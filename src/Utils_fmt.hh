@@ -29,11 +29,11 @@
 #include "Utils.hh"
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-#include "fmt/printf.h"
-#include "fmt/chrono.h"
-#include "fmt/ostream.h"
-#include "fmt/color.h"
-#include "fmt/std.h"
+#include "Utils/fmt/printf.h"
+#include "Utils/fmt/chrono.h"
+#include "Utils/fmt/ostream.h"
+#include "Utils/fmt/color.h"
+#include "Utils/fmt/std.h"
 #endif
 
 ///

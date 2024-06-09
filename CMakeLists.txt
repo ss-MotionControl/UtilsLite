@@ -11,7 +11,7 @@
 
 cmake_minimum_required(VERSION 3.14)
 
-project( Utils )
+project( UtilsLite )
 
 if (IS_DIRECTORY "${PROJECT_SOURCE_DIR}/cmake_utils")
   set( HOME "${PROJECT_SOURCE_DIR}/cmake_utils/" )
