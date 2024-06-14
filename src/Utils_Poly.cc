@@ -705,7 +705,7 @@ namespace Utils {
         Integer vc = sign_variations( c, c_on_root );
         // check interval [a,c]
         if ( I0.va != vc || c_on_root || I0.a_on_root ) {
-          if ( c < I1.b ) { // check if it is a true reduction
+          if ( c < I0.b ) { // check if it is a true reduction
             I1.a = I0.a; I1.va = I0.va; I1.a_on_root = I0.a_on_root;
             I1.b = c;    I1.vb = vc;    I1.b_on_root = c_on_root;
             I_stack.push_back(I1);
