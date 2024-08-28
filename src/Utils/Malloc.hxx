@@ -233,27 +233,12 @@ namespace Utils {
     //!
     //! Get pointer of allocated memory for `sz` objets.
     //!
-    T * operator () ( std::size_t sz ) {
-      std::size_t offs = m_num_allocated;
-      m_num_allocated += sz;
-      UTILS_ASSERT(
-        m_num_allocated <= mem_size,
-        "MallocFixed<{}>::operator () ({}) -- Memory EXAUSTED\n", m_name, sz
-      );
-      return m_data + offs;
-    }
+    T * operator () ( std::size_t sz );
 
     //!
     //! Free pointer of allocated memory for `sz` objets.
     //!
-    void
-    pop( std::size_t sz ) {
-      UTILS_ASSERT(
-        sz <= m_num_allocated,
-        "MallocFixed<{}>::pop({}) -- Not enough element on Stack\n", m_name, sz
-      );
-      m_num_allocated -= sz;
-    }
+    void pop( std::size_t sz );
 
     //!
     //! `true` if you cannot get more memory pointers.
