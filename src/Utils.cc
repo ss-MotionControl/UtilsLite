@@ -97,19 +97,19 @@ namespace Utils {
   ) {
 
     // check points
-    T_int n  = npts-1;
+    T_int n{ npts-1 };
     UTILS_ASSERT(
       npts > 1 && last_interval >= 0 && last_interval < n,
       "In search_interval( npts={}, X, x={}, last_interval={}, closed={}, can_extend={})\n"
-      "npts musrt be >= 2 and last_interval must be in [0,npts-2]\n",
+      "npts must be >= 2 and last_interval must be in [0,npts-2]\n",
       npts, x, last_interval, closed, can_extend
     );
 
-    // checl range
-    T_real xl = X[0];
-    T_real xr = X[n];
+    // check range
+    T_real xl{ X[0] };
+    T_real xr{ X[n] };
     if ( closed ) { // put x in range (change also its value)
-      T_real L = xr-xl;
+      T_real L{xr-xl};
       x -= xl;
       x  = fmod( x, L );
       if ( x < 0 ) x += L;
@@ -124,14 +124,14 @@ namespace Utils {
     }
 
     // find the interval of the support of the B-spline
-    T_real const * XL = X+last_interval;
+    T_real const * XL{ X+last_interval };
     if ( XL[1] < x ) { // x on the right
       if ( x >= X[n-1] ) {
         last_interval = n-1; // last interval
       } else if ( x < XL[2] ) { // x in (XL[1],XL[2])
         ++last_interval;
       } else { // x >= XL[2] search the right interval
-        T_real const * XE = X+n;
+        T_real const * XE{X+n};
         last_interval += T_int(lower_bound( XL, XE, x )-XL);
         T_real const * XX = X+last_interval;
         if ( x < XX[0] || Utils::is_zero(XX[0]-XX[1]) ) --last_interval;
