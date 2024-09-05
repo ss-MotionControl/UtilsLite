@@ -110,7 +110,7 @@ endforeach(F ${S})
 list(FILTER PUBLIC_HEADERS EXCLUDE REGEX "\.DS")
 
 # extra include directory for compilation
-include_directories( ./src ./src/Utils ./lib3rd/include )
+include_directories( ./src ./src/UtilsLite ./lib3rd/include )
 
 #   _____                  _
 #  |_   _|_ _ _ _ __ _ ___| |_ ___

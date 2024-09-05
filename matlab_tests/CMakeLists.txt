@@ -94,7 +94,7 @@ endforeach(F ${S})
 list(FILTER PUBLIC_HEADERS EXCLUDE REGEX "\.DS")
 
 # extra include directory for compilation
-include_directories( src ../src ../src/Utils )
+include_directories( src ../src ../src/UtilsLite )
 
 message( STATUS "SOURCES = ${SOURCES}" )
 
