@@ -1,13 +1,13 @@
 require 'fileutils'
 
-index='./_build/html/genindex.html'
-#system("sed -i .bak 's/(C\+\+ class)/(MATLAB class)/g' #{index}");
-#system("sed -i .bak 's/(C\+\+ function)/(MATLAB function)/g' #{index}");
-system("sed -i .bak 's/(C\+\+ class)/(class)/g' #{index}");
-system("sed -i .bak 's/(C\+\+ function)/(function)/g' #{index}");
-FileUtils.rm "#{index}.bak"
+index='./doxygen2/html/genindex.html'
+system("sed -i .bak 's/(C\+\+ class)/(MATLAB class)/g' #{index}");
+system("sed -i .bak 's/(C\+\+ function)/(MATLAB function)/g' #{index}");
+#system("sed -i .bak 's/(C\+\+ class)/(class)/g' #{index}");
+#system("sed -i .bak 's/(C\+\+ function)/(function)/g' #{index}");
+#FileUtils.rm "#{index}.bak"
 
-Dir.glob("./_build/html/api-matlab/*.html").each do |f|
+Dir.glob("./doxygen2/html/*.html").each do |f|
   puts "filter: #{f}"
   out = "";
   File.open(f,"r") do |file|

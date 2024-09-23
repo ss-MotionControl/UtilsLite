@@ -28,7 +28,7 @@ include( "${HOME}/CMakeLists-common.txt" )
 project(
   ${PROJECT_NAME}
   VERSION ${UTILS_PROJECT_VERSION}
-  HOMEPAGE_URL "https://ebertolazzi.github.io/Utils/"
+  HOMEPAGE_URL "https://ebertolazzi.github.io/UtilsLite/"
 )
 
 include( "${HOME}/CMakeLists-cflags.txt" )
@@ -82,7 +82,6 @@ set( SOURCES )
 file(
   GLOB S
   ${SOURCE_DIR}/*.cc
-  ${SOURCE_DIR}/Utils/miniz/*.c
 )
 foreach(F ${S})
   # build relative path respect to source directory
