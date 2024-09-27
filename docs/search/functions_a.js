@@ -1,11 +1,8 @@
 var searchData=
 [
-  ['n_5froots_0',['n_roots',['../class_utils_1_1_sturm.html#a87430c71771aa17bd90879373954bac3',1,'Utils::Sturm']]],
-  ['name_1',['name',['../class_utils_1_1_h_j_pattern_search.html#a745a0267993cd54c430e9d02c8e55f26',1,'Utils::HJPatternSearch::name()'],['../class_utils_1_1_nelder_mead.html#a015e8baa4008b38724a18a333da61cbc',1,'Utils::NelderMead::name(void) const']]],
-  ['neldermead_2',['NelderMead',['../class_utils_1_1_nelder_mead.html#a637b102165390b4e454ad19594461265',1,'Utils::NelderMead']]],
-  ['normalize_3',['normalize',['../class_utils_1_1_poly.html#acf05d972918cfa5ad132ba049ec8d86d',1,'Utils::Poly']]],
-  ['num_5fcheck_4',['num_check',['../class_utils_1_1_a_a_b_btree.html#a0877dd1b9954cee1c902b196f8d38b43',1,'Utils::AABBtree']]],
-  ['num_5ffun_5feval_5',['num_fun_eval',['../class_utils_1_1_algo748.html#afbe6bbfc053b5e1c8bcc811517aaafeb',1,'Utils::Algo748::num_fun_eval()'],['../class_utils_1_1_trichotomy.html#a146b21bec9983c96f6a811ab038f74c6',1,'Utils::Trichotomy::num_fun_eval()'],['../class_utils_1_1_zeros.html#a97581d399d1bf4c913bbb3c970c52fbe',1,'Utils::Zeros::num_fun_eval()']]],
-  ['num_5fobjects_6',['num_objects',['../class_utils_1_1_a_a_b_btree.html#a7abcf41e75cae8b2f99709b98bc930ea',1,'Utils::AABBtree']]],
-  ['num_5ftree_5fnodes_7',['num_tree_nodes',['../class_utils_1_1_a_a_b_btree.html#a6b7ede237339cb36367c0b13e14ec0ab',1,'Utils::AABBtree::num_tree_nodes() const'],['../class_utils_1_1_a_a_b_btree.html#a93e5a206de80146abb2c4d9120f05a8e',1,'Utils::AABBtree::num_tree_nodes(integer nmin) const']]]
+  ['leading_5fcoeff_0',['leading_coeff',['../d5/d0a/class_utils_1_1_poly.html#a92c88a9e1ee6c6ec426b54c234c2d400',1,'Utils::Poly']]],
+  ['leave_1',['leave',['../d6/dde/class_utils_1_1_wait_worker.html#a7653c04a6c283a21f9a1289917dab8f5',1,'Utils::WaitWorker']]],
+  ['length_2',['length',['../dd/d3f/class_utils_1_1_sturm.html#a8ceacd6f0cea700e695fac701aed703f',1,'Utils::Sturm']]],
+  ['line_3',['line',['../d8/d2b/class_utils_1_1_table_1_1_cell.html#a2d8e3ab669f122b03d60755c3c269acc',1,'Utils::Table::Cell']]],
+  ['lock_4',['lock',['../d4/d63/class_utils_1_1_spin_lock.html#a41aad301ab8a0dd6e5f03b7cdfeedb39',1,'Utils::SpinLock']]]
 ];

@@ -29,6 +29,11 @@
 
 namespace Utils {
 
+  /*!
+   * \addtogroup TwoD
+   * @{
+   */
+
   /*\
    |   ____       _       _   ____  ____
    |  |  _ \ ___ (_)_ __ | |_|___ \|  _ \
@@ -465,8 +470,9 @@ namespace Utils {
   extern template class Polygon2D<double>;
   #endif
 
-}
+  /*! @} */
 
+}
 
 #endif
 

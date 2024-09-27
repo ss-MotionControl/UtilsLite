@@ -1,5 +1,8 @@
 var searchData=
 [
-  ['y_0',['y',['../class_utils_1_1_point2_d.html#a68175bcb74cbb68f6d59c3a380ce8361',1,'Utils::Point2D']]],
-  ['your_20terminal_1',['rang - Colors for your Terminal',['../md_rang.html',1,'']]]
+  ['quaternion_0',['Quaternion',['../df/d85/class_utils_1_1_quaternion.html',1,'Utils::Quaternion&lt; T &gt;'],['../df/d85/class_utils_1_1_quaternion.html#aaff804352b84cf9bd3583704b4a9da31',1,'Utils::Quaternion::Quaternion()'],['../df/d85/class_utils_1_1_quaternion.html#a81846974ec17d6b033c15a7f5a743762',1,'Utils::Quaternion::Quaternion(real_type A, real_type B, real_type C, real_type D)']]],
+  ['quaternion_2ehxx_1',['Quaternion.hxx',['../dd/d80/_quaternion_8hxx.html',1,'']]],
+  ['queue_2',['Queue',['../d1/dd3/class_utils_1_1tp_1_1_queue.html',1,'Utils::tp::Queue'],['../d1/dd3/class_utils_1_1tp_1_1_queue.html#a81f3c350df873f8152f09a8d374aacb9',1,'Utils::tp::Queue::Queue(Queue const &amp;)=delete'],['../d1/dd3/class_utils_1_1tp_1_1_queue.html#a36077177869f4cd2ae4503b618d7d040',1,'Utils::tp::Queue::Queue(Queue &amp;&amp;)=delete'],['../d1/dd3/class_utils_1_1tp_1_1_queue.html#a129468ddbca6410c8bd482f67aa9bfc6',1,'Utils::tp::Queue::Queue(unsigned capacity)']]],
+  ['queue_5fcapacity_3',['queue_capacity',['../db/d2f/class_utils_1_1_h_queue.html#a04bbdee7a5c76c65239c4582c65b9d7b',1,'Utils::HQueue::queue_capacity()'],['../db/db7/class_utils_1_1_thread_pool2.html#ac72bccb0dc8cc70c4b3bf30a78123619',1,'Utils::ThreadPool2::queue_capacity()'],['../d0/d7e/class_utils_1_1_thread_pool3.html#ac179b3f85bcb3093af78a370a6876119',1,'Utils::ThreadPool3::queue_capacity()'],['../d2/d3d/class_utils_1_1_thread_pool4.html#a92a13fe236190db203a592a6ba4c127b',1,'Utils::ThreadPool4::queue_capacity()']]],
+  ['quickpool_2ehxx_4',['quickpool.hxx',['../d3/d3b/quickpool_8hxx.html',1,'']]]
 ];

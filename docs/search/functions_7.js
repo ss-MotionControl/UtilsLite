@@ -1,11 +1,23 @@
 var searchData=
 [
-  ['info_0',['info',['../class_utils_1_1_a_a_b_btree.html#af68e83b7bc3766b56043e346cb67ebb0',1,'Utils::AABBtree::info()'],['../class_utils_1_1_h_j_pattern_search.html#ab80b2fed846d79e3a3e0252e8652b4f3',1,'Utils::HJPatternSearch::info()'],['../class_utils_1_1_nelder_mead.html#a03ba8831453a04809ffbdf0d96eb9ddd',1,'Utils::NelderMead::info()'],['../namespace_utils.html#ad4adadc1f5136ae37fa104a17f717f33',1,'Utils::info()']]],
-  ['integral_1',['integral',['../class_utils_1_1_poly.html#a393e8fedfd7582c70513e3367b06d94c',1,'Utils::Poly']]],
-  ['intersect_2',['intersect',['../class_utils_1_1_a_a_b_btree.html#a726d05ec82c7725866bc78ebcb182542',1,'Utils::AABBtree::intersect()'],['../class_utils_1_1_segment2_d.html#abda9061ff65c477190435f9e3a46ff3d',1,'Utils::Segment2D::intersect()']]],
-  ['intersect_5fand_5frefine_3',['intersect_and_refine',['../class_utils_1_1_a_a_b_btree.html#a939e3704ed02c70298b23a33e3a3ca18',1,'Utils::AABBtree']]],
-  ['intersect_5fwith_5fone_5fbbox_4',['intersect_with_one_bbox',['../class_utils_1_1_a_a_b_btree.html#a8b4507c2c89d37f22d122c10fa126b59',1,'Utils::AABBtree']]],
-  ['intersect_5fwith_5fone_5fbbox_5fand_5frefine_5',['intersect_with_one_bbox_and_refine',['../class_utils_1_1_a_a_b_btree.html#a7f8ba81a469919167dc4d27adf5996dd',1,'Utils::AABBtree']]],
-  ['intersect_5fwith_5fone_5fpoint_6',['intersect_with_one_point',['../class_utils_1_1_a_a_b_btree.html#ac96e1e65e09d2ac52f7b19331cf5f39b',1,'Utils::AABBtree']]],
-  ['intersect_5fwith_5fone_5fpoint_5fand_5frefine_7',['intersect_with_one_point_and_refine',['../class_utils_1_1_a_a_b_btree.html#a57c6f3bd74d399c5803d358b021d9f16',1,'Utils::AABBtree']]]
+  ['hard_5ffree_0',['hard_free',['../dc/d87/class_utils_1_1_malloc.html#a7b51724a548d23e5f068cd8cd6f9741a',1,'Utils::Malloc']]],
+  ['has_5f3dnow_1',['has_3Dnow',['../d1/d7c/namespace_utils.html#a4e97142c438da664514a23b18e2d78b5',1,'Utils']]],
+  ['has_5f3dnowext_2',['has_3DnowExt',['../d1/d7c/namespace_utils.html#aba2fd2867ebadf79e3a410432dee6be6',1,'Utils']]],
+  ['has_5fmmx_3',['has_MMX',['../d1/d7c/namespace_utils.html#a7c7bf98506a28c7c0bd193b43938dd2d',1,'Utils']]],
+  ['has_5fmmxplus_4',['has_MMXplus',['../d1/d7c/namespace_utils.html#a5a6ed6aad87692dc9f985b77ea5ecaf6',1,'Utils']]],
+  ['has_5fsse_5',['has_SSE',['../d1/d7c/namespace_utils.html#af8d9d1e93dc2f0ca1a48d6238171d594',1,'Utils']]],
+  ['has_5fsse2_6',['has_SSE2',['../d1/d7c/namespace_utils.html#a1b9f64aa51c59f99bdf74e6b6a98ac07',1,'Utils']]],
+  ['has_5fsse3_7',['has_SSE3',['../d1/d7c/namespace_utils.html#add73bdf6e760cf02aaadbe84ba81db91',1,'Utils']]],
+  ['has_5fsse41_8',['has_SSE41',['../d1/d7c/namespace_utils.html#a8eab2179398335e92627aebb490fc847',1,'Utils']]],
+  ['has_5fsse42_9',['has_SSE42',['../d1/d7c/namespace_utils.html#a934692c46987c2baa575b77885abfbec',1,'Utils']]],
+  ['has_5fsse4a_10',['has_SSE4a',['../d1/d7c/namespace_utils.html#a4be6d569a0d8b16aa0f576ec81da5466',1,'Utils']]],
+  ['has_5fsse5_11',['has_SSE5',['../d1/d7c/namespace_utils.html#a13a58d92d56d3912de212376678f8ec5',1,'Utils']]],
+  ['has_5fssse3_12',['has_SSSE3',['../d1/d7c/namespace_utils.html#a663f9a4dab142985c3e1aefe6c090afd',1,'Utils']]],
+  ['hash_13',['hash',['../d5/dc2/class_utils_1_1_s_h_a3.html#a845781b31b5fea397f76f9d80f17abb4',1,'Utils::SHA3']]],
+  ['hash_5fhex_5fstring_14',['hash_hex_string',['../d5/dc2/class_utils_1_1_s_h_a3.html#a2de6c0078b73104c2cf055d800458eb4',1,'Utils::SHA3']]],
+  ['hash_5fstring_15',['hash_string',['../d5/dc2/class_utils_1_1_s_h_a3.html#a2e2e33c6a8646cc0f67e53a640511d5c',1,'Utils::SHA3']]],
+  ['headings_16',['headings',['../d2/da0/class_utils_1_1_table_1_1_table.html#a7f0e368b7f495acd767834c3aa672c27',1,'Utils::Table::Table::headings() const'],['../d2/da0/class_utils_1_1_table_1_1_table.html#a7cb615327cbb74e0dbdc56be5ec9eee9',1,'Utils::Table::Table::headings(vecstr const &amp;headings)']]],
+  ['height_17',['height',['../d8/d2b/class_utils_1_1_table_1_1_cell.html#ad2248841567a25118f723939cb923ba5',1,'Utils::Table::Cell::height()'],['../d0/d29/class_utils_1_1_table_1_1_row.html#aea3ecdd35d7ad186842df8d1cfd15e77',1,'Utils::Table::Row::height()']]],
+  ['hjpatternsearch_18',['HJPatternSearch',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#ae5af96f0e974e0647adad8f0eadc2b22',1,'Utils::HJPatternSearch']]],
+  ['hqueue_19',['HQueue',['../db/d2f/class_utils_1_1_h_queue.html#a408ea01913c51d154e5d67f11a252b93',1,'Utils::HQueue']]]
 ];

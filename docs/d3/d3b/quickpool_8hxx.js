@@ -1,0 +1,28 @@
+var quickpool_8hxx =
+[
+    [ "quickpool::mem::padding_impl::padding_bytes< T, Align >", "d4/d3b/structquickpool_1_1mem_1_1padding__impl_1_1padding__bytes.html", "d4/d3b/structquickpool_1_1mem_1_1padding__impl_1_1padding__bytes" ],
+    [ "quickpool::mem::padding_impl::empty_struct", "d9/db3/structquickpool_1_1mem_1_1padding__impl_1_1empty__struct.html", null ],
+    [ "quickpool::mem::padding_impl::padding< T, Align >", "d3/d5d/structquickpool_1_1mem_1_1padding__impl_1_1padding.html", null ],
+    [ "quickpool::mem::aligned::allocator< T, Alignment >", "d0/d81/classquickpool_1_1mem_1_1aligned_1_1allocator.html", "d0/d81/classquickpool_1_1mem_1_1aligned_1_1allocator" ],
+    [ "quickpool::mem::aligned::allocator< T, Alignment >::rebind< U >", "dd/db2/structquickpool_1_1mem_1_1aligned_1_1allocator_1_1rebind.html", "dd/db2/structquickpool_1_1mem_1_1aligned_1_1allocator_1_1rebind" ],
+    [ "quickpool::mem::aligned::atomic< T, Align >", "d0/dab/structquickpool_1_1mem_1_1aligned_1_1atomic.html", "d0/dab/structquickpool_1_1mem_1_1aligned_1_1atomic" ],
+    [ "quickpool::mem::aligned::relaxed_atomic< T >", "d8/d71/structquickpool_1_1mem_1_1aligned_1_1relaxed__atomic.html", "d8/d71/structquickpool_1_1mem_1_1aligned_1_1relaxed__atomic" ],
+    [ "quickpool::loop::State", "dd/d8d/structquickpool_1_1loop_1_1_state.html", "dd/d8d/structquickpool_1_1loop_1_1_state" ],
+    [ "quickpool::loop::Worker< Function >", "d2/d38/structquickpool_1_1loop_1_1_worker.html", "d2/d38/structquickpool_1_1loop_1_1_worker" ],
+    [ "quickpool::sched::RingBuffer< T >", "df/d21/classquickpool_1_1sched_1_1_ring_buffer.html", "df/d21/classquickpool_1_1sched_1_1_ring_buffer" ],
+    [ "quickpool::sched::TaskQueue", "d8/dfb/classquickpool_1_1sched_1_1_task_queue.html", "d8/dfb/classquickpool_1_1sched_1_1_task_queue" ],
+    [ "quickpool::sched::TaskManager", "dd/d2d/classquickpool_1_1sched_1_1_task_manager.html", "dd/d2d/classquickpool_1_1sched_1_1_task_manager" ],
+    [ "quickpool::ThreadPool", "d4/d28/classquickpool_1_1_thread_pool.html", "d4/d28/classquickpool_1_1_thread_pool" ],
+    [ "vector", "d3/d3b/quickpool_8hxx.html#a16ee4331d14dcfa0b49a0ad54d2b8b5a", null ],
+    [ "alloc", "d3/d3b/quickpool_8hxx.html#a5b7c68e8d877188bf161814385bff665", null ],
+    [ "create_workers", "d3/d3b/quickpool_8hxx.html#a381238e2b958aa9893499a10247e74bd", null ],
+    [ "done", "d3/d3b/quickpool_8hxx.html#abc737ea3d3b4a958f05d435681d7098d", null ],
+    [ "free", "d3/d3b/quickpool_8hxx.html#a18ffd4a3fafe5570a4716ea1398f6d17", null ],
+    [ "get_active_threads", "d3/d3b/quickpool_8hxx.html#a7e1597aaed04ba7dddb4e5beb0e3be63", null ],
+    [ "mod", "d3/d3b/quickpool_8hxx.html#abbafda6c8ea715fd0a75facd81dc8f59", null ],
+    [ "parallel_for", "d3/d3b/quickpool_8hxx.html#a3432dfdfadaf9705389263e726926b28", null ],
+    [ "parallel_for_each", "d3/d3b/quickpool_8hxx.html#a5542d71824605f77ed621c725d77ed69", null ],
+    [ "push", "d3/d3b/quickpool_8hxx.html#a06e138ab2370dc5055a64995ad6c9286", null ],
+    [ "set_active_threads", "d3/d3b/quickpool_8hxx.html#a56d0ddf0c5f3dc5f4cf2ada1c8cde29a", null ],
+    [ "wait", "d3/d3b/quickpool_8hxx.html#a2a7dcef03a6a02c06a999ef6f244a291", null ]
+];

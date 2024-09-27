@@ -21,9 +21,12 @@
 // eof: ThreadPoolBase.hxx
 //
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
 namespace Utils {
+
+  /*!
+   * \addtogroup THREAD
+   * @{
+   */
 
   /*\
    |   _____ _                    _ ___          _ ___
@@ -143,9 +146,10 @@ namespace Utils {
       ~Queue() = default;
     };
   }
-}
 
-#endif
+  /*! @} */
+
+}
 
 //
 // eof: ThreadPoolBase.hxx

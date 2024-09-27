@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['terminal_0',['rang - Colors for your Terminal',['../md_rang.html',1,'']]]
+  ['rang_0',['Rang',['../d1/d5f/_rang.html',1,'3rd']]]
 ];

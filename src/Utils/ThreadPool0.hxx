@@ -27,6 +27,11 @@
 
 namespace Utils {
 
+  /*!
+   * \addtogroup THREAD
+   * @{
+   */
+
   /*\
    |   _____ _                        _ ____             _
    |  |_   _| |__  _ __ ___  __ _  __| |  _ \ ___   ___ | |
@@ -57,57 +62,8 @@ namespace Utils {
     //!  of threads, although it does not actually create any threads.
     //!  The specified number is ignored.
     //!
-    //!  \param num_threads The number of threads to initialize (ignored).
-    //!
     explicit
-    ThreadPool0( unsigned num_threads )
-    : ThreadPoolBase()
-    {}
-
-    //! Destructor.
-    virtual ~ThreadPool0() = default;
-
-
-Here's the Doxygen documentation for the ThreadPool0 class in the Utils namespace. This documentation provides a clear overview of the class's purpose, methods, and behavior.
-
-cpp
-Copy code
-namespace Utils {
-
-/*\
- |   _____ _                        _ ____             _
- |  |_   _| |__  _ __ ___  __ _  __| |  _ \ ___   ___ | |
- |    | | | '_ \| '__/ _ \/ _` |/ _` | |_) / _ \ / _ \| |
- |    | | | | | | | |  __/ (_| | (_| |  __/ (_) | (_) | |
- |    |_| |_| |_|_|  \___|\__,_|\__,_|_|   \___/ \___/|_|
-\*/
-
-/*!
- * \brief Fake thread pool class.
- *
- * This class simulates a thread pool by executing tasks
- * in the calling thread, providing a simple interface for
- * task execution without actual multi-threading capabilities.
- *
- * It is primarily used for testing or environments where
- * threading is not needed.
- */
-class ThreadPool0 : public ThreadPoolBase {
-    using Func = std::function<void()>;
-
-  public:
-
-    /*!
-     * \brief Constructs a fake thread pool with a specified number of threads.
-     *
-     * This constructor initializes the thread pool with a specified number
-     * of threads, although it does not actually create any threads.
-     * The specified number is ignored.
-     *
-     * \param num_threads The number of threads to initialize (ignored).
-     */
-    explicit
-    ThreadPool0( unsigned num_threads )
+    ThreadPool0( unsigned )
     : ThreadPoolBase()
     {}
 
@@ -155,8 +111,6 @@ class ThreadPool0 : public ThreadPoolBase {
     //!
     //! This method does not perform any actions, as the fake
     //! thread pool does not support resizing.
-    //!
-    //! \param num_threads The new number of threads (ignored).
     //!
     void resize( unsigned ) override { }
 

@@ -39,6 +39,11 @@ namespace Utils {
   using std::pow;
   using std::abs;
 
+  /*!
+   * \addtogroup Minimize
+   * @{
+   */
+
   //!
   //! \class Trichotomy_base_fun
   //! \brief Abstract base class for defining mathematical functions used in the minimization algorithm.
@@ -90,8 +95,6 @@ namespace Utils {
     Real eval( Real x ) const override { return m_fun(x); };
   };
   #endif
-
-
 
   //!
   //! \class Trichotomy
@@ -254,6 +257,8 @@ namespace Utils {
   extern template class Trichotomy<float>;
   extern template class Trichotomy<double>;
   #endif
+
+  /*! @} */
 
 }
 

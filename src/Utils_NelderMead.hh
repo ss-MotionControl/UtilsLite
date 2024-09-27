@@ -37,6 +37,10 @@
 #include "Utils_eigen.hh"
 
 namespace Utils {
+  /*!
+   * \addtogroup Minimize
+   * @{
+   */
 
   //!
   //!  \class NelderMead
@@ -302,6 +306,9 @@ namespace Utils {
     //!
     Real get_worst_value() const { return m_f.coeff(m_high); }
   };
+
+  /*! @} */
+
 }
 
 #endif

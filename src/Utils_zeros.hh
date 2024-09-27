@@ -39,6 +39,11 @@ namespace Utils {
   using std::pow;
   using std::abs;
 
+  /*!
+   * \addtogroup Zeros
+   * @{
+   */
+
   /*
   //   __________ ____   ___  ____
   //  |__  / ____|  _ \ / _ \/ ___|
@@ -47,6 +52,7 @@ namespace Utils {
   //  /____|_____|_| \_\\___/|____/
   */
   //!
+  //! \ingroup Zeros
   //! \class Zeros_base_fun
   //! \brief Abstract base class for defining mathematical functions used in root-finding algorithms.
   //!

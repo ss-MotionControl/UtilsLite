@@ -1,9 +1,14 @@
 var searchData=
 [
-  ['a_0',['a',['../class_utils_1_1_sturm.html#a99debcb56db9be766de438e0a2dd9cc4',1,'Utils::Sturm']]],
-  ['aabbtree_1',['AABBtree',['../class_utils_1_1_a_a_b_btree.html#ab0f99b7914d3aaeea6a57a9b816686a8',1,'Utils::AABBtree::AABBtree()=default'],['../class_utils_1_1_a_a_b_btree.html#af287aefcabe31cad318ff443966c9329',1,'Utils::AABBtree::AABBtree(AABBtree&lt; Real &gt; const &amp;t)']]],
-  ['add_5fbboxes_2',['add_bboxes',['../class_utils_1_1_a_a_b_btree.html#a892773c9eed277c8eedf2390054c4c49',1,'Utils::AABBtree']]],
-  ['adjust_5fdegree_3',['adjust_degree',['../class_utils_1_1_poly.html#a2a260e04c0338c3fb80981cd07633318',1,'Utils::Poly']]],
-  ['algo748_4',['Algo748',['../class_utils_1_1_algo748.html#ab3bc7c60b865d9cf760d828bf55a3e09',1,'Utils::Algo748']]],
-  ['allocate_5',['allocate',['../class_utils_1_1_a_a_b_btree.html#adb1b7bba94b901c62f4c508e7f51c822',1,'Utils::AABBtree']]]
+  ['a_0',['a',['../dd/d3f/class_utils_1_1_sturm.html#a99debcb56db9be766de438e0a2dd9cc4',1,'Utils::Sturm']]],
+  ['aabbtree_1',['AABBtree',['../d9/d90/class_utils_1_1_a_a_b_btree.html#ab0f99b7914d3aaeea6a57a9b816686a8',1,'Utils::AABBtree::AABBtree()=default'],['../d9/d90/class_utils_1_1_a_a_b_btree.html#af287aefcabe31cad318ff443966c9329',1,'Utils::AABBtree::AABBtree(AABBtree&lt; Real &gt; const &amp;t)']]],
+  ['add_5fbboxes_2',['add_bboxes',['../d9/d90/class_utils_1_1_a_a_b_btree.html#a892773c9eed277c8eedf2390054c4c49',1,'Utils::AABBtree']]],
+  ['add_5frow_3',['add_row',['../d2/da0/class_utils_1_1_table_1_1_table.html#a2bdfc1b871b65e6a8338377246b5537d',1,'Utils::Table::Table']]],
+  ['adjust_5fdegree_4',['adjust_degree',['../d5/d0a/class_utils_1_1_poly.html#a2a260e04c0338c3fb80981cd07633318',1,'Utils::Poly']]],
+  ['algo748_5',['Algo748',['../d2/df8/class_utils_1_1_algo748.html#ab3bc7c60b865d9cf760d828bf55a3e09',1,'Utils::Algo748']]],
+  ['align_5fcolumn_6',['align_column',['../d2/da0/class_utils_1_1_table_1_1_table.html#a8a157f1429ecdd336702f4d4ed4fc1de',1,'Utils::Table::Table']]],
+  ['alignment_7',['alignment',['../d4/d88/class_utils_1_1_table_1_1_style.html#a68769daedaf6d6ec3409d7a395fb6afd',1,'Utils::Table::Style::alignment() const'],['../d4/d88/class_utils_1_1_table_1_1_style.html#a85cb527cd86e4d4ca1b56f4511938797',1,'Utils::Table::Style::alignment(Alignment align)'],['../d8/d2b/class_utils_1_1_table_1_1_cell.html#a21407133165d5e1e1efc5dcd5568b08f',1,'Utils::Table::Cell::alignment() const'],['../d8/d2b/class_utils_1_1_table_1_1_cell.html#a6b7c195a571a0370f35a14bc80285548',1,'Utils::Table::Cell::alignment(Alignment align)']]],
+  ['allocate_8',['allocate',['../dc/d87/class_utils_1_1_malloc.html#ad370911c11e3610447274af8620c1afe',1,'Utils::Malloc::allocate()'],['../d9/d90/class_utils_1_1_a_a_b_btree.html#adb1b7bba94b901c62f4c508e7f51c822',1,'Utils::AABBtree::allocate()']]],
+  ['at_5fscope_5fexit_9',['at_scope_exit',['../d9/d18/group___t_h_r_e_a_d.html#ga633cf79a96f127c0d378eb35197fb000',1,'Utils::at_scope_exit(Function &amp;&amp;fun) -&gt; at_scope_exit_impl&lt; Function &gt;'],['../d9/d18/group___t_h_r_e_a_d.html#gab6249efe6e74bdd4433bd606292cbb36',1,'Utils::at_scope_exit(Function const &amp;fun) -&gt; at_scope_exit_impl&lt; Function const &amp; &gt;']]],
+  ['at_5fscope_5fexit_5fimpl_10',['at_scope_exit_impl',['../db/da5/class_utils_1_1at__scope__exit__impl.html#a33f8601dda5b1c003ba336d7f6e6e52b',1,'Utils::at_scope_exit_impl::at_scope_exit_impl(at_scope_exit_impl const &amp;)=delete'],['../db/da5/class_utils_1_1at__scope__exit__impl.html#ac31a5c4ec041556cd6dadde56f22ab1f',1,'Utils::at_scope_exit_impl::at_scope_exit_impl()'],['../db/da5/class_utils_1_1at__scope__exit__impl.html#a25eddee4119ac95eb965901893e0d3da',1,'Utils::at_scope_exit_impl::at_scope_exit_impl(Destructor &amp;&amp;destructor)'],['../db/da5/class_utils_1_1at__scope__exit__impl.html#a5235abb66802c9e51373aaff2bc8bff4',1,'Utils::at_scope_exit_impl::at_scope_exit_impl(Destructor const &amp;destructor)'],['../db/da5/class_utils_1_1at__scope__exit__impl.html#a02d366089a93ac138b22ea2d6b565bc7',1,'Utils::at_scope_exit_impl::at_scope_exit_impl(at_scope_exit_impl &amp;&amp;x) noexcept']]]
 ];

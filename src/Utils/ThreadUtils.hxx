@@ -21,9 +21,12 @@
 // file: ThreadUtils.hxx
 //
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
-
 namespace Utils {
+
+  /*!
+   * \addtogroup THREAD
+   * @{
+   */
 
   #ifdef UTILS_OS_WINDOWS
     #define UTILS_SEMAPHORE Utils::WinSemaphore
@@ -640,9 +643,9 @@ namespace Utils {
   auto at_scope_exit(Function const & fun) -> at_scope_exit_impl<Function const &>
   { return at_scope_exit_impl<Function const &>(fun); }
 
-}
+  /*! @} */
 
-#endif
+}
 
 //
 // eof: ThreadUtils.hxx

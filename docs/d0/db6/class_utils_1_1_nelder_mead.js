@@ -1,0 +1,26 @@
+var class_utils_1_1_nelder_mead =
+[
+    [ "integer", "d0/db6/class_utils_1_1_nelder_mead.html#a5213fe8a5a026cb3047a1f50044e1563", null ],
+    [ "MapMat", "d0/db6/class_utils_1_1_nelder_mead.html#ab50da673454664f441529d07eedb637c", null ],
+    [ "MapVec", "d0/db6/class_utils_1_1_nelder_mead.html#a98e57541561411f6acddd0f9524406ad", null ],
+    [ "Mat_t", "d0/db6/class_utils_1_1_nelder_mead.html#ab47a4e23899a1a64f99717cc0c1a6a44", null ],
+    [ "NM_move", "d0/db6/class_utils_1_1_nelder_mead.html#a6dd7d8487310b2750eabaaea138ae352", null ],
+    [ "NMFunc", "d0/db6/class_utils_1_1_nelder_mead.html#a10f91ec6c0d46acba982ce1f38588152", null ],
+    [ "Vec_t", "d0/db6/class_utils_1_1_nelder_mead.html#a05ec38ac2d47754d712776ae89e9e95a", null ],
+    [ "NelderMead", "d0/db6/class_utils_1_1_nelder_mead.html#a637b102165390b4e454ad19594461265", null ],
+    [ "change_console", "d0/db6/class_utils_1_1_nelder_mead.html#ae2affc6681becb65412b2317c9a2701c", null ],
+    [ "get_better_value", "d0/db6/class_utils_1_1_nelder_mead.html#af1d8b2f014c7229685c0e1b8b6c09820", null ],
+    [ "get_last_solution", "d0/db6/class_utils_1_1_nelder_mead.html#a2c2315268ae77ad171751998443629b2", null ],
+    [ "get_worst_value", "d0/db6/class_utils_1_1_nelder_mead.html#ad3d66f63995e71fc69056ab9f8e8b4dd", null ],
+    [ "info", "d0/db6/class_utils_1_1_nelder_mead.html#a03ba8831453a04809ffbdf0d96eb9ddd", null ],
+    [ "message", "d0/db6/class_utils_1_1_nelder_mead.html#a315af046e38fc62d758d94ff23b0e2d7", null ],
+    [ "name", "d0/db6/class_utils_1_1_nelder_mead.html#a015e8baa4008b38724a18a333da61cbc", null ],
+    [ "print_info", "d0/db6/class_utils_1_1_nelder_mead.html#ae28f7154d336b0c442689ba3f9a991bb", null ],
+    [ "run", "d0/db6/class_utils_1_1_nelder_mead.html#a948c521ec6ea457f44f3cabc9693162f", null ],
+    [ "search", "d0/db6/class_utils_1_1_nelder_mead.html#a65fe78b8e1f35fde8756a82304a9392f", null ],
+    [ "set_max_fun_evaluation", "d0/db6/class_utils_1_1_nelder_mead.html#a1c5b7f8367a3a9e708e9ccf8910a4895", null ],
+    [ "set_max_iterations", "d0/db6/class_utils_1_1_nelder_mead.html#aae3522dec95c8f2251158c8c2fa9c179", null ],
+    [ "set_tolerance", "d0/db6/class_utils_1_1_nelder_mead.html#a3c521863c45ce5d5efc6ef24452302dd", null ],
+    [ "set_verbose", "d0/db6/class_utils_1_1_nelder_mead.html#af338cef03259466602204449342cc971", null ],
+    [ "setup", "d0/db6/class_utils_1_1_nelder_mead.html#a57872c6c2031b8ec83048027b1b44bd4", null ]
+];

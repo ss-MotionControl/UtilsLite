@@ -1,14 +1,22 @@
 var searchData=
 [
-  ['n_5froots_0',['n_roots',['../class_utils_1_1_sturm.html#a87430c71771aa17bd90879373954bac3',1,'Utils::Sturm']]],
-  ['name_1',['name',['../class_utils_1_1_h_j_pattern_search.html#a745a0267993cd54c430e9d02c8e55f26',1,'Utils::HJPatternSearch::name()'],['../class_utils_1_1_nelder_mead.html#a015e8baa4008b38724a18a333da61cbc',1,'Utils::NelderMead::name()']]],
-  ['neldermead_2',['NelderMead',['../class_utils_1_1_nelder_mead.html',1,'Utils::NelderMead&lt; Real &gt;'],['../class_utils_1_1_nelder_mead.html#a637b102165390b4e454ad19594461265',1,'Utils::NelderMead::NelderMead(string const &amp;name)']]],
-  ['nm_5fmove_3',['NM_move',['../class_utils_1_1_nelder_mead.html#a6dd7d8487310b2750eabaaea138ae352',1,'Utils::NelderMead']]],
-  ['nmfunc_4',['NMFunc',['../class_utils_1_1_nelder_mead.html#a10f91ec6c0d46acba982ce1f38588152',1,'Utils::NelderMead']]],
-  ['normalize_5',['normalize',['../class_utils_1_1_poly.html#acf05d972918cfa5ad132ba049ec8d86d',1,'Utils::Poly']]],
-  ['num_5fcheck_6',['num_check',['../class_utils_1_1_a_a_b_btree.html#a0877dd1b9954cee1c902b196f8d38b43',1,'Utils::AABBtree']]],
-  ['num_5ffun_5feval_7',['num_fun_eval',['../class_utils_1_1_algo748.html#afbe6bbfc053b5e1c8bcc811517aaafeb',1,'Utils::Algo748::num_fun_eval()'],['../class_utils_1_1_trichotomy.html#a146b21bec9983c96f6a811ab038f74c6',1,'Utils::Trichotomy::num_fun_eval()'],['../class_utils_1_1_zeros.html#a97581d399d1bf4c913bbb3c970c52fbe',1,'Utils::Zeros::num_fun_eval()']]],
-  ['num_5fobjects_8',['num_objects',['../class_utils_1_1_a_a_b_btree.html#a7abcf41e75cae8b2f99709b98bc930ea',1,'Utils::AABBtree']]],
-  ['num_5ftree_5fnodes_9',['num_tree_nodes',['../class_utils_1_1_a_a_b_btree.html#a6b7ede237339cb36367c0b13e14ec0ab',1,'Utils::AABBtree::num_tree_nodes() const'],['../class_utils_1_1_a_a_b_btree.html#a93e5a206de80146abb2c4d9120f05a8e',1,'Utils::AABBtree::num_tree_nodes(integer nmin) const']]],
-  ['numbers_2ecc_10',['Numbers.cc',['../_numbers_8cc.html',1,'']]]
+  ['fatal_0',['fatal',['../d1/df8/class_utils_1_1_console.html#aa4c2b0a4f4549fc9422f26e974cb23d0',1,'Utils::Console::fatal(char const *msg) const'],['../d1/df8/class_utils_1_1_console.html#ae552a42d38747eab86898d099cb0992a',1,'Utils::Console::fatal(string const &amp;msg) const']]],
+  ['fg_1',['fg',['../d1/df2/namespacerang.html#a41a68f6ed991b29fa720fcfbcd319ef9',1,'rang']]],
+  ['fgb_2',['fgB',['../d1/df2/namespacerang.html#a3b83d0d73d49b5a75c3b92031f2c77ee',1,'rang']]],
+  ['finding_20algorithms_3',['Zero-Finding Algorithms',['../d2/d38/group___zeros.html',1,'']]],
+  ['flush_4',['flush',['../d1/df8/class_utils_1_1_console.html#a4b7ef1b2ade9dc8f0d489f258ea3d30d',1,'Utils::Console']]],
+  ['fmt_5fformat_2ecc_5',['fmt_format.cc',['../df/d45/fmt__format_8cc.html',1,'']]],
+  ['fmt_5fos_2ecc_6',['fmt_os.cc',['../d9/d9c/fmt__os_8cc.html',1,'']]],
+  ['for_20function_20minimization_7',['Using the &lt;strong&gt;HJPatternSearch&lt;/strong&gt; Class for Function Minimization',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#autotoc_md16',1,'']]],
+  ['for_20your_20terminal_8',['rang - Colors for your Terminal',['../d1/d5f/_rang.html#autotoc_md4',1,'']]],
+  ['force_9',['Force',['../d1/df2/namespacerang.html#a9a0ad8048ed47f032f5bdb687ba64164a9eb6b78a99cdb6ffd3d40d18621d9f80',1,'rang']]],
+  ['found_5fnan_10',['found_NaN',['../d1/d7c/namespace_utils.html#a3895f693284de68f895073abe709ac06',1,'Utils::found_NaN(double const *pv, int DIM)'],['../d1/d7c/namespace_utils.html#a5e75b533b6cba2fefb0cd02133ba56dd',1,'Utils::found_NaN(float const *pv, int DIM)']]],
+  ['free_11',['free',['../dc/d87/class_utils_1_1_malloc.html#a817592d2e181aa4bf36306c6169a30cb',1,'Utils::Malloc::free()'],['../d1/d7a/class_utils_1_1_malloc_fixed.html#a4bd958d4fbeb618d1aa0cc21ba36277d',1,'Utils::MallocFixed::free()']]],
+  ['function_12',['Step 2: Define the Objective Function',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#autotoc_md19',1,'']]],
+  ['function_13',['Step 2: defining your function',['../d2/df8/class_utils_1_1_algo748.html#autotoc_md9',1,'']]],
+  ['function_20minimization_14',['Using the &lt;strong&gt;HJPatternSearch&lt;/strong&gt; Class for Function Minimization',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#autotoc_md16',1,'']]],
+  ['function_20parameters_15',['Step 6: Advanced usage with function parameters',['../d2/df8/class_utils_1_1_algo748.html#autotoc_md13',1,'']]],
+  ['function_20to_20execute_20the_20solver_16',['Step 4: Main Function to Execute the Solver',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#autotoc_md21',1,'']]],
+  ['functions_17',['OS Utility Functions',['../d6/da2/group___o_s.html',1,'']]],
+  ['functions_18',['Step 5: Using lambda functions',['../d2/df8/class_utils_1_1_algo748.html#autotoc_md12',1,'']]]
 ];

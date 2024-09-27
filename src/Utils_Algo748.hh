@@ -39,6 +39,12 @@ namespace Utils {
   using std::pow;
   using std::abs;
 
+  /*!
+   * \addtogroup Zeros
+   * @{
+   */
+
+
   /*
   //      _    _           _____ _  _    ___
   //     / \  | | __ _  __|___  | || |  ( _ )
@@ -102,35 +108,165 @@ namespace Utils {
   #endif
 
   //!
-  //! \class Algo748
-  //! \brief Class for solving \f$ f(x)=0 \f$ without the usew of derivative
+  //!  \class Algo748
+  //!  \brief Class for solving \f$ f(x)=0 \f$ without the usew of derivative
   //!
-  //! \note The used algorithm is described in:
-  //!       **G. E. Alefeld, Florian A Potra, Yixun Shi**,
-  //!       *Algorithm 748: enclosing zeros of continuous functions*,
-  //!       ACM Transactions on Mathematical Software, vol 21, N.3, 1995
+  //!  \note The used algorithm is described in:
+  //!        **G. E. Alefeld, Florian A Potra, Yixun Shi**,
+  //!        *Algorithm 748: enclosing zeros of continuous functions*,
+  //!        ACM Transactions on Mathematical Software, vol 21, N.3, 1995
   //!
-  //! **Usage Example**
+  //!  ## Usage simple example:
   //!
-  //! To use this class, first wrap your function in a derived class. For instance, for the function \f$ f(x) = x^2 - 2 \f$, you can define:
+  //!  To use this class, first wrap your function in a derived class. For instance, for the function \f$ f(x) = x^2 - 2 \f$, you can define:
   //!
-  //! \code{cpp}
-  //! class Fun1 : public Algo748_base_fun<double> {
-  //! public:
-  //!   double eval(double x) const override { return x*x - 2; }
-  //! };
-  //! \endcode
+  //!  \code{cpp}
+  //!  class Fun1 : public Algo748_base_fun<double> {
+  //!  public:
+  //!    double eval(double x) const override { return x*x - 2; }
+  //!  };
+  //!  \endcode
   //!
-  //! Next, instantiate the function and the solver. Then, call the desired method to find the root:
+  //!  Next, instantiate the function and the solver. Then, call the desired method to find the root:
   //!
-  //! \code{cpp}
-  //! Algo748<real_type> solver;
-  //! Fun1 f;
-  //! real_type a=-1,b=2;
-  //! real_type x_solution = solver.eval2(a,b,f);
-  //! \endcode
+  //!  \code{cpp}
+  //!  Algo748<real_type> solver;
+  //!  Fun1 f;
+  //!  real_type a=-1,b=2;
+  //!  real_type x_solution = solver.eval2(a,b,f);
+  //!  \endcode
   //!
-  //! If the method converges, `x_solution` will contain the computed solution.
+  //!  If the method converges, `x_solution` will contain the computed solution.
+  //!
+  //!  ## Usage Detailed Example:
+  //!
+  //!  To create a custom function, derive from this class and implement the required methods.
+  //!  Here is an example for the function \f$ f(x) = x^2 - 2 \f$:
+  //!
+  //!  ### Step 1: including headers
+  //!
+  //!  To use the `Algo748` class, include the necessary headers:
+  //!
+  //!  \code{cpp}
+  //!  #include "Utils_Algo748.hh"
+  //!  #include "Utils_fmt.hh" // For formatted output
+  //!  \endcode
+  //!
+  //!  ### Step 2: defining your function
+  //!
+  //!  Define the function for which you want to find the root. The function must
+  //!  take a single argument (the variable for which you're solving) and return
+  //!  a value.
+  //!
+  //!  For example, to find the root of \f$ \sin(x) - \frac{x}{2} = 0 \f$:
+  //!
+  //!  \code{cpp}
+  //!  static real_type myFunction(real_type x) {
+  //!    return sin(x) - x / 2;
+  //!  }
+  //!  \endcode
+  //!
+  //!  ### Step 3: Creating solver instance
+  //!
+  //!  Create an instance of the `Algo748` class to solve your function. The
+  //!  class provides methods to evaluate functions and find roots.
+  //!
+  //!  ### Step 4: Calling the solver
+  //!
+  //!  To find a root, call the `eval` method with the initial guesses for the
+  //!  root (interval `[a, b]`).
+  //!  Here's an example of how to set up a program to find a root:
+  //!
+  //!  \code{cpp}
+  //!  int
+  //!  main() {
+  //!    // Create an instance of the solver
+  //!    Algo748<real_type> solver;
+  //!
+  //!    // Define the interval [a, b]
+  //!    real_type a = 0.0; // lower bound
+  //!    real_type b = 2.0; // upper bound
+  //!
+  //!    // Solve for the root
+  //!    real_type root = solver.eval2(a, b, myFunction);
+  //!
+  //!    // Print the results
+  //!    cout << "Root found: " << root << endl;
+  //!    cout << "f(root) = " << myFunction(root) << endl;
+  //!
+  //!    return 0;
+  //!  }
+  //!  \endcode
+  //!
+  //!  ### Step 5: Using lambda functions
+  //!
+  //!  You can also use lambda functions to define your function inline, which
+  //!  can simplify your code. Here's how to modify the previous example:
+  //!
+  //!  \code{cpp}
+  //!  int
+  //!  main() {
+  //!    // Create an instance of the solver
+  //!    Algo748<real_type> solver;
+  //!
+  //!    // Define the interval [a, b]
+  //!    real_type a = 0.0; // lower bound
+  //!    real_type b = 2.0; // upper bound
+  //!
+  //!    // Solve for the root using a lambda function
+  //!    real_type root = solver.eval2(a, b, [](real_type x) { return sin(x) - x / 2; });
+  //!
+  //!    // Print the results
+  //!    cout << "Root found: " << root << endl;
+  //!    cout << "f(root) = " << sin(root) - root / 2 << endl;
+  //!
+  //!    return 0;
+  //!  }
+  //!  \endcode
+  //!
+  //!  ### Step 6: Advanced usage with function parameters
+  //!
+  //!  If your function requires additional parameters, you can wrap it in a
+  //!  lambda or use `std::bind`. Here's an example using `std::bind`:
+  //!
+  //!  \code{cpp}
+  //!  #include <functional>
+  //!
+  //!  static real_type myParameterizedFunction(real_type x, real_type a) {
+  //!    return a * x * exp(-x);
+  //!  }
+  //!
+  //!  int
+  //!  main() {
+  //!    // Create an instance of the solver
+  //!    Algo748<real_type> solver;
+  //!
+  //!    // Define the interval [a, b]
+  //!    real_type a = 0.0;
+  //!    real_type b = 5.0;
+  //!    real_type parameter = -1.0;
+  //!
+  //!    // Solve for the root using std::bind
+  //!    real_type root = solver.eval2(a, b, std::bind(myParameterizedFunction, std::placeholders::_1, parameter));
+  //!
+  //!    // Print the results
+  //!    cout << "Root found: " << root << endl;
+  //!    cout << "f(root) = " << myParameterizedFunction(root, parameter) << endl;
+  //!
+  //!    return 0;
+  //!  }
+  //!  \endcode
+  //!
+  //!  ### Step 7: Analyzing results
+  //!
+  //!  After calling the `eval2` method, you can check the number of iterations,
+  //!  number of function evaluations, and whether the algorithm converged:
+  //!
+  //!  \code{cpp}
+  //!  cout << "Iterations: " << solver.used_iter() << endl;
+  //!  cout << "Function Evaluations: " << solver.num_fun_eval() << endl;
+  //!  cout << "Converged: " << (solver.converged() ? "Yes" : "No") << endl;
+  //!  \endcode
   //!
   template <typename Real>
   class Algo748 {
@@ -299,6 +435,8 @@ namespace Utils {
   extern template class Algo748<float>;
   extern template class Algo748<double>;
   #endif
+
+  /*! @} */
 
 }
 

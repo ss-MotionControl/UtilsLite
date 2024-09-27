@@ -25,16 +25,19 @@
 var NAVTREE =
 [
   [ "UtilsLite", "index.html", [
-    [ "Introduction", "index.html#autotoc_md1", null ],
-    [ "3rd party software included", "index.html#autotoc_md2", null ],
-    [ "LICENSE", "md__2_users_2enrico_2_ricerca_2develop_2_p_i_n_s_2pins-_w_o_r_k_i_n_g_2_lib_sources_2submodules_2_utils_lite_2_l_i_c_e_n_s_e.html", null ],
-    [ "Author", "md_author.html", null ],
-    [ "rang - Colors for your Terminal", "md_rang.html", null ],
+    [ "Third party software", "d2/df1/3rd.html", "d2/df1/3rd" ],
+    [ "Installation guide", "df/d70/_install.html", null ],
+    [ "License", "d5/d8f/_license.html", null ],
+    [ "Deprecated List", "da/d58/deprecated.html", null ],
+    [ "Topics", "topics.html", "topics" ],
     [ "Namespaces", "namespaces.html", [
       [ "Namespace List", "namespaces.html", "namespaces_dup" ],
       [ "Namespace Members", "namespacemembers.html", [
         [ "All", "namespacemembers.html", null ],
-        [ "Functions", "namespacemembers_func.html", null ]
+        [ "Functions", "namespacemembers_func.html", null ],
+        [ "Variables", "namespacemembers_vars.html", null ],
+        [ "Typedefs", "namespacemembers_type.html", null ],
+        [ "Enumerations", "namespacemembers_enum.html", null ]
       ] ]
     ] ],
     [ "Classes", "annotated.html", [
@@ -43,7 +46,8 @@ var NAVTREE =
       [ "Class Hierarchy", "hierarchy.html", "hierarchy" ],
       [ "Class Members", "functions.html", [
         [ "All", "functions.html", "functions_dup" ],
-        [ "Functions", "functions_func.html", null ],
+        [ "Functions", "functions_func.html", "functions_func" ],
+        [ "Variables", "functions_vars.html", null ],
         [ "Typedefs", "functions_type.html", null ]
       ] ]
     ] ],
@@ -51,6 +55,7 @@ var NAVTREE =
       [ "File List", "files.html", "files_dup" ],
       [ "File Members", "globals.html", [
         [ "All", "globals.html", null ],
+        [ "Functions", "globals_func.html", null ],
         [ "Macros", "globals_defs.html", null ]
       ] ]
     ] ]
@@ -59,9 +64,12 @@ var NAVTREE =
 
 var NAVTREEINDEX =
 [
-"_c_p_uinfo_8cc.html",
-"class_utils_1_1_nelder_mead.html#a5213fe8a5a026cb3047a1f50044e1563",
-"class_utils_1_1_trichotomy__base__fun.html#af2dfa6de36d7efef65f903294abeb27d"
+"annotated.html",
+"d1/df8/class_utils_1_1_console.html",
+"d3/d26/class_utils_1_1_algo748__base__fun.html",
+"d6/da2/group___o_s.html#gad46d83d379a26b615fdce8aa1bf0e32e",
+"d9/d1a/rang_8hxx.html#ad33ed681a0b63f07283bbb55d19da7d2a6411532ba4971f378391776a9db629d3",
+"dc/d73/group___mex.html#gaa7b0f5e70692eb1eee373c2a12237b66"
 ];
 
 var SYNCONMSG = 'click to disable panel synchronisation';

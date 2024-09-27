@@ -58,6 +58,8 @@
 #include "Eigen/Dense"
 #include <type_traits>
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
 namespace fmt {
   template <typename TYPE, int ROW, int COL>
   struct formatter<Eigen::Matrix<TYPE,ROW,COL>> : ostream_formatter {};
@@ -71,6 +73,8 @@ namespace fmt {
   template <typename EXPR>
   struct formatter<Eigen::WithFormat<EXPR>> : ostream_formatter {};
 }
+
+#endif
 
 #endif
 

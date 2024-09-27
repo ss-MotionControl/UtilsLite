@@ -1,0 +1,35 @@
+var group___mex =
+[
+    [ "Utils::mex_class_handle< base >", "d1/df8/class_utils_1_1mex__class__handle.html", [
+      [ "mex_class_handle", "d1/df8/class_utils_1_1mex__class__handle.html#afff49c2702f2a39afc1fad6f93808cb4", null ],
+      [ "mex_class_handle", "d1/df8/class_utils_1_1mex__class__handle.html#a41b3816a58a51fab43cb112ec2c16ec4", null ],
+      [ "~mex_class_handle", "d1/df8/class_utils_1_1mex__class__handle.html#adf82a9d3beeb515a1375b1bbba6e4242", null ],
+      [ "is_valid", "d1/df8/class_utils_1_1mex__class__handle.html#a20316764944a775dabc4578573b17153", null ],
+      [ "operator=", "d1/df8/class_utils_1_1mex__class__handle.html#a2b88a4f4ada9dc16dc7f301e203b3eb3", null ],
+      [ "ptr", "d1/df8/class_utils_1_1mex__class__handle.html#a054e800625a245ee804e922e3694f0c7", null ]
+    ] ],
+    [ "Utils::mex_convert_mx_to_handle_ptr", "dc/d73/group___mex.html#ga44fc6a8ac5c4ab90310f8debf27ea5a5", null ],
+    [ "Utils::mex_convert_mx_to_ptr", "dc/d73/group___mex.html#ga6c47af4523cedfa8d36245790265666e", null ],
+    [ "Utils::mex_convert_ptr_to_mx", "dc/d73/group___mex.html#ga5b5febf5b8f69b8f33523a30c964c0fa", null ],
+    [ "Utils::mex_create_matrix_int32", "dc/d73/group___mex.html#gaeeb5068dcbc9f927ffbe669a7638309b", null ],
+    [ "Utils::mex_create_matrix_int64", "dc/d73/group___mex.html#gafe209611b9a6cdeef2d54a061b73efdb", null ],
+    [ "Utils::mex_create_matrix_value", "dc/d73/group___mex.html#gab6b2b7220a30e2941cc27e260265d9f7", null ],
+    [ "Utils::mex_destroy_object", "dc/d73/group___mex.html#ga656fca76359f49f41dbb9d151127aacf", null ],
+    [ "Utils::mex_error_message", "dc/d73/group___mex.html#gaa7b0f5e70692eb1eee373c2a12237b66", null ],
+    [ "Utils::mex_get_bool", "dc/d73/group___mex.html#gaac399dcddc3eac15ad927b77bd26f51d", null ],
+    [ "Utils::mex_get_bool", "dc/d73/group___mex.html#ga821bcdce4edd76921d442117cd6e9b81", null ],
+    [ "Utils::mex_get_int64", "dc/d73/group___mex.html#ga5596433037f94a168e2cd99875898f19", null ],
+    [ "Utils::mex_get_int64", "dc/d73/group___mex.html#ga69574a8b868326dbf6a06910f06fd9cb", null ],
+    [ "Utils::mex_get_scalar_value", "dc/d73/group___mex.html#ga56bf404a50b0799a0e5dcbe66ad26043", null ],
+    [ "Utils::mex_get_scalar_value", "dc/d73/group___mex.html#ga52847003ac67b5e12a6421b4c530e13d", null ],
+    [ "Utils::mex_is_scalar", "dc/d73/group___mex.html#ga2955cb74a3597d5d8a4472a4dd810ab9", null ],
+    [ "Utils::mex_is_scalar", "dc/d73/group___mex.html#gaf0cd9416062cb6de579479fb1956bd78", null ],
+    [ "Utils::mex_matrix_pointer", "dc/d73/group___mex.html#ga3735c221dcf3288bfc1e50bf78a55c5b", null ],
+    [ "Utils::mex_matrix_pointer", "dc/d73/group___mex.html#ga9a18ea1686c01a64c8d3aeb40d7e7209", null ],
+    [ "Utils::mex_set_scalar_bool", "dc/d73/group___mex.html#gade72f93dfa29955ad2477ed1f4be98da", null ],
+    [ "Utils::mex_set_scalar_int32", "dc/d73/group___mex.html#gaadf665880a105c6b96bc05f4e9f0a16e", null ],
+    [ "Utils::mex_set_scalar_int64", "dc/d73/group___mex.html#ga1a1782ad3614827034725ef3b95bfa2c", null ],
+    [ "Utils::mex_set_scalar_value", "dc/d73/group___mex.html#ga918cbfcabf4a433d189129a823f24d34", null ],
+    [ "Utils::mex_vector_pointer", "dc/d73/group___mex.html#ga77ad7a21e92529477af0019112915fad", null ],
+    [ "Utils::mex_vector_pointer", "dc/d73/group___mex.html#gac23b1604c8767b511677f4431e8ed3d0", null ]
+];

@@ -28,6 +28,7 @@
   #include <chrono>
   #include <thread>
 #endif
+
 #endif
 
 namespace Utils {
@@ -57,12 +58,8 @@ namespace Utils {
   //! std::cout << "Elapsed time: " << timer.elapsed_ms() << " ms" << std::endl;
   //! \endcode
   //!
-  class TicToc;
 
 #ifdef UTILS_OS_WINDOWS
-  //!
-  //! Class for timing code execution.
-  //!
   class TicToc {
 
     using real_type = double;
@@ -170,10 +167,6 @@ namespace Utils {
   void sleep_for_nanoseconds( unsigned ns );
 
 #else
-
-  //!
-  //! Class for timing code execution.
-  //!
   class TicToc {
 
     using real_type = double;

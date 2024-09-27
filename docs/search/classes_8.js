@@ -1,7 +1,6 @@
 var searchData=
 [
-  ['triangle2d_0',['Triangle2D',['../class_utils_1_1_triangle2_d.html',1,'Utils']]],
-  ['trichotomy_1',['Trichotomy',['../class_utils_1_1_trichotomy.html',1,'Utils']]],
-  ['trichotomy_5fbase_5ffun_2',['Trichotomy_base_fun',['../class_utils_1_1_trichotomy__base__fun.html',1,'Utils']]],
-  ['tvd_3',['TVD',['../class_utils_1_1_t_v_d.html',1,'Utils']]]
+  ['row_0',['Row',['../d0/d29/class_utils_1_1_table_1_1_row.html',1,'Utils::Table']]],
+  ['runtime_5ferror_1',['Runtime_Error',['../db/d6b/class_utils_1_1_runtime___error.html',1,'Utils']]],
+  ['runtime_5ftraceerror_2',['Runtime_TraceError',['../d8/d7d/class_utils_1_1_runtime___trace_error.html',1,'Utils']]]
 ];

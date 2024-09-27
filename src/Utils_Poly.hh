@@ -875,10 +875,12 @@ namespace Utils {
     //! // Now P(x) = 2 + 4x
     //! \endcode
     //!
-    Poly_t & operator *= ( Real );
+    Poly_t & operator *= ( Real a );
 
   };
 
+  //!
+  //! \ingroup Zeros
   //!
   //! \brief Class for managing and computing the Sturm sequence associated with a polynomial.
   //!
@@ -1384,10 +1386,14 @@ namespace Utils {
 
 }
 
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
 namespace fmt {
   template <typename Real> struct formatter<Utils::Poly<Real>> : ostream_formatter {};
   template <typename Real> struct formatter<Utils::Sturm<Real>> : ostream_formatter {};
 }
+
+#endif
 
 #endif
 

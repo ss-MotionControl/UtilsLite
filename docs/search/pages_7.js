@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['your_20terminal_0',['rang - Colors for your Terminal',['../md_rang.html',1,'']]]
+  ['third_20party_20software_0',['Third party software',['../d2/df1/3rd.html',1,'index']]]
 ];
