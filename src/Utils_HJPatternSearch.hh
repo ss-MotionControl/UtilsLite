@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Utils_HJPatternSearch.hh
-///
+//
+// file: Utils_HJPatternSearch.hh
+//
 
 #pragma once
 
@@ -150,6 +150,6 @@ namespace Utils {
 
 #endif
 
-///
-/// eof: Utils_HJPatternSearch.hh
-///
+//
+// eof: Utils_HJPatternSearch.hh
+//

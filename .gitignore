@@ -11,10 +11,9 @@ build
 *.mexmaci64
 Xcode
 bin
-docs
 lib
 ThirdParties/Eigen/eigen-3.4.0
 ThirdParties/fmt/fmt-10.2.1
-docs_build/_static
 src/Utils/fmt
 src/Eigen
+doxygen/docs

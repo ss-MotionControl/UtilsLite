@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Utils_NelderMead.cc
-///
+//
+// file: Utils_NelderMead.cc
+//
 
 #include "Utils_NelderMead.hh"
 
@@ -475,6 +475,6 @@ namespace Utils {
 
 }
 
-///
-/// eof: Utils_NelderMead.cc
-///
+//
+// eof: Utils_NelderMead.cc
+//

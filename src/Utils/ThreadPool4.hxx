@@ -1,9 +1,8 @@
-/**
- */
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-///
-/// file: ThreadPool4.hxx
-///
+//
+// file: ThreadPool4.hxx
+//
 
 namespace Utils {
 
@@ -85,6 +84,8 @@ namespace Utils {
 
 }
 
-///
-/// eof: ThreadPool4.hxx
-///
+//
+// eof: ThreadPool4.hxx
+//
+
+#endif

@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// eof: Table.hxx
-///
+//
+// eof: Table.hxx
+//
 
 /*\
 
@@ -321,6 +321,6 @@ operator << ( Utils::ostream_type& stream, Utils::Table::Table const & table ) {
   return stream << table.render();
 }
 
-///
-/// eof: Table.hxx
-///
+//
+// eof: Table.hxx
+//

@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Token.hxx
-///
+//
+// file: Token.hxx
+//
 
 //
 // https://stackoverflow.com/questions/53849/how-do-i-tokenize-a-string-in-c
@@ -61,6 +61,6 @@ namespace Utils {
 
 }
 
-///
-/// eof: Token.hxx
-///
+//
+// eof: Token.hxx
+//

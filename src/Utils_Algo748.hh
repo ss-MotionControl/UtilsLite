@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Utils_Algo748.hh
-///
+//
+// file: Utils_Algo748.hh
+//
 
 #pragma once
 
@@ -49,15 +49,49 @@ namespace Utils {
   */
 
   //!
-  //! Class function for `Algo748` class
+  //! \class Algo748_base_fun
+  //! \brief Abstract base class for defining mathematical functions used in the zero search algorithm.
+  //!
+  //! This class serves as a base interface for user-defined functions that can be evaluated.
+  //! It allows for the implementation the numerical method to
+  //! find the solution of the one dimensional equation \f$ f(x) = 0 \f$.
+  //! Users must inherit from this class and implement the virtual method to define their specific functions.
+  //!
+  //! **Template Parameter:**
+  //! - `Real`: A numeric type representing the data type of the function's input and output,
+  //!   such as `float`, `double`, etc.
+  //!
+  //! **Usage Example:**
+  //! To create a custom function, derive from this class and implement the required methods.
+  //! Here is an example for the function \f$ f(x) = x^2 - 2 \f$:
+  //!
+  //! \code{cpp}
+  //! class Fun1 : public Trichotomy_base_fun<double> {
+  //! public:
+  //!     double eval(double x) const override { return x*x - 2; }
+  //! };
+  //! \endcode
   //!
   template <typename Real>
   class Algo748_base_fun {
   public:
+    //!
+    //! Evaluate the function \f$ f(x) \f$
+    //!
+    //! \param[in] x the point to evaluate \f$ f(x) \f$
+    //! \return the value of \f$ f(x) \f$
+    //!
     virtual Real eval( Real x ) const = 0;
+    //!
+    //! Evaluate the function \f$ f(x) \f$
+    //!
+    //! \param[in] x the point to evaluate \f$ f(x) \f$
+    //! \return the value of \f$ f(x) \f$
+    //!
     Real operator () ( Real x ) const { return this->eval(x); }
   };
 
+  #ifndef DOXYGEN_SHOULD_SKIP_THIS
   template <typename Real, typename PFUN>
   class Algo748_fun : public Algo748_base_fun<Real> {
     PFUN m_fun;
@@ -65,13 +99,38 @@ namespace Utils {
     explicit Algo748_fun( PFUN pfun ) : m_fun(pfun) {}
     Real eval( Real x ) const override { return m_fun(x); };
   };
+  #endif
 
   //!
-  //! Implementation of:
+  //! \class Algo748
+  //! \brief Class for solving \f$ f(x)=0 \f$ without the usew of derivative
   //!
-  //! - **G. E. Alefeld, Florian A Potra, Yixun Shi**,
-  //!   *Algorithm 748: enclosing zeros of continuous functions*,
-  //!   ACM Transactions on Mathematical Software, vol 21, N.3, 1995
+  //! \note The used algorithm is described in:
+  //!       **G. E. Alefeld, Florian A Potra, Yixun Shi**,
+  //!       *Algorithm 748: enclosing zeros of continuous functions*,
+  //!       ACM Transactions on Mathematical Software, vol 21, N.3, 1995
+  //!
+  //! **Usage Example**
+  //!
+  //! To use this class, first wrap your function in a derived class. For instance, for the function \f$ f(x) = x^2 - 2 \f$, you can define:
+  //!
+  //! \code{cpp}
+  //! class Fun1 : public Algo748_base_fun<double> {
+  //! public:
+  //!   double eval(double x) const override { return x*x - 2; }
+  //! };
+  //! \endcode
+  //!
+  //! Next, instantiate the function and the solver. Then, call the desired method to find the root:
+  //!
+  //! \code{cpp}
+  //! Algo748<real_type> solver;
+  //! Fun1 f;
+  //! real_type a=-1,b=2;
+  //! real_type x_solution = solver.eval2(a,b,f);
+  //! \endcode
+  //!
+  //! If the method converges, `x_solution` will contain the computed solution.
   //!
   template <typename Real>
   class Algo748 {
@@ -114,18 +173,44 @@ namespace Utils {
     Algo748() = default;
     ~Algo748() = default;
 
+    //!
+    //! Find the solution for a function wrapped in the class `Algo748_base_fun<Real>`
+    //! starting from guess interval `[a,b]`
+    //!
+    //! \param a    lower bound search interval
+    //! \param b    upper bound search interval
+    //! \param fun  the pointer to base class `Algo748_base_fun<Real>` wrapping the user function
+    //!
     Real
     eval( Real a, Real b, Algo748_base_fun<Real> * fun ) {
       m_function = fun;
       return this->eval( a, b );
     }
 
+    //!
+    //! Find the solution for a function wrapped in the class `Algo748_base_fun<Real>`
+    //! starting from guess interval `[a,b]`
+    //!
+    //! \param a    guess interval lower bound
+    //! \param b    guess interval upper bound
+    //! \param amin lower bound search interval
+    //! \param bmax upper bound search interval
+    //! \param fun  the pointer to base class `Algo748_base_fun<Real>` wrapping the user function
+    //!
     Real
     eval( Real a, Real b, Real amin, Real bmax, Algo748_base_fun<Real> * fun ) {
       m_function = fun;
       return this->eval( a, b, amin, bmax );
     }
 
+    //!
+    //! Find the solution for a function stored in `pfun`
+    //! starting from guess interval `[a,b]`
+    //!
+    //! \param a    lower bound search interval
+    //! \param b    upper bound search interval
+    //! \param pfun object storing the function
+    //!
     template <typename PFUN>
     Real
     eval2( Real a, Real b, PFUN pfun ) {
@@ -134,6 +219,16 @@ namespace Utils {
       return this->eval( a, b );
     }
 
+    //!
+    //! Find the solution for a function stored in `pfun`
+    //! starting from guess interval `[a,b]`
+    //!
+    //! \param a    guess interval lower bound
+    //! \param b    guess interval upper bound
+    //! \param amin lower bound search interval
+    //! \param bmax upper bound search interval
+    //! \param pfun object storing the function
+    //!
     template <typename PFUN>
     Real
     eval2( Real a, Real b, Real amin, Real bmax, PFUN pfun ) {
@@ -142,6 +237,16 @@ namespace Utils {
       return this->eval( a, b, amin, bmax );
     }
 
+    //!
+    //! Find the solution for a function wrapped into `pfun`
+    //! starting from guess interval `[a,b]`
+    //!
+    //! \param a    lower bound search interval
+    //! \param b    upper bound search interval
+    //! \param fa   the value \f$ f(a) \f$
+    //! \param fb   the value \f$ f(b) \f$
+    //! \param pfun object storing the function
+    //!
     template <typename PFUN>
     Real
     eval3( Real a, Real b, Real fa, Real fb, PFUN pfun ) {
@@ -154,13 +259,39 @@ namespace Utils {
       return eval();
     }
 
+    //!
+    //! Fix the maximum number of iteration.
+    //!
+    //! \param mit the maximum number of iteration
+    //!
     void set_max_iterations( Integer mit );
+
+    //!
+    //! Fix the maximum number of evaluation.
+    //!
+    //! \param mfev the maximum number of evaluation of \f$ f(x) \f$
+    //!
     void set_max_fun_evaluation( Integer mfev );
 
-    Integer used_iter()    const { return m_iteration_count; }
+    //!
+    //! \return the number of iterations used in the last computation
+    //!
+    Integer used_iter() const { return m_iteration_count; }
+
+    //!
+    //! \return the number of evaluation used in the last computation
+    //!
     Integer num_fun_eval() const { return m_fun_evaluation_count; }
-    Real    tolerance()    const { return m_tolerance; }
-    bool    converged()    const { return m_converged; }
+
+    //!
+    //! \return the tolerance set for computation
+    //!
+    Real tolerance() const { return m_tolerance; }
+
+    //!
+    //! \return true if the last computation was successfull
+    //!
+    bool converged() const { return m_converged; }
 
   };
 
@@ -173,6 +304,6 @@ namespace Utils {
 
 #endif
 
-///
-/// EOF: Utils_Algo748.hh
-///
+//
+// EOF: Utils_Algo748.hh
+//

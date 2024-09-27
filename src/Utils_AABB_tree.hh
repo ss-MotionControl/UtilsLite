@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Utils_AABBtree.hh
-///
+//
+// file: Utils_AABBtree.hh
+//
 #pragma once
 
 #ifndef UTILS_AABB_TREE_dot_HH
@@ -200,6 +200,6 @@ namespace Utils {
 
 #endif
 
-///
-/// eof: Utils_AABBtree.hh
-///
+//
+// eof: Utils_AABBtree.hh
+//

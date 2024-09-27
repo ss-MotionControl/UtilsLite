@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Utils_eigen.hh
-///
+//
+// file: Utils_eigen.hh
+//
 #pragma once
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -76,6 +76,6 @@ namespace fmt {
 
 #endif
 
-///
-/// eof: Utils_eigen.hh
-///
+//
+// eof: Utils_eigen.hh
+//

@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Quaternion.hxx
-///
+//
+// file: Quaternion.hxx
+//
 
 namespace Utils {
 
@@ -261,6 +261,6 @@ namespace Utils {
   }
 }
 
-///
-/// eof: Quaternion.hxx
-///
+//
+// eof: Quaternion.hxx
+//

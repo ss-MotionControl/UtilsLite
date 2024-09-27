@@ -17,6 +17,10 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
+//
+// file: Utils.cc
+//
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include "Utils.hh"
@@ -84,7 +88,36 @@ namespace Utils {
    |  \__ \  __/ (_| | | | (__| | | || || | | | ||  __/ |   \ V / (_| | |
    |  |___/\___|\__,_|_|  \___|_| |_|___|_| |_|\__\___|_|    \_/ \__,_|_|
   \*/
-
+  //!
+  //!  \brief Searches for the interval that contains a given value in a sorted array.
+  //!
+  //!  This function searches for the interval within which the value `x` falls
+  //!  based on a provided sorted array of `npts` points. It updates the
+  //!  `last_interval` to reflect the correct interval in the array.
+  //!
+  //!  If the `closed` parameter is true, the function will adjust the value of `x`
+  //!  to fit within the range defined by the first and last elements of the array.
+  //!  If `can_extend` is false and `x` is outside this range, an assertion will fail.
+  //!
+  //!  \tparam T_int The type used for the integer index (e.g., `int`).
+  //!  \tparam T_real The type used for the real number (e.g., `double`).
+  //!
+  //!  \param npts The number of points in the array `X`. Must be greater than or equal to 2.
+  //!  \param X An array of sorted real numbers defining the points.
+  //!  \param x A reference to the value being searched for in the array.
+  //!  \param last_interval A reference to the last known interval index. It will be updated
+  //!                       to the correct interval index after the search.
+  //!  \param closed A boolean indicating if the range is closed. If true, `x` will be
+  //!                adjusted to fit within the range defined by the first and last elements.
+  //!  \param can_extend A boolean indicating if `x` is allowed to be outside the range
+  //!                    defined by the first and last elements.
+  //!
+  //!  \note The function makes use of assertions to ensure that input values are valid
+  //!        and that the calculated interval is within the expected range.
+  //!
+  //!  \throw std::runtime_error If assertions fail due to invalid input parameters or
+  //!         out-of-range conditions.
+  //!
   template <typename T_int, typename T_real>
   void
   search_interval(
@@ -198,7 +231,6 @@ namespace Utils {
 
 #endif
 
-///
-/// eof: Utils.cc
-///
-
+//
+// eof: Utils.cc
+//

@@ -17,9 +17,11 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: ThreadUtils.hxx
-///
+//
+// file: ThreadUtils.hxx
+//
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 namespace Utils {
 
@@ -640,6 +642,8 @@ namespace Utils {
 
 }
 
-///
-/// eof: ThreadUtils.hxx
-///
+#endif
+
+//
+// eof: ThreadUtils.hxx
+//

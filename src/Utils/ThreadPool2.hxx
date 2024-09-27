@@ -1,3 +1,5 @@
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
+
 /**
  * Threadpool for C++11
  *
@@ -7,9 +9,9 @@
  * version 2.0 (https://github.com/RuedigerHelsch/ThreadPool)
  */
 
-///
-/// file: ThreadPool2.hxx
-///
+//
+// file: ThreadPool2.hxx
+//
 
 namespace Utils {
 
@@ -296,6 +298,8 @@ namespace Utils {
 
 }
 
-///
-/// eof: ThreadPool2.hxx
-///
+#endif
+
+//
+// eof: ThreadPool2.hxx
+//

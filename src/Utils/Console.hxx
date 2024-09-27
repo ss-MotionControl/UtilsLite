@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Console.hxx
-///
+//
+// file: Console.hxx
+//
 
 namespace Utils {
 
@@ -299,6 +299,6 @@ namespace Utils {
 
 }
 
-///
-/// eof: Console.hxx
-///
+//
+// eof: Console.hxx
+//

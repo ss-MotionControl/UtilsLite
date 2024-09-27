@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Utils_GG2D.cc
-///
+//
+// file: Utils_GG2D.cc
+//
 
 #include "Utils_GG2D.hh"
 #include "Utils_fmt.hh"
@@ -191,6 +191,6 @@ namespace Utils {
 
 }
 
-///
-/// eof: Utils_GG2D.cc
-///
+//
+// eof: Utils_GG2D.cc
+//

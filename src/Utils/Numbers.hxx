@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Numbers.hxx
-///
+//
+// file: Numbers.hxx
+//
 
 namespace Utils {
 
@@ -39,19 +39,19 @@ namespace Utils {
   //   \____\___/|_| |_|___/\__\__,_|_| |_|\__|___/
   */
 
-  /// Not a number constant
+  //! Not a number constant
   template <typename T> T NaN();
   template <typename T> T Inf();
-  /// machine epsilon
+  //! machine epsilon
   template <typename T> T machine_eps();
 
-  /// square root of machine epsilon
+  //! square root of machine epsilon
   template <typename T> T sqrt_machine_eps();
 
-  /// maximum representable value
+  //! maximum representable value
   template <typename T> T maximum_value();
 
-  /// minimum representable value
+  //! minimum representable value
   template <typename T> T minimum_value();
 
   #ifndef DOXYGEN_SHOULD_SKIP_THIS
@@ -241,6 +241,6 @@ namespace Utils {
   #endif
 }
 
-///
-/// eof: Number.hxx
-///
+//
+// eof: Number.hxx
+//

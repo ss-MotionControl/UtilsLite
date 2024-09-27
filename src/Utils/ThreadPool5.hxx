@@ -17,9 +17,11 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: ThreadPool5.hxx
-///
+//
+// file: ThreadPool5.hxx
+//
+
+#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 namespace Utils {
 
@@ -170,6 +172,8 @@ namespace Utils {
   };
 }
 
-///
-/// eof: ThreadPool5.hxx
-///
+#endif
+
+//
+// eof: ThreadPool5.hxx
+//

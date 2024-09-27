@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Utils_TVD.hh
-///
+//
+// file: Utils_TVD.hh
+//
 
 #pragma once
 
@@ -73,6 +73,6 @@ namespace Utils {
 
 #endif
 
-///
-/// EOF: Utils_TVD.hh
-///
+//
+// eof: Utils_TVD.hh
+//

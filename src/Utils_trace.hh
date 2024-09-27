@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Utils_trace.hh
-///
+//
+// file: Utils_trace.hh
+//
 
 #pragma once
 
@@ -109,6 +109,6 @@ namespace Utils {
 
 #endif
 
-///
-/// eof: Utils_trace.hh
-///
+//
+// eof: Utils_trace.hh
+//

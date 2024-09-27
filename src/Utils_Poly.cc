@@ -17,9 +17,9 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-///
-/// file: Utils_Poly.cc
-///
+//
+// file: Utils_Poly.cc
+//
 
 #if defined(__llvm__) || defined(__clang__)
 #pragma clang diagnostic ignored "-Wdeprecated-copy-with-dtor"
@@ -46,7 +46,6 @@ namespace Utils { \
   template void divide( Poly<REAL> const & p, Poly<REAL> const & q, Poly<REAL> & M, Poly<REAL> & R ); \
   template void GCD( Poly<REAL> const & p, Poly<REAL> const & q, Poly<REAL> & g, REAL epsi ); \
 }
-#endif
 
 namespace Utils {
 
@@ -783,7 +782,11 @@ namespace Utils {
   */
 }
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 UTILS_POLY_INTANTIATE( double );
 UTILS_POLY_INTANTIATE( float );
+
 #endif
+
+//
+// eof: Utils_Poly.cc
+//
