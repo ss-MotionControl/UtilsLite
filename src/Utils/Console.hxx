@@ -540,6 +540,150 @@ namespace Utils {
     Console const & gray_reversed(string const & msg, int msg_level = 0) const {
       return this->gray_reversed(msg.c_str(), msg_level);
     }
+
+    //! Sets the message style.
+    //! \param s The text style (e.g., bold, underline).
+    //! \param f The foreground color of the text.
+    //! \param b The background color of the text.
+    void
+    set_message_style(
+      rang::style const & s,
+      rang::fg    const & f,
+      rang::bg    const & b
+    ) {
+      m_message_style.s = s; m_message_style.f = f; m_message_style.b = b;
+    }
+
+    //! Sets the message style using a higher-level function.
+    //! \param s The text style.
+    //! \param f The foreground color.
+    //! \param b The background color.
+    //! \deprecated use `set_message_style`
+    void
+    setMessageStyle(
+      rang::style const & s,
+      rang::fg    const & f,
+      rang::bg    const & b
+    ) {
+      this->set_message_style( s, f, b );
+    }
+
+    //! Sets the warning style.
+    //! \param s The text style.
+    //! \param f The foreground color.
+    //! \param b The background color.
+    void
+    set_warning_style(
+      rang::style const & s,
+      rang::fg    const & f,
+      rang::bg    const & b
+    ) {
+      m_warning_style.s = s;
+      m_warning_style.f = f;
+      m_warning_style.b = b;
+    }
+
+    //! Sets the warning style.
+    //! \param s The text style.
+    //! \param f The foreground color.
+    //! \param b The background color.
+    //! \deprecated use `set_warning_style`
+    void
+    setWarningStyle(
+      rang::style const & s,
+      rang::fg    const & f,
+      rang::bg    const & b
+    ) {
+      this->set_warning_style( s, f, b );
+    }
+
+    //! Sets the error style.
+    //! \param s The text style.
+    //! \param f The foreground color.
+    //! \param b The background color.
+    void
+    set_error_style(
+      rang::style const & s,
+      rang::fg    const & f,
+      rang::bg    const & b
+    ) {
+      m_error_style.s = s;
+      m_error_style.f = f;
+      m_error_style.b = b;
+    }
+
+    //! Sets the error style.
+    //! \param s The text style.
+    //! \param f The foreground color.
+    //! \param b The background color.
+    //! \deprecated use `set_error_style`
+    void
+    setErrorStyle(
+      rang::style const & s,
+      rang::fg    const & f,
+      rang::bg    const & b
+    ) {
+      this->set_error_style( s, f, b );
+    }
+
+    //! Sets the fatal error style.
+    //! \param s The text style.
+    //! \param f The foreground color.
+    //! \param b The background color.
+    void
+    set_fatal_style(
+      rang::style const & s,
+      rang::fg    const & f,
+      rang::bg    const & b
+    ) {
+      m_fatal_style.s = s;
+      m_fatal_style.f = f;
+      m_fatal_style.b = b;
+    }
+
+    //! Sets the fatal error style.
+    //! \param s The text style.
+    //! \param f The foreground color.
+    //! \param b The background color.
+    //! \deprecated use `set_fatal_style`
+    void
+    setFatalStyle(
+      rang::style const & s,
+      rang::fg    const & f,
+      rang::bg    const & b
+    ) {
+      this->set_fatal_style( s, f, b );
+    }
+
+    //! Disables coloring.
+    //! Turns off color control in non-Windows terminals.
+    void
+    set_off() const {
+      #ifndef UTILS_OS_WINDOWS
+      rang::setControlMode( rang::control::Off );
+      #endif
+    }
+
+    //! Disables coloring.
+    //! Turns off color control in non-Windows terminals.
+    //! \deprecated use `set_off`
+    void setOff() const { this->set_off(); }
+
+    //! Sets coloring to automatic mode.
+    //! Enables automatic color control in terminals depending on the operating system.
+    void
+    set_auto() const {
+      #ifdef UTILS_OS_WINDOWS
+      rang::setWinTermMode( rang::winTerm::Auto );
+      #else
+      rang::setControlMode( rang::control::Auto );
+      #endif
+    }
+
+    //! Sets coloring to automatic mode.
+    //! Enables automatic color control in terminals depending on the operating system.
+    //! \deprecated use `set_auto`
+    void setAuto() const { this->set_auto(); }
   };
 
 } // namespace Utils

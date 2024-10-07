@@ -132,6 +132,9 @@ namespace Utils {
     //!
     unsigned size() const { return 1; }
   };
+
+  /*! @} */
+
 }
 
 //
