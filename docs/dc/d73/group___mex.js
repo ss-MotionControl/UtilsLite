@@ -14,6 +14,8 @@ var group___mex =
     [ "Utils::mex_create_matrix_int32", "dc/d73/group___mex.html#gaeeb5068dcbc9f927ffbe669a7638309b", null ],
     [ "Utils::mex_create_matrix_int64", "dc/d73/group___mex.html#gafe209611b9a6cdeef2d54a061b73efdb", null ],
     [ "Utils::mex_create_matrix_value", "dc/d73/group___mex.html#gab6b2b7220a30e2941cc27e260265d9f7", null ],
+    [ "Utils::mex_create_sparse_matrix", "dc/d73/group___mex.html#gaf9b32dd531f02e51244520f82cb31394", null ],
+    [ "Utils::mex_create_string_cell_array", "dc/d73/group___mex.html#gaabb0934f3a4f58f8d390df487621079f", null ],
     [ "Utils::mex_destroy_object", "dc/d73/group___mex.html#ga656fca76359f49f41dbb9d151127aacf", null ],
     [ "Utils::mex_error_message", "dc/d73/group___mex.html#gaa7b0f5e70692eb1eee373c2a12237b66", null ],
     [ "Utils::mex_get_bool", "dc/d73/group___mex.html#gaac399dcddc3eac15ad927b77bd26f51d", null ],

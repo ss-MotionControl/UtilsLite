@@ -197,6 +197,13 @@ Functions</h2></td></tr>
 <tr class="memitem:gab6b2b7220a30e2941cc27e260265d9f7" id="r_gab6b2b7220a30e2941cc27e260265d9f7"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gab6b2b7220a30e2941cc27e260265d9f7">Utils::mex_create_matrix_value</a> (mxArray *&amp;arg, mwSize nrow, mwSize ncol)</td></tr>
 <tr class="memdesc:gab6b2b7220a30e2941cc27e260265d9f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a numeric matrix of type double and returns a pointer to its data.  <br /></td></tr>
 <tr class="separator:gab6b2b7220a30e2941cc27e260265d9f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf9b32dd531f02e51244520f82cb31394" id="r_gaf9b32dd531f02e51244520f82cb31394"><td class="memTemplParams" colspan="2">template&lt;typename R , typename I &gt; </td></tr>
+<tr class="memitem:gaf9b32dd531f02e51244520f82cb31394"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#gaf9b32dd531f02e51244520f82cb31394">Utils::mex_create_sparse_matrix</a> (size_t nnz, size_t nrows, size_t ncols, I i_rows[], I j_cols[], R vals[], mxArray *arg_out[])</td></tr>
+<tr class="memdesc:gaf9b32dd531f02e51244520f82cb31394"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a sparse matrix in MATLAB format.  <br /></td></tr>
+<tr class="separator:gaf9b32dd531f02e51244520f82cb31394"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaabb0934f3a4f58f8d390df487621079f" id="r_gaabb0934f3a4f58f8d390df487621079f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#gaabb0934f3a4f58f8d390df487621079f">Utils::mex_create_string_cell_array</a> (mxArray *&amp;arg, std::vector&lt; std::string &gt; const &amp;str_vec)</td></tr>
+<tr class="memdesc:gaabb0934f3a4f58f8d390df487621079f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a MATLAB cell array and fills it with a vector of C++ strings.  <br /></td></tr>
+<tr class="separator:gaabb0934f3a4f58f8d390df487621079f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5b5febf5b8f69b8f33523a30c964c0fa" id="r_ga5b5febf5b8f69b8f33523a30c964c0fa"><td class="memTemplParams" colspan="2">template&lt;typename base &gt; </td></tr>
 <tr class="memitem:ga5b5febf5b8f69b8f33523a30c964c0fa"><td class="memTemplItemLeft" align="right" valign="top">mxArray *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#ga5b5febf5b8f69b8f33523a30c964c0fa">Utils::mex_convert_ptr_to_mx</a> (base *ptr)</td></tr>
 <tr class="memdesc:ga5b5febf5b8f69b8f33523a30c964c0fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a pointer to a <a class="el" href="../../d1/df8/class_utils_1_1mex__class__handle.html" title="A class template that manages a C++ object for use with MATLAB.">mex_class_handle</a> into a MATLAB mxArray.  <br /></td></tr>
@@ -488,6 +495,122 @@ template&lt;typename base &gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Pointer to the data of the created double matrix. </dd></dl>
+
+</div>
+</div>
+<a id="gaf9b32dd531f02e51244520f82cb31394" name="gaf9b32dd531f02e51244520f82cb31394"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaf9b32dd531f02e51244520f82cb31394">&#9670;&#160;</a></span>mex_create_sparse_matrix()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename R , typename I &gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">int Utils::mex_create_sparse_matrix </td>
+          <td>(</td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>nnz</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>nrows</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>ncols</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">I</td>          <td class="paramname"><span class="paramname"><em>i_rows</em></span>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">I</td>          <td class="paramname"><span class="paramname"><em>j_cols</em></span>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">R</td>          <td class="paramname"><span class="paramname"><em>vals</em></span>[], </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">mxArray *</td>          <td class="paramname"><span class="paramname"><em>arg_out</em></span>[]&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates a sparse matrix in MATLAB format. </p>
+<p>This function creates a sparse matrix using MATLAB's internal data structures. The inputs are arrays representing the row indices, column indices, and values of the non-zero elements of the sparse matrix.</p>
+<dl class="tparams"><dt>Template Parameters</dt><dd>
+  <table class="tparams">
+    <tr><td class="paramname">R</td><td>Type of the values in the sparse matrix. </td></tr>
+    <tr><td class="paramname">I</td><td>Type of the row and column indices. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">nnz</td><td>Number of non-zero elements in the sparse matrix. </td></tr>
+    <tr><td class="paramname">nrows</td><td>Number of rows in the sparse matrix. </td></tr>
+    <tr><td class="paramname">ncols</td><td>Number of columns in the sparse matrix. </td></tr>
+    <tr><td class="paramname">i_rows</td><td>Array of row indices (0-based). </td></tr>
+    <tr><td class="paramname">j_cols</td><td>Array of column indices (0-based). </td></tr>
+    <tr><td class="paramname">vals</td><td>Array of non-zero values. </td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>int Status code of the MATLAB function call. </dd></dl>
+
+</div>
+</div>
+<a id="gaabb0934f3a4f58f8d390df487621079f" name="gaabb0934f3a4f58f8d390df487621079f"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#gaabb0934f3a4f58f8d390df487621079f">&#9670;&#160;</a></span>mex_create_string_cell_array()</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void Utils::mex_create_string_cell_array </td>
+          <td>(</td>
+          <td class="paramtype">mxArray *&amp;</td>          <td class="paramname"><span class="paramname"><em>arg</em></span>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">std::vector&lt; std::string &gt; const &amp;</td>          <td class="paramname"><span class="paramname"><em>str_vec</em></span>&#160;)</td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+<p>Creates a MATLAB cell array and fills it with a vector of C++ strings. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">arg</td><td>Reference to the mxArray pointer that will hold the MATLAB cell array. </td></tr>
+    <tr><td class="paramname">str_vec</td><td>Vector of C++ strings to be inserted into the cell array. </td></tr>
+  </table>
+  </dd>
+</dl>
 
 </div>
 </div>

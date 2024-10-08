@@ -49,6 +49,8 @@ var mex__utils_8hxx =
     [ "mex_create_matrix_int32", "db/de1/mex__utils_8hxx.html#gaeeb5068dcbc9f927ffbe669a7638309b", null ],
     [ "mex_create_matrix_int64", "db/de1/mex__utils_8hxx.html#gafe209611b9a6cdeef2d54a061b73efdb", null ],
     [ "mex_create_matrix_value", "db/de1/mex__utils_8hxx.html#gab6b2b7220a30e2941cc27e260265d9f7", null ],
+    [ "mex_create_sparse_matrix", "db/de1/mex__utils_8hxx.html#gaf9b32dd531f02e51244520f82cb31394", null ],
+    [ "mex_create_string_cell_array", "db/de1/mex__utils_8hxx.html#gaabb0934f3a4f58f8d390df487621079f", null ],
     [ "mex_destroy_object", "db/de1/mex__utils_8hxx.html#ga656fca76359f49f41dbb9d151127aacf", null ],
     [ "mex_error_message", "db/de1/mex__utils_8hxx.html#gaa7b0f5e70692eb1eee373c2a12237b66", null ],
     [ "mex_get_bool", "db/de1/mex__utils_8hxx.html#gaac399dcddc3eac15ad927b77bd26f51d", null ],

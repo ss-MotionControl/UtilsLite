@@ -131,6 +131,7 @@ $(function(){initNavTree('db/de1/mex__utils_8hxx.html','../../'); initResizable(
 <code>#include &lt;map&gt;</code><br />
 <code>#include &lt;string&gt;</code><br />
 <code>#include &lt;cstring&gt;</code><br />
+<code>#include &lt;vector&gt;</code><br />
 <code>#include &lt;cstdint&gt;</code><br />
 <code>#include &lt;typeinfo&gt;</code><br />
 </div>
@@ -298,6 +299,13 @@ Functions</h2></td></tr>
 <tr class="memitem:gab6b2b7220a30e2941cc27e260265d9f7" id="r_gab6b2b7220a30e2941cc27e260265d9f7"><td class="memItemLeft" align="right" valign="top">double *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d73/group___mex.html#gab6b2b7220a30e2941cc27e260265d9f7">Utils::mex_create_matrix_value</a> (mxArray *&amp;arg, mwSize nrow, mwSize ncol)</td></tr>
 <tr class="memdesc:gab6b2b7220a30e2941cc27e260265d9f7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a numeric matrix of type double and returns a pointer to its data.  <br /></td></tr>
 <tr class="separator:gab6b2b7220a30e2941cc27e260265d9f7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaf9b32dd531f02e51244520f82cb31394" id="r_gaf9b32dd531f02e51244520f82cb31394"><td class="memTemplParams" colspan="2">template&lt;typename R , typename I &gt; </td></tr>
+<tr class="memitem:gaf9b32dd531f02e51244520f82cb31394"><td class="memTemplItemLeft" align="right" valign="top">int&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d73/group___mex.html#gaf9b32dd531f02e51244520f82cb31394">Utils::mex_create_sparse_matrix</a> (size_t nnz, size_t nrows, size_t ncols, I i_rows[], I j_cols[], R vals[], mxArray *arg_out[])</td></tr>
+<tr class="memdesc:gaf9b32dd531f02e51244520f82cb31394"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a sparse matrix in MATLAB format.  <br /></td></tr>
+<tr class="separator:gaf9b32dd531f02e51244520f82cb31394"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:gaabb0934f3a4f58f8d390df487621079f" id="r_gaabb0934f3a4f58f8d390df487621079f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../dc/d73/group___mex.html#gaabb0934f3a4f58f8d390df487621079f">Utils::mex_create_string_cell_array</a> (mxArray *&amp;arg, std::vector&lt; std::string &gt; const &amp;str_vec)</td></tr>
+<tr class="memdesc:gaabb0934f3a4f58f8d390df487621079f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Creates a MATLAB cell array and fills it with a vector of C++ strings.  <br /></td></tr>
+<tr class="separator:gaabb0934f3a4f58f8d390df487621079f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ga5b5febf5b8f69b8f33523a30c964c0fa" id="r_ga5b5febf5b8f69b8f33523a30c964c0fa"><td class="memTemplParams" colspan="2">template&lt;typename base &gt; </td></tr>
 <tr class="memitem:ga5b5febf5b8f69b8f33523a30c964c0fa"><td class="memTemplItemLeft" align="right" valign="top">mxArray *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../dc/d73/group___mex.html#ga5b5febf5b8f69b8f33523a30c964c0fa">Utils::mex_convert_ptr_to_mx</a> (base *ptr)</td></tr>
 <tr class="memdesc:ga5b5febf5b8f69b8f33523a30c964c0fa"><td class="mdescLeft">&#160;</td><td class="mdescRight">Converts a pointer to a <a class="el" href="../../d1/df8/class_utils_1_1mex__class__handle.html" title="A class template that manages a C++ object for use with MATLAB.">mex_class_handle</a> into a MATLAB mxArray.  <br /></td></tr>
@@ -914,7 +922,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line">  <a class="code hl_define" href="#a23d725bf757ea16957380bd63d878bf4">UTILS_MEX_ASSERT0</a>( COND, fmt::format( FMT,__VA_ARGS__) )</div>
-<div class="ttc" id="amex__utils_8hxx_html_a23d725bf757ea16957380bd63d878bf4"><div class="ttname"><a href="#a23d725bf757ea16957380bd63d878bf4">UTILS_MEX_ASSERT0</a></div><div class="ttdeci">#define UTILS_MEX_ASSERT0(COND, MSG)</div><div class="ttdef"><b>Definition</b> mex_utils.hxx:74</div></div>
+<div class="ttc" id="amex__utils_8hxx_html_a23d725bf757ea16957380bd63d878bf4"><div class="ttname"><a href="#a23d725bf757ea16957380bd63d878bf4">UTILS_MEX_ASSERT0</a></div><div class="ttdeci">#define UTILS_MEX_ASSERT0(COND, MSG)</div><div class="ttdef"><b>Definition</b> mex_utils.hxx:75</div></div>
 </div><!-- fragment -->
 </div>
 </div>
@@ -937,7 +945,7 @@ Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 <b>Value:</b><div class="fragment"><div class="line"><span class="keywordflow">if</span> ( !(COND) ) <a class="code hl_function" href="../../dc/d73/group___mex.html#gaa7b0f5e70692eb1eee373c2a12237b66">Utils::mex_error_message</a>( MSG )</div>
-<div class="ttc" id="agroup___mex_html_gaa7b0f5e70692eb1eee373c2a12237b66"><div class="ttname"><a href="../../dc/d73/group___mex.html#gaa7b0f5e70692eb1eee373c2a12237b66">Utils::mex_error_message</a></div><div class="ttdeci">void mex_error_message(std::string msg)</div><div class="ttdoc">Sends an error message to MATLAB.</div><div class="ttdef"><b>Definition</b> mex_utils.hxx:94</div></div>
+<div class="ttc" id="agroup___mex_html_gaa7b0f5e70692eb1eee373c2a12237b66"><div class="ttname"><a href="../../dc/d73/group___mex.html#gaa7b0f5e70692eb1eee373c2a12237b66">Utils::mex_error_message</a></div><div class="ttdeci">void mex_error_message(std::string msg)</div><div class="ttdoc">Sends an error message to MATLAB.</div><div class="ttdef"><b>Definition</b> mex_utils.hxx:95</div></div>
 </div><!-- fragment -->
 </div>
 </div>
