@@ -26,3 +26,29 @@ rake
 ```
 
 to compile using mingw open MSYS2 shell and compile as in unix evironment.
+The commanda run `cmake` with the appropriate parameters.
+
+### Compile without the use of rake
+
+Prepare for compilation
+
+```
+mkdir build
+cd build
+```
+
+compile with ninja (reccomended)
+
+```
+cmake -G Ninja ..
+ninja
+```
+
+or use default (makfile in unix)
+
+```
+cmake ..
+make # or make -j10 for parallel copilation
+```
+
+other engines are avaible in windows or unix.
