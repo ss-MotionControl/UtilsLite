@@ -113,7 +113,18 @@ namespace Utils {
       else if ( m_c >= m_b-tol ) m_c = m_b - tol;
     }
 
+    UTILS_ASSERT(
+      Utils::is_finite(m_fc),
+      "in Algo748<Real>::bracketing(), unexpected NaN or Inf "
+      "for c at [a,b] = [{},{}]\n", m_a, m_b
+    );
+
     m_fc = this->evaluate( m_c );
+
+    UTILS_ASSERT(
+      Utils::is_finite(m_fc),
+      "in Algo748<Real>::bracketing(), unexpected NaN or Inf at f({})\n", m_c
+    );
 
     // If f(c)=0, then set a=c and return.
     // This will terminate the procedure.
@@ -168,6 +179,21 @@ namespace Utils {
     Real tol{ Real(0.7)*m_tolerance };
     if ( c <= m_a+tol || c >= m_b-tol ) c = (m_a+m_b)/2;
 
+    UTILS_ASSERT(
+      Utils::is_finite(c),
+      "in Algo748<Real>::pzero(), compute NaN or Inf at\n"
+      "a={} f(a)={}\n"
+      "b={} f(b)={}\n"
+      "c={} f(c)={}\n"
+      "d={} f(d)={}\n"
+      "e={} f(e)={}\n",
+      m_a, m_fa,
+      m_b, m_fb,
+      m_c, m_fc,
+      m_d, m_fd,
+      m_e, m_fe
+    );
+
     // CALCULATE THE OUTPUT C.
     return c;
   }
@@ -199,6 +225,15 @@ namespace Utils {
       ok = PDC != 0;
       if ( ok ) c -= PC/PDC;
     }
+
+    UTILS_ASSERT(
+      Utils::is_finite(c),
+      "in Algo748<Real>::newton_quadratic(), compute NaN or Inf at\n"
+      "A0={}\n"
+      "A1={}\n"
+      "A2={}\n",
+      A0, A1, A2
+    );
 
     if ( ok ) return c;
     else      return m_a-A0/A1;
