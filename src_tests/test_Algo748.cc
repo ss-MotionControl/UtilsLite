@@ -140,13 +140,14 @@ template <typename FUN>
 void
 do_solve( real_type a, real_type b, FUN f ) {
   Algo748<real_type> solver;
-  real_type res = solver.eval2( a, b, f );
+  real_type res  = solver.eval2( a, b, f );
+  real_type fres = f(res);
   ++ntest;
   fmt::print(
     "#{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} f(x) = {}\n",
     ntest, solver.used_iter(), solver.num_fun_eval(), solver.converged(),
     fmt::format("{:.6}",res),
-    fmt::format("{:.3}",f(res))
+    fmt::format("{:.3}",fres)
   );
 }
 
@@ -163,8 +164,10 @@ do_solve2( real_type a, real_type b, real_type amin, real_type bmax, FUN f ) {
     fmt::format("{:.3}",f(res))
   );
 }
+
 int
 main() {
+  do_solve( -1.0, 1.0, [] ( real_type x ) { return x > 0 ? 1/(1-x) : x-1; } );
 
   do_solve( m_pi/2, m_pi, [](real_type x) { return sin(x)-x/2; });
   for ( int i = 1; i <= 10; ++i )

@@ -296,7 +296,7 @@ namespace Utils {
     bool bracketing();
     void set_tolerance( Real tol );
     Real pzero();
-    Real newton_quadratic( Integer niter );
+    bool newton_quadratic( Integer niter, Real & c );
     Real evaluate( Real x ) { ++m_fun_evaluation_count; return m_function->eval(x); };
     bool all_different( Real a, Real b, Real c, Real d ) const;
 
