@@ -151,12 +151,13 @@ namespace Utils {
 
   void
   ThreadPool5::Worker::info( ostream_type & s ) const {
+    double rjob{1000.0/(m_job_done_counter>0?m_job_done_counter:1)};
     fmt::print( s,
       "Worker {:2}, #job = {:4}, [job {:10}, sync {:10}, wait {:10}]\n",
       m_worker_id, m_job_done_counter,
-      fmt::format( "{:.3} mus", 1000*elapsed_job_ms()/m_job_done_counter),
-      fmt::format( "{:.3} mus", 1000*elapsed_sync_ms()/m_job_done_counter),
-      fmt::format( "{:.3} mus", 1000*elapsed_wait_ms()/m_job_done_counter)
+      fmt::format( "{:.3} mus", rjob*elapsed_job_ms() ),
+      fmt::format( "{:.3} mus", rjob*elapsed_sync_ms() ),
+      fmt::format( "{:.3} mus", rjob*elapsed_wait_ms() )
     );
   }
 

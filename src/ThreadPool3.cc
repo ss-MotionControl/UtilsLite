@@ -170,11 +170,12 @@ namespace Utils {
     unsigned nw = unsigned(m_pop_ms.size());
     for ( unsigned i = 0; i < nw; ++i ) {
       unsigned njob = m_n_job[i];
+      double rjob{1000.0/(njob>0?njob:1)};
       fmt::print( s,
         "Worker {:2}, #job = {:4}, [job {:10}, POP {:10}]\n",
         i, njob,
-        fmt::format( "{:.3} mus", 1000*m_job_ms[i]/njob ),
-        fmt::format( "{:.3} mus", 1000*m_pop_ms[i]/njob )
+        fmt::format( "{:.3} mus", rjob*m_job_ms[i] ),
+        fmt::format( "{:.3} mus", rjob*m_pop_ms[i] )
       );
     }
     fmt::print( s, "PUSH {:10.6} ms\n\n", m_push_ms );

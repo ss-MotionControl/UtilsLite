@@ -114,7 +114,7 @@ main( int argc, char *argv[] ) {
   Utils::TicToc tm;
 
   int NN = 10000;
-  int nt = 10;
+  int nt = 64;
   int sz = 200;
   int zz = 0;
 
