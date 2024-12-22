@@ -66,11 +66,12 @@ static
 void
 do_test( int n, int sz ) {
   Counter c;
-  int nn = 1+((n*14)%sz);
+  int nn = 1+((n*111)%sz);
   //int nn = 40;
   for ( int i = 0; i < nn; ++i ) {
-    //Utils::sleep_for_nanoseconds(10);
-    c.inc();
+    //Utils::sleep_for_nanoseconds(1);
+    int mm = 1+((i*11)%64);
+    for ( int j = 0; j < mm; ++j ) c.inc();
   }
   accumulator += c.get();
   //c.print();
@@ -114,7 +115,7 @@ main( int argc, char *argv[] ) {
   Utils::TicToc tm;
 
   int NN = 10000;
-  int nt = 64;
+  int nt = 8;//64;
   int sz = 200;
   int zz = 0;
 

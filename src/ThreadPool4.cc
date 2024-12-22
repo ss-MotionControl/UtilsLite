@@ -45,11 +45,11 @@ namespace Utils {
     m_tm.tic();
     // --------------------------
     ++m_push_waiting;
-    m_work_on_queue_mutex.lock();
-    m_queue_push_cv.wait( m_work_on_queue_mutex, [&]()->bool { return !m_work_queue.is_full(); } );
-    m_work_queue.push( task );
-    --m_push_waiting;
-    m_work_on_queue_mutex.unlock();
+    { std::unique_lock<std::mutex> lock( m_work_on_queue_mutex );
+      while ( m_work_queue.is_full() ) m_queue_push_cv.wait( m_work_on_queue_mutex );
+      m_work_queue.push( task );
+      --m_push_waiting;
+    }
     if ( m_pop_waiting > 0 ) m_queue_pop_cv.notify_one();
     if ( m_push_waiting > 0 && !m_work_queue.is_full() ) m_queue_push_cv.notify_one();
     // --------------------------
@@ -59,13 +59,14 @@ namespace Utils {
 
   tp::Queue::TaskData *
   ThreadPool4::pop_task() {
+    TaskData * task{ nullptr };
     ++m_pop_waiting;
-    m_work_on_queue_mutex.lock();
-    m_queue_pop_cv.wait( m_work_on_queue_mutex, [&]()->bool { return !m_work_queue.empty(); } );
-    TaskData * task = m_work_queue.pop();
-    ++m_running_task; // must be incremented in the locked part
-    --m_pop_waiting;
-    m_work_on_queue_mutex.unlock();
+    { std::unique_lock<std::mutex> lock(m_work_on_queue_mutex);
+      while ( m_work_queue.empty() ) m_queue_pop_cv.wait( m_work_on_queue_mutex );
+      task = m_work_queue.pop();
+      ++m_running_task; // must be incremented in the locked part
+      --m_pop_waiting;
+    }
     if ( m_push_waiting > 0 ) m_queue_push_cv.notify_one();
     if ( m_pop_waiting  > 0 && !m_work_queue.empty() ) m_queue_pop_cv.notify_one();
     return task;

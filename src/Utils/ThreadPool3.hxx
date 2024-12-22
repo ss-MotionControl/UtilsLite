@@ -24,19 +24,19 @@ namespace Utils {
     using real_type = double;              //!< Type used for timing measurements.
     using TaskData  = tp::Queue::TaskData; //!< Type representing a task in the queue.
 
-    std::atomic<bool>           m_done;           //!< Flag indicating if the pool is finished.
-    std::atomic<unsigned>       m_running_task;   //!< Number of tasks currently being executed.
-    std::atomic<unsigned>       m_running_thread; //!< Number of threads currently running tasks.
-    std::vector<std::thread>    m_worker_threads; //!< Vector of worker threads.
-    tp::Queue                   m_work_queue;     //!< Queue for tasks; not thread-safe by itself.
+    std::atomic<bool>           m_done{false};       //!< Flag indicating if the pool is finished.
+    std::atomic<unsigned>       m_running_task{0};   //!< Number of tasks currently being executed.
+    std::atomic<unsigned>       m_running_thread{0}; //!< Number of threads currently running tasks.
+    std::vector<std::thread>    m_worker_threads;    //!< Vector of worker threads.
+    tp::Queue                   m_work_queue;        //!< Queue for tasks; not thread-safe by itself.
     // -----------------------------------------
     std::mutex                  m_queue_push_mutex; //!< Mutex for managing concurrent task pushes.
     std::condition_variable_any m_queue_push_cv;    //!< Condition variable for notifying task pushes.
-    unsigned                    m_push_waiting;     //!< Count of threads waiting to push tasks.
+    std::atomic<unsigned>       m_push_waiting{0};  //!< Count of threads waiting to push tasks.
     // -----------------------------------------
     std::mutex                  m_queue_pop_mutex; //!< Mutex for managing concurrent task pops.
     std::condition_variable_any m_queue_pop_cv;    //!< Condition variable for notifying task pops.
-    unsigned                    m_pop_waiting;     //!< Count of threads waiting to pop tasks.
+    std::atomic<unsigned>       m_pop_waiting{0};  //!< Count of threads waiting to pop tasks.
     // -----------------------------------------
     UTILS_SPINLOCK              m_queue_spin; //!< Spinlock for quick access to the queue.
 

@@ -31,7 +31,7 @@ namespace Utils {
     std::atomic<unsigned>    m_running_thread;      //!< Count of threads currently active.
     std::vector<std::thread> m_worker_threads;      //!< Collection of worker threads.
     tp::Queue                m_work_queue;          //!< Queue for holding tasks; not thread-safe.
-    SpinLock                 m_work_on_queue_mutex; //!< Mutex for safe access to the task queue.
+    std::mutex               m_work_on_queue_mutex; //!< Mutex for safe access to the task queue.
 
     // -----------------------------------------
     std::condition_variable_any m_queue_pop_cv; //!< Condition variable for task popping notifications.
