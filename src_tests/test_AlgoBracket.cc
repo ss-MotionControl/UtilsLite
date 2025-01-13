@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------*\
  |                                                                          |
- |  Copyright (C) 2022                                                      |
+ |  Copyright (C) 2025                                                      |
  |                                                                          |
  |         , __                 , __                                        |
  |        /|/  \               /|/  \                                       |
@@ -17,40 +17,62 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
+#include "Utils_AlgoBracket.hh"
 #include "Utils_Algo748.hh"
 #include "Utils_fmt.hh"
 
 using namespace std;
 
+using Utils::AlgoBracket;
 using Utils::Algo748;
 
 #include "1D_fun.cxx"
 
+int const NA{7};
+
 static int ntest{0};
-static int nfuneval{0};
+static int nfuneval[NA]{0,0,0,0,0,0,0};
+static int nfuneval2{0};
 
 template <typename FUN>
 void
 do_solve( string const & name, real_type a, real_type b, FUN f ) {
-  Algo748<real_type> solver;
-  real_type res  = solver.eval2( a, b, f );
-  real_type fres = f(res);
+  fmt::print( "\n#{:<3} {}\n", ntest, name );
   ++ntest;
-  nfuneval += solver.num_fun_eval();
-  fmt::print(
-    "#{:<3} it:{:<3} #f:{:<3} {} x = {:12} f(x) = {:15} b-a={:10} [{}]\n",
-    ntest, solver.used_iter(), solver.num_fun_eval(), solver.converged() ? "YES" : "NO ",
-    fmt::format("{:.6}",res),
-    fmt::format("{:.3}",fres),
-    fmt::format("{:.4}",solver.b()-solver.a()),
-    name
-  );
+
+  for ( unsigned ialgo : {0,1,2,3,4,5} ) {
+    AlgoBracket<real_type> solver;
+    solver.select( ialgo );
+    real_type res  = solver.eval2( a, b, f );
+    real_type fres = f(res);
+    nfuneval[ialgo] += solver.num_fun_eval();
+    fmt::print(
+      "{:<15} f:{:<3} it:{:<3} {} x = {:12} f(x) = {:15}\n",
+      solver.algo(), solver.num_fun_eval(), solver.used_iter(), solver.converged() ? "YES" : "NO ",
+      fmt::format("{:.6}",res),
+      fmt::format("{:.3}",fres)
+    );
+  }
+
+  {
+    Algo748<real_type> solver;
+    real_type res  = solver.eval2( a, b, f );
+    real_type fres = f(res);
+    nfuneval2 += solver.num_fun_eval();
+    fmt::print(
+      "{:<15} f:{:<3} it:{:<3} {} x = {:12} f(x) = {:15}\n",
+      "Algo748", solver.num_fun_eval(), solver.used_iter(), solver.converged() ? "YES" : "NO ",
+      fmt::format("{:.6}",res),
+      fmt::format("{:.3}",fres)
+    );
+  }
 }
 
+/*
 template <typename FUN>
 void
 do_solve2( real_type a, real_type b, real_type amin, real_type bmax, FUN f ) {
-  Algo748<real_type> solver;
+  AlgoBracket<real_type> solver;
   real_type res = solver.eval2( a, b, amin, bmax, f );
   ++ntest;
   nfuneval += solver.num_fun_eval();
@@ -62,7 +84,7 @@ do_solve2( real_type a, real_type b, real_type amin, real_type bmax, FUN f ) {
     fmt::format("{:.6}",solver.b()-solver.a())
   );
 }
-
+*/
 
 int
 main() {
@@ -78,10 +100,11 @@ main() {
   //do_solve( "fun_penalty(x,-10)",            -1.0, 1.0,    [] ( real_type x ) { return fun_penalty(x,-10); } );
   //do_solve2( -1, 1.1498547501802843, -100, 100, [] ( real_type x ) { return fun_penalty(x,-229.970950036057); } );
 
-  fmt::print( "nfuneval {}\n", nfuneval );
+
+  for ( unsigned ialgo : {0,1,2,3,4,5} ) fmt::print( "nfuneval[{}] {}\n", ialgo, nfuneval[ialgo] );
+  fmt::print( "nfuneval[748] {}\n", nfuneval2 );
 
   cout << "\nAll Done Folks!\n";
 
   return 0;
 }
-

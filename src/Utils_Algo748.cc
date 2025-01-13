@@ -323,6 +323,15 @@ namespace Utils {
   template <typename Real>
   Real
   Algo748<Real>::eval() {
+  
+    UTILS_ASSERT(
+      !is_NaN( m_fa ) && !is_NaN( m_fb ),
+      "Algo748::eval() bad initial interval\n"
+      "a = {}, fa = {}\n"
+      "b = {}, fb = {}\n",
+      m_a, m_fa,
+      m_b, m_fb
+    );
 
     // check for trivial solution
     m_converged = m_fa == 0; if ( m_converged ) return m_a;
@@ -335,9 +344,19 @@ namespace Utils {
     // While f(left) or f(right) are infinite perform bisection
     //
     while ( !( is_finite(m_fa) && is_finite(m_fb) ) ) {
+
       ++m_iteration_count;
+
       m_c  = (m_a+m_b)/2;
       m_fc = this->evaluate(m_c);
+
+      UTILS_ASSERT(
+       !is_NaN( m_fc ),
+       "Algo748::eval()\n"
+       "c = {}, fc = {}\n",
+       m_c, m_fc
+      );
+
       m_converged = m_fc == 0;
       if ( m_converged ) return m_c;
       if ( m_fa*m_fc < 0 ) {
