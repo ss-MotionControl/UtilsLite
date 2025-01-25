@@ -18,13 +18,11 @@
 \*--------------------------------------------------------------------------*/
 
 #include "Utils_AlgoBracket.hh"
-#include "Utils_Algo748.hh"
 #include "Utils_fmt.hh"
 
 using namespace std;
 
 using Utils::AlgoBracket;
-using Utils::Algo748;
 
 #include "1D_fun.cxx"
 
@@ -32,7 +30,6 @@ int const NA{8};
 
 static int ntest{0};
 static int nfuneval[NA]{0,0,0,0,0,0,0,0};
-static int nfuneval2{0};
 
 template <typename FUN>
 void
@@ -49,19 +46,6 @@ do_solve( string const & name, real_type a, real_type b, FUN f ) {
     fmt::print(
       "{:<15} f:{:<3} it:{:<3} {} x = {:12} f(x) = {:15}\n",
       solver.algo(), solver.num_fun_eval(), solver.used_iter(), solver.converged() ? "YES" : "NO ",
-      fmt::format("{:.6}",res),
-      fmt::format("{:.3}",fres)
-    );
-  }
-
-  {
-    Algo748<real_type> solver;
-    real_type res  = solver.eval2( a, b, f );
-    real_type fres = f(res);
-    nfuneval2 += solver.num_fun_eval();
-    fmt::print(
-      "{:<15} f:{:<3} it:{:<3} {} x = {:12} f(x) = {:15}\n",
-      "Algo748", solver.num_fun_eval(), solver.used_iter(), solver.converged() ? "YES" : "NO ",
       fmt::format("{:.6}",res),
       fmt::format("{:.3}",fres)
     );
@@ -106,8 +90,6 @@ main() {
     solver.select( ialgo );
     fmt::print( "{:15} = {}\n", solver.algo(), nfuneval[ialgo] );
   }
-
-  fmt::print( "nfuneval[748] {}\n", nfuneval2 );
 
   cout << "\nAll Done Folks!\n";
 
