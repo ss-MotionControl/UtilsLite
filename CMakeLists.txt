@@ -99,7 +99,7 @@ set( PUBLIC_HEADERS )
 file(
   GLOB_RECURSE S
   ${SOURCE_DIR}/*.h*
-  ${SOURCE_DIR}/Eigen/*
+  ${SOURCE_DIR}/Utils/3rd/Eigen/*
 )
 foreach (F ${S})
   # build relative path respect to source directory
@@ -175,7 +175,7 @@ if ( UTILS_ENABLE_TESTS )
     GLOB S
     ${CMAKE_CURRENT_SOURCE_DIR}/src_tests/*.cc
   )
-  list(FILTER S EXCLUDE REGEX "eigen")
+  #list(FILTER S EXCLUDE REGEX "eigen")
   foreach(F ${S})
     file( RELATIVE_PATH RF "${CMAKE_CURRENT_SOURCE_DIR}/src_tests/" "${F}" )
     get_filename_component( RFF ${RF} NAME_WLE )
