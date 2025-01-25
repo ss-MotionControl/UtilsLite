@@ -21,6 +21,11 @@
 // file: Utils_NelderMead.cc
 //
 
+#if defined(__llvm__) || defined(__clang__)
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+#pragma clang diagnostic ignored "-Wduplicate-enum"
+#endif
+
 #include "Utils_NelderMead.hh"
 
 //#define UTILS_DEBUG

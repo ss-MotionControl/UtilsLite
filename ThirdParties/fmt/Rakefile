@@ -7,7 +7,7 @@ else
   require_relative "../../../Rakefile_common.rb"
 end
 
-VER = "10.2.1"
+VER = "11.1.2"
 
 desc "install FMT"
 task :install_common do
@@ -16,9 +16,9 @@ task :install_common do
     extract_zip("fmt-#{VER}.zip");
   end
   #FileUtils.cp   "fmt-#{VER}/src/fmt.cc",    '../../src'
-  FileUtils.cp   "fmt-#{VER}/src/format.cc", '../../src/Utils/format.cxx'
-  FileUtils.cp   "fmt-#{VER}/src/os.cc",     '../../src/Utils/os.cxx'
-  FileUtils.cp_r "fmt-#{VER}/include/fmt",   '../../src/Utils'
+  FileUtils.cp   "fmt-#{VER}/src/format.cc", '../../src/Utils/3rd/format.cxx'
+  FileUtils.cp   "fmt-#{VER}/src/os.cc",     '../../src/Utils/3rd/os.cxx'
+  FileUtils.cp_r "fmt-#{VER}/include/fmt",   '../../src/Utils/3rd'
 end
 
 task :install_osx   => :install_common do end

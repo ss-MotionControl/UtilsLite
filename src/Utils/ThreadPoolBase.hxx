@@ -47,9 +47,7 @@ namespace Utils {
 
     ThreadPoolBase() = default;
 
-    virtual
-    void
-    exec( std::function<void()> && ) = 0;
+    virtual void exec( std::function<void()> && ) = 0;
 
     template <typename Func, typename... Args>
     void
@@ -67,7 +65,6 @@ namespace Utils {
     virtual unsigned     thread_count() const = 0;
     virtual void         resize( unsigned numThreads ) = 0;
     virtual char const * name() const = 0;
-    virtual void         info( ostream_type & ) const { }
   };
 
   namespace tp {

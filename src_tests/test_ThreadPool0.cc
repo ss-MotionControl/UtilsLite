@@ -58,8 +58,6 @@ test_TP( int NN, int nt, int sz, char const * name ) {
     "\n[{}] result {} [LAUNCH: {}ms, WAIT {}ms, JOIN {}ms] {}ms\n",
     name, accumulator.load(), t_launch, t_wait, t_join, t_launch+t_wait
   );
-
-  pool.info(cout);
 }
 
 int
@@ -89,13 +87,15 @@ main( int argc, char *argv[] ) {
 
   test_TP<Utils::ThreadPool1>( NN, nt, sz, "ThreadPool1");
 
-  //test_TP<Utils::ThreadPool2>( NN, nt, sz, "ThreadPool2");
+  test_TP<Utils::ThreadPool2>( NN, nt, sz, "ThreadPool2");
 
   test_TP<Utils::ThreadPool3>( NN, nt, sz, "ThreadPool3");
 
   test_TP<Utils::ThreadPool4>( NN, nt, sz, "ThreadPool4");
 
   test_TP<Utils::ThreadPool5>( NN, nt, sz, "ThreadPool5");
+
+  test_TP<Utils::ThreadPool6>( NN, nt, sz, "ThreadPool6");
 
   fmt::print("All done folks!\n\n");
 
@@ -119,6 +119,10 @@ main( int argc, char *argv[] ) {
 
   fmt::print("ThreadPool5\n");
   Utils::ThreadPool5 TP5(16); // 0%
+  Utils::sleep_for_seconds(4);
+
+  fmt::print("ThreadPool6\n");
+  Utils::ThreadPool6 TP6(16); // 0%
   Utils::sleep_for_seconds(4);
 
   #endif

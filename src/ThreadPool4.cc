@@ -24,6 +24,11 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#if defined(__llvm__) || defined(__clang__)
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+#pragma clang diagnostic ignored "-Wduplicate-enum"
+#endif
+
 #include "Utils.hh"
 #include "Utils_fmt.hh"
 
@@ -42,7 +47,6 @@ namespace Utils {
 
   void
   ThreadPool4::push_task( TaskData * task ) {
-    m_tm.tic();
     // --------------------------
     ++m_push_waiting;
     { std::unique_lock<std::mutex> lock( m_work_on_queue_mutex );
@@ -52,9 +56,6 @@ namespace Utils {
     }
     if ( m_pop_waiting > 0 ) m_queue_pop_cv.notify_one();
     if ( m_push_waiting > 0 && !m_work_queue.is_full() ) m_queue_push_cv.notify_one();
-    // --------------------------
-    m_tm.toc();
-    m_push_ms += m_tm.elapsed_ms();
   }
 
   tp::Queue::TaskData *
@@ -73,26 +74,15 @@ namespace Utils {
   }
 
   void
-  ThreadPool4::worker_thread(
-    real_type & pop_ms,
-    real_type & job_ms,
-    unsigned  & n_job
-  ) {
-    TicToc tm;
+  ThreadPool4::worker_thread() {
     ++m_running_thread;
     while ( !m_done ) {
       // ---------------------------- POP
-      tm.tic();
       TaskData * task = pop_task();
-      tm.toc();
-      pop_ms += tm.elapsed_ms();
       // ---------------------------- RUN
-      tm.tic();
       (*task)(); // run and delete task;
-      tm.toc();
-      job_ms += tm.elapsed_ms();
       // ---------------------------- UPDATE
-      --m_running_task; ++n_job;
+      --m_running_task;
     }
     --m_running_thread;
   }
@@ -101,24 +91,10 @@ namespace Utils {
   ThreadPool4::create_workers( unsigned thread_count ) {
     m_worker_threads.clear();
     m_worker_threads.reserve(thread_count);
-    m_job_ms.resize( std::size_t(thread_count) );
-    m_pop_ms.resize( std::size_t(thread_count) );
-    m_n_job.resize( std::size_t(thread_count) );
-    std::fill( m_job_ms.begin(), m_job_ms.end(), 0 );
-    std::fill( m_pop_ms.begin(), m_pop_ms.end(), 0 );
-    std::fill( m_n_job.begin(), m_n_job.end(), 0 );
-    m_push_ms = 0;
-    m_done    = false;
+    m_done = false;
     try {
       for ( unsigned i=0; i<thread_count; ++i )
-        m_worker_threads.emplace_back(
-          //std::thread(
-          &ThreadPool4::worker_thread, this,
-          std::ref(m_pop_ms[i]),
-          std::ref(m_job_ms[i]),
-          std::ref(m_n_job[i])
-          //)
-        );
+        m_worker_threads.emplace_back( &ThreadPool4::worker_thread, this );
     } catch(...) {
       m_done = true;
       throw;
@@ -147,22 +123,6 @@ namespace Utils {
     m_work_queue.clear(); // remove spurious (null task) remained
     for ( std::thread & w : m_worker_threads ) { if (w.joinable()) w.join(); }
     m_worker_threads.clear(); // destroy the workers threads vector
-  }
-
-  void
-  ThreadPool4::info( ostream_type & s ) const {
-    unsigned nw = unsigned(m_pop_ms.size());
-    for ( unsigned i = 0; i < nw; ++i ) {
-      unsigned njob = m_n_job[i];
-      double rjob{1000.0/(njob>0?njob:1)};
-      fmt::print( s,
-        "Worker {:2}, #job = {:4}, [job {:10}, POP {:10}]\n",
-        i, njob,
-        fmt::format( "{:.3} mus", rjob*m_job_ms[i] ),
-        fmt::format( "{:.3} mus", rjob*m_pop_ms[i] )
-      );
-    }
-    fmt::print( s, "PUSH {:10.6} ms\n\n", m_push_ms );
   }
 
 }

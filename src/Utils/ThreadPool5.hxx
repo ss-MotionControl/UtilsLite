@@ -73,10 +73,6 @@ namespace Utils {
       UTILS_SEMAPHORE       m_is_running;                 //!< Semaphore to manage task execution.
       std::thread           m_running_thread;             //!< The thread that runs the worker loop.
       std::function<void()> m_job;                        //!< Function to be executed by the worker.
-      TicToc                m_tm;                         //!< Timing utility for measuring execution durations.
-      real_type             m_job_ms  = 0;                //!< Time taken for job execution.
-      real_type             m_sync_ms = 0;                //!< Time spent in synchronization.
-      real_type             m_wait_ms = 0;                //!< Time spent waiting for tasks.
 
       //!
       //! \brief The main loop for the worker thread, continuously fetching and executing tasks.
@@ -146,27 +142,6 @@ namespace Utils {
       //! \return The count of completed jobs.
       //!
       unsigned job_done_counter() const { return m_job_done_counter; }
-
-      //!
-      //! \brief Gets the elapsed time spent executing jobs.
-      //!
-      //! \return The elapsed time in milliseconds.
-      //!
-      real_type elapsed_job_ms()  const { return m_job_ms; }
-
-      //!
-      //! \brief Gets the elapsed time spent in synchronization.
-      //!
-      //! \return The elapsed time in milliseconds.
-      //!
-      real_type elapsed_sync_ms() const { return m_sync_ms; }
-
-      //!
-      //! \brief Gets the elapsed time spent waiting for tasks.
-      //!
-      //! \return The elapsed time in milliseconds.
-      //!
-      real_type elapsed_wait_ms() const { return m_wait_ms; }
 
       //!
       //! \brief Outputs information about the worker's performance.
@@ -305,20 +280,6 @@ namespace Utils {
     //! \brief Stops all workers in the pool.
     //!
     void stop() { for ( auto && w : m_workers ) w.stop(); }
-
-    //!
-    //! \brief Outputs information about the stack of available workers.
-    //!
-    //! \param s The output stream to which information will be written.
-    //!
-    void info_stack( ostream_type & s ) const;
-
-    //!
-    //! \brief Outputs information about the thread pool's performance.
-    //!
-    //! \param s The output stream to which information will be written.
-    //!
-    void info( ostream_type & s ) const override;
   };
 
   /*! @} */

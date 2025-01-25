@@ -41,12 +41,6 @@ namespace Utils {
     std::atomic<unsigned>       m_push_waiting;  //!< Count of threads waiting to push tasks into the queue.
     // -----------------------------------------
 
-    TicToc                   m_tm;      //!< Timing utility for measuring execution durations.
-    std::vector<real_type>   m_job_ms;  //!< Duration of executed jobs.
-    std::vector<real_type>   m_pop_ms;  //!< Duration for popping tasks from the queue.
-    std::vector<unsigned>    m_n_job;   //!< Count of jobs executed.
-    real_type                m_push_ms; //!< Duration for pushing tasks into the queue.
-
     //!
     //! \brief Sleep for a brief period to yield control.
     //!
@@ -85,12 +79,7 @@ namespace Utils {
     //! \param job_ms Reference to a variable for measuring the duration of job execution.
     //! \param n_job Reference to a variable tracking the number of executed jobs.
     //!
-    void
-    worker_thread(
-      real_type & pop_ms,
-      real_type & job_ms,
-      unsigned  & n_job
-    );
+    void worker_thread();
 
     //!
     //! \brief Creates worker threads for the thread pool.
@@ -155,13 +144,6 @@ namespace Utils {
     //! \brief Joins all worker threads and waits for them to finish executing.
     //!
     void join() override;
-
-    //!
-    //! \brief Provides information about the thread pool's performance.
-    //!
-    //! \param s The output stream to which information will be written.
-    //!
-    void info( ostream_type & s ) const override;
 
     //!
     //! \brief Gets the current number of threads in the pool.

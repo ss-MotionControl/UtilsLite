@@ -24,6 +24,11 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#if defined(__llvm__) || defined(__clang__)
+#pragma clang diagnostic ignored "-Wexit-time-destructors"
+#pragma clang diagnostic ignored "-Wduplicate-enum"
+#endif
+
 #include "Utils.hh"
 #include "Utils_fmt.hh"
 
@@ -75,26 +80,6 @@ namespace Utils {
     return id;
   }
 
-  void
-  ThreadPool5::info_stack( ostream_type & s ) const {
-    fmt::print( s, "STACK[{}]: ", m_stack.size() );
-    for ( unsigned const & id : m_stack )
-      fmt::print( s, "{}, ", id );
-    s << '\n';
-  }
-
-  void
-  ThreadPool5::info( ostream_type & s ) const {
-    for ( Worker const & w : m_workers ) w.info(s);
-    fmt::print( s,
-      "LAUNCH {} ms\n"
-      "POP    {} ms\n",
-      m_exec_ms, m_pop_ms
-    );
-    info_stack( s );
-    fmt::print( s, "\n" );
-  }
-
   /*\
    |  __        __         _
    |  \ \      / /__  _ __| | _____ _ __
@@ -128,37 +113,16 @@ namespace Utils {
   ThreadPool5::Worker::worker_loop() {
     m_is_running.red(); // block computation
     while ( m_active ) {
-      m_tm.tic();
       m_is_running.wait(); // wait signal to start computation
-      m_tm.toc();
-      m_wait_ms += m_tm.elapsed_ms();
       // ----------------------------------------
       if ( !m_active ) break; // if finished exit
-      m_tm.tic();
       m_job();
-      m_tm.toc();
-      m_job_ms += m_tm.elapsed_ms();
       // ----------------------------------------
-      m_tm.tic();
       m_is_running.red();     // block computation
       ++m_job_done_counter;
       m_tp->push_worker( m_worker_id ); // worker ready for a new computation
-      m_tm.toc();
-      m_sync_ms += m_tm.elapsed_ms();
       std::this_thread::yield();
     }
-  }
-
-  void
-  ThreadPool5::Worker::info( ostream_type & s ) const {
-    double rjob{1000.0/(m_job_done_counter>0?m_job_done_counter:1)};
-    fmt::print( s,
-      "Worker {:2}, #job = {:4}, [job {:10}, sync {:10}, wait {:10}]\n",
-      m_worker_id, m_job_done_counter,
-      fmt::format( "{:.3} mus", rjob*elapsed_job_ms() ),
-      fmt::format( "{:.3} mus", rjob*elapsed_sync_ms() ),
-      fmt::format( "{:.3} mus", rjob*elapsed_wait_ms() )
-    );
   }
 
 }

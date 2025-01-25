@@ -22,7 +22,7 @@ task :install_common do
   else
     extract_zip("eigen-#{VER}.zip");
   end
-  FileUtils.cp_r "eigen-#{VER}/Eigen", '../../src'
+  FileUtils.cp_r "eigen-#{VER}/Eigen", '../../src/Utils/3rd'
 end
 
 task :install_osx   => :install_common do end

@@ -42,6 +42,7 @@ class BlockMult {
   Utils::ThreadPool3 Pool3{5};
   Utils::ThreadPool4 Pool4{5};
   Utils::ThreadPool5 Pool5{5};
+  Utils::ThreadPool6 Pool6{5};
 
   std::vector<integer> const * m_i_block;
   std::vector<integer> const * m_j_block;
@@ -200,6 +201,19 @@ BlockMult::multiply(
       }
     }
     Pool5.wait();
+    break;
+  case 6:
+    for ( integer i{1}; i < integer(i_block.size()); ++i ) {
+      for ( integer j{1}; j < integer(j_block.size()); ++j ) {
+        #ifdef USE_RUN
+        Pool6.run( &BlockMult::Compute_C_block, this, std::ref(A), std::ref(B), std::ref(C), i, j );
+        #else
+        auto fun = [this, &A, &B, &C, i, j]() -> void { this->Compute_C_block( A, B, C, i, j ); };
+        Pool6.exec( fun );
+        #endif
+      }
+    }
+    Pool6.wait();
     break;
   default:
     fmt::print("ERROR\n\n\n");

@@ -40,12 +40,6 @@ namespace Utils {
     // -----------------------------------------
     UTILS_SPINLOCK              m_queue_spin; //!< Spinlock for quick access to the queue.
 
-    TicToc                 m_tm;      //!< Timing utility for measuring task durations.
-    std::vector<real_type> m_job_ms;  //!< Duration of job executions.
-    std::vector<real_type> m_pop_ms;  //!< Duration of task popping.
-    std::vector<unsigned>  m_n_job;   //!< Number of jobs executed.
-    real_type              m_push_ms; //!< Duration of task pushing.
-
     //!
     //! \brief Pops a task from the task queue.
     //!
@@ -65,16 +59,7 @@ namespace Utils {
     //!
     //! This function continuously pops tasks from the queue and executes them.
     //!
-    //! \param pop_ms Reference to the variable for measuring pop duration.
-    //! \param job_ms Reference to the variable for measuring job execution duration.
-    //! \param n_job Reference to the variable tracking the number of executed jobs.
-    //!
-    void
-    worker_thread(
-      real_type & pop_ms,
-      real_type & job_ms,
-      unsigned  & n_job
-    );
+    void worker_thread();
 
     //!
     //! \brief Creates worker threads for the thread pool.
@@ -110,12 +95,8 @@ namespace Utils {
     //! \param fun The function to be executed as a task.
     //!
     void
-    exec( std::function<void()> && fun ) override {
-      m_tm.tic();
-      push_task( new TaskData(std::move(fun)) );
-      m_tm.toc();
-      m_push_ms += m_tm.elapsed_ms();
-    }
+    exec( std::function<void()> && fun ) override 
+    { push_task( new TaskData(std::move(fun)) ); }
 
     //!
     //! \brief Waits for all tasks in the queue to complete.
@@ -145,13 +126,6 @@ namespace Utils {
     //! \param queue_capacity The new capacity for the task queue.
     //!
     void resize( unsigned thread_count, unsigned queue_capacity );
-
-    //!
-    //! \brief Provides information about the thread pool's performance.
-    //!
-    //! \param s The output stream to which information will be written.
-    //!
-    void info( ostream_type & s ) const override;
 
     //!
     //! \brief Gets the current number of threads in the pool.

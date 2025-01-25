@@ -29,6 +29,8 @@ task :install_osx do
   sh "rake install_osx"
   FileUtils.cd "../fmt"
   sh "rake install_osx"
+  FileUtils.cd "../BS_thread_pool"
+  sh "rake install_osx"
   FileUtils.cd ".."
 end
 
@@ -38,6 +40,8 @@ task :install_linux do
   sh "rake install_linux"
   FileUtils.cd "../fmt"
   sh "rake install_linux"
+  FileUtils.cd "../BS_thread_pool"
+  sh "rake install_linux"
   FileUtils.cd ".."
 end
 
@@ -46,6 +50,8 @@ task :install_mingw do
   FileUtils.cd "Eigen"
   sh "rake install_mingw"
   FileUtils.cd "../fmt"
+  sh "rake install_mingw"
+  FileUtils.cd "../BS_thread_pool"
   sh "rake install_mingw"
   FileUtils.cd ".."
   #FileUtils.mkdir_p "../lib3rd/include"
@@ -58,6 +64,8 @@ task :install_win do
   FileUtils.cd "Eigen"
   sh "rake install_win"
   FileUtils.cd "../fmt"
+  sh "rake install_win"
+  FileUtils.cd "../BS_thread_pool"
   sh "rake install_win"
   FileUtils.cd ".."
   FileUtils.mkdir_p "../lib3rd/include"
