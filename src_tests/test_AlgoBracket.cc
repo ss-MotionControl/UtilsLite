@@ -28,10 +28,10 @@ using Utils::Algo748;
 
 #include "1D_fun.cxx"
 
-int const NA{7};
+int const NA{8};
 
 static int ntest{0};
-static int nfuneval[NA]{0,0,0,0,0,0,0};
+static int nfuneval[NA]{0,0,0,0,0,0,0,0};
 static int nfuneval2{0};
 
 template <typename FUN>
@@ -40,7 +40,7 @@ do_solve( string const & name, real_type a, real_type b, FUN f ) {
   fmt::print( "\n#{:<3} {}\n", ntest, name );
   ++ntest;
 
-  for ( unsigned ialgo : {0,1,2,3,4,5} ) {
+  for ( unsigned ialgo : {0,1,2,3,4,5,6} ) {
     AlgoBracket<real_type> solver;
     solver.select( ialgo );
     real_type res  = solver.eval2( a, b, f );
@@ -101,7 +101,12 @@ main() {
   //do_solve2( -1, 1.1498547501802843, -100, 100, [] ( real_type x ) { return fun_penalty(x,-229.970950036057); } );
 
 
-  for ( unsigned ialgo : {0,1,2,3,4,5} ) fmt::print( "nfuneval[{}] {}\n", ialgo, nfuneval[ialgo] );
+  for ( unsigned ialgo : {0,1,2,3,4,5,6} ) {
+    AlgoBracket<real_type> solver;
+    solver.select( ialgo );
+    fmt::print( "{:15} = {}\n", solver.algo(), nfuneval[ialgo] );
+  }
+
   fmt::print( "nfuneval[748] {}\n", nfuneval2 );
 
   cout << "\nAll Done Folks!\n";
