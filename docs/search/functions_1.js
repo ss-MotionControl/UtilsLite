@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['b_0',['b',['../dd/d3f/class_utils_1_1_sturm.html#aa4b6a427207c85065ae0d28015739f8e',1,'Utils::Sturm']]],
+  ['b_0',['b',['../d6/df4/class_utils_1_1_algo_bracket.html#a667c538bc45ff549f3df6c2569a49a12',1,'Utils::AlgoBracket::b()'],['../d6/d0e/class_utils_1_1_algo_h_newton.html#a08a08739b8bcb034d07c56adb9cc4771',1,'Utils::AlgoHNewton::b()'],['../dd/d3f/class_utils_1_1_sturm.html#aa4b6a427207c85065ae0d28015739f8e',1,'Utils::Sturm::b()']]],
   ['barrier_1',['Barrier',['../d8/d20/class_utils_1_1_barrier.html#a14ed62044081ac0e7f16bd1d38ca9505',1,'Utils::Barrier']]],
   ['basename_2',['basename',['../d1/d7c/namespace_utils.html#a2997c62c5f9d707ddf987d063de96f7a',1,'Utils::basename(char const *filename)'],['../d1/d7c/namespace_utils.html#ad5c0171845cbb514af40614283eabfc9',1,'Utils::basename(char const filename[])']]],
   ['bbox_3',['bbox',['../d8/de1/class_utils_1_1_segment2_d.html#ac9a4f5ff8cf9674d3c85768a0a08dfde',1,'Utils::Segment2D']]],

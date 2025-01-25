@@ -18,6 +18,5 @@ var searchData=
   ['hash_5fstring_15',['hash_string',['../d5/dc2/class_utils_1_1_s_h_a3.html#a2e2e33c6a8646cc0f67e53a640511d5c',1,'Utils::SHA3']]],
   ['headings_16',['headings',['../d2/da0/class_utils_1_1_table_1_1_table.html#a7f0e368b7f495acd767834c3aa672c27',1,'Utils::Table::Table::headings() const'],['../d2/da0/class_utils_1_1_table_1_1_table.html#a7cb615327cbb74e0dbdc56be5ec9eee9',1,'Utils::Table::Table::headings(vecstr const &amp;headings)']]],
   ['height_17',['height',['../d8/d2b/class_utils_1_1_table_1_1_cell.html#ad2248841567a25118f723939cb923ba5',1,'Utils::Table::Cell::height()'],['../d0/d29/class_utils_1_1_table_1_1_row.html#aea3ecdd35d7ad186842df8d1cfd15e77',1,'Utils::Table::Row::height()']]],
-  ['hjpatternsearch_18',['HJPatternSearch',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#ae5af96f0e974e0647adad8f0eadc2b22',1,'Utils::HJPatternSearch']]],
-  ['hqueue_19',['HQueue',['../db/d2f/class_utils_1_1_h_queue.html#a408ea01913c51d154e5d67f11a252b93',1,'Utils::HQueue']]]
+  ['hjpatternsearch_18',['HJPatternSearch',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#ae5af96f0e974e0647adad8f0eadc2b22',1,'Utils::HJPatternSearch']]]
 ];

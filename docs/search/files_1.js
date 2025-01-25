@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['fmt_5fformat_2ecc_0',['fmt_format.cc',['../df/d45/fmt__format_8cc.html',1,'']]],
-  ['fmt_5fos_2ecc_1',['fmt_os.cc',['../d9/d9c/fmt__os_8cc.html',1,'']]]
+  ['console_2ecc_0',['Console.cc',['../dd/d31/_console_8cc.html',1,'']]],
+  ['console_2ehxx_1',['Console.hxx',['../d8/d87/_console_8hxx.html',1,'']]],
+  ['cpuinfo_2ecc_2',['CPUinfo.cc',['../d0/d07/_c_p_uinfo_8cc.html',1,'']]]
 ];

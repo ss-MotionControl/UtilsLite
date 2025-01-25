@@ -18,6 +18,5 @@ var searchData=
   ['projection_15',['projection',['../d8/de1/class_utils_1_1_segment2_d.html#a475f60c9b9034613b9edfdaa581b9ced',1,'Utils::Segment2D::projection(Point2D&lt; Real &gt; const &amp;P, Real &amp;s) const'],['../d8/de1/class_utils_1_1_segment2_d.html#a26c47860ca84b1f265b8a8de6b9e3ce5',1,'Utils::Segment2D::projection(Point2D&lt; Real &gt; const &amp;P, Real &amp;s, Real &amp;t) const']]],
   ['ptr_16',['ptr',['../d1/df8/class_utils_1_1mex__class__handle.html#a054e800625a245ee804e922e3694f0c7',1,'Utils::mex_class_handle']]],
   ['purge_17',['purge',['../d5/d0a/class_utils_1_1_poly.html#ab4173ce23169e05421f004437832e351',1,'Utils::Poly']]],
-  ['push_18',['push',['../d1/dd3/class_utils_1_1tp_1_1_queue.html#acb1c2b4d051dfbf732d0fef11ebdbe21',1,'Utils::tp::Queue']]],
-  ['put_19',['put',['../db/d2f/class_utils_1_1_h_queue.html#a1cb23fa8d1cfcf6229488063f44dfcdc',1,'Utils::HQueue']]]
+  ['push_18',['push',['../d1/dd3/class_utils_1_1tp_1_1_queue.html#acb1c2b4d051dfbf732d0fef11ebdbe21',1,'Utils::tp::Queue']]]
 ];

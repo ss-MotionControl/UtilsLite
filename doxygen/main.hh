@@ -119,6 +119,7 @@
   - [{fmt}](https://fmt.dev/latest/index.html)
   - [Eigen](https://eigen.tuxfamily.org)
   - [rang](https://github.com/agauniyal/rang) (local documentation \subpage Rang)
+  - [thread_pool](https://github.com/bshoshany/thread-pool)
 
 */
 

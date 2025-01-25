@@ -8,6 +8,5 @@ var searchData=
   ['vecrow_5',['vecRow',['../d2/da0/class_utils_1_1_table_1_1_table.html#a912d78a83bd36a6364f9270b22cd5a64',1,'Utils::Table::Table']]],
   ['vecstr_6',['vecstr',['../d0/d29/class_utils_1_1_table_1_1_row.html#ae54420dda4d31729ed9565fa69b8923a',1,'Utils::Table::Row::vecstr'],['../d2/da0/class_utils_1_1_table_1_1_table.html#ae97af79b09b7f8ceb0f824371b94e4d0',1,'Utils::Table::Table::vecstr']]],
   ['vecvecstr_7',['vecvecstr',['../d2/da0/class_utils_1_1_table_1_1_table.html#a1bc214d3a6bbfb95d2e8d00e5fbe5e6c',1,'Utils::Table::Table']]],
-  ['verify_20the_20installation_8',['Verify the Installation',['../df/d70/_install.html#autotoc_md3',1,'']]],
-  ['virtualtask_9',['VirtualTask',['../db/db5/class_utils_1_1_virtual_task.html',1,'Utils']]]
+  ['verify_20the_20installation_8',['Verify the Installation',['../df/d70/_install.html#autotoc_md3',1,'']]]
 ];

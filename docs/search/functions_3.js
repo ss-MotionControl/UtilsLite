@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['d_0',['D',['../d2/d38/group___zeros.html#ga746d55385311a13dcad8ab0b32c875ed',1,'Utils::Zeros_base_fun']]],
+  ['d_0',['D',['../db/dee/class_utils_1_1_algo_h_newton__base__fun.html#aff9ca9294bb92e44c2565cb583d5bd51',1,'Utils::AlgoHNewton_base_fun::D()'],['../d2/d38/group___zeros.html#ga746d55385311a13dcad8ab0b32c875ed',1,'Utils::Zeros_base_fun::D(Real x) const']]],
   ['dd_1',['DD',['../d2/d38/group___zeros.html#gae85b0406099bb149036a4e59351f7afc',1,'Utils::Zeros_base_fun']]],
   ['ddd_2',['DDD',['../d2/d38/group___zeros.html#ga57f1d961ada3d9878984d2fb5d6c69df',1,'Utils::Zeros_base_fun']]],
   ['degree_3',['degree',['../d5/d0a/class_utils_1_1_poly.html#a975b25d30210ea80add629ecdb8ba450',1,'Utils::Poly']]],

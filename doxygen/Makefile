@@ -7,3 +7,9 @@ clean:
 
 html:
 	@doxygen $(DOXYFILE)
+
+install:
+	@rm -rf ../docs*
+	@mkdir  ../docs
+	@touch  ../docs/.nojekyll
+	@cp -rf docs/html/. ../docs

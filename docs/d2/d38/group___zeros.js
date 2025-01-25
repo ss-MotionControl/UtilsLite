@@ -1,23 +1,49 @@
 var group___zeros =
 [
-    [ "Utils::Algo748_base_fun< Real >", "d3/d26/class_utils_1_1_algo748__base__fun.html", [
-      [ "eval", "d3/d26/class_utils_1_1_algo748__base__fun.html#a7794ad5f2e0b67957b36e10e41491d30", null ],
-      [ "operator()", "d3/d26/class_utils_1_1_algo748__base__fun.html#a190c8dbe837ebc36d722676b3477d789", null ]
+    [ "Utils::Bracket_base_fun< Real >", "df/dbf/class_utils_1_1_bracket__base__fun.html", [
+      [ "eval", "df/dbf/class_utils_1_1_bracket__base__fun.html#ad03c2c9227d5ec292b0832a3c3bc6a95", null ],
+      [ "operator()", "df/dbf/class_utils_1_1_bracket__base__fun.html#a09c4260e64b60f2bf109b66095852a9e", null ]
     ] ],
-    [ "Utils::Algo748< Real >", "d2/df8/class_utils_1_1_algo748.html", [
-      [ "Algo748", "d2/df8/class_utils_1_1_algo748.html#ab3bc7c60b865d9cf760d828bf55a3e09", null ],
-      [ "~Algo748", "d2/df8/class_utils_1_1_algo748.html#a6955fe0a65359b27ac29ed7a4c457cdb", null ],
-      [ "converged", "d2/df8/class_utils_1_1_algo748.html#abaea1b68666b4dca5d0329c388825a91", null ],
-      [ "eval", "d2/df8/class_utils_1_1_algo748.html#ab8efc045d0c7410d527ea4aa400935d7", null ],
-      [ "eval", "d2/df8/class_utils_1_1_algo748.html#a877a475391471700a93e27175e9ecdef", null ],
-      [ "eval2", "d2/df8/class_utils_1_1_algo748.html#a86972989b80c2647906ab8abe2468066", null ],
-      [ "eval2", "d2/df8/class_utils_1_1_algo748.html#ad5776c594ac8dfd09f968cef70677ade", null ],
-      [ "eval3", "d2/df8/class_utils_1_1_algo748.html#adc996db488b81ae8fc71157ef035676d", null ],
-      [ "num_fun_eval", "d2/df8/class_utils_1_1_algo748.html#afbe6bbfc053b5e1c8bcc811517aaafeb", null ],
-      [ "set_max_fun_evaluation", "d2/df8/class_utils_1_1_algo748.html#a5c599f4bfa43d79c750a5418965f1bdf", null ],
-      [ "set_max_iterations", "d2/df8/class_utils_1_1_algo748.html#a2ea4fbdab49685c5ebad3ad8e61b5bf2", null ],
-      [ "tolerance", "d2/df8/class_utils_1_1_algo748.html#a587960d03c090f03fa64fe3484d15e6d", null ],
-      [ "used_iter", "d2/df8/class_utils_1_1_algo748.html#aa7743f39149dfcbf6f701feaffca21d4", null ]
+    [ "Utils::AlgoBracket< Real >", "d6/df4/class_utils_1_1_algo_bracket.html", [
+      [ "AlgoBracket", "d6/df4/class_utils_1_1_algo_bracket.html#a8ca4119043b2ba2b44ea7f436abf9c17", null ],
+      [ "~AlgoBracket", "d6/df4/class_utils_1_1_algo_bracket.html#abb86b8edbef50ecb8e0923ac4c98e09a", null ],
+      [ "a", "d6/df4/class_utils_1_1_algo_bracket.html#a41c792181919f31f817e512810b91765", null ],
+      [ "algo", "d6/df4/class_utils_1_1_algo_bracket.html#ae197afb6bea6dee373d6e049f69f1f74", null ],
+      [ "b", "d6/df4/class_utils_1_1_algo_bracket.html#a667c538bc45ff549f3df6c2569a49a12", null ],
+      [ "converged", "d6/df4/class_utils_1_1_algo_bracket.html#a65c7278dfd0e314b3b3b6d3bd34c4b5f", null ],
+      [ "eval", "d6/df4/class_utils_1_1_algo_bracket.html#af5382c2a4f21828a8d1c69a2eaedd283", null ],
+      [ "eval", "d6/df4/class_utils_1_1_algo_bracket.html#a3315e6d35287985381b827a0c9236b70", null ],
+      [ "eval2", "d6/df4/class_utils_1_1_algo_bracket.html#a209c2cfcdd06f026a06d1b4d4d6144be", null ],
+      [ "eval2", "d6/df4/class_utils_1_1_algo_bracket.html#a23a295df180c0b2b094721ba6ba4f1cb", null ],
+      [ "eval3", "d6/df4/class_utils_1_1_algo_bracket.html#a9ddad72ec71796a2f9c21b4cafb934aa", null ],
+      [ "fa", "d6/df4/class_utils_1_1_algo_bracket.html#a6dc8e4270ac972d8c96a77b4d4b3ca60", null ],
+      [ "fb", "d6/df4/class_utils_1_1_algo_bracket.html#aa30aa8ff1285e1b9bf6feb345f25fae3", null ],
+      [ "num_fun_eval", "d6/df4/class_utils_1_1_algo_bracket.html#a4993c56547e24887285440026eab6968", null ],
+      [ "select", "d6/df4/class_utils_1_1_algo_bracket.html#af86b8d344d982a7811da94c77921b1a1", null ],
+      [ "set_max_fun_evaluation", "d6/df4/class_utils_1_1_algo_bracket.html#a06b2fabaa0985b3ba8806e3363b8b01f", null ],
+      [ "set_max_iterations", "d6/df4/class_utils_1_1_algo_bracket.html#a4f5eece49f71f8c4f63b1fee32112323", null ],
+      [ "tolerance", "d6/df4/class_utils_1_1_algo_bracket.html#a608c9e78143f543546df91f48208e5fd", null ],
+      [ "used_iter", "d6/df4/class_utils_1_1_algo_bracket.html#ad1c68be6e6abf12205544c32de7d9af0", null ]
+    ] ],
+    [ "Utils::AlgoHNewton_base_fun< Real >", "db/dee/class_utils_1_1_algo_h_newton__base__fun.html", [
+      [ "D", "db/dee/class_utils_1_1_algo_h_newton__base__fun.html#aff9ca9294bb92e44c2565cb583d5bd51", null ],
+      [ "eval", "db/dee/class_utils_1_1_algo_h_newton__base__fun.html#a609dfe131e340040f0a1b98ff750f329", null ]
+    ] ],
+    [ "Utils::AlgoHNewton< Real >", "d6/d0e/class_utils_1_1_algo_h_newton.html", [
+      [ "AlgoHNewton", "d6/d0e/class_utils_1_1_algo_h_newton.html#a21259ca5f8415a80a4b71bd29c603e10", null ],
+      [ "~AlgoHNewton", "d6/d0e/class_utils_1_1_algo_h_newton.html#ad9350084a446ef4a993798352ebd2dca", null ],
+      [ "a", "d6/d0e/class_utils_1_1_algo_h_newton.html#ae6430c641e4e1a01dde7cabede5dc689", null ],
+      [ "b", "d6/d0e/class_utils_1_1_algo_h_newton.html#a08a08739b8bcb034d07c56adb9cc4771", null ],
+      [ "converged", "d6/d0e/class_utils_1_1_algo_h_newton.html#a8fce3d3890a08bdf9b64b5709d503077", null ],
+      [ "eval", "d6/d0e/class_utils_1_1_algo_h_newton.html#a7a32ee3fb83f04128cb969808107ea23", null ],
+      [ "eval", "d6/d0e/class_utils_1_1_algo_h_newton.html#a579aafeeda00765e116f27e8c617e70a", null ],
+      [ "fa", "d6/d0e/class_utils_1_1_algo_h_newton.html#a7659d664045a906c04c125a8b21c823e", null ],
+      [ "fb", "d6/d0e/class_utils_1_1_algo_h_newton.html#ae07b12cac60a68b56b4508037fb8caa7", null ],
+      [ "num_fun_D_eval", "d6/d0e/class_utils_1_1_algo_h_newton.html#a159fa40126646ab59026fd092ccda659", null ],
+      [ "num_fun_eval", "d6/d0e/class_utils_1_1_algo_h_newton.html#a8563f0fa7cf177b31bfa7025cc30985c", null ],
+      [ "set_max_iterations", "d6/d0e/class_utils_1_1_algo_h_newton.html#a4758a1f63a77563b470d21410f3ffacc", null ],
+      [ "tolerance", "d6/d0e/class_utils_1_1_algo_h_newton.html#a77869289fd446820513e0eeac165e59b", null ],
+      [ "used_iter", "d6/d0e/class_utils_1_1_algo_h_newton.html#a78f34e7749acd0aef3738a123ee4b4d0", null ]
     ] ],
     [ "Utils::Sturm< Real >", "dd/d3f/class_utils_1_1_sturm.html", [
       [ "dvec_t", "dd/d3f/class_utils_1_1_sturm.html#a9dc0ee35f553556a1a70aad397881ca7", null ],

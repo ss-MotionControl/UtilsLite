@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['lambda_20functions_0',['Step 5: Using lambda functions',['../d2/df8/class_utils_1_1_algo748.html#autotoc_md12',1,'']]],
+  ['lambda_20functions_0',['Step 5: Using lambda functions',['../d6/df4/class_utils_1_1_algo_bracket.html#autotoc_md12',1,'']]],
   ['leading_5fcoeff_1',['leading_coeff',['../d5/d0a/class_utils_1_1_poly.html#a92c88a9e1ee6c6ec426b54c234c2d400',1,'Utils::Poly']]],
   ['leave_2',['leave',['../d6/dde/class_utils_1_1_wait_worker.html#a7653c04a6c283a21f9a1289917dab8f5',1,'Utils::WaitWorker']]],
   ['length_3',['length',['../dd/d3f/class_utils_1_1_sturm.html#a8ceacd6f0cea700e695fac701aed703f',1,'Utils::Sturm']]],

@@ -25,11 +25,7 @@ FILE_PATTERNS          = *.c \
                          *.hpp \
                          *.md
 
-EXCLUDE                = ../src/Eigen/ \
-                         ../src/Utils/mingw-std-threads/ \
-                         ../src/Utils/fmt/ \
-                         ../src/Utils/format.cxx \
-                         ../src/Utils/os.cxx
+EXCLUDE                = ../src/Utils/3rd
 
 EXTRACT_ALL            = YES
 RECURSIVE              = YES
