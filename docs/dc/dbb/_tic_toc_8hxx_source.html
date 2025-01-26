@@ -200,98 +200,99 @@ $(function(){initNavTree('dc/dbb/_tic_toc_8hxx_source.html','../../'); initResiz
 <div class="foldopen" id="foldopen00170" data-start="{" data-end="};">
 <div class="line"><a id="l00170" name="l00170"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html">  170</a></span>  <span class="keyword">class </span><a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a> {</div>
 <div class="line"><a id="l00171" name="l00171"></a><span class="lineno">  171</span> </div>
-<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <span class="keyword">using </span>real_type = double;</div>
-<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span><span class="preprocessor">    #ifdef TIC_TOC_USE_HRC</span></div>
-<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    <span class="keyword">using </span>clock = std::chrono::high_resolution_clock;</div>
-<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span><span class="preprocessor">    #else</span></div>
-<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    <span class="keyword">using </span>clock = std::chrono::steady_clock;</div>
-<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span><span class="preprocessor">    #endif</span></div>
+<div class="line"><a id="l00172" name="l00172"></a><span class="lineno">  172</span>    <span class="keyword">using </span>real_type          = double;</div>
+<div class="line"><a id="l00173" name="l00173"></a><span class="lineno">  173</span>    <span class="keyword">using </span>clock              = std::chrono::high_resolution_clock;</div>
+<div class="line"><a id="l00174" name="l00174"></a><span class="lineno">  174</span>    <span class="keyword">using </span>elapsed_resolution = std::chrono::microseconds;</div>
+<div class="line"><a id="l00175" name="l00175"></a><span class="lineno">  175</span> </div>
+<div class="line"><a id="l00176" name="l00176"></a><span class="lineno">  176</span>    clock::time_point m_start_time;</div>
+<div class="line"><a id="l00177" name="l00177"></a><span class="lineno">  177</span>    clock::time_point m_stop_time;</div>
 <div class="line"><a id="l00178" name="l00178"></a><span class="lineno">  178</span> </div>
-<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    <span class="keyword">using </span>elapsed_resolution = std::chrono::microseconds;</div>
+<div class="line"><a id="l00179" name="l00179"></a><span class="lineno">  179</span>    elapsed_resolution m_elapsed_time{0};</div>
 <div class="line"><a id="l00180" name="l00180"></a><span class="lineno">  180</span> </div>
-<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>    clock::time_point m_start_time;</div>
-<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span>    clock::time_point m_stop_time;</div>
-<div class="line"><a id="l00183" name="l00183"></a><span class="lineno">  183</span> </div>
-<div class="line"><a id="l00184" name="l00184"></a><span class="lineno">  184</span>    elapsed_resolution m_elapsed_time;</div>
-<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span> </div>
-<div class="line"><a id="l00186" name="l00186"></a><span class="lineno">  186</span>   <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00187" name="l00187"></a><span class="lineno">  187</span> </div>
-<div class="line"><a id="l00188" name="l00188"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">  188</a></span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a>( <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a> <span class="keyword">const</span> &amp; ) = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00189" name="l00189"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a007e023131fe7532f02ccdef0766065e">  189</a></span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a> <span class="keyword">const</span> &amp; <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a007e023131fe7532f02ccdef0766065e">operator = </a>( <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a> <span class="keyword">const</span> &amp; ) <span class="keyword">const</span> = <span class="keyword">delete</span>;</div>
-<div class="line"><a id="l00190" name="l00190"></a><span class="lineno">  190</span></div>
-<div class="foldopen" id="foldopen00197" data-start="{" data-end="}">
-<div class="line"><a id="l00197" name="l00197"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a45a074011eea46904f9447ca880bb829">  197</a></span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a45a074011eea46904f9447ca880bb829">TicToc</a>()</div>
-<div class="line"><a id="l00198" name="l00198"></a><span class="lineno">  198</span>    : m_elapsed_time(0)</div>
-<div class="line"><a id="l00199" name="l00199"></a><span class="lineno">  199</span>    { this-&gt;<a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a06770d03e648fa3a509038f00dc74506">tic</a>(); }</div>
+<div class="line"><a id="l00181" name="l00181"></a><span class="lineno">  181</span>   <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00182" name="l00182"></a><span class="lineno">  182</span> </div>
+<div class="line"><a id="l00183" name="l00183"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">  183</a></span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a>( <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a> <span class="keyword">const</span> &amp; ) = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00184" name="l00184"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a007e023131fe7532f02ccdef0766065e">  184</a></span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a> <span class="keyword">const</span> &amp; <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a007e023131fe7532f02ccdef0766065e">operator = </a>( <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a> <span class="keyword">const</span> &amp; ) <span class="keyword">const</span> = <span class="keyword">delete</span>;</div>
+<div class="line"><a id="l00185" name="l00185"></a><span class="lineno">  185</span></div>
+<div class="line"><a id="l00192" name="l00192"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a45a074011eea46904f9447ca880bb829">  192</a></span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a45a074011eea46904f9447ca880bb829">TicToc</a>() { this-&gt;<a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a06770d03e648fa3a509038f00dc74506">tic</a>(); }</div>
+<div class="line"><a id="l00193" name="l00193"></a><span class="lineno">  193</span> </div>
+<div class="line"><a id="l00194" name="l00194"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a332b92ccabe098298daf2ac1dbf1982d">  194</a></span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a332b92ccabe098298daf2ac1dbf1982d">~TicToc</a>() = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00195" name="l00195"></a><span class="lineno">  195</span></div>
+<div class="line"><a id="l00201" name="l00201"></a><span class="lineno">  201</span>    <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00202" data-start="{" data-end="}">
+<div class="line"><a id="l00202" name="l00202"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a06770d03e648fa3a509038f00dc74506">  202</a></span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a06770d03e648fa3a509038f00dc74506">tic</a>()</div>
+<div class="line"><a id="l00203" name="l00203"></a><span class="lineno">  203</span>    { m_start_time = clock::now(); }</div>
 </div>
-<div class="line"><a id="l00200" name="l00200"></a><span class="lineno">  200</span> </div>
-<div class="line"><a id="l00201" name="l00201"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a332b92ccabe098298daf2ac1dbf1982d">  201</a></span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a332b92ccabe098298daf2ac1dbf1982d">~TicToc</a>() = <span class="keywordflow">default</span>;</div>
-<div class="line"><a id="l00202" name="l00202"></a><span class="lineno">  202</span></div>
-<div class="line"><a id="l00208" name="l00208"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a06770d03e648fa3a509038f00dc74506">  208</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a06770d03e648fa3a509038f00dc74506">tic</a>();</div>
-<div class="line"><a id="l00209" name="l00209"></a><span class="lineno">  209</span></div>
-<div class="line"><a id="l00216" name="l00216"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a2a9cce5adc5098c42e553b92ecc7e309">  216</a></span>    <span class="keywordtype">void</span> <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a2a9cce5adc5098c42e553b92ecc7e309">toc</a>();</div>
-<div class="line"><a id="l00217" name="l00217"></a><span class="lineno">  217</span></div>
-<div class="line"><a id="l00223" name="l00223"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a5da044ad716a94e4aae1c6ced8d5cbc1">  223</a></span>    real_type <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a5da044ad716a94e4aae1c6ced8d5cbc1">elapsed_s</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00224" name="l00224"></a><span class="lineno">  224</span></div>
-<div class="line"><a id="l00230" name="l00230"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a3ea0100128ff03fdb79686ce197579c3">  230</a></span>    real_type <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a3ea0100128ff03fdb79686ce197579c3">elapsed_ms</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00231" name="l00231"></a><span class="lineno">  231</span></div>
-<div class="line"><a id="l00237" name="l00237"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#af02a061ca2e5049a7bcf9219c06599da">  237</a></span>    real_type <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#af02a061ca2e5049a7bcf9219c06599da">elapsed_mus</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00238" name="l00238"></a><span class="lineno">  238</span></div>
-<div class="line"><a id="l00244" name="l00244"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a94525a538ec9bf2a2d756968e50829f9">  244</a></span>    real_type <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a94525a538ec9bf2a2d756968e50829f9">elapsed_ns</a>() <span class="keyword">const</span>;</div>
-<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span>  };</div>
+<div class="line"><a id="l00204" name="l00204"></a><span class="lineno">  204</span></div>
+<div class="line"><a id="l00211" name="l00211"></a><span class="lineno">  211</span>    <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00212" data-start="{" data-end="}">
+<div class="line"><a id="l00212" name="l00212"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a2a9cce5adc5098c42e553b92ecc7e309">  212</a></span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a2a9cce5adc5098c42e553b92ecc7e309">toc</a>() {</div>
+<div class="line"><a id="l00213" name="l00213"></a><span class="lineno">  213</span>      m_stop_time    = clock::now();</div>
+<div class="line"><a id="l00214" name="l00214"></a><span class="lineno">  214</span>      m_elapsed_time = std::chrono::duration_cast&lt;elapsed_resolution&gt;(m_stop_time - m_start_time);</div>
+<div class="line"><a id="l00215" name="l00215"></a><span class="lineno">  215</span>    }</div>
 </div>
-<div class="line"><a id="l00246" name="l00246"></a><span class="lineno">  246</span></div>
-<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>  <span class="keyword">inline</span></div>
-<div class="line"><a id="l00256" name="l00256"></a><span class="lineno">  256</span>  <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00257" data-start="{" data-end="}">
-<div class="line"><a id="l00257" name="l00257"></a><span class="lineno"><a class="line" href="../../d1/d7c/namespace_utils.html#a31bb8bf0d19075c88dc3bef01c305230">  257</a></span>  <a class="code hl_function" href="../../d1/d7c/namespace_utils.html#a31bb8bf0d19075c88dc3bef01c305230">sleep_for_seconds</a>( <span class="keywordtype">unsigned</span> s )</div>
-<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span>  { std::this_thread::sleep_for(std::chrono::seconds(s)); }</div>
+<div class="line"><a id="l00216" name="l00216"></a><span class="lineno">  216</span></div>
+<div class="line"><a id="l00222" name="l00222"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a5da044ad716a94e4aae1c6ced8d5cbc1">  222</a></span>    real_type <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a5da044ad716a94e4aae1c6ced8d5cbc1">elapsed_s</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> real_type(1e-6*m_elapsed_time.count()); }</div>
+<div class="line"><a id="l00223" name="l00223"></a><span class="lineno">  223</span></div>
+<div class="line"><a id="l00229" name="l00229"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a3ea0100128ff03fdb79686ce197579c3">  229</a></span>    real_type <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a3ea0100128ff03fdb79686ce197579c3">elapsed_ms</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> real_type(1e-3*m_elapsed_time.count()); }</div>
+<div class="line"><a id="l00230" name="l00230"></a><span class="lineno">  230</span></div>
+<div class="line"><a id="l00236" name="l00236"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#af02a061ca2e5049a7bcf9219c06599da">  236</a></span>    real_type <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#af02a061ca2e5049a7bcf9219c06599da">elapsed_mus</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> real_type(m_elapsed_time.count()); }</div>
+<div class="line"><a id="l00237" name="l00237"></a><span class="lineno">  237</span></div>
+<div class="line"><a id="l00243" name="l00243"></a><span class="lineno"><a class="line" href="../../d7/df9/class_utils_1_1_tic_toc.html#a94525a538ec9bf2a2d756968e50829f9">  243</a></span>    real_type <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a94525a538ec9bf2a2d756968e50829f9">elapsed_ns</a>()<span class="keyword"> const </span>{ <span class="keywordflow">return</span> real_type(1e3*m_elapsed_time.count()); }</div>
+<div class="line"><a id="l00244" name="l00244"></a><span class="lineno">  244</span>  };</div>
 </div>
-<div class="line"><a id="l00259" name="l00259"></a><span class="lineno">  259</span></div>
-<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>  <span class="keyword">inline</span></div>
-<div class="line"><a id="l00269" name="l00269"></a><span class="lineno">  269</span>  <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00270" data-start="{" data-end="}">
-<div class="line"><a id="l00270" name="l00270"></a><span class="lineno"><a class="line" href="../../d1/d7c/namespace_utils.html#a249dc69f8d1c7433862c297d4e187ec0">  270</a></span>  <a class="code hl_function" href="../../d1/d7c/namespace_utils.html#a249dc69f8d1c7433862c297d4e187ec0">sleep_for_milliseconds</a>( <span class="keywordtype">unsigned</span> ms )</div>
-<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span>  {  std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }</div>
+<div class="line"><a id="l00245" name="l00245"></a><span class="lineno">  245</span></div>
+<div class="line"><a id="l00254" name="l00254"></a><span class="lineno">  254</span>  <span class="keyword">inline</span></div>
+<div class="line"><a id="l00255" name="l00255"></a><span class="lineno">  255</span>  <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00256" data-start="{" data-end="}">
+<div class="line"><a id="l00256" name="l00256"></a><span class="lineno"><a class="line" href="../../d1/d7c/namespace_utils.html#a31bb8bf0d19075c88dc3bef01c305230">  256</a></span>  <a class="code hl_function" href="../../d1/d7c/namespace_utils.html#a31bb8bf0d19075c88dc3bef01c305230">sleep_for_seconds</a>( <span class="keywordtype">unsigned</span> s )</div>
+<div class="line"><a id="l00257" name="l00257"></a><span class="lineno">  257</span>  { std::this_thread::sleep_for(std::chrono::seconds(s)); }</div>
 </div>
-<div class="line"><a id="l00272" name="l00272"></a><span class="lineno">  272</span></div>
-<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>  <span class="keyword">inline</span></div>
-<div class="line"><a id="l00282" name="l00282"></a><span class="lineno">  282</span>  <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00283" data-start="{" data-end="}">
-<div class="line"><a id="l00283" name="l00283"></a><span class="lineno"><a class="line" href="../../d1/d7c/namespace_utils.html#aa9f6370dc7778277af89c0a870d2f0f5">  283</a></span>  <a class="code hl_function" href="../../d1/d7c/namespace_utils.html#aa9f6370dc7778277af89c0a870d2f0f5">sleep_for_microseconds</a>( <span class="keywordtype">unsigned</span> mus )</div>
-<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span>  {  std::this_thread::sleep_for(std::chrono::microseconds(mus)); }</div>
+<div class="line"><a id="l00258" name="l00258"></a><span class="lineno">  258</span></div>
+<div class="line"><a id="l00267" name="l00267"></a><span class="lineno">  267</span>  <span class="keyword">inline</span></div>
+<div class="line"><a id="l00268" name="l00268"></a><span class="lineno">  268</span>  <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00269" data-start="{" data-end="}">
+<div class="line"><a id="l00269" name="l00269"></a><span class="lineno"><a class="line" href="../../d1/d7c/namespace_utils.html#a249dc69f8d1c7433862c297d4e187ec0">  269</a></span>  <a class="code hl_function" href="../../d1/d7c/namespace_utils.html#a249dc69f8d1c7433862c297d4e187ec0">sleep_for_milliseconds</a>( <span class="keywordtype">unsigned</span> ms )</div>
+<div class="line"><a id="l00270" name="l00270"></a><span class="lineno">  270</span>  {  std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }</div>
 </div>
-<div class="line"><a id="l00285" name="l00285"></a><span class="lineno">  285</span></div>
-<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>  <span class="keyword">inline</span></div>
-<div class="line"><a id="l00295" name="l00295"></a><span class="lineno">  295</span>  <span class="keywordtype">void</span></div>
-<div class="foldopen" id="foldopen00296" data-start="{" data-end="}">
-<div class="line"><a id="l00296" name="l00296"></a><span class="lineno"><a class="line" href="../../d1/d7c/namespace_utils.html#a8b36dffc80f19e211a69c1006c02cede">  296</a></span>  <a class="code hl_function" href="../../d1/d7c/namespace_utils.html#a8b36dffc80f19e211a69c1006c02cede">sleep_for_nanoseconds</a>( <span class="keywordtype">unsigned</span> ns )</div>
-<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span>  {  std::this_thread::sleep_for(std::chrono::nanoseconds(ns)); }</div>
+<div class="line"><a id="l00271" name="l00271"></a><span class="lineno">  271</span></div>
+<div class="line"><a id="l00280" name="l00280"></a><span class="lineno">  280</span>  <span class="keyword">inline</span></div>
+<div class="line"><a id="l00281" name="l00281"></a><span class="lineno">  281</span>  <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00282" data-start="{" data-end="}">
+<div class="line"><a id="l00282" name="l00282"></a><span class="lineno"><a class="line" href="../../d1/d7c/namespace_utils.html#aa9f6370dc7778277af89c0a870d2f0f5">  282</a></span>  <a class="code hl_function" href="../../d1/d7c/namespace_utils.html#aa9f6370dc7778277af89c0a870d2f0f5">sleep_for_microseconds</a>( <span class="keywordtype">unsigned</span> mus )</div>
+<div class="line"><a id="l00283" name="l00283"></a><span class="lineno">  283</span>  {  std::this_thread::sleep_for(std::chrono::microseconds(mus)); }</div>
 </div>
-<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span> </div>
-<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span> </div>
-<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span>}</div>
-<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span> </div>
-<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span><span class="comment">//</span></div>
-<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span><span class="comment">// eof: TicToc.hxx</span></div>
-<div class="line"><a id="l00305" name="l00305"></a><span class="lineno">  305</span><span class="comment">//</span></div>
+<div class="line"><a id="l00284" name="l00284"></a><span class="lineno">  284</span></div>
+<div class="line"><a id="l00293" name="l00293"></a><span class="lineno">  293</span>  <span class="keyword">inline</span></div>
+<div class="line"><a id="l00294" name="l00294"></a><span class="lineno">  294</span>  <span class="keywordtype">void</span></div>
+<div class="foldopen" id="foldopen00295" data-start="{" data-end="}">
+<div class="line"><a id="l00295" name="l00295"></a><span class="lineno"><a class="line" href="../../d1/d7c/namespace_utils.html#a8b36dffc80f19e211a69c1006c02cede">  295</a></span>  <a class="code hl_function" href="../../d1/d7c/namespace_utils.html#a8b36dffc80f19e211a69c1006c02cede">sleep_for_nanoseconds</a>( <span class="keywordtype">unsigned</span> ns )</div>
+<div class="line"><a id="l00296" name="l00296"></a><span class="lineno">  296</span>  {  std::this_thread::sleep_for(std::chrono::nanoseconds(ns)); }</div>
+</div>
+<div class="line"><a id="l00297" name="l00297"></a><span class="lineno">  297</span> </div>
+<div class="line"><a id="l00298" name="l00298"></a><span class="lineno">  298</span><span class="preprocessor">#endif</span></div>
+<div class="line"><a id="l00299" name="l00299"></a><span class="lineno">  299</span> </div>
+<div class="line"><a id="l00300" name="l00300"></a><span class="lineno">  300</span>}</div>
+<div class="line"><a id="l00301" name="l00301"></a><span class="lineno">  301</span> </div>
+<div class="line"><a id="l00302" name="l00302"></a><span class="lineno">  302</span><span class="comment">//</span></div>
+<div class="line"><a id="l00303" name="l00303"></a><span class="lineno">  303</span><span class="comment">// eof: TicToc.hxx</span></div>
+<div class="line"><a id="l00304" name="l00304"></a><span class="lineno">  304</span><span class="comment">//</span></div>
 <div class="ttc" id="aclass_utils_1_1_tic_toc_html"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html">Utils::TicToc</a></div><div class="ttdoc">A class for timing code execution.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:170</div></div>
 <div class="ttc" id="aclass_utils_1_1_tic_toc_html_a007e023131fe7532f02ccdef0766065e"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a007e023131fe7532f02ccdef0766065e">Utils::TicToc::operator=</a></div><div class="ttdeci">TicToc const &amp; operator=(TicToc const &amp;) const =delete</div></div>
-<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a06770d03e648fa3a509038f00dc74506"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a06770d03e648fa3a509038f00dc74506">Utils::TicToc::tic</a></div><div class="ttdeci">void tic()</div><div class="ttdoc">Start timing.</div></div>
-<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a2a9cce5adc5098c42e553b92ecc7e309"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a2a9cce5adc5098c42e553b92ecc7e309">Utils::TicToc::toc</a></div><div class="ttdeci">void toc()</div><div class="ttdoc">End timing.</div></div>
+<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a06770d03e648fa3a509038f00dc74506"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a06770d03e648fa3a509038f00dc74506">Utils::TicToc::tic</a></div><div class="ttdeci">void tic()</div><div class="ttdoc">Start timing.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:202</div></div>
+<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a2a9cce5adc5098c42e553b92ecc7e309"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a2a9cce5adc5098c42e553b92ecc7e309">Utils::TicToc::toc</a></div><div class="ttdeci">void toc()</div><div class="ttdoc">End timing.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:212</div></div>
 <div class="ttc" id="aclass_utils_1_1_tic_toc_html_a332b92ccabe098298daf2ac1dbf1982d"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a332b92ccabe098298daf2ac1dbf1982d">Utils::TicToc::~TicToc</a></div><div class="ttdeci">~TicToc()=default</div></div>
-<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a3ea0100128ff03fdb79686ce197579c3"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a3ea0100128ff03fdb79686ce197579c3">Utils::TicToc::elapsed_ms</a></div><div class="ttdeci">real_type elapsed_ms() const</div><div class="ttdoc">Return elapsed time (between tic-toc) in milliseconds.</div></div>
-<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a45a074011eea46904f9447ca880bb829"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a45a074011eea46904f9447ca880bb829">Utils::TicToc::TicToc</a></div><div class="ttdeci">TicToc()</div><div class="ttdoc">Constructs a TicToc object and starts the timer.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:197</div></div>
-<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a5da044ad716a94e4aae1c6ced8d5cbc1"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a5da044ad716a94e4aae1c6ced8d5cbc1">Utils::TicToc::elapsed_s</a></div><div class="ttdeci">real_type elapsed_s() const</div><div class="ttdoc">Return elapsed time (between tic-toc) in seconds.</div></div>
-<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a94525a538ec9bf2a2d756968e50829f9"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a94525a538ec9bf2a2d756968e50829f9">Utils::TicToc::elapsed_ns</a></div><div class="ttdeci">real_type elapsed_ns() const</div><div class="ttdoc">Return elapsed time (between tic-toc) in nanoseconds.</div></div>
+<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a3ea0100128ff03fdb79686ce197579c3"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a3ea0100128ff03fdb79686ce197579c3">Utils::TicToc::elapsed_ms</a></div><div class="ttdeci">real_type elapsed_ms() const</div><div class="ttdoc">Return elapsed time (between tic-toc) in milliseconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:229</div></div>
+<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a45a074011eea46904f9447ca880bb829"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a45a074011eea46904f9447ca880bb829">Utils::TicToc::TicToc</a></div><div class="ttdeci">TicToc()</div><div class="ttdoc">Constructs a TicToc object and starts the timer.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:192</div></div>
+<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a5da044ad716a94e4aae1c6ced8d5cbc1"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a5da044ad716a94e4aae1c6ced8d5cbc1">Utils::TicToc::elapsed_s</a></div><div class="ttdeci">real_type elapsed_s() const</div><div class="ttdoc">Return elapsed time (between tic-toc) in seconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:222</div></div>
+<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a94525a538ec9bf2a2d756968e50829f9"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#a94525a538ec9bf2a2d756968e50829f9">Utils::TicToc::elapsed_ns</a></div><div class="ttdeci">real_type elapsed_ns() const</div><div class="ttdoc">Return elapsed time (between tic-toc) in nanoseconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:243</div></div>
 <div class="ttc" id="aclass_utils_1_1_tic_toc_html_ad721d498ee3f3410c7e849b9b7c516da"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">Utils::TicToc::TicToc</a></div><div class="ttdeci">TicToc(TicToc const &amp;)=delete</div></div>
-<div class="ttc" id="aclass_utils_1_1_tic_toc_html_af02a061ca2e5049a7bcf9219c06599da"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#af02a061ca2e5049a7bcf9219c06599da">Utils::TicToc::elapsed_mus</a></div><div class="ttdeci">real_type elapsed_mus() const</div><div class="ttdoc">Return elapsed time (between tic-toc) in microseconds.</div></div>
+<div class="ttc" id="aclass_utils_1_1_tic_toc_html_af02a061ca2e5049a7bcf9219c06599da"><div class="ttname"><a href="../../d7/df9/class_utils_1_1_tic_toc.html#af02a061ca2e5049a7bcf9219c06599da">Utils::TicToc::elapsed_mus</a></div><div class="ttdeci">real_type elapsed_mus() const</div><div class="ttdoc">Return elapsed time (between tic-toc) in microseconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:236</div></div>
 <div class="ttc" id="anamespace_utils_html"><div class="ttname"><a href="../../d1/d7c/namespace_utils.html">Utils</a></div><div class="ttdef"><b>Definition</b> SystemUtils.cc:39</div></div>
-<div class="ttc" id="anamespace_utils_html_a249dc69f8d1c7433862c297d4e187ec0"><div class="ttname"><a href="../../d1/d7c/namespace_utils.html#a249dc69f8d1c7433862c297d4e187ec0">Utils::sleep_for_milliseconds</a></div><div class="ttdeci">void sleep_for_milliseconds(unsigned ms)</div><div class="ttdoc">Sleep for a specified number of milliseconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:270</div></div>
-<div class="ttc" id="anamespace_utils_html_a31bb8bf0d19075c88dc3bef01c305230"><div class="ttname"><a href="../../d1/d7c/namespace_utils.html#a31bb8bf0d19075c88dc3bef01c305230">Utils::sleep_for_seconds</a></div><div class="ttdeci">void sleep_for_seconds(unsigned s)</div><div class="ttdoc">Sleep for a specified number of seconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:257</div></div>
-<div class="ttc" id="anamespace_utils_html_a8b36dffc80f19e211a69c1006c02cede"><div class="ttname"><a href="../../d1/d7c/namespace_utils.html#a8b36dffc80f19e211a69c1006c02cede">Utils::sleep_for_nanoseconds</a></div><div class="ttdeci">void sleep_for_nanoseconds(unsigned ns)</div><div class="ttdoc">Sleep for a specified number of nanoseconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:296</div></div>
-<div class="ttc" id="anamespace_utils_html_aa9f6370dc7778277af89c0a870d2f0f5"><div class="ttname"><a href="../../d1/d7c/namespace_utils.html#aa9f6370dc7778277af89c0a870d2f0f5">Utils::sleep_for_microseconds</a></div><div class="ttdeci">void sleep_for_microseconds(unsigned mus)</div><div class="ttdoc">Sleep for a specified number of microseconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:283</div></div>
+<div class="ttc" id="anamespace_utils_html_a249dc69f8d1c7433862c297d4e187ec0"><div class="ttname"><a href="../../d1/d7c/namespace_utils.html#a249dc69f8d1c7433862c297d4e187ec0">Utils::sleep_for_milliseconds</a></div><div class="ttdeci">void sleep_for_milliseconds(unsigned ms)</div><div class="ttdoc">Sleep for a specified number of milliseconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:269</div></div>
+<div class="ttc" id="anamespace_utils_html_a31bb8bf0d19075c88dc3bef01c305230"><div class="ttname"><a href="../../d1/d7c/namespace_utils.html#a31bb8bf0d19075c88dc3bef01c305230">Utils::sleep_for_seconds</a></div><div class="ttdeci">void sleep_for_seconds(unsigned s)</div><div class="ttdoc">Sleep for a specified number of seconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:256</div></div>
+<div class="ttc" id="anamespace_utils_html_a8b36dffc80f19e211a69c1006c02cede"><div class="ttname"><a href="../../d1/d7c/namespace_utils.html#a8b36dffc80f19e211a69c1006c02cede">Utils::sleep_for_nanoseconds</a></div><div class="ttdeci">void sleep_for_nanoseconds(unsigned ns)</div><div class="ttdoc">Sleep for a specified number of nanoseconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:295</div></div>
+<div class="ttc" id="anamespace_utils_html_aa9f6370dc7778277af89c0a870d2f0f5"><div class="ttname"><a href="../../d1/d7c/namespace_utils.html#aa9f6370dc7778277af89c0a870d2f0f5">Utils::sleep_for_microseconds</a></div><div class="ttdeci">void sleep_for_microseconds(unsigned mus)</div><div class="ttdoc">Sleep for a specified number of microseconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:282</div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
 <!-- start footer part -->

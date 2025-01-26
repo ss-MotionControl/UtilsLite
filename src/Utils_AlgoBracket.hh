@@ -279,7 +279,8 @@ namespace Utils {
 
     using Integer = int;
 
-    Real m_tolerance{ pow(machine_eps<Real>(),Real(2./3.)) };
+    Real m_tolerance_x{ 100*machine_eps<Real>() };
+    Real m_tolerance_f{ 100*machine_eps<Real>() };
     bool m_converged{ false };
 
     Real   m_a{0}, m_fa{0};
@@ -308,6 +309,11 @@ namespace Utils {
 
     AlgoBracket() = default;
     ~AlgoBracket() = default;
+
+    explicit
+    AlgoBracket( Real tol_x, Real tol_f )
+    : m_tolerance_x( tol_x ), m_tolerance_f( tol_f )
+    {}
 
     //!
     //! Find the solution for a function wrapped in the class `Bracket_base_fun<Real>`
@@ -422,7 +428,12 @@ namespace Utils {
     //!
     //! \return the tolerance set for computation
     //!
-    Real tolerance() const { return m_tolerance; }
+    Real tolerance_x() const { return m_tolerance_x; }
+
+    //!
+    //! \return the tolerance set for computation
+    //!
+    Real tolerance_f() const { return m_tolerance_f; }
 
     //!
     //! \return true if the last computation was successfull

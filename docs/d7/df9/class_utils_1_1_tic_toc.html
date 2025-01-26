@@ -172,9 +172,9 @@ Public Member Functions</h2></td></tr>
 <div class="line"><span class="comment">// ... code to be timed ...</span></div>
 <div class="line">timer.<a class="code hl_function" href="#a2a9cce5adc5098c42e553b92ecc7e309">toc</a>();</div>
 <div class="line">std::cout &lt;&lt; <span class="stringliteral">&quot;Elapsed time: &quot;</span> &lt;&lt; timer.<a class="code hl_function" href="#a3ea0100128ff03fdb79686ce197579c3">elapsed_ms</a>() &lt;&lt; <span class="stringliteral">&quot; ms&quot;</span> &lt;&lt; std::endl;</div>
-<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a06770d03e648fa3a509038f00dc74506"><div class="ttname"><a href="#a06770d03e648fa3a509038f00dc74506">Utils::TicToc::tic</a></div><div class="ttdeci">void tic()</div><div class="ttdoc">Start timing.</div></div>
-<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a2a9cce5adc5098c42e553b92ecc7e309"><div class="ttname"><a href="#a2a9cce5adc5098c42e553b92ecc7e309">Utils::TicToc::toc</a></div><div class="ttdeci">void toc()</div><div class="ttdoc">End timing.</div></div>
-<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a3ea0100128ff03fdb79686ce197579c3"><div class="ttname"><a href="#a3ea0100128ff03fdb79686ce197579c3">Utils::TicToc::elapsed_ms</a></div><div class="ttdeci">real_type elapsed_ms() const</div><div class="ttdoc">Return elapsed time (between tic-toc) in milliseconds.</div></div>
+<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a06770d03e648fa3a509038f00dc74506"><div class="ttname"><a href="#a06770d03e648fa3a509038f00dc74506">Utils::TicToc::tic</a></div><div class="ttdeci">void tic()</div><div class="ttdoc">Start timing.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:202</div></div>
+<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a2a9cce5adc5098c42e553b92ecc7e309"><div class="ttname"><a href="#a2a9cce5adc5098c42e553b92ecc7e309">Utils::TicToc::toc</a></div><div class="ttdeci">void toc()</div><div class="ttdoc">End timing.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:212</div></div>
+<div class="ttc" id="aclass_utils_1_1_tic_toc_html_a3ea0100128ff03fdb79686ce197579c3"><div class="ttname"><a href="#a3ea0100128ff03fdb79686ce197579c3">Utils::TicToc::elapsed_ms</a></div><div class="ttdeci">real_type elapsed_ms() const</div><div class="ttdoc">Return elapsed time (between tic-toc) in milliseconds.</div><div class="ttdef"><b>Definition</b> TicToc.hxx:229</div></div>
 <div class="ttc" id="aclass_utils_1_1_tic_toc_html_ad721d498ee3f3410c7e849b9b7c516da"><div class="ttname"><a href="#ad721d498ee3f3410c7e849b9b7c516da">Utils::TicToc::TicToc</a></div><div class="ttdeci">TicToc(TicToc const &amp;)=delete</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="ad721d498ee3f3410c7e849b9b7c516da" name="ad721d498ee3f3410c7e849b9b7c516da"></a>
@@ -261,6 +261,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">real_type Utils::TicToc::elapsed_ms </td>
@@ -269,6 +272,11 @@ Public Member Functions</h2></td></tr>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Return elapsed time (between tic-toc) in milliseconds. </p>
@@ -281,6 +289,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">real_type Utils::TicToc::elapsed_mus </td>
@@ -289,6 +300,11 @@ Public Member Functions</h2></td></tr>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Return elapsed time (between tic-toc) in microseconds. </p>
@@ -301,6 +317,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">real_type Utils::TicToc::elapsed_ns </td>
@@ -309,6 +328,11 @@ Public Member Functions</h2></td></tr>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Return elapsed time (between tic-toc) in nanoseconds. </p>
@@ -321,6 +345,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">real_type Utils::TicToc::elapsed_s </td>
@@ -329,6 +356,11 @@ Public Member Functions</h2></td></tr>
           <td> const</td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Return elapsed time (between tic-toc) in seconds. </p>
@@ -366,6 +398,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void Utils::TicToc::tic </td>
@@ -374,6 +409,11 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>Start timing. </p>
@@ -386,6 +426,9 @@ Public Member Functions</h2></td></tr>
 
 <div class="memitem">
 <div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
       <table class="memname">
         <tr>
           <td class="memname">void Utils::TicToc::toc </td>
@@ -394,6 +437,11 @@ Public Member Functions</h2></td></tr>
           <td></td>
         </tr>
       </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
 </div><div class="memdoc">
 
 <p>End timing. </p>

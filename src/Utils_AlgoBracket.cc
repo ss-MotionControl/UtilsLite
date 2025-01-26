@@ -285,7 +285,6 @@ namespace Utils {
     // check for trivial solution
     m_converged = fa == 0; if ( m_converged ) return a;
     m_converged = fb == 0; if ( m_converged ) return b;
-    m_tolerance = 10*Utils::machine_eps<Real>()*( 1 + 2*max(abs(a),abs(b)) );
 
     auto check = [this] ( Real c, Real fc ) -> void {
       UTILS_ASSERT(
@@ -326,11 +325,16 @@ namespace Utils {
 
       if ( m_fa*fc < 0 ) { b = c; fb = fc; } // --> [a,c]
       else               { a = c; fa = fc; } // --> [c,b]
+      
+      Real abs_fa{ abs(fa) };
+      Real abs_fb{ abs(fb) };
 
-      m_converged = (b-a) <= m_tolerance;
-      if ( m_converged ) return abs(fb) < abs(fa) ? b : a;
+      m_converged = (b-a)  < m_tolerance_x ||
+                    abs_fa < m_tolerance_f ||
+                    abs_fb < m_tolerance_f;
+      if ( m_converged ) return abs_fb < abs_fa ? b : a;
     }
-    
+
     /*
     //  _     _               _   _
     // | |__ (_)___  ___  ___| |_(_) ___  _ __
@@ -346,8 +350,12 @@ namespace Utils {
       Real & fb { m_fb };
       while ( ++m_iteration_count < m_max_iteration ) {
 
-        Real ba{ b - a };
-        m_converged = ba <= m_tolerance;
+        Real ba     { b - a };
+        Real abs_fa { abs(fa) };
+        Real abs_fb { abs(fb) };
+        m_converged = ba     < m_tolerance_x ||
+                      abs_fa < m_tolerance_f ||
+                      abs_fb < m_tolerance_f;
         if ( m_converged ) break;
         
         Real c  { a + ba/2      };
@@ -380,11 +388,16 @@ namespace Utils {
       while ( ++m_iteration_count < m_max_iteration ) {
       
         Real ba{ b - a };
-        Real tol{ m_tolerance / ( 2 * abs(ba) ) };
+        Real tol{ m_tolerance_x / ( 2 * abs(ba) ) };
         m_converged = tol >= 0.5;
         if ( m_converged ) break;
+        
+        Real abs_fa { abs(fa) };
+        Real abs_fb { abs(fb) };
+        m_converged = abs_fa < m_tolerance_f || abs_fb < m_tolerance_f;
+        if ( m_converged ) break;
 
-        Real c{ abs(fa) < abs(fb) ?
+        Real c{ abs_fa < abs_fb ?
                 a + max( tol, fa/(fa-fb) ) * ba :
                 b - max( tol, fb/(fb-fa) ) * ba };
         Real fc{ evaluate( c ) };
@@ -429,10 +442,15 @@ namespace Utils {
       while ( ++m_iteration_count < m_max_iteration ) {
 
         Real dir{ b-a };
-        Real tol{ m_tolerance / ( 2 * abs( dir ) ) };
+        Real tol{ m_tolerance_x / ( 2 * abs( dir ) ) };
         m_converged = tol >= 0.5;
         if ( m_converged ) break;
         
+        Real abs_fa { abs(fa) };
+        Real abs_fb { abs(fb) };
+        m_converged = abs_fa < m_tolerance_f || abs_fb < m_tolerance_f;
+        if ( m_converged ) break;
+
         if      ( t < tol   ) t = tol;
         else if ( t > 1-tol ) t = 1-tol;
 
@@ -514,11 +532,16 @@ namespace Utils {
           fa = fb; fb = fc; fc = fa;
         }
 
-        Real tol { 2 * Utils::machine_eps<Real>() * abs( b ) + m_tolerance };
+        Real tol { 2 * Utils::machine_eps<Real>() * abs( b ) + m_tolerance_x };
         Real m   { ( c - b )/2 };
         
         m_converged = abs( m ) <= tol || fb == 0;
         if ( m_converged ) { m_a = m_b; m_fa = 0; break; }
+        
+        Real abs_fa { abs(fa) };
+        Real abs_fb { abs(fb) };
+        m_converged = abs_fa < m_tolerance_f || abs_fb < m_tolerance_f;
+        if ( m_converged ) break;
 
         if ( abs( e ) < tol || abs( fa ) <= abs( fb ) ) {
           d = e = m;
@@ -587,7 +610,12 @@ namespace Utils {
       while ( ++m_iteration_count < m_max_iteration ) {
       
         Real d{ (b - a)/2 };
-        m_converged = 2*abs(d) <= m_tolerance;
+        m_converged = 2*abs(d) <= m_tolerance_x;
+        if ( m_converged ) break;
+                        
+        Real abs_fa { abs(fa) };
+        Real abs_fb { abs(fb) };
+        m_converged = abs_fa < m_tolerance_f || abs_fb < m_tolerance_f;
         if ( m_converged ) break;
 
         // Compute the improved root x from Ridder's formula
@@ -657,10 +685,15 @@ namespace Utils {
       while ( ++m_iteration_count < m_max_iteration ) {
 
         Real dir{ x2 - x1 };
-        Real tol{ m_tolerance / ( 2 * abs( dir ) ) };
+        Real tol{ m_tolerance_x / ( 2 * abs( dir ) ) };
         m_converged = tol >= 0.5;
         if ( m_converged ) break;
-        
+                
+        Real abs_f1 { abs(f1) };
+        Real abs_f2 { abs(f2) };
+        m_converged = abs_f1 < m_tolerance_f || abs_f2 < m_tolerance_f;
+        if ( m_converged ) break;
+
         Real x3, f3;
         
         if ( bisection ) {
@@ -753,11 +786,11 @@ namespace Utils {
       Real e  { NaN<Real>() };
       Real fe { NaN<Real>() }; // Dumb values
 
-      auto set_tolerance = [this]( Real B ) -> void {
-        Real eps{ 2*machine_eps<Real>() };
-        m_tolerance = eps + 2*abs(B)*eps;
-      };
-    
+      //auto set_tolerance = [this]( Real B ) -> void {
+      //  Real eps{ 2*machine_eps<Real>() };
+      //  m_tolerance_x = eps + 2*abs(B)*eps;
+      //};
+
       auto all_different = []( Real a, Real b, Real c, Real d ) -> bool {
         return a != b && a != c && a != d && b != c && b != d && c != d;
       };
@@ -786,7 +819,7 @@ namespace Utils {
 
         Real c{ a - fa*(DD0-fb*(DDD0-fd*DDDD0)) };
 
-        Real tol{ Real(0.7)*m_tolerance };
+        Real tol{ Real(0.7)*m_tolerance_x };
         if ( c <= a+tol || c >= b-tol ) c = (a+b)/2;
 
         UTILS_ASSERT(
@@ -866,7 +899,7 @@ namespace Utils {
         return is_finite(c) && c > a && c < b;
       };
 
-      auto bracketing = [this,check,set_tolerance]( Real & c, Real & fc, Real & d, Real & fd ) -> bool {
+      auto bracketing = [this,check]( Real & c, Real & fc, Real & d, Real & fd ) -> bool {
         // Given current enclosing interval [a,b] and a number c in (a,b):
         //
         //  a) if f(c)=0 then sets the output a=c.
@@ -877,7 +910,7 @@ namespace Utils {
         //
         // Adjust c if (b-a) is very small or if c is very close to a or b.
         {
-          Real tol{ Real(0.7)*m_tolerance };
+          Real tol{ Real(0.7)*m_tolerance_x };
           Real hba{ (m_b - m_a)/2 };
           if      ( hba <= tol   ) c = m_a + hba;
           else if ( c <= m_a+tol ) c = m_a + tol;
@@ -912,8 +945,8 @@ namespace Utils {
             m_a = c;   m_fa = fc;
           }
           // update the termination criterion according to the new enclosing interval.
-          if ( abs(m_fb) <= abs(m_fa) ) set_tolerance(m_b);
-          else                          set_tolerance(m_a);
+          //if ( abs(m_fb) <= abs(m_fa) ) set_tolerance(m_b);
+          //else                          set_tolerance(m_a);
           return false;
         }
       };
@@ -949,21 +982,14 @@ namespace Utils {
 
         // Calculates the termination criterion.
         // Stops the procedure if the criterion is satisfied.
-        
-        Real c;
 
-        {
-          Real abs_fa { abs(fa) };
-          Real abs_fb { abs(fb) };
-          c = abs_fb <= abs_fa ? b : a;
-          set_tolerance( c );
-          m_converged = BA0 <= m_tolerance;
-          if ( m_converged ) {
-            a = b = c;
-            if ( abs_fb <= abs_fa ) fa = fb; else fb = fa;
-            return;
-          }
-        }
+        m_converged = BA0 <= m_tolerance_x;
+        if ( m_converged ) return;
+
+        Real abs_fa { abs(fa) };
+        Real abs_fb { abs(fb) };
+        m_converged = abs_fa < m_tolerance_f || abs_fb < m_tolerance_f;
+        if ( m_converged ) return;
 
         //
         // Starting with the second iteration, in the first two steps, either
@@ -995,8 +1021,9 @@ namespace Utils {
         // well as to update the termination criterion. stop the procedure
         // if the criterion is satisfied or the exact solution is obtained.
         //
-        m_converged = bracketing( c, fc, d, fd ) || (b-a) <= m_tolerance;
+        m_converged = bracketing( c, fc, d, fd ) || (b-a) <= m_tolerance_x;
         if ( m_converged ) return;
+
         if ( !all_different( fa, fb, fd, fe ) ) {
           do_newton_quadratic = true;
         } else {
@@ -1014,7 +1041,7 @@ namespace Utils {
         //
 
         {
-          m_converged = bracketing( c, fc, d, fd ) || (m_b-m_a) <= m_tolerance;
+          m_converged = bracketing( c, fc, d, fd ) || (b-a) <= m_tolerance_x;
           if ( m_converged ) return;
 
           e  = d;
@@ -1035,7 +1062,7 @@ namespace Utils {
         // well as to update the termination criterion. stop the procedure
         // if the criterion is satisfied or the exact solution is obtained.
         //
-        m_converged = bracketing( c, fc, d, fd ) || (b-a) <= m_tolerance;
+        m_converged = bracketing( c, fc, d, fd ) || (b-a) <= m_tolerance_x;
         if ( m_converged ) return;
         //
         // Determines whether an additional bisection step is needed.
@@ -1054,7 +1081,7 @@ namespace Utils {
         {
           Real ba{ b - a };
           c = a + ba/2;
-          m_converged = bracketing( c, fc, d, fd ) || ba <= m_tolerance;
+          m_converged = bracketing( c, fc, d, fd ) || ba <= m_tolerance_x;
         }
       }
     };

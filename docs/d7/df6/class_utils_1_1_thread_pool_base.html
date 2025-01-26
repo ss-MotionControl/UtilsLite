@@ -120,7 +120,9 @@ $(function(){initNavTree('d7/df6/class_utils_1_1_thread_pool_base.html','../../'
 
 <div class="header">
   <div class="summary">
+<a href="#nested-classes">Classes</a> &#124;
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pro-types">Protected Types</a> &#124;
 <a href="../../d6/d42/class_utils_1_1_thread_pool_base-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Utils::ThreadPoolBase Class Reference<span class="mlabels"><span class="mlabel abstract">abstract</span></span><div class="ingroups"><a class="el" href="../../d9/d18/group___t_h_r_e_a_d.html">Thread Utilities</a></div></div></div>
 </div><!--header-->
@@ -136,13 +138,19 @@ Inheritance diagram for Utils::ThreadPoolBase:</div>
 <area href="../../df/d9e/class_utils_1_1_thread_pool0.html" title="Fake thread pool class." alt="Utils::ThreadPool0" shape="rect" coords="0,56,134,80"/>
 <area href="../../da/dac/class_utils_1_1_thread_pool1.html" title="Manages a pool of worker threads for concurrent task execution." alt="Utils::ThreadPool1" shape="rect" coords="144,56,278,80"/>
 <area href="../../db/db7/class_utils_1_1_thread_pool2.html" title="Manages a pool of worker threads for concurrent task execution." alt="Utils::ThreadPool2" shape="rect" coords="288,56,422,80"/>
-<area href="../../d0/d7e/class_utils_1_1_thread_pool3.html" title="A thread pool implementation for concurrent task execution." alt="Utils::ThreadPool3" shape="rect" coords="432,56,566,80"/>
-<area href="../../d2/d3d/class_utils_1_1_thread_pool4.html" title="A thread pool for concurrent task execution with enhanced synchronization." alt="Utils::ThreadPool4" shape="rect" coords="576,56,710,80"/>
+<area href="../../d0/d7e/class_utils_1_1_thread_pool3.html" title="A thread pool for concurrent task execution with worker management." alt="Utils::ThreadPool3" shape="rect" coords="432,56,566,80"/>
+<area href="../../d2/d3d/class_utils_1_1_thread_pool4.html" title="A thread pool for concurrent task execution with worker management." alt="Utils::ThreadPool4" shape="rect" coords="576,56,710,80"/>
 <area href="../../d9/d09/class_utils_1_1_thread_pool5.html" title="A thread pool for concurrent task execution with worker management." alt="Utils::ThreadPool5" shape="rect" coords="720,56,854,80"/>
-<area href="../../d9/d1a/class_utils_1_1_thread_pool6.html" title="A thread pool for concurrent task execution with worker management." alt="Utils::ThreadPool6" shape="rect" coords="864,56,998,80"/>
   </map>
 </div></div>
 <table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
+Classes</h2></td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/dad/class_utils_1_1_thread_pool_base_1_1_concrete_task.html">ConcreteTask</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d2/d2d/class_utils_1_1_thread_pool_base_1_1_task.html">Task</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
 <tr class="memitem:a24a2c16aa57fade2c02ae5e5527061db" id="r_a24a2c16aa57fade2c02ae5e5527061db"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a24a2c16aa57fade2c02ae5e5527061db">ThreadPoolBase</a> (<a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html">ThreadPoolBase</a> const &amp;)=delete</td></tr>
@@ -155,22 +163,46 @@ Public Member Functions</h2></td></tr>
 <tr class="separator:a75976376cd0d5524f8ac74060a2b200e"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac0295d456fb4dc846f8609facae37008" id="r_ac0295d456fb4dc846f8609facae37008"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac0295d456fb4dc846f8609facae37008">ThreadPoolBase</a> ()=default</td></tr>
 <tr class="separator:ac0295d456fb4dc846f8609facae37008"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:af767b37e8d8eed116a0645b312d92b39" id="r_af767b37e8d8eed116a0645b312d92b39"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af767b37e8d8eed116a0645b312d92b39">exec</a> (std::function&lt; void()&gt; &amp;&amp;)=0</td></tr>
-<tr class="separator:af767b37e8d8eed116a0645b312d92b39"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a34a8181f44ebbfa9c65001b546cdd683" id="r_a34a8181f44ebbfa9c65001b546cdd683"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a34a8181f44ebbfa9c65001b546cdd683">exec</a> (<a class="el" href="#a6559bd5ba85caedf75829820e740d66d">FUN</a> &amp;&amp;)=0</td></tr>
+<tr class="separator:a34a8181f44ebbfa9c65001b546cdd683"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0b8906fddff53722b4c04d9a0b3bb914" id="r_a0b8906fddff53722b4c04d9a0b3bb914"><td class="memTemplParams" colspan="2">template&lt;typename Func, typename... Args&gt; </td></tr>
 <tr class="memitem:a0b8906fddff53722b4c04d9a0b3bb914"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a0b8906fddff53722b4c04d9a0b3bb914">run</a> (Func &amp;&amp;func, Args &amp;&amp;... args)</td></tr>
 <tr class="separator:a0b8906fddff53722b4c04d9a0b3bb914"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a342b35d5b9b5e0790cd8bbac8af86ece" id="r_a342b35d5b9b5e0790cd8bbac8af86ece"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a342b35d5b9b5e0790cd8bbac8af86ece">wait</a> ()=0</td></tr>
 <tr class="separator:a342b35d5b9b5e0790cd8bbac8af86ece"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa1072b5bf1c9ea2103c9faf95a680080" id="r_aa1072b5bf1c9ea2103c9faf95a680080"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa1072b5bf1c9ea2103c9faf95a680080">join</a> ()=0</td></tr>
-<tr class="separator:aa1072b5bf1c9ea2103c9faf95a680080"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aac746234e01e372f74bfcf5fdf2a38b9" id="r_aac746234e01e372f74bfcf5fdf2a38b9"><td class="memItemLeft" align="right" valign="top">virtual unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aac746234e01e372f74bfcf5fdf2a38b9">thread_count</a> () const =0</td></tr>
 <tr class="separator:aac746234e01e372f74bfcf5fdf2a38b9"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a0b8f6189c7a29d6bde0cfb0d4f8bfb9f" id="r_a0b8f6189c7a29d6bde0cfb0d4f8bfb9f"><td class="memItemLeft" align="right" valign="top">virtual void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0b8f6189c7a29d6bde0cfb0d4f8bfb9f">resize</a> (unsigned numThreads)=0</td></tr>
-<tr class="separator:a0b8f6189c7a29d6bde0cfb0d4f8bfb9f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:aba3f4b9e77dbd03601f5a3eb51cac562" id="r_aba3f4b9e77dbd03601f5a3eb51cac562"><td class="memItemLeft" align="right" valign="top">virtual char const *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aba3f4b9e77dbd03601f5a3eb51cac562">name</a> () const =0</td></tr>
 <tr class="separator:aba3f4b9e77dbd03601f5a3eb51cac562"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pro-types" name="pro-types"></a>
+Protected Types</h2></td></tr>
+<tr class="memitem:a6559bd5ba85caedf75829820e740d66d" id="r_a6559bd5ba85caedf75829820e740d66d"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void(void)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6559bd5ba85caedf75829820e740d66d">FUN</a></td></tr>
+<tr class="separator:a6559bd5ba85caedf75829820e740d66d"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
+<h2 class="groupheader">Member Typedef Documentation</h2>
+<a id="a6559bd5ba85caedf75829820e740d66d" name="a6559bd5ba85caedf75829820e740d66d"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6559bd5ba85caedf75829820e740d66d">&#9670;&#160;</a></span>FUN</h2>
+
+<div class="memitem">
+<div class="memproto">
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">typedef std::function&lt;void(void)&gt; <a class="el" href="#a6559bd5ba85caedf75829820e740d66d">Utils::ThreadPoolBase::FUN</a></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel protected">protected</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
 <h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
 <a id="a24a2c16aa57fade2c02ae5e5527061db" name="a24a2c16aa57fade2c02ae5e5527061db"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#a24a2c16aa57fade2c02ae5e5527061db">&#9670;&#160;</a></span>ThreadPoolBase() <span class="overload">[1/3]</span></h2>
@@ -248,8 +280,8 @@ Public Member Functions</h2></td></tr>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="af767b37e8d8eed116a0645b312d92b39" name="af767b37e8d8eed116a0645b312d92b39"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#af767b37e8d8eed116a0645b312d92b39">&#9670;&#160;</a></span>exec()</h2>
+<a id="a34a8181f44ebbfa9c65001b546cdd683" name="a34a8181f44ebbfa9c65001b546cdd683"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a34a8181f44ebbfa9c65001b546cdd683">&#9670;&#160;</a></span>exec()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -260,7 +292,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">virtual void Utils::ThreadPoolBase::exec </td>
           <td>(</td>
-          <td class="paramtype">std::function&lt; void()&gt; &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="#a6559bd5ba85caedf75829820e740d66d">FUN</a> &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -271,34 +303,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="../../df/d9e/class_utils_1_1_thread_pool0.html#a3e70884e3e5ce869d3d71ab5951e2fe6">Utils::ThreadPool0</a>, <a class="el" href="../../da/dac/class_utils_1_1_thread_pool1.html#af5ac992d6d97afd742428a0eb9deed2b">Utils::ThreadPool1</a>, <a class="el" href="../../d0/d7e/class_utils_1_1_thread_pool3.html#a96d506e5328ff115b8ce5aacc786319e">Utils::ThreadPool3</a>, <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html#a302df07180096fc888b45caca7019519">Utils::ThreadPool4</a>, <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html#ac4719ea74f0aa41f7de9acdc8c6cb81c">Utils::ThreadPool5</a>, and <a class="el" href="../../d9/d1a/class_utils_1_1_thread_pool6.html#abd420c9e1fbe6fcce754b38f502bc2cf">Utils::ThreadPool6</a>.</p>
-
-</div>
-</div>
-<a id="aa1072b5bf1c9ea2103c9faf95a680080" name="aa1072b5bf1c9ea2103c9faf95a680080"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa1072b5bf1c9ea2103c9faf95a680080">&#9670;&#160;</a></span>join()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void Utils::ThreadPoolBase::join </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel pure-virtual">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="../../df/d9e/class_utils_1_1_thread_pool0.html#a2f8c2d4ac8f4dd50e184222648c9a09c">Utils::ThreadPool0</a>, <a class="el" href="../../da/dac/class_utils_1_1_thread_pool1.html#a50bcc217ebf99631a9dfd8409ba23476">Utils::ThreadPool1</a>, <a class="el" href="../../db/db7/class_utils_1_1_thread_pool2.html#aad97ed8921680895f2e44bc4602da4fa">Utils::ThreadPool2</a>, <a class="el" href="../../d0/d7e/class_utils_1_1_thread_pool3.html#ad51cdd38914f9fe3d7bb33a66d240c13">Utils::ThreadPool3</a>, <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html#a52a8e28b5adbf724578fc9417367481f">Utils::ThreadPool4</a>, <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html#a7a1346b637a525cfba849a4f5c486b0f">Utils::ThreadPool5</a>, and <a class="el" href="../../d9/d1a/class_utils_1_1_thread_pool6.html#a37314c2a2dd2bfb356a32754b57d44d9">Utils::ThreadPool6</a>.</p>
+<p>Implemented in <a class="el" href="../../df/d9e/class_utils_1_1_thread_pool0.html#a041396170a5f51dad20b80f49e9b7402">Utils::ThreadPool0</a>, <a class="el" href="../../da/dac/class_utils_1_1_thread_pool1.html#ac576364c8f448787116ed646921b1362">Utils::ThreadPool1</a>, <a class="el" href="../../db/db7/class_utils_1_1_thread_pool2.html#a66ffaf23f1e1aa64964dc5d95501696a">Utils::ThreadPool2</a>, <a class="el" href="../../d0/d7e/class_utils_1_1_thread_pool3.html#a5cd9a306b1d45c15eb8c6cfcee434e70">Utils::ThreadPool3</a>, <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html#a0e89aa050a9a0e5e5848d42afff9cf28">Utils::ThreadPool4</a>, and <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html#a0339fc7bb07f56ca80de6a89bba67c8a">Utils::ThreadPool5</a>.</p>
 
 </div>
 </div>
@@ -325,7 +330,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="../../df/d9e/class_utils_1_1_thread_pool0.html#a0178826a1dcefd57246801be4f0ad659">Utils::ThreadPool0</a>, <a class="el" href="../../da/dac/class_utils_1_1_thread_pool1.html#a87484fc1f6de796cd7964fdc62ba50d1">Utils::ThreadPool1</a>, <a class="el" href="../../db/db7/class_utils_1_1_thread_pool2.html#aff7205d2546e3b704c90f03d75d7aef3">Utils::ThreadPool2</a>, <a class="el" href="../../d0/d7e/class_utils_1_1_thread_pool3.html#aee5fa10a2b71d067ea7c0834b2639a6a">Utils::ThreadPool3</a>, <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html#a38adf24295b9a12687c0ffd58f488d35">Utils::ThreadPool4</a>, <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html#a76f17d4dbbe88fc4d018b678781fd483">Utils::ThreadPool5</a>, and <a class="el" href="../../d9/d1a/class_utils_1_1_thread_pool6.html#a44348961b16365ea251eb650d09a15ce">Utils::ThreadPool6</a>.</p>
+<p>Implemented in <a class="el" href="../../df/d9e/class_utils_1_1_thread_pool0.html#a0178826a1dcefd57246801be4f0ad659">Utils::ThreadPool0</a>, <a class="el" href="../../da/dac/class_utils_1_1_thread_pool1.html#a87484fc1f6de796cd7964fdc62ba50d1">Utils::ThreadPool1</a>, <a class="el" href="../../db/db7/class_utils_1_1_thread_pool2.html#aff7205d2546e3b704c90f03d75d7aef3">Utils::ThreadPool2</a>, <a class="el" href="../../d0/d7e/class_utils_1_1_thread_pool3.html#aee5fa10a2b71d067ea7c0834b2639a6a">Utils::ThreadPool3</a>, <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html#a38adf24295b9a12687c0ffd58f488d35">Utils::ThreadPool4</a>, and <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html#a76f17d4dbbe88fc4d018b678781fd483">Utils::ThreadPool5</a>.</p>
 
 </div>
 </div>
@@ -376,33 +381,6 @@ Public Member Functions</h2></td></tr>
   </tr>
 </table>
 </div><div class="memdoc">
-
-</div>
-</div>
-<a id="a0b8f6189c7a29d6bde0cfb0d4f8bfb9f" name="a0b8f6189c7a29d6bde0cfb0d4f8bfb9f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a0b8f6189c7a29d6bde0cfb0d4f8bfb9f">&#9670;&#160;</a></span>resize()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">virtual void Utils::ThreadPoolBase::resize </td>
-          <td>(</td>
-          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>numThreads</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel pure-virtual">pure virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Implemented in <a class="el" href="../../df/d9e/class_utils_1_1_thread_pool0.html#afb2bd68200c900775799c814e29bd832">Utils::ThreadPool0</a>, <a class="el" href="../../da/dac/class_utils_1_1_thread_pool1.html#a6bcb6880d31e5e26c628ad282245a0ff">Utils::ThreadPool1</a>, <a class="el" href="../../db/db7/class_utils_1_1_thread_pool2.html#a0968bebec1055bd6839cf048df89d783">Utils::ThreadPool2</a>, <a class="el" href="../../d0/d7e/class_utils_1_1_thread_pool3.html#af45352fa84d5513ce830ab05928ad2ca">Utils::ThreadPool3</a>, <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html#ada7d6dfc0d8744093b5c4d1be800fbb0">Utils::ThreadPool4</a>, <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html#aa3ef855ddef963a47d117e1cb6fedc0e">Utils::ThreadPool5</a>, and <a class="el" href="../../d9/d1a/class_utils_1_1_thread_pool6.html#a0891777f4d01e9472aed046b4f99d3be">Utils::ThreadPool6</a>.</p>
 
 </div>
 </div>
@@ -460,7 +438,7 @@ template&lt;typename Func, typename... Args&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="../../df/d9e/class_utils_1_1_thread_pool0.html#a3e0eb9762d7bac48865f2e4dc68704d6">Utils::ThreadPool0</a>, <a class="el" href="../../da/dac/class_utils_1_1_thread_pool1.html#a7a457be0523b2abeb6a4deb1813c2eff">Utils::ThreadPool1</a>, <a class="el" href="../../db/db7/class_utils_1_1_thread_pool2.html#ac2e05243b8b771a30b82947610b8328c">Utils::ThreadPool2</a>, <a class="el" href="../../d0/d7e/class_utils_1_1_thread_pool3.html#ac8d4615e2d3dd13f501e8e41ae2cddc1">Utils::ThreadPool3</a>, <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html#a768429a1f40724d2630d35fbcfea6f63">Utils::ThreadPool4</a>, <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html#a5595da14c96984f353b43995e9a62224">Utils::ThreadPool5</a>, and <a class="el" href="../../d9/d1a/class_utils_1_1_thread_pool6.html#a8ef2d1c26518fa49b32513701b8d9db2">Utils::ThreadPool6</a>.</p>
+<p>Implemented in <a class="el" href="../../df/d9e/class_utils_1_1_thread_pool0.html#a3e0eb9762d7bac48865f2e4dc68704d6">Utils::ThreadPool0</a>, <a class="el" href="../../da/dac/class_utils_1_1_thread_pool1.html#a7a457be0523b2abeb6a4deb1813c2eff">Utils::ThreadPool1</a>, <a class="el" href="../../db/db7/class_utils_1_1_thread_pool2.html#ac2e05243b8b771a30b82947610b8328c">Utils::ThreadPool2</a>, <a class="el" href="../../d0/d7e/class_utils_1_1_thread_pool3.html#ac8d4615e2d3dd13f501e8e41ae2cddc1">Utils::ThreadPool3</a>, <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html#a768429a1f40724d2630d35fbcfea6f63">Utils::ThreadPool4</a>, and <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html#a5595da14c96984f353b43995e9a62224">Utils::ThreadPool5</a>.</p>
 
 </div>
 </div>
@@ -487,7 +465,7 @@ template&lt;typename Func, typename... Args&gt; </div>
 </table>
 </div><div class="memdoc">
 
-<p>Implemented in <a class="el" href="../../df/d9e/class_utils_1_1_thread_pool0.html#ae76baf0539661611919773dd3661d371">Utils::ThreadPool0</a>, <a class="el" href="../../da/dac/class_utils_1_1_thread_pool1.html#a228fa6ff145eac0854b8fb4b91a025b3">Utils::ThreadPool1</a>, <a class="el" href="../../db/db7/class_utils_1_1_thread_pool2.html#a1a27a2f246ac102d014613259c67aa7b">Utils::ThreadPool2</a>, <a class="el" href="../../d0/d7e/class_utils_1_1_thread_pool3.html#a19b65d122de80d709682d251c6bfd817">Utils::ThreadPool3</a>, <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html#ac4191615558ce29ded858152ec62a04c">Utils::ThreadPool4</a>, <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html#a08dec573dd93d110a4f2568a28e55174">Utils::ThreadPool5</a>, and <a class="el" href="../../d9/d1a/class_utils_1_1_thread_pool6.html#a2465f7d7a590884fb2155514fe4b9a49">Utils::ThreadPool6</a>.</p>
+<p>Implemented in <a class="el" href="../../df/d9e/class_utils_1_1_thread_pool0.html#ae76baf0539661611919773dd3661d371">Utils::ThreadPool0</a>, <a class="el" href="../../da/dac/class_utils_1_1_thread_pool1.html#a228fa6ff145eac0854b8fb4b91a025b3">Utils::ThreadPool1</a>, <a class="el" href="../../db/db7/class_utils_1_1_thread_pool2.html#a1a27a2f246ac102d014613259c67aa7b">Utils::ThreadPool2</a>, <a class="el" href="../../d0/d7e/class_utils_1_1_thread_pool3.html#a19b65d122de80d709682d251c6bfd817">Utils::ThreadPool3</a>, <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html#ac4191615558ce29ded858152ec62a04c">Utils::ThreadPool4</a>, and <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html#a08dec573dd93d110a4f2568a28e55174">Utils::ThreadPool5</a>.</p>
 
 </div>
 </div>

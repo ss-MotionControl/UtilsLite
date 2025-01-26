@@ -1,5 +1,6 @@
 var searchData=
 [
-  ['nm_5fmove_0',['NM_move',['../d0/db6/class_utils_1_1_nelder_mead.html#a6dd7d8487310b2750eabaaea138ae352',1,'Utils::NelderMead']]],
-  ['nmfunc_1',['NMFunc',['../d0/db6/class_utils_1_1_nelder_mead.html#a10f91ec6c0d46acba982ce1f38588152',1,'Utils::NelderMead']]]
+  ['mapmat_0',['MapMat',['../d0/db6/class_utils_1_1_nelder_mead.html#ab50da673454664f441529d07eedb637c',1,'Utils::NelderMead']]],
+  ['mapvec_1',['MapVec',['../d0/db6/class_utils_1_1_nelder_mead.html#a98e57541561411f6acddd0f9524406ad',1,'Utils::NelderMead']]],
+  ['mat_5ft_2',['Mat_t',['../d0/db6/class_utils_1_1_nelder_mead.html#ab47a4e23899a1a64f99717cc0c1a6a44',1,'Utils::NelderMead']]]
 ];

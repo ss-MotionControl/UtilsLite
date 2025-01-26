@@ -11,6 +11,9 @@ var hierarchy =
     [ "Utils::Bracket_base_fun< Real >", "df/dbf/class_utils_1_1_bracket__base__fun.html", null ],
     [ "Utils::Table::Cell", "d8/d2b/class_utils_1_1_table_1_1_cell.html", null ],
     [ "Utils::Console", "d1/df8/class_utils_1_1_console.html", null ],
+    [ "std::function", null, [
+      [ "Utils::unique_function< T >", "d8/d6f/class_utils_1_1unique__function.html", null ]
+    ] ],
     [ "Utils::HJPatternSearch< Real >", "d7/d30/class_utils_1_1_h_j_pattern_search.html", null ],
     [ "Utils::Malloc< T >", "dc/d87/class_utils_1_1_malloc.html", null ],
     [ "Utils::MallocFixed< T, mem_size >", "d1/d7a/class_utils_1_1_malloc_fixed.html", null ],
@@ -36,6 +39,9 @@ var hierarchy =
     [ "Utils::Sturm< Real >", "dd/d3f/class_utils_1_1_sturm.html", null ],
     [ "Utils::Table::Style", "d4/d88/class_utils_1_1_table_1_1_style.html", null ],
     [ "Utils::Table::Table", "d2/da0/class_utils_1_1_table_1_1_table.html", null ],
+    [ "Utils::ThreadPoolBase::Task", "d2/d2d/class_utils_1_1_thread_pool_base_1_1_task.html", [
+      [ "Utils::ThreadPoolBase::ConcreteTask< Callable >", "d6/dad/class_utils_1_1_thread_pool_base_1_1_concrete_task.html", null ]
+    ] ],
     [ "Utils::tp::Queue::TaskData", "d9/dac/class_utils_1_1tp_1_1_queue_1_1_task_data.html", null ],
     [ "Utils::ThreadPoolBase", "d7/df6/class_utils_1_1_thread_pool_base.html", [
       [ "Utils::ThreadPool0", "df/d9e/class_utils_1_1_thread_pool0.html", null ],
@@ -43,8 +49,7 @@ var hierarchy =
       [ "Utils::ThreadPool2", "db/db7/class_utils_1_1_thread_pool2.html", null ],
       [ "Utils::ThreadPool3", "d0/d7e/class_utils_1_1_thread_pool3.html", null ],
       [ "Utils::ThreadPool4", "d2/d3d/class_utils_1_1_thread_pool4.html", null ],
-      [ "Utils::ThreadPool5", "d9/d09/class_utils_1_1_thread_pool5.html", null ],
-      [ "Utils::ThreadPool6", "d9/d1a/class_utils_1_1_thread_pool6.html", null ]
+      [ "Utils::ThreadPool5", "d9/d09/class_utils_1_1_thread_pool5.html", null ]
     ] ],
     [ "Utils::TicToc", "d7/df9/class_utils_1_1_tic_toc.html", null ],
     [ "Utils::Tokenizer", "de/d76/class_utils_1_1_tokenizer.html", null ],

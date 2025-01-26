@@ -121,12 +121,13 @@ $(function(){initNavTree('d2/d3d/class_utils_1_1_thread_pool4.html','../../'); i
 <div class="header">
   <div class="summary">
 <a href="#pub-methods">Public Member Functions</a> &#124;
+<a href="#pub-static-methods">Static Public Member Functions</a> &#124;
 <a href="../../d7/d82/class_utils_1_1_thread_pool4-members.html">List of all members</a>  </div>
   <div class="headertitle"><div class="title">Utils::ThreadPool4 Class Reference<div class="ingroups"><a class="el" href="../../d9/d18/group___t_h_r_e_a_d.html">Thread Utilities</a></div></div></div>
 </div><!--header-->
 <div class="contents">
 
-<p>A thread pool for concurrent task execution with enhanced synchronization.  
+<p>A thread pool for concurrent task execution with worker management.  
  <a href="#details">More...</a></p>
 
 <p><code>#include &lt;<a class="el" href="../../d0/da6/_thread_pool4_8hxx_source.html">ThreadPool4.hxx</a>&gt;</code></p>
@@ -142,35 +143,22 @@ Inheritance diagram for Utils::ThreadPool4:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:a9407472148ac6cfd9d5c7368491473f8" id="r_a9407472148ac6cfd9d5c7368491473f8"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9407472148ac6cfd9d5c7368491473f8">ThreadPool4</a> (unsigned <a class="el" href="#a768429a1f40724d2630d35fbcfea6f63">thread_count</a>=std::thread::hardware_concurrency(), unsigned <a class="el" href="#a92a13fe236190db203a592a6ba4c127b">queue_capacity</a>=0)</td></tr>
-<tr class="memdesc:a9407472148ac6cfd9d5c7368491473f8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructor for the <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html" title="A thread pool for concurrent task execution with enhanced synchronization.">ThreadPool4</a> class.  <br /></td></tr>
-<tr class="separator:a9407472148ac6cfd9d5c7368491473f8"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ab63f0c60cb867f37f006fbecf545420a" id="r_ab63f0c60cb867f37f006fbecf545420a"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab63f0c60cb867f37f006fbecf545420a">ThreadPool4</a> (unsigned nthread=std::max(unsigned(1), unsigned(std::thread::hardware_concurrency() -1)))</td></tr>
+<tr class="memdesc:ab63f0c60cb867f37f006fbecf545420a"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a new <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html" title="A thread pool for concurrent task execution with worker management.">ThreadPool5</a> instance with a specified number of threads.  <br /></td></tr>
+<tr class="separator:ab63f0c60cb867f37f006fbecf545420a"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a0eba6d5102c62b6fef664eeae8ec8f66" id="r_a0eba6d5102c62b6fef664eeae8ec8f66"><td class="memItemLeft" align="right" valign="top">virtual&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0eba6d5102c62b6fef664eeae8ec8f66">~ThreadPool4</a> ()</td></tr>
-<tr class="memdesc:a0eba6d5102c62b6fef664eeae8ec8f66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor for the <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html" title="A thread pool for concurrent task execution with enhanced synchronization.">ThreadPool4</a> class.  <br /></td></tr>
+<tr class="memdesc:a0eba6d5102c62b6fef664eeae8ec8f66"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor for the <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html" title="A thread pool for concurrent task execution with worker management.">ThreadPool5</a> class.  <br /></td></tr>
 <tr class="separator:a0eba6d5102c62b6fef664eeae8ec8f66"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ada7d6dfc0d8744093b5c4d1be800fbb0" id="r_ada7d6dfc0d8744093b5c4d1be800fbb0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ada7d6dfc0d8744093b5c4d1be800fbb0">resize</a> (unsigned <a class="el" href="#a768429a1f40724d2630d35fbcfea6f63">thread_count</a>) override</td></tr>
-<tr class="memdesc:ada7d6dfc0d8744093b5c4d1be800fbb0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resizes the thread pool to a new thread count.  <br /></td></tr>
-<tr class="separator:ada7d6dfc0d8744093b5c4d1be800fbb0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ac12d9559b9cfbe128d5b605a7828f462" id="r_ac12d9559b9cfbe128d5b605a7828f462"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac12d9559b9cfbe128d5b605a7828f462">resize</a> (unsigned <a class="el" href="#a768429a1f40724d2630d35fbcfea6f63">thread_count</a>, unsigned <a class="el" href="#a92a13fe236190db203a592a6ba4c127b">queue_capacity</a>)</td></tr>
-<tr class="memdesc:ac12d9559b9cfbe128d5b605a7828f462"><td class="mdescLeft">&#160;</td><td class="mdescRight">Resizes the thread pool and the task queue.  <br /></td></tr>
-<tr class="separator:ac12d9559b9cfbe128d5b605a7828f462"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a302df07180096fc888b45caca7019519" id="r_a302df07180096fc888b45caca7019519"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a302df07180096fc888b45caca7019519">exec</a> (std::function&lt; void()&gt; &amp;&amp;fun) override</td></tr>
-<tr class="memdesc:a302df07180096fc888b45caca7019519"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes a task and adds it to the task queue.  <br /></td></tr>
-<tr class="separator:a302df07180096fc888b45caca7019519"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a0e89aa050a9a0e5e5848d42afff9cf28" id="r_a0e89aa050a9a0e5e5848d42afff9cf28"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a0e89aa050a9a0e5e5848d42afff9cf28">exec</a> (<a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html#a6559bd5ba85caedf75829820e740d66d">FUN</a> &amp;&amp;fun) override</td></tr>
+<tr class="memdesc:a0e89aa050a9a0e5e5848d42afff9cf28"><td class="mdescLeft">&#160;</td><td class="mdescRight">Executes a task and assigns it to an available worker.  <br /></td></tr>
+<tr class="separator:a0e89aa050a9a0e5e5848d42afff9cf28"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:ac4191615558ce29ded858152ec62a04c" id="r_ac4191615558ce29ded858152ec62a04c"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac4191615558ce29ded858152ec62a04c">wait</a> () override</td></tr>
-<tr class="memdesc:ac4191615558ce29ded858152ec62a04c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Waits for all tasks in the queue to complete.  <br /></td></tr>
+<tr class="memdesc:ac4191615558ce29ded858152ec62a04c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Waits for all tasks to be completed.  <br /></td></tr>
 <tr class="separator:ac4191615558ce29ded858152ec62a04c"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a52a8e28b5adbf724578fc9417367481f" id="r_a52a8e28b5adbf724578fc9417367481f"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a52a8e28b5adbf724578fc9417367481f">join</a> () override</td></tr>
-<tr class="memdesc:a52a8e28b5adbf724578fc9417367481f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Joins all worker threads and waits for them to finish executing.  <br /></td></tr>
-<tr class="separator:a52a8e28b5adbf724578fc9417367481f"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a768429a1f40724d2630d35fbcfea6f63" id="r_a768429a1f40724d2630d35fbcfea6f63"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a768429a1f40724d2630d35fbcfea6f63">thread_count</a> () const override</td></tr>
 <tr class="memdesc:a768429a1f40724d2630d35fbcfea6f63"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current number of threads in the pool.  <br /></td></tr>
 <tr class="separator:a768429a1f40724d2630d35fbcfea6f63"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a92a13fe236190db203a592a6ba4c127b" id="r_a92a13fe236190db203a592a6ba4c127b"><td class="memItemLeft" align="right" valign="top">unsigned&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a92a13fe236190db203a592a6ba4c127b">queue_capacity</a> () const</td></tr>
-<tr class="memdesc:a92a13fe236190db203a592a6ba4c127b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the current capacity of the task queue.  <br /></td></tr>
-<tr class="separator:a92a13fe236190db203a592a6ba4c127b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a38adf24295b9a12687c0ffd58f488d35" id="r_a38adf24295b9a12687c0ffd58f488d35"><td class="memItemLeft" align="right" valign="top">char const *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a38adf24295b9a12687c0ffd58f488d35">name</a> () const override</td></tr>
-<tr class="memdesc:a38adf24295b9a12687c0ffd58f488d35"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the name of the thread pool implementation.  <br /></td></tr>
 <tr class="separator:a38adf24295b9a12687c0ffd58f488d35"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="inherit_header pub_methods_class_utils_1_1_thread_pool_base"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pub_methods_class_utils_1_1_thread_pool_base')"><img src="../../closed.png" alt="-"/>&#160;Public Member Functions inherited from <a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html">Utils::ThreadPoolBase</a></td></tr>
 <tr class="memitem:a24a2c16aa57fade2c02ae5e5527061db inherit pub_methods_class_utils_1_1_thread_pool_base" id="r_a24a2c16aa57fade2c02ae5e5527061db"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html#a24a2c16aa57fade2c02ae5e5527061db">ThreadPoolBase</a> (<a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html">ThreadPoolBase</a> const &amp;)=delete</td></tr>
@@ -186,14 +174,26 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a0b8906fddff53722b4c04d9a0b3bb914 inherit pub_methods_class_utils_1_1_thread_pool_base" id="r_a0b8906fddff53722b4c04d9a0b3bb914"><td class="memTemplParams" colspan="2">template&lt;typename Func, typename... Args&gt; </td></tr>
 <tr class="memitem:a0b8906fddff53722b4c04d9a0b3bb914 inherit pub_methods_class_utils_1_1_thread_pool_base"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html#a0b8906fddff53722b4c04d9a0b3bb914">run</a> (Func &amp;&amp;func, Args &amp;&amp;... args)</td></tr>
 <tr class="separator:a0b8906fddff53722b4c04d9a0b3bb914 inherit pub_methods_class_utils_1_1_thread_pool_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-static-methods" name="pub-static-methods"></a>
+Static Public Member Functions</h2></td></tr>
+<tr class="memitem:a9c4cf80706ae79fe12191baca1e5edbb" id="r_a9c4cf80706ae79fe12191baca1e5edbb"><td class="memItemLeft" align="right" valign="top">static char const *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a9c4cf80706ae79fe12191baca1e5edbb">Name</a> ()</td></tr>
+<tr class="memdesc:a9c4cf80706ae79fe12191baca1e5edbb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Gets the name of the thread pool implementation.  <br /></td></tr>
+<tr class="separator:a9c4cf80706ae79fe12191baca1e5edbb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+</table><table class="memberdecls">
+<tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="inherited" name="inherited"></a>
+Additional Inherited Members</h2></td></tr>
+<tr class="inherit_header pro_types_class_utils_1_1_thread_pool_base"><td colspan="2" onclick="javascript:dynsection.toggleInherit('pro_types_class_utils_1_1_thread_pool_base')"><img src="../../closed.png" alt="-"/>&#160;Protected Types inherited from <a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html">Utils::ThreadPoolBase</a></td></tr>
+<tr class="memitem:a6559bd5ba85caedf75829820e740d66d inherit pro_types_class_utils_1_1_thread_pool_base" id="r_a6559bd5ba85caedf75829820e740d66d"><td class="memItemLeft" align="right" valign="top">typedef std::function&lt; void(void)&gt;&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html#a6559bd5ba85caedf75829820e740d66d">FUN</a></td></tr>
+<tr class="separator:a6559bd5ba85caedf75829820e740d66d inherit pro_types_class_utils_1_1_thread_pool_base"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
-<div class="textblock"><p>A thread pool for concurrent task execution with enhanced synchronization. </p>
-<p>The <code><a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html" title="A thread pool for concurrent task execution with enhanced synchronization.">ThreadPool4</a></code> class provides a flexible and efficient thread pool implementation that allows for concurrent execution of tasks. It includes mechanisms for dynamic resizing of the thread pool and effective management of task synchronization using atomic operations and condition variables.</p>
-<p>This class extends <code><a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html">ThreadPoolBase</a></code> and manages a collection of worker threads that execute tasks from a queue. </p>
+<div class="textblock"><p>A thread pool for concurrent task execution with worker management. </p>
+<p>The <code><a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html" title="A thread pool for concurrent task execution with worker management.">ThreadPool4</a></code> class provides an implementation of a thread pool that allows for efficient concurrent execution of tasks. This class manages a collection of worker threads that can be dynamically resized, and utilizes a semaphore-based mechanism for worker synchronization.</p>
+<p>This class extends <code><a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html">ThreadPoolBase</a></code> and supports task execution, joining, and resizing of worker threads. </p>
 </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="a9407472148ac6cfd9d5c7368491473f8" name="a9407472148ac6cfd9d5c7368491473f8"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a9407472148ac6cfd9d5c7368491473f8">&#9670;&#160;</a></span>ThreadPool4()</h2>
+<a id="ab63f0c60cb867f37f006fbecf545420a" name="ab63f0c60cb867f37f006fbecf545420a"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ab63f0c60cb867f37f006fbecf545420a">&#9670;&#160;</a></span>ThreadPool4()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -204,26 +204,21 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">Utils::ThreadPool4::ThreadPool4 </td>
           <td>(</td>
-          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>thread_count</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::thread::hardware_concurrency()</span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
+          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>nthread</em></span><span class="paramdefsep"> = </span><span class="paramdefval">std::max(&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;unsigned(1),&#160;&#160;&#160;&#160;&#160;&#160;&#160;&#160;unsigned(std::thread::hardware_concurrency()-1)&#160;&#160;&#160;&#160;&#160;&#160;)</span></td><td>)</td>
           <td></td>
-          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>queue_capacity</em></span><span class="paramdefsep"> = </span><span class="paramdefval">0</span>&#160;)</td>
         </tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel explicit">explicit</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Constructor for the <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html" title="A thread pool for concurrent task execution with enhanced synchronization.">ThreadPool4</a> class. </p>
+<p>Constructs a new <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html" title="A thread pool for concurrent task execution with worker management.">ThreadPool5</a> instance with a specified number of threads. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">thread_count</td><td>The number of threads in the pool. Defaults to the number of hardware threads available. </td></tr>
-    <tr><td class="paramname">queue_capacity</td><td>The capacity of the task queue. Defaults to 0, allowing unlimited tasks. </td></tr>
+    <tr><td class="paramname">nthread</td><td>The number of threads to create in the pool. Defaults to the maximum hardware threads available. </td></tr>
   </table>
   </dd>
 </dl>
@@ -253,14 +248,14 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Destructor for the <a class="el" href="../../d2/d3d/class_utils_1_1_thread_pool4.html" title="A thread pool for concurrent task execution with enhanced synchronization.">ThreadPool4</a> class. </p>
-<p>Ensures all tasks are completed before destruction by calling <a class="el" href="#a52a8e28b5adbf724578fc9417367481f" title="Joins all worker threads and waits for them to finish executing.">join()</a>. </p>
+<p>Destructor for the <a class="el" href="../../d9/d09/class_utils_1_1_thread_pool5.html" title="A thread pool for concurrent task execution with worker management.">ThreadPool5</a> class. </p>
+<p>Ensures all workers are stopped and joined before destruction. </p>
 
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="a302df07180096fc888b45caca7019519" name="a302df07180096fc888b45caca7019519"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a302df07180096fc888b45caca7019519">&#9670;&#160;</a></span>exec()</h2>
+<a id="a0e89aa050a9a0e5e5848d42afff9cf28" name="a0e89aa050a9a0e5e5848d42afff9cf28"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a0e89aa050a9a0e5e5848d42afff9cf28">&#9670;&#160;</a></span>exec()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -271,7 +266,7 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">void Utils::ThreadPool4::exec </td>
           <td>(</td>
-          <td class="paramtype">std::function&lt; void()&gt; &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em>fun</em></span></td><td>)</td>
+          <td class="paramtype"><a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html#a6559bd5ba85caedf75829820e740d66d">FUN</a> &amp;&amp;</td>          <td class="paramname"><span class="paramname"><em>fun</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -282,7 +277,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Executes a task and adds it to the task queue. </p>
+<p>Executes a task and assigns it to an available worker. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">fun</td><td>The function to be executed as a task. </td></tr>
@@ -290,12 +285,12 @@ Public Member Functions</h2></td></tr>
   </dd>
 </dl>
 
-<p>Implements <a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html#af767b37e8d8eed116a0645b312d92b39">Utils::ThreadPoolBase</a>.</p>
+<p>Implements <a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html#a34a8181f44ebbfa9c65001b546cdd683">Utils::ThreadPoolBase</a>.</p>
 
 </div>
 </div>
-<a id="a52a8e28b5adbf724578fc9417367481f" name="a52a8e28b5adbf724578fc9417367481f"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a52a8e28b5adbf724578fc9417367481f">&#9670;&#160;</a></span>join()</h2>
+<a id="a9c4cf80706ae79fe12191baca1e5edbb" name="a9c4cf80706ae79fe12191baca1e5edbb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a9c4cf80706ae79fe12191baca1e5edbb">&#9670;&#160;</a></span>Name()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -304,7 +299,7 @@ Public Member Functions</h2></td></tr>
   <td class="mlabels-left">
       <table class="memname">
         <tr>
-          <td class="memname">void Utils::ThreadPool4::join </td>
+          <td class="memname">static char const  * Utils::ThreadPool4::Name </td>
           <td>(</td>
           <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
           <td></td>
@@ -312,14 +307,13 @@ Public Member Functions</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel static">static</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Joins all worker threads and waits for them to finish executing. </p>
-
-<p>Implements <a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html#aa1072b5bf1c9ea2103c9faf95a680080">Utils::ThreadPoolBase</a>.</p>
+<p>Gets the name of the thread pool implementation. </p>
+<dl class="section return"><dt>Returns</dt><dd>A constant character pointer to the name of the thread pool. </dd></dl>
 
 </div>
 </div>
@@ -346,103 +340,7 @@ Public Member Functions</h2></td></tr>
 </table>
 </div><div class="memdoc">
 
-<p>Gets the name of the thread pool implementation. </p>
-<dl class="section return"><dt>Returns</dt><dd>A constant character pointer to the name of the thread pool. </dd></dl>
-
 <p>Implements <a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html#aba3f4b9e77dbd03601f5a3eb51cac562">Utils::ThreadPoolBase</a>.</p>
-
-</div>
-</div>
-<a id="a92a13fe236190db203a592a6ba4c127b" name="a92a13fe236190db203a592a6ba4c127b"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a92a13fe236190db203a592a6ba4c127b">&#9670;&#160;</a></span>queue_capacity()</h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">unsigned Utils::ThreadPool4::queue_capacity </td>
-          <td>(</td>
-          <td class="paramname"><span class="paramname"><em></em></span></td><td>)</td>
-          <td> const</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Gets the current capacity of the task queue. </p>
-<dl class="section return"><dt>Returns</dt><dd>The capacity of the task queue. </dd></dl>
-
-</div>
-</div>
-<a id="ada7d6dfc0d8744093b5c4d1be800fbb0" name="ada7d6dfc0d8744093b5c4d1be800fbb0"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ada7d6dfc0d8744093b5c4d1be800fbb0">&#9670;&#160;</a></span>resize() <span class="overload">[1/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">void Utils::ThreadPool4::resize </td>
-          <td>(</td>
-          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>thread_count</em></span></td><td>)</td>
-          <td></td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Resizes the thread pool to a new thread count. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">thread_count</td><td>The new number of threads to maintain in the pool. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-<p>Implements <a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html#a0b8f6189c7a29d6bde0cfb0d4f8bfb9f">Utils::ThreadPoolBase</a>.</p>
-
-</div>
-</div>
-<a id="ac12d9559b9cfbe128d5b605a7828f462" name="ac12d9559b9cfbe128d5b605a7828f462"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ac12d9559b9cfbe128d5b605a7828f462">&#9670;&#160;</a></span>resize() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">void Utils::ThreadPool4::resize </td>
-          <td>(</td>
-          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>thread_count</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">unsigned</td>          <td class="paramname"><span class="paramname"><em>queue_capacity</em></span>&#160;)</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-
-<p>Resizes the thread pool and the task queue. </p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">thread_count</td><td>The new number of threads to maintain in the pool. </td></tr>
-    <tr><td class="paramname">queue_capacity</td><td>The new capacity for the task queue. </td></tr>
-  </table>
-  </dd>
-</dl>
 
 </div>
 </div>
@@ -494,13 +392,12 @@ Public Member Functions</h2></td></tr>
       </table>
   </td>
   <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
+<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel override">override</span><span class="mlabel virtual">virtual</span></span>  </td>
   </tr>
 </table>
 </div><div class="memdoc">
 
-<p>Waits for all tasks in the queue to complete. </p>
-<p>This function ensures that all queued tasks have finished executing. </p>
+<p>Waits for all tasks to be completed. </p>
 
 <p>Implements <a class="el" href="../../d7/df6/class_utils_1_1_thread_pool_base.html#a342b35d5b9b5e0790cd8bbac8af86ece">Utils::ThreadPoolBase</a>.</p>
 

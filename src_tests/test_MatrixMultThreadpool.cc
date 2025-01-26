@@ -42,7 +42,6 @@ class BlockMult {
   Utils::ThreadPool3 Pool3{5};
   Utils::ThreadPool4 Pool4{5};
   Utils::ThreadPool5 Pool5{5};
-  Utils::ThreadPool6 Pool6{5};
 
   std::vector<integer> const * m_i_block;
   std::vector<integer> const * m_j_block;
@@ -123,98 +122,28 @@ BlockMult::multiply(
 
   //#define USE_RUN
 
+
+  #define THE_TASK(POOL) \
+    for ( integer i{1}; i < integer(i_block.size()); ++i ) {                                            \
+      for ( integer j{1}; j < integer(j_block.size()); ++j ) {                                          \
+        /*if ( false ) { */                                                                                  \
+          POOL.run( &BlockMult::Compute_C_block, this, std::ref(A), std::ref(B), std::ref(C), i, j );   \
+        /*} else {                                                                                        \
+          auto fun = [this, &A, &B, &C, i, j]() -> void { this->Compute_C_block( A, B, C, i, j ); };    \
+          POOL.exec( fun );                                                                             \
+        } */                                                                                             \
+      }                                                                                                 \
+    }                                                                                                   \
+    POOL.wait()
+
+
   switch ( ntp ) {
-  case 0:
-    for ( integer i{1}; i < integer(i_block.size()); ++i ) {
-      for ( integer j{1}; j < integer(j_block.size()); ++j ) {
-        #ifdef USE_RUN
-        Pool0.run( &BlockMult::Compute_C_block, this, std::ref(A), std::ref(B), std::ref(C), i, j );
-        #else
-        auto fun = [this, &A, &B, &C, i, j]() -> void { this->Compute_C_block( A, B, C, i, j ); };
-        Pool0.exec( fun );
-        #endif
-      }
-    }
-    Pool0.wait();
-    break;
-  case 1:
-    for ( integer i{1}; i < integer(i_block.size()); ++i ) {
-      for ( integer j{1}; j < integer(j_block.size()); ++j ) {
-        #ifdef USE_RUN
-        Pool1.run( &BlockMult::Compute_C_block, this, std::ref(A), std::ref(B), std::ref(C), i, j );
-        #else
-        auto fun = [this, &A, &B, &C, i, j]() -> void { this->Compute_C_block( A, B, C, i, j ); };
-        Pool1.exec( fun );
-        #endif
-      }
-    }
-    Pool1.wait();
-    break;
-  case 2:
-    for ( integer i{1}; i < integer(i_block.size()); ++i ) {
-      for ( integer j{1}; j < integer(j_block.size()); ++j ) {
-        #ifdef USE_RUN
-        Pool2.run( &BlockMult::Compute_C_block, this, std::ref(A), std::ref(B), std::ref(C), i, j );
-        #else
-        auto fun = [this, &A, &B, &C, i, j]() -> void { this->Compute_C_block( A, B, C, i, j ); };
-        Pool2.exec( fun );
-        #endif
-      }
-    }
-    Pool2.wait();
-    break;
-  case 3:
-    for ( integer i{1}; i < integer(i_block.size()); ++i ) {
-      for ( integer j{1}; j < integer(j_block.size()); ++j ) {
-        #ifdef USE_RUN
-        Pool3.run( &BlockMult::Compute_C_block, this, std::ref(A), std::ref(B), std::ref(C), i, j );
-        #else
-        auto fun = [this, &A, &B, &C, i, j]() -> void { this->Compute_C_block( A, B, C, i, j ); };
-        Pool3.exec( fun );
-        #endif
-      }
-    }
-    Pool3.wait();
-    break;
-  case 4:
-    for ( integer i{1}; i < integer(i_block.size()); ++i ) {
-      for ( integer j{1}; j < integer(j_block.size()); ++j ) {
-        #ifdef USE_RUN
-        Pool4.run( &BlockMult::Compute_C_block, this, std::ref(A), std::ref(B), std::ref(C), i, j );
-        #else
-        auto fun = [this, &A, &B, &C, i, j]() -> void { this->Compute_C_block( A, B, C, i, j ); };
-        Pool4.exec( fun );
-        #endif
-      }
-    }
-    Pool4.wait();
-    break;
-  case 5:
-    for ( integer i{1}; i < integer(i_block.size()); ++i ) {
-      for ( integer j{1}; j < integer(j_block.size()); ++j ) {
-        #ifdef USE_RUN
-        Pool5.run( &BlockMult::Compute_C_block, this, std::ref(A), std::ref(B), std::ref(C), i, j );
-        #else
-        auto fun = [this, &A, &B, &C, i, j]() -> void { this->Compute_C_block( A, B, C, i, j ); };
-        Pool5.exec( fun );
-        #endif
-      }
-    }
-    Pool5.wait();
-    break;
-  case 6:
-    for ( integer i{1}; i < integer(i_block.size()); ++i ) {
-      for ( integer j{1}; j < integer(j_block.size()); ++j ) {
-        #ifdef USE_RUN
-        Pool6.run( &BlockMult::Compute_C_block, this, std::ref(A), std::ref(B), std::ref(C), i, j );
-        #else
-        auto fun = [this, &A, &B, &C, i, j]() -> void { this->Compute_C_block( A, B, C, i, j ); };
-        Pool6.exec( fun );
-        #endif
-      }
-    }
-    Pool6.wait();
-    break;
+  case 0: THE_TASK(Pool0); break;
+  case 1: THE_TASK(Pool1); break;
+  case 2: THE_TASK(Pool2); break;
+  case 3: THE_TASK(Pool3); break;
+  case 4: THE_TASK(Pool4); break;
+  case 5: THE_TASK(Pool5); break;
   default:
     fmt::print("ERROR\n\n\n");
   }
@@ -281,6 +210,16 @@ main() {
   }
 
   for ( int nptp{0}; nptp <= 5; ++nptp ) {
+    std::string name{"NONE"};
+    switch ( nptp ) {
+    case 0: name = Utils::ThreadPool0::Name(); break;
+    case 1: name = Utils::ThreadPool1::Name(); break;
+    case 2: name = Utils::ThreadPool2::Name(); break;
+    case 3: name = Utils::ThreadPool3::Name(); break;
+    case 4: name = Utils::ThreadPool4::Name(); break;
+    case 5: name = Utils::ThreadPool5::Name(); break;
+    }
+
     BlockMult BM;
     for ( int i{0}; i < n_runs; ++i ) {
       tm.tic();
@@ -291,8 +230,8 @@ main() {
     mean   = times.mean();
     stdDev = (((times.array() - mean) * (times.array() - mean)).sqrt()).sum()/((double)(n_runs-1));
     fmt::print(
-      "time (#{}): {:8.4}ms {:8.4}ms (sdev) Check M3a - M3b: {:8.4}\n\n",
-      nptp, mean, stdDev, (M3a-M3b).norm()
+      "time (#{:30}): {:8.4}ms {:8.4}ms (sdev) Check M3a - M3b: {:8.4}\n\n",
+      name, mean, stdDev, (M3a-M3b).norm()
     );
   }
 

@@ -184,7 +184,6 @@ namespace Utils {
 #include "ThreadPool3.hxx"
 #include "ThreadPool4.hxx"
 #include "ThreadPool5.hxx"
-#include "ThreadPool6.hxx"
 // -----------------------
 
 namespace Utils {

@@ -1,27 +1,6 @@
 var searchData=
 [
-  ['pa_0',['Pa',['../d8/de1/class_utils_1_1_segment2_d.html#ab197708381574acbdd4ced7011cc0d2c',1,'Utils::Segment2D']]],
-  ['padding_5fleft_1',['padding_left',['../d4/d88/class_utils_1_1_table_1_1_style.html#ab6abe2ac910b205019d7a865e1e67ea5',1,'Utils::Table::Style::padding_left() const'],['../d4/d88/class_utils_1_1_table_1_1_style.html#aa42ab5cbb2024084275c493b8a1f74bd',1,'Utils::Table::Style::padding_left(integer padding)']]],
-  ['padding_5fright_2',['padding_right',['../d4/d88/class_utils_1_1_table_1_1_style.html#a334b7ec2e5c448a3c944a65c0371b7c7',1,'Utils::Table::Style::padding_right() const'],['../d4/d88/class_utils_1_1_table_1_1_style.html#aadbfea7209aa5fb65ebbf29628fd86e3',1,'Utils::Table::Style::padding_right(integer padding)']]],
-  ['parameters_3',['Step 6: Advanced usage with function parameters',['../d6/df4/class_utils_1_1_algo_bracket.html#autotoc_md13',1,'']]],
-  ['party_20software_4',['Third party software',['../d2/df1/3rd.html',1,'index']]],
-  ['pb_5',['Pb',['../d8/de1/class_utils_1_1_segment2_d.html#abde41c5d86577298b24bce300b524a7f',1,'Utils::Segment2D']]],
-  ['pnt_5fbbox_5fminmax_6',['pnt_bbox_minmax',['../d9/d90/class_utils_1_1_a_a_b_btree.html#a50299a7f1406c4693ae797ce665f3a65',1,'Utils::AABBtree']]],
-  ['point2d_7',['Point2D',['../d7/df8/class_utils_1_1_point2_d.html',1,'Utils::Point2D&lt; Real &gt;'],['../d7/df8/class_utils_1_1_point2_d.html#a4ff75eeecdcc44a4c102356001dcae25',1,'Utils::Point2D::Point2D()']]],
-  ['poly_8',['Poly',['../d5/d0a/class_utils_1_1_poly.html',1,'Utils::Poly&lt; Real &gt;'],['../d5/d0a/class_utils_1_1_poly.html#a6cdec52c75fe4a9b33dbdf3ef3bd29b4',1,'Utils::Poly::Poly()'],['../d5/d0a/class_utils_1_1_poly.html#abed0d4298ac031d4dcc9ca0ebeec9f47',1,'Utils::Poly::Poly(int order)'],['../d5/d0a/class_utils_1_1_poly.html#a167a179fcf05ddbdd23cfb57677df709',1,'Utils::Poly::Poly(Poly_t const &amp;c)'],['../d5/d0a/class_utils_1_1_poly.html#a7829a8c3658185e8e01469151648223b',1,'Utils::Poly::Poly(dvec_t const &amp;c)']]],
-  ['poly_5ft_9',['Poly_t',['../d5/d0a/class_utils_1_1_poly.html#a8a5bb89d7e587bc59e5e7fa7cb2185b8',1,'Utils::Poly::Poly_t'],['../dd/d3f/class_utils_1_1_sturm.html#a2e3a258a99b953e1fc3cd6126a419d98',1,'Utils::Sturm::Poly_t']]],
-  ['polygon2d_10',['Polygon2D',['../dc/db5/class_utils_1_1_polygon2_d.html',1,'Utils::Polygon2D&lt; Real &gt;'],['../dc/db5/class_utils_1_1_polygon2_d.html#a7fabb90cb0cfcda2504c6ebd1a588d01',1,'Utils::Polygon2D::Polygon2D()']]],
-  ['pop_11',['pop',['../dc/d87/class_utils_1_1_malloc.html#a3a2115fae260e7ec70890a31d670d1da',1,'Utils::Malloc::pop()'],['../d1/d7a/class_utils_1_1_malloc_fixed.html#addab66762d02a33f5ef9f3cc8c181da7',1,'Utils::MallocFixed::pop()'],['../d1/dd3/class_utils_1_1tp_1_1_queue.html#ae6f9204b200ef03400d2199d10a0f115',1,'Utils::tp::Queue::pop()']]],
-  ['prerequisites_12',['Prerequisites',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#autotoc_md23',1,'']]],
-  ['print_13',['print',['../df/d85/class_utils_1_1_quaternion.html#a72aa66eae4385da3d57adc71dc4cd56a',1,'Utils::Quaternion']]],
-  ['print_5finfo_14',['print_info',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#ae191df19bd943ebd2009cc4faaf84326',1,'Utils::HJPatternSearch::print_info()'],['../d0/db6/class_utils_1_1_nelder_mead.html#ae28f7154d336b0c442689ba3f9a991bb',1,'Utils::NelderMead::print_info()']]],
-  ['print_5ftrace_15',['print_trace',['../d6/da2/group___o_s.html#ga99a2735f4ca4d463dc1150f891633525',1,'Utils']]],
-  ['printtrace_16',['printTrace',['../d6/da2/group___o_s.html#ga3cf68d8b878c4480ae62f4cd15fc476d',1,'Utils']]],
-  ['progress_5fbar_17',['progress_bar',['../d1/d7c/namespace_utils.html#a0a3878fc25cea3cb575a7a2bb13a46c1',1,'Utils::progress_bar(double progress, int width)'],['../d1/d7c/namespace_utils.html#a52a8f23bc24e0dcd408e28a2f9f43068',1,'Utils::progress_bar(ostream &amp;s, double progress, int width, char const *msg)']]],
-  ['progress_5fbar2_18',['progress_bar2',['../d1/d7c/namespace_utils.html#afdf0a4e8f93dc53b07f184af716eb1e8',1,'Utils']]],
-  ['project_19',['Integrate into Your Project',['../df/d70/_install.html#autotoc_md2',1,'']]],
-  ['projection_20',['projection',['../d8/de1/class_utils_1_1_segment2_d.html#a475f60c9b9034613b9edfdaa581b9ced',1,'Utils::Segment2D::projection(Point2D&lt; Real &gt; const &amp;P, Real &amp;s) const'],['../d8/de1/class_utils_1_1_segment2_d.html#a26c47860ca84b1f265b8a8de6b9e3ce5',1,'Utils::Segment2D::projection(Point2D&lt; Real &gt; const &amp;P, Real &amp;s, Real &amp;t) const']]],
-  ['ptr_21',['ptr',['../d1/df8/class_utils_1_1mex__class__handle.html#a054e800625a245ee804e922e3694f0c7',1,'Utils::mex_class_handle']]],
-  ['purge_22',['purge',['../d5/d0a/class_utils_1_1_poly.html#ab4173ce23169e05421f004437832e351',1,'Utils::Poly']]],
-  ['push_23',['push',['../d1/dd3/class_utils_1_1tp_1_1_queue.html#acb1c2b4d051dfbf732d0fef11ebdbe21',1,'Utils::tp::Queue']]]
+  ['quaternion_0',['Quaternion',['../df/d85/class_utils_1_1_quaternion.html',1,'Utils::Quaternion&lt; T &gt;'],['../df/d85/class_utils_1_1_quaternion.html#aaff804352b84cf9bd3583704b4a9da31',1,'Utils::Quaternion::Quaternion()'],['../df/d85/class_utils_1_1_quaternion.html#a81846974ec17d6b033c15a7f5a743762',1,'Utils::Quaternion::Quaternion(real_type A, real_type B, real_type C, real_type D)']]],
+  ['quaternion_2ehxx_1',['Quaternion.hxx',['../dd/d80/_quaternion_8hxx.html',1,'']]],
+  ['queue_2',['Queue',['../d1/dd3/class_utils_1_1tp_1_1_queue.html',1,'Utils::tp::Queue'],['../d1/dd3/class_utils_1_1tp_1_1_queue.html#a81f3c350df873f8152f09a8d374aacb9',1,'Utils::tp::Queue::Queue(Queue const &amp;)=delete'],['../d1/dd3/class_utils_1_1tp_1_1_queue.html#a36077177869f4cd2ae4503b618d7d040',1,'Utils::tp::Queue::Queue(Queue &amp;&amp;)=delete'],['../d1/dd3/class_utils_1_1tp_1_1_queue.html#a129468ddbca6410c8bd482f67aa9bfc6',1,'Utils::tp::Queue::Queue(unsigned capacity)']]]
 ];

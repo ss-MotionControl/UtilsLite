@@ -9,9 +9,9 @@ end
 
 VER = "5.0.0"
 
-desc "install FMT"
+desc "install BS-thread-pool"
 task :install_common do
-  puts "Copy BS source".yellow
+  puts "Copy BS-thread-pool source".yellow
   if not Dir.exist?("thread-pool-#{VER}") then
     extract_zip("thread-pool-#{VER}.zip");
   end

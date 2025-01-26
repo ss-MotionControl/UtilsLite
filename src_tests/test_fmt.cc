@@ -48,7 +48,6 @@ main() {
   // Prints "The date is 2020-11-07." (with the current date):
   fmt::print("The date is {:%Y-%m-%d}.", fmt::localtime(t));
 
-  #if 0
   // C++14
   using namespace std::literals::chrono_literals;
 
@@ -57,7 +56,6 @@ main() {
 
   // Prints "strftime-like format: 03:15:30":
   fmt::print("strftime-like format: {:%H:%M:%S}\n", 3h + 15min + 30s);
-  #endif
 
   fmt::print(fmt::emphasis::bold | fg(fmt::color::red),
              "Elapsed time: {0:.2f} seconds\n\n", 1.23);
@@ -67,6 +65,29 @@ main() {
                                fmt::bg(fmt::color::blue)));
 
   fmt::printf("Elapsed time: %.2f seconds\n\n", 1.23);
+
+
+  std::cout 
+    << Utils::fmt_table_top_row( 50, " PIPPO " )
+    << Utils::fmt_table_row( 50 )
+    << Utils::fmt_table_row( 50 )
+    << Utils::fmt_table_middle_row( 50 )
+    << Utils::fmt_table_row( 50, " PLUTO " )
+    << Utils::fmt_table_row( 50, {"A","B","C"} )
+    << Utils::fmt_table_middle_row( 50 )
+    << Utils::fmt_table_row( 50 )
+    << Utils::fmt_table_row( 50 )
+    << Utils::fmt_table_bottom_row( 50 )
+    << Utils::fmt_table_top_row( 50, 4 )
+    << Utils::fmt_table_row( 50, std::initializer_list<string_view>{ "pippo", "plto", "paperino", "paperino" } )
+    << Utils::fmt_table_middle_row( 50, 4 )
+    << Utils::fmt_table_row( 50, std::initializer_list<string_view>{ "pippo", "pluto", "paino", "paperino" } )
+    << Utils::fmt_table_middle_row( 50, 4 )
+    << Utils::fmt_table_row( 50, std::initializer_list<string_view>{ "pippo", "pluto", "paperino", "erino" } )
+    << Utils::fmt_table_bottom_row( 50, 4 )
+    << Utils::fmt_table_top_row( 50 )
+    << Utils::fmt_table_row( 50, std::initializer_list<string_view>{ "unico" } )
+    << Utils::fmt_table_bottom_row( 50 );
 
   fmt::print("\n\nAll done!\n");
   return 0;

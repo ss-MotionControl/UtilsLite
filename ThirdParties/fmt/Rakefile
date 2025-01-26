@@ -7,7 +7,7 @@ else
   require_relative "../../../Rakefile_common.rb"
 end
 
-VER = "11.1.2"
+VER = "11.1.3"
 
 desc "install FMT"
 task :install_common do

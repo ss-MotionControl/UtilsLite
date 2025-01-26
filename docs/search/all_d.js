@@ -12,11 +12,12 @@ var searchData=
   ['force_9',['Force',['../d1/df2/namespacerang.html#a9a0ad8048ed47f032f5bdb687ba64164a9eb6b78a99cdb6ffd3d40d18621d9f80',1,'rang']]],
   ['found_5fnan_10',['found_NaN',['../d1/d7c/namespace_utils.html#a3895f693284de68f895073abe709ac06',1,'Utils::found_NaN(double const *pv, int DIM)'],['../d1/d7c/namespace_utils.html#a5e75b533b6cba2fefb0cd02133ba56dd',1,'Utils::found_NaN(float const *pv, int DIM)']]],
   ['free_11',['free',['../dc/d87/class_utils_1_1_malloc.html#a817592d2e181aa4bf36306c6169a30cb',1,'Utils::Malloc::free()'],['../d1/d7a/class_utils_1_1_malloc_fixed.html#a4bd958d4fbeb618d1aa0cc21ba36277d',1,'Utils::MallocFixed::free()']]],
-  ['function_12',['Step 2: Define the Objective Function',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#autotoc_md25',1,'']]],
-  ['function_13',['function',['../d6/d0e/class_utils_1_1_algo_h_newton.html#autotoc_md18',1,'defining your function'],['../d6/df4/class_utils_1_1_algo_bracket.html#autotoc_md9',1,'Step 2: defining your function']]],
-  ['function_20minimization_14',['Using the &lt;strong&gt;HJPatternSearch&lt;/strong&gt; Class for Function Minimization',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#autotoc_md22',1,'']]],
-  ['function_20parameters_15',['Step 6: Advanced usage with function parameters',['../d6/df4/class_utils_1_1_algo_bracket.html#autotoc_md13',1,'']]],
-  ['function_20to_20execute_20the_20solver_16',['Step 4: Main Function to Execute the Solver',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#autotoc_md27',1,'']]],
-  ['functions_17',['OS Utility Functions',['../d6/da2/group___o_s.html',1,'']]],
-  ['functions_18',['Step 5: Using lambda functions',['../d6/df4/class_utils_1_1_algo_bracket.html#autotoc_md12',1,'']]]
+  ['fun_12',['FUN',['../d7/df6/class_utils_1_1_thread_pool_base.html#a6559bd5ba85caedf75829820e740d66d',1,'Utils::ThreadPoolBase']]],
+  ['function_13',['Step 2: Define the Objective Function',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#autotoc_md25',1,'']]],
+  ['function_14',['function',['../d6/d0e/class_utils_1_1_algo_h_newton.html#autotoc_md18',1,'defining your function'],['../d6/df4/class_utils_1_1_algo_bracket.html#autotoc_md9',1,'Step 2: defining your function']]],
+  ['function_20minimization_15',['Using the &lt;strong&gt;HJPatternSearch&lt;/strong&gt; Class for Function Minimization',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#autotoc_md22',1,'']]],
+  ['function_20parameters_16',['Step 6: Advanced usage with function parameters',['../d6/df4/class_utils_1_1_algo_bracket.html#autotoc_md13',1,'']]],
+  ['function_20to_20execute_20the_20solver_17',['Step 4: Main Function to Execute the Solver',['../d7/d30/class_utils_1_1_h_j_pattern_search.html#autotoc_md27',1,'']]],
+  ['functions_18',['OS Utility Functions',['../d6/da2/group___o_s.html',1,'']]],
+  ['functions_19',['Step 5: Using lambda functions',['../d6/df4/class_utils_1_1_algo_bracket.html#autotoc_md12',1,'']]]
 ];

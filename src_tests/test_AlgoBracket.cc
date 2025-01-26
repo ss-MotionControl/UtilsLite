@@ -44,10 +44,11 @@ do_solve( string const & name, real_type a, real_type b, FUN f ) {
     real_type fres = f(res);
     nfuneval[ialgo] += solver.num_fun_eval();
     fmt::print(
-      "{:<15} f:{:<3} it:{:<3} {} x = {:12} f(x) = {:15}\n",
+      "{:<15} f:{:<3} it:{:<3} {} x = {:12} f(x) = {:15}  b-a={}\n",
       solver.algo(), solver.num_fun_eval(), solver.used_iter(), solver.converged() ? "YES" : "NO ",
       fmt::format("{:.6}",res),
-      fmt::format("{:.3}",fres)
+      fmt::format("{:.6}",fres),
+      fmt::format("{:.6}",solver.b() - solver.a())
     );
   }
 }

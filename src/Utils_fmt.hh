@@ -91,6 +91,9 @@
 
 #endif
 
+#include <string>
+#include <string_view>
+
 namespace Utils {
 
   using std::runtime_error;
@@ -166,6 +169,37 @@ namespace Utils {
     //!
     char const * what() const noexcept override;
   };
+
+  inline string fmt_table_left_top()    { return "┌"; };
+  inline string fmt_table_left_middle() { return "├"; };
+  inline string fmt_table_left_bottom() { return "└"; };
+  
+  inline string fmt_table_middle_top()    { return "┬"; };
+  inline string fmt_table_middle_middle() { return "┼"; };
+  inline string fmt_table_middle_bottom() { return "┴"; };
+
+  inline string fmt_table_right_top()    { return "┐"; };
+  inline string fmt_table_right_middle() { return "┤"; };
+  inline string fmt_table_right_bottom() { return "┘"; };
+  
+  inline string fmt_table_cross() { return "┼"; };
+
+  inline string fmt_table_bar()   { return "─"; }
+  inline string fmt_table_vbar()  { return "│"; }
+  inline string fmt_table_dot()   { return "•"; }
+  inline string fmt_table_vdots() { return "⋮"; }
+  
+  using std::string_view;
+
+  string fmt_table_top_row    ( unsigned width, string_view title = "", string_view fill = "─" );
+  string fmt_table_top_row    ( unsigned width, unsigned N, string_view fill = "─" );
+  string fmt_table_middle_row ( unsigned width, string_view title = "", string_view fill = "─" );
+  string fmt_table_middle_row ( unsigned width, unsigned N, string_view fill = "─" );
+  string fmt_table_bottom_row ( unsigned width, string_view title = "", string_view fill = "─" );
+  string fmt_table_bottom_row ( unsigned width, unsigned N, string_view fill = "─" );
+  string fmt_table_row        ( unsigned width, string_view title = "", string_view fill=" " );
+  string fmt_table_row        ( unsigned width, std::initializer_list<string_view> names );
+  string fmt_table_row_L      ( unsigned width, string_view title = "", string_view fill=" " );
 
 }
 
