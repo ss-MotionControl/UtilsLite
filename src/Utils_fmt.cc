@@ -25,90 +25,77 @@
 
 namespace Utils {
 
-  static
-  inline
   string
-  fmt_fw( string_view L, unsigned width, string_view fill, string_view R )
-  { return fmt::format( "{}{{:{}^{}}}{}", L, fill, width, R ); }
-
-  static
-  inline
-  string
-  fmt_fw_L( string_view L, unsigned width, string_view fill, string_view R )
-  { return fmt::format( "{}{{:{}<{}}}{}", L, fill, width, R ); }
-
-  string
-  fmt_table_top_row( unsigned width, string_view title, string_view fill )
-  { return fmt::format( fmt_fw( "┌", width, fill, "┐\n" ), title ); }
+  fmt_table_row(
+    unsigned    width,
+    string_view L,
+    string_view R,
+    string_view F,
+    string_view title,
+    string_view align
+  ) {
+    string FMT{ fmt::format( "{{}}{{:{}{}{}}}{{}}", F, align, width ) };
+    return fmt::format( FMT, L, title, R );
+  }
   
   string
-  fmt_table_middle_row( unsigned width, string_view title, string_view fill )
-  { return fmt::format( fmt_fw( "├", width, fill, "┤\n" ), title ); }
+  fmt_table_row(
+    unsigned    width,
+    string_view L,
+    string_view C,
+    string_view R,
+    string_view F,
+    std::initializer_list<string_view> names,
+    string_view align
+  ) {
+    unsigned N  { unsigned(names.size()) };
+    unsigned ww { width+1-N };
+    unsigned w  { ww/N };
+    unsigned r  { ww-w*N };
+    unsigned r2 { r/2 };
+    UTILS_ASSERT( w > 3, "fmt_table_row( width={}, ... ) no space to print\n", width );
+    string FMT{ fmt::format("{}{{:{}{}{}}}{}", F, F, align, w-2, F ) };
+    string res{ L };
+    unsigned k{0};
+    while ( k < r2 ) { res += ' '; ++k; }
+    unsigned i{0};
+    for ( auto n : names ) {
+      res += fmt::format( FMT, n );
+      if ( ++i != N ) res += C;
+    };
+    while ( k < r ) { res += ' '; ++k; }
+    res += R;
+    return res;
+  }
   
   string
-  fmt_table_bottom_row( unsigned width, string_view title, string_view fill )
-  { return fmt::format( fmt_fw( "└", width, fill, "┘\n" ), title ); }
+  fmt_table_row(
+    unsigned    width,
+    string_view L,
+    string_view C,
+    string_view R,
+    string_view F,
+    unsigned    N
+  ) {
+    unsigned ww { width+1-N };
+    unsigned w  { ww/N };
+    unsigned r  { ww-w*N };
+    unsigned r2 { r/2 };
+    UTILS_ASSERT( w > 3, "fmt_table_row( width={}, ... ) no space to print\n", width );
+
+    string str{""};
+    for ( unsigned i{0}; i < w; ++i ) str += F;
+
+    string res{ L };
+    unsigned k{0};
+    while ( k < r2 ) { res += F; ++k; }
+    unsigned i{0};
+    for ( unsigned i{1}; i <= N; ++i ) { res += str; if ( i != N ) res += C; };
+    while ( k < r ) { res += F; ++k; }
+    res += R;
+    return res;
+  }
   
-  string
-  fmt_table_row( unsigned width, string_view title, string_view fill )
-  { return fmt::format( fmt_fw( "│", width, fill, "│\n" ), title ); }
-
-  string
-  fmt_table_row_L( unsigned width, string_view title, string_view fill )
-  { return fmt::format( fmt_fw_L( "│", width, fill, "│\n" ), title ); }
-
-  string
-  fmt_table_row( unsigned width, std::initializer_list<string_view> names ) {
-    unsigned N{ unsigned(names.size()) };
-    unsigned w{ (width+1-N)/N };
-    UTILS_ASSERT( w > 3, "fmt_table_row( width={}, ... ) no space to print\n", width );
-    string FMT{ fmt::format("│ {{:<{}}} ", w-2 ) };
-    string res{""};
-    for ( auto & n : names ) res += fmt::format( FMT, n );
-    res += string( width+1-N-w*N,' ');
-    res += "│\n";
-    return res;
-  }
-
-  string
-  fmt_table_top_row( unsigned width, unsigned N, string_view fill ) {
-    unsigned w{ (width+1-N)/N };
-    UTILS_ASSERT( w > 3, "fmt_table_row( width={}, ... ) no space to print\n", width );
-    string res{""};
-    string str{""};
-    for ( unsigned i{0}; i < w; ++i ) str += fill;
-    for ( unsigned i{0}; i < N; ++i ) { res += i == 0 ? "┌" : "┬"; res += str; }
-    for ( unsigned i{width+1-N-w*N}; i > 0; --i ) res += fill;
-    res += "┐\n";
-    return res;
-  }
-
-  string
-  fmt_table_middle_row( unsigned width, unsigned N, string_view fill ) {
-    unsigned w{ (width+1-N)/N };
-    UTILS_ASSERT( w > 3, "fmt_table_row( width={}, ... ) no space to print\n", width );
-    string res{""};
-    string str{""};
-    for ( unsigned i{0}; i < w; ++i ) str += fill;
-    for ( unsigned i{0}; i < N; ++i ) { res += i == 0 ? "├" : "┼"; res += str; }
-    for ( unsigned i{width+1-N-w*N}; i > 0; --i ) res += fill;
-    res += "┤\n";
-    return res;
-  }
-
-  string
-  fmt_table_bottom_row( unsigned width, unsigned N, string_view fill ) {
-    unsigned w{ (width+1-N)/N };
-    UTILS_ASSERT( w > 3, "fmt_table_row( width={}, ... ) no space to print\n", width );
-    string res{""};
-    string str{""};
-    for ( unsigned i{0}; i < w; ++i ) str += fill;
-    for ( unsigned i{0}; i < N; ++i ) { res += i == 0 ? "└" : "┴"; res += str; }
-    for ( unsigned i{width+1-N-w*N}; i > 0; --i ) res += fill;
-    res += "┘\n";
-    return res;
-  }
-
 }
 
 //
