@@ -26,7 +26,7 @@ using namespace rang;
 
 static
 void
-printHeading( string const & heading ) {
+printHeading( string_view heading ) {
   cout
     << '\n'
     << style::reset << heading << style::reset << bg::reset << fg::reset

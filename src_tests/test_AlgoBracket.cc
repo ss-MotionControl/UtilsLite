@@ -33,7 +33,7 @@ static int nfuneval[NA]{0,0,0,0,0,0,0,0};
 
 template <typename FUN>
 void
-do_solve( string const & name, real_type a, real_type b, FUN f ) {
+do_solve( string_view name, real_type a, real_type b, FUN f ) {
   fmt::print( "\n#{:<3} {}\n", ntest, name );
   ++ntest;
 

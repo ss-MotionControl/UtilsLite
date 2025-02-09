@@ -89,7 +89,6 @@ namespace Utils {
     string res{ L };
     unsigned k{0};
     while ( k < r2 ) { res += F; ++k; }
-    unsigned i{0};
     for ( unsigned i{1}; i <= N; ++i ) { res += str; if ( i != N ) res += C; };
     while ( k < r ) { res += F; ++k; }
     res += R;

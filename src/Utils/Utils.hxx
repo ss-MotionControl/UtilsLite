@@ -99,6 +99,7 @@
 #include <functional>		// For std::bind()
 
 #include <string>
+#include <string_view>
 #include <vector>
 #include <list>
 #include <map>
@@ -161,6 +162,7 @@
 namespace Utils {
   #ifndef DOXYGEN_SHOULD_SKIP_THIS
   using string       = std::string;
+  using string_view  = std::string_view;
   using ostream_type = std::basic_ostream<char>;
   using istream_type = std::basic_istream<char>;
   #endif
@@ -187,10 +189,6 @@ namespace Utils {
 // -----------------------
 
 namespace Utils {
-
-  #ifndef DOXYGEN_SHOULD_SKIP_THIS
-  using std::string;
-  #endif
 
   string basename( char const filename[] );
 
@@ -291,42 +289,42 @@ namespace Utils {
   static
   inline
   bool
-  is_lower( string const & s ) {
+  is_lower( string_view s ) {
     return std::all_of( s.begin(), s.end(), islower );
   }
 
   static
   inline
   bool
-  is_upper( string const & s ) {
+  is_upper( string_view s ) {
     return std::all_of( s.begin(), s.end(), isupper );
   }
 
   static
   inline
   bool
-  is_alpha( string const & s ) {
+  is_alpha( string_view s ) {
     return std::all_of( s.begin(), s.end(), isalpha );
   }
 
   static
   inline
   bool
-  is_alphanum( string const & s ) {
+  is_alphanum( string_view s ) {
     return std::all_of( s.begin(), s.end(), isalnum );
   }
 
   static
   inline
   bool
-  is_digits( string const & s ) {
+  is_digits( string_view s ) {
     return std::all_of( s.begin(), s.end(), isdigit );
   }
 
   static
   inline
   bool
-  is_xdigits( string const & s ) {
+  is_xdigits( string_view s ) {
     return std::all_of( s.begin(), s.end(), isxdigit );
   }
 

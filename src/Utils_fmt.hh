@@ -131,9 +131,9 @@ namespace Utils {
     //!
     explicit
     Runtime_Error(
-      std::string const & reason,
-      char const *        file,
-      int                 line
+      string_view  reason,
+      char const * file,
+      int          line
     )
     : std::runtime_error( fmt::format( "\n{}\nOn File:{}:{}\n", reason, file, line ) )
     { }

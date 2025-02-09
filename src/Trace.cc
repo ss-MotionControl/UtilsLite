@@ -71,7 +71,7 @@ namespace Utils {
   print_trace(
     int            line,
     char const *   file,
-    string const & msg,
+    string_view    msg,
     ostream_type & stream
   ) {
     fmt::print( stream,
@@ -96,9 +96,9 @@ namespace Utils {
 
   string
   Runtime_TraceError::grab_backtrace(
-    string const & reason,
-    char const *   file,
-    int            line
+    string_view  reason,
+    char const * file,
+    int          line
   ) const {
     return fmt::format( "\n{}\nOn File:{}:{}\n", reason, file, line );
   }
@@ -128,7 +128,7 @@ namespace Utils {
   print_trace(
     int            line,
     char const *   file,
-    string const & reason,
+    string_view    reason,
     ostream_type & stream
   ) {
 
@@ -179,9 +179,9 @@ namespace Utils {
 
   string
   Runtime_TraceError::grab_backtrace(
-    string const & reason,
-    char const *   file,
-    int            line
+    string_view  reason,
+    char const * file,
+    int          line
   ) const {
     ostringstream ost;
     print_trace( line, file, reason, ost );

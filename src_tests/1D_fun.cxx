@@ -44,7 +44,7 @@ public:
   fun1D() = delete;
 
   explicit
-  fun1D( real_type a0, real_type b0, string const & info, FUN1D && f )
+  fun1D( real_type a0, real_type b0, string_view info, FUN1D && f )
   : m_a0(a0)
   , m_b0(b0)
   , m_fun(f)
