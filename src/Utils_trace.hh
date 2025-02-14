@@ -86,7 +86,7 @@ namespace Utils {
   void
   print_trace(
     int            line,
-    char const *   file,
+    string_view    file,
     string_view    msg,
     ostream_type & stream
   );
@@ -98,7 +98,7 @@ namespace Utils {
   void
   printTrace(
     int            line,
-    char const *   file,
+    string_view    file,
     string_view    msg,
     ostream_type & stream
   ) {
@@ -133,7 +133,7 @@ namespace Utils {
     std::string
     grab_backtrace(
       string_view  reason,
-      char const * file,
+      string_view  file,
       int          line
     ) const;
 
@@ -150,9 +150,9 @@ namespace Utils {
     //!
     explicit
     Runtime_TraceError(
-      string_view  reason,
-      char const * file,
-      int          line
+      string_view reason,
+      string_view file,
+      int         line
     )
     : std::runtime_error( grab_backtrace( reason, file, line ) )
     { }

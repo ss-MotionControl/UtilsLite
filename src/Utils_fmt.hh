@@ -131,29 +131,9 @@ namespace Utils {
     //!
     explicit
     Runtime_Error(
-      string_view  reason,
-      char const * file,
-      int          line
-    )
-    : std::runtime_error( fmt::format( "\n{}\nOn File:{}:{}\n", reason, file, line ) )
-    { }
-
-    //!
-    //! \brief Constructs a Runtime_Error instance with a given reason.
-    //!
-    //! This constructor initializes the error with a specified reason,
-    //! the file where the error occurred, and the line number. It formats
-    //! the error message accordingly.
-    //!
-    //! \param reason A C-style string that describes the reason for the error.
-    //! \param file The name of the file where the error occurred.
-    //! \param line The line number in the file where the error occurred.
-    //!
-    explicit
-    Runtime_Error(
-      char const * reason,
-      char const * file,
-      int          line
+      string_view reason,
+      string_view file,
+      int         line
     )
     : std::runtime_error( fmt::format( "\n{}\nOn File:{}:{}\n", reason, file, line ) )
     { }

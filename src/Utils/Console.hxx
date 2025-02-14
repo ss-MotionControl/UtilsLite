@@ -33,7 +33,7 @@ namespace Utils {
    * \param filename C-style string representing the file name.
    * \return Base name of the file.
    */
-  string basename(char const * filename);
+  string basename( string_view filename );
 
   //!
   //! \brief Class to handle console output with different styles and levels.

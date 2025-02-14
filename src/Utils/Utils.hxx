@@ -192,8 +192,8 @@ namespace Utils {
 
   string basename( char const filename[] );
 
-  bool   get_environment( char const ename[], string & res );
-  void   set_environment( char const ename[], char const newval[], bool overwrite );
+  bool   get_environment( string_view ename, string & res );
+  void   set_environment( string_view ename, string_view newval, bool overwrite );
   void   get_MAC_address( std::map<string,string> & addr );
   string get_host_name();
   void   get_IP_address( std::vector<string> & addr );
@@ -204,9 +204,9 @@ namespace Utils {
   string get_user_name();
   string get_home_directory();
   string get_executable_path_name();
-  bool   check_if_file_exists( char const fname[] );
-  bool   check_if_dir_exists( char const dirname[] );
-  bool   make_directory( char const dirname[], unsigned mode = 0777 );
+  bool   check_if_file_exists( string_view fname );
+  bool   check_if_dir_exists( string_view dirname );
+  bool   make_directory( string_view dirname, unsigned mode = 0777 );
 
 
   template <typename T_int, typename T_real>
@@ -371,8 +371,8 @@ namespace Utils {
   }
 
   string progress_bar( double progress, int width );
-  void   progress_bar( ostream &, double progress, int width, char const * msg );
-  void   progress_bar2( ostream &, double progress, int width, char const * msg );
+  void   progress_bar( ostream &, double progress, int width, string_view msg );
+  void   progress_bar2( ostream &, double progress, int width, string_view msg );
 
 }
 
