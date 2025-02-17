@@ -218,7 +218,7 @@ namespace Utils {
       if (stat (fnam.data(), &buffer) == 0) return S_ISREG(buffer.st_mode);
       return false;
     #else
-      DWORD ftyp = GetFileAttributesA(fname);
+      DWORD ftyp = GetFileAttributesA(fname.data());
       if (ftyp == INVALID_FILE_ATTRIBUTES) return false;  //something is wrong with your path!
       if (ftyp & FILE_ATTRIBUTE_DIRECTORY) return false;  // this is a directory!
       return true; // this is not a directory!
@@ -235,7 +235,7 @@ namespace Utils {
       if (stat (dirname.data(), &buffer) == 0) return S_ISDIR(buffer.st_mode);
       return false;
     #else
-      DWORD ftyp = GetFileAttributesA(dirname);
+      DWORD ftyp = GetFileAttributesA(dirname.data());
       if (ftyp == INVALID_FILE_ATTRIBUTES) return false;  //something is wrong with your path!
       if (ftyp & FILE_ATTRIBUTE_DIRECTORY) return true;   // this is a directory!
       return false; // this is not a directory!
@@ -249,7 +249,7 @@ namespace Utils {
   make_directory( string_view dirname, unsigned /* mode */ ) {
     bool ok = check_if_dir_exists( dirname );
     if ( ok ) return false;
-    CreateDirectoryA( dirname, NULL );
+    CreateDirectoryA( dirname.data(), NULL );
     return true;
   }
 
