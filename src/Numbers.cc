@@ -81,14 +81,14 @@ namespace Utils {
         UTILS_ERROR(
           "{}\n({}):{}) found Infinity at {}[{}]\n{}\n",
           LINE_LINE_LINE_LINE,
-          basename(file), line, v_name, i,
+          Utils::get_basename(file), line, v_name, i,
           LINE_LINE_LINE_LINE
         );
       } else if ( is_NaN(pv[i]) ) {
         UTILS_ERROR(
           "{}\n({}):{}) found NaN at {}[{}]\n{}\n",
           LINE_LINE_LINE_LINE,
-          basename(file), line, v_name, i,
+          Utils::get_basename(file), line, v_name, i,
           LINE_LINE_LINE_LINE
         );
       }
@@ -108,14 +108,14 @@ namespace Utils {
         UTILS_ERROR(
           "{}\n({}):{}) found Infinity at {}[{}]\n{}\n",
           LINE_LINE_LINE_LINE,
-          basename(file), line, v_name, i,
+          Utils::get_basename(file), line, v_name, i,
           LINE_LINE_LINE_LINE
         );
       } else if ( is_NaN(pv[i]) ) {
         UTILS_ERROR(
           "{}\n({}):{}) found NaN at {}[{}]\n{}\n",
           LINE_LINE_LINE_LINE,
-          basename(file), line, v_name, i,
+          Utils::get_basename(file), line, v_name, i,
           LINE_LINE_LINE_LINE
         );
       }

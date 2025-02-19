@@ -110,6 +110,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cstdlib>
+#include <filesystem>
 
 // C/C++
 #include <cstddef>
@@ -190,7 +191,34 @@ namespace Utils {
 
 namespace Utils {
 
-  string basename( char const filename[] );
+  /*\
+  :|:  _
+  :|: | |__  __ _ ___ ___ _ _  __ _ _ __  ___
+  :|: | '_ \/ _` (_-</ -_) ' \/ _` | '  \/ -_)
+  :|: |_.__/\__,_/__/\___|_||_\__,_|_|_|_\___|
+  :|:
+  \*/
+
+  inline
+  string
+  get_basename( string_view path ) {
+    namespace fs = std::filesystem;
+    return fs::path(path).parent_path().string();
+  }
+
+  inline
+  string
+  get_filename( string_view path ) {
+    namespace fs = std::filesystem;
+    return fs::path(path).filename().string();
+  }
+
+  inline
+  string
+  get_extension( string_view path ) {
+    namespace fs = std::filesystem;
+    return fs::path(path).extension().string();
+  }
 
   bool   get_environment( string_view ename, string & res );
   void   set_environment( string_view ename, string_view newval, bool overwrite );
@@ -272,61 +300,14 @@ namespace Utils {
     search_interval( npts, X, x, last_interval, closed, can_extend );
   }
 
-  static
-  inline
-  void
-  to_upper( string & str ) {
-    for ( auto & c: str ) c = char(toupper(int(c)));
-  }
-
-  static
-  inline
-  void
-  to_lower( string & str ) {
-    for ( auto & c: str ) c = char(tolower(int(c)));
-  }
-
-  static
-  inline
-  bool
-  is_lower( string_view s ) {
-    return std::all_of( s.begin(), s.end(), islower );
-  }
-
-  static
-  inline
-  bool
-  is_upper( string_view s ) {
-    return std::all_of( s.begin(), s.end(), isupper );
-  }
-
-  static
-  inline
-  bool
-  is_alpha( string_view s ) {
-    return std::all_of( s.begin(), s.end(), isalpha );
-  }
-
-  static
-  inline
-  bool
-  is_alphanum( string_view s ) {
-    return std::all_of( s.begin(), s.end(), isalnum );
-  }
-
-  static
-  inline
-  bool
-  is_digits( string_view s ) {
-    return std::all_of( s.begin(), s.end(), isdigit );
-  }
-
-  static
-  inline
-  bool
-  is_xdigits( string_view s ) {
-    return std::all_of( s.begin(), s.end(), isxdigit );
-  }
+  static inline void to_upper    ( string & str  ) { for ( auto & c: str ) c = char(toupper(int(c))); }
+  static inline void to_lower    ( string & str  ) { for ( auto & c: str ) c = char(tolower(int(c))); }
+  static inline bool is_lower    ( string_view s ) { return std::all_of( s.begin(), s.end(), islower ); }
+  static inline bool is_upper    ( string_view s ) { return std::all_of( s.begin(), s.end(), isupper ); }
+  static inline bool is_alpha    ( string_view s ) { return std::all_of( s.begin(), s.end(), isalpha ); }
+  static inline bool is_alphanum ( string_view s ) { return std::all_of( s.begin(), s.end(), isalnum ); }
+  static inline bool is_digits   ( string_view s ) { return std::all_of( s.begin(), s.end(), isdigit ); }
+  static inline bool is_xdigits  ( string_view s ) { return std::all_of( s.begin(), s.end(), isxdigit ); }
 
   // https://stackoverflow.com/questions/11376288/fast-computing-of-log2-for-64-bit-integers
   static
@@ -371,8 +352,8 @@ namespace Utils {
   }
 
   string progress_bar( double progress, int width );
-  void   progress_bar( ostream &, double progress, int width, string_view msg );
-  void   progress_bar2( ostream &, double progress, int width, string_view msg );
+  void   progress_bar( ostream_type &, double progress, int width, string_view msg );
+  void   progress_bar2( ostream_type &, double progress, int width, string_view msg );
 
 }
 

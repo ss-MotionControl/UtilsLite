@@ -81,8 +81,8 @@ namespace Utils {
   Real
   Poly<Real>::eval( Real x ) const {
     // Calcolo il polinomio usando il metodo di Horner
-    Integer n = m_order-1;
-    Real res = this->coeff(n);
+    Integer n   { m_order-1      };
+    Real    res { this->coeff(n) };
     while ( n-- > 0 ) res = res*x+this->coeff(n);
     return res;
   }
@@ -94,8 +94,8 @@ namespace Utils {
   Real
   Poly<Real>::eval_D( Real x ) const {
     // Calcolo il polinomio usando il metodo di Horner
-    Integer n = m_order-1;
-    Real Dp = this->coeff(n)*n;
+    Integer n  { m_order-1        };
+    Real    Dp { this->coeff(n)*n };
     while ( --n > 0 ) Dp = Dp*x+this->coeff(n)*n;
     return Dp;
   }
@@ -107,7 +107,7 @@ namespace Utils {
   void
   Poly<Real>::eval( Real x, Real & p, Real & Dp ) const {
     // Calcolo il polinomio usando il metodo di Horner
-    Integer n = m_order-1;
+    Integer n{m_order-1};
     p  = this->coeff(n);
     Dp = this->coeff(n)*n;
     while ( --n > 0 ) {
@@ -139,6 +139,7 @@ namespace Utils {
     itg.coeffRef(0) = 0;
     for ( Integer i = 1; i <= m_order; ++i )
       itg.coeffRef(i) = this->coeff(i-1)/i;
+    itg.m_order = m_order+1;
   }
 
   /*
@@ -148,7 +149,7 @@ namespace Utils {
   Real
   Poly<Real>::normalize() {
     // search max module coeff
-    Real S = this->cwiseAbs().maxCoeff();
+    Real S{ this->cwiseAbs().maxCoeff() };
     if ( S > 0 ) this->to_eigen() /= S;
     return S;
   }
@@ -164,7 +165,7 @@ namespace Utils {
       if ( MX < 1 ) MX = 1;
       Real EPS = epsi*MX;
       for ( Integer i = 0; i < m_order; ++i ) {
-        Real & ai = this->coeffRef(i);
+        Real & ai{ this->coeffRef(i) };
         if ( std::abs( ai ) <= EPS ) ai = 0;
       }
     }
@@ -187,8 +188,8 @@ namespace Utils {
   template <typename Real>
   typename Poly<Real>::Integer
   Poly<Real>::sign_variations() const {
-    Integer sign_var  = 0;
-    Integer last_sign = 0;
+    Integer sign_var  {0};
+    Integer last_sign {0};
     for ( Integer i=0; i < m_order; ++i ) {
       Real v = this->coeff(i);
       if ( v > 0 ) {
@@ -255,8 +256,8 @@ namespace Utils {
   template <typename Real>
   Poly<Real> &
   Poly<Real>::operator -= ( Poly<Real> const & b ) {
-    Integer max_order = std::max( m_order, b.m_order );
-    Integer min_order = std::min( m_order, b.m_order );
+    Integer max_order{ std::max( m_order, b.m_order ) };
+    Integer min_order{ std::min( m_order, b.m_order ) };
 
     // ridimensiona vettore coefficienti senza distruggere il contenuto
     this->conservativeResize( max_order );
@@ -291,7 +292,7 @@ namespace Utils {
   Poly<Real> &
   Poly<Real>::operator *= ( Poly<Real> const & b ) {
     dvec_t a(this->to_eigen()); // fa una copia dei coefficienti del vettore
-    Integer new_order = m_order + b.m_order - 1;
+    Integer new_order{ m_order + b.m_order - 1 };
     this->resize( m_order + b.m_order - 1 ); // nuovo polinomio contenente il risultato
     this->setZero();
     for( Integer i=0; i<m_order; ++i )
@@ -318,13 +319,13 @@ namespace Utils {
   Poly<Real>
   operator + ( Poly<Real> const & a, Poly<Real> const & b ) {
     using Integer = typename Poly<Real>::Integer;
-    Integer max_order = std::max( a.order(), b.order() );
-    Integer min_order = std::min( a.order(), b.order() );
+    Integer max_order{ std::max( a.order(), b.order() ) };
+    Integer min_order{ std::min( a.order(), b.order() ) };
     Poly<Real> sum( max_order ); // nuovo polinomio contenente la somma
 
     // somma i coefficienti fino al grado comune ad entrambi i polinomi
     sum.head( min_order ).noalias() = a.head(min_order) + b.head(min_order);
-    Integer n_tail = max_order - min_order;
+    Integer n_tail{ max_order - min_order };
     if ( n_tail > 0 ) {
       if ( a.order() > b.order() ) sum.tail( n_tail ).noalias() = a.tail(n_tail);
       else                         sum.tail( n_tail ).noalias() = b.tail(n_tail);
@@ -339,7 +340,7 @@ namespace Utils {
   Poly<Real>
   operator + ( Poly<Real> const & a, Real b ) {
     using Integer = typename Poly<Real>::Integer;
-    Integer max_order = std::max( a.order(), 1 );
+    Integer max_order{ std::max( a.order(), 1 ) };
     Poly<Real> sum( max_order ); // nuovo polinomio contenente la somma
 
     // somma i coefficienti fino al grado comune ad entrambi i polinomi
@@ -359,7 +360,7 @@ namespace Utils {
   Poly<Real>
   operator + ( Real a, Poly<Real> const & b ) {
     using Integer = typename Poly<Real>::Integer;
-    Integer max_order = std::max( b.order(), 1 );
+    Integer max_order{ std::max( b.order(), 1 ) };
     Poly<Real> sum( max_order ); // nuovo polinomio contenente la somma
 
     // somma i coefficienti fino al grado comune ad entrambi i polinomi
@@ -379,8 +380,8 @@ namespace Utils {
   Poly<Real>
   operator - ( Poly<Real> const & a, Poly<Real> const & b ) {
     using Integer = typename Poly<Real>::Integer;
-    Integer max_order = std::max( a.order(), b.order() );
-    Integer min_order = std::min( a.order(), b.order() );
+    Integer max_order{ std::max( a.order(), b.order() ) };
+    Integer min_order{ std::min( a.order(), b.order() ) };
     Poly<Real> sum( max_order ); // nuovo polinomio contenente la somma
 
     // somma i coefficienti fino al grado comune ad entrambi i polinomi
@@ -400,7 +401,7 @@ namespace Utils {
   Poly<Real>
   operator - ( Poly<Real> const & a, Real b ) {
     using Integer = typename Poly<Real>::Integer;
-    Integer max_order = std::max( a.order(), 1 );
+    Integer max_order{ std::max( a.order(), 1 ) };
     Poly<Real> sum( max_order ); // nuovo polinomio contenente la somma
 
     // somma i coefficienti fino al grado comune ad entrambi i polinomi
@@ -420,7 +421,7 @@ namespace Utils {
   Poly<Real>
   operator - ( Real a, Poly<Real> const & b ) {
     using Integer = typename Poly<Real>::Integer;
-    Integer max_order = std::max( b.order(), 1 );
+    Integer max_order{ std::max( b.order(), 1 ) };
     Poly<Real> sum( max_order ); // nuovo polinomio contenente la somma
 
     // somma i coefficienti fino al grado comune ad entrambi i polinomi
@@ -441,8 +442,8 @@ namespace Utils {
   operator * ( Poly<Real> const & a, Poly<Real> const & b ) {
     using Integer = typename Poly<Real>::Integer;
     Poly<Real> prd( a.order() + b.order() - 1 ); // nuovo polinomio contenente il risultato
-    for( Integer i = 0; i < a.order(); ++i )
-      for( Integer j = 0; j < b.order(); ++j )
+    for( Integer i{0}; i < a.order(); ++i )
+      for( Integer j{0}; j < b.order(); ++j )
         prd.coeffRef(i+j) += a.coeff(i) * b.coeff(j);
     return prd;
   }
@@ -503,8 +504,8 @@ namespace Utils {
     // P(x) = Q(x) * M(x) + R(x)
     //
     R = P;
-    Real lcQ = Q.leading_coeff();
-    Integer dd = R.order() - Q.order();
+    Real    lcQ { Q.leading_coeff()     };
+    Integer dd  { R.order() - Q.order() };
     if ( dd < 0 ) {
       // P = Q +R
       M.set_scalar(1);
@@ -519,8 +520,8 @@ namespace Utils {
       );
 
       while ( dd >= 0 && R_degree >= 0 ) {
-        Real lcR = R(R_degree);
-        Real bf  = lcR/lcQ;
+        Real lcR { R(R_degree) };
+        Real bf  { lcR/lcQ     };
         M.coeffRef(dd) = bf;
         R.segment(dd,Q.degree()).noalias() -= bf*Q.head(Q.degree());
         R.coeffRef(R_degree) = 0;
@@ -586,7 +587,7 @@ namespace Utils {
     m_sturm.reserve(P.order());
     m_sturm.emplace_back(P);  m_sturm.back().adjust_degree();
     m_sturm.emplace_back(DP); m_sturm.back().adjust_degree();
-    Integer ns = 1;
+    Integer ns{1};
     while ( true ) {
       divide( m_sturm[ns-1], m_sturm[ns], M, R );
       if ( R.order() <= 0 ) break;
@@ -594,7 +595,7 @@ namespace Utils {
       ++ns;
     }
     // divide by GCD
-    for ( Integer i = 0; i < ns; ++i ) {
+    for ( Integer i{0}; i < ns; ++i ) {
       divide( m_sturm[i], m_sturm.back(), M, R );
       M.normalize();
       m_sturm[i] = M;
@@ -608,10 +609,10 @@ namespace Utils {
   template <typename Real>
   typename Sturm<Real>::Integer
   Sturm<Real>::sign_variations( Real x, bool & on_root ) const {
-    Integer sign_var  = 0;
-    Integer last_sign = 0;
-    Integer npoly     = Integer(m_sturm.size());
-    Real    v         = m_sturm[0].eval(x);
+    Integer sign_var  { 0 };
+    Integer last_sign { 0 };
+    Integer npoly     { Integer(m_sturm.size()) };
+    Real    v         { m_sturm[0].eval(x) };
     on_root = false;
     if      ( v > 0 ) last_sign = 1;
     else if ( v < 0 ) last_sign = -1;
@@ -619,7 +620,7 @@ namespace Utils {
       on_root   = true;
       last_sign = 0;
     }
-    for ( Integer i = 1; i < npoly; ++i ) {
+    for ( Integer i{1}; i < npoly; ++i ) {
       v = m_sturm[i].eval(x);
       if ( v > 0 ) {
         if ( last_sign == -1 ) ++sign_var;
@@ -651,7 +652,7 @@ namespace Utils {
     I0.va = sign_variations( I0.a, I0.a_on_root );
     I0.vb = sign_variations( I0.b, I0.b_on_root );
 
-    Integer n_roots = std::abs( I0.va - I0.vb );
+    Integer n_roots{ std::abs( I0.va - I0.vb ) };
 
     if ( n_roots <= 1 ) {
       if ( n_roots == 1 && !I0.a_on_root && !I0.b_on_root ) {
@@ -699,7 +700,7 @@ namespace Utils {
         I1.a_on_root = I1.b_on_root = true;
         I_stack.push_back(I1);
       } else {
-        Real    c  = (I0.a+I0.b)/2;
+        Real    c{ (I0.a+I0.b)/2 };
         bool    c_on_root;
         Integer vc = sign_variations( c, c_on_root );
         // check interval [a,c]
@@ -764,9 +765,9 @@ namespace Utils {
   Sturm<Real>::refine_roots() {
     m_fun.setup( &m_sturm[0] );
     m_roots.resize( m_intervals.size() );
-    Integer n = 0;
+    Integer n{0};
     for ( auto & I : m_intervals ) {
-      Real & r = m_roots.coeffRef(n++);
+      Real & r{ m_roots.coeffRef(n++) };
       if      ( I.a_on_root ) r = I.a;
       else if ( I.b_on_root ) r = I.b;
       else {

@@ -109,7 +109,7 @@ namespace Utils {
   inline
   string
   demang( string_view mangled_name ) {
-    if ( mangled_name == nullptr ) return string{""};
+    if ( mangled_name.data() == nullptr ) return string{""};
     int status = 0;
     string retval{mangled_name};
     char * name = abi::__cxa_demangle( mangled_name.data(), nullptr, nullptr, &status );
@@ -134,7 +134,7 @@ namespace Utils {
 
     fmt::print(
       stream, "\n{}\nOn File:{}:{}\nprocess ID:{}, parent process ID:{}\nstack trace:\n",
-      reason, basename(file), line, getpid(), getppid()
+      reason, Utils::get_basename(file), line, getpid(), getppid()
     );
 
     #ifdef UTILS_OS_OSX
