@@ -345,7 +345,7 @@ namespace Utils {
     #define CMD MEX_ERROR_MESSAGE_14
     IN_OUT(2,0);
     AABB_TREE * ptr = Utils::mex_convert_mx_to_ptr<AABB_TREE>(arg_in_1);
-    mexPrintf("%s\n",ptr->info().c_str());
+    mexPrintf("%s\n",ptr->info().data());
     #undef CMD
   }
 
@@ -495,7 +495,7 @@ namespace Utils {
       DO_CMD pfun = cmd_to_fun.at(cmd);
       pfun( nlhs, plhs, nrhs, prhs );
     } catch ( std::exception const & e ) {
-      mexErrMsgTxt( fmt::format( "AABB_treeMexWrapper Error: {}", e.what() ).c_str() );
+      mexErrMsgTxt( fmt::format( "AABB_treeMexWrapper Error: {}", e.what() ).data() );
     } catch (...) {
       mexErrMsgTxt( "AABB_treeMexWrapper failed" );
     }

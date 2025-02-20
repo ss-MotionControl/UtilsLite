@@ -264,7 +264,7 @@ namespace Utils {
       DO_CMD pfun = cmd_to_fun.at(cmd);
       pfun( nlhs, plhs, nrhs, prhs );
     } catch ( std::exception const & e ) {
-      mexErrMsgTxt( fmt::format( "Segment2DMexWrapper Error: {}", e.what() ).c_str() );
+      mexErrMsgTxt( fmt::format( "Segment2DMexWrapper Error: {}", e.what() ).data() );
     } catch (...) {
       mexErrMsgTxt( "Segment2DMexWrapper failed" );
     }

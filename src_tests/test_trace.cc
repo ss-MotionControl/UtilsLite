@@ -43,7 +43,7 @@ fun1( int i ) {
     fun2( i-1 );
   } else {
     std::string str = fmt::format("format {}",i);
-    fun5( str.c_str() );
+    fun5( str.data() );
   }
 }
 
@@ -55,7 +55,7 @@ fun2( int i ) {
     fun3( i-1 );
   } else {
     std::string str = fmt::format("format {}",i);
-    fun5( str.c_str() );
+    fun5( str.data() );
   }
 }
 
@@ -67,7 +67,7 @@ fun3( int i ) {
     fun4( i-1 );
   } else {
     std::string str = fmt::format("format {}",i);
-    fun5( str.c_str() );
+    fun5( str.data() );
   }
 }
 
@@ -79,7 +79,7 @@ fun4( int i ) {
     fun1( i-1 );
   } else {
     std::string str = fmt::format("format {}",i);
-    fun5( str.c_str() );
+    fun5( str.data() );
   }
 }
 
