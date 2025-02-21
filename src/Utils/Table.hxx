@@ -215,7 +215,7 @@ namespace Utils {
       integer maximum_line_width() const;
 
       string line( integer idx ) const;
-      void trim_line( std::string & line ) const;
+      static void trim_line( std::string & line ) ;
 
       string render( integer line, integer col ) const;
     };

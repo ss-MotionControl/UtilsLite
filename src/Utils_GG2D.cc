@@ -122,14 +122,14 @@ namespace Utils {
 
   template <typename Real>
   bool
-  Segment2D<Real>::intersect( Segment2D<Real> const & S, Real & s, Real & t ) const {
+  Segment2D<Real>::intersect( Segment2D const & S, Real & s, Real & t ) const {
     s = t = 0;
     // check if collinear
     Point2D<Real> D1, D2, RES;
     D1.noalias() = m_Pb - m_Pa;
     D2.noalias() = S.m_Pb - S.m_Pa;
-    Real CX = (D1.x()*D2.y()-D1.y()*D2.x())/(D1.norm()*D2.norm());
-    if ( abs(CX) <= 10*machine_eps<Real>() ) {
+    if ( Real CX = (D1.x()*D2.y()-D1.y()*D2.x())/(D1.norm()*D2.norm());
+         abs(CX) <= 10*machine_eps<Real>() ) {
       // collinear point check if overlap
       if ( this->projection( S.m_Pa, s ) ) return true;
       if ( this->projection( S.m_Pb, s ) ) return true;

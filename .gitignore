@@ -17,3 +17,5 @@ ThirdParties/fmt/fmt-10.2.1
 src/Utils/fmt
 src/Eigen
 doxygen/docs
+.idea
+cmake-build-debug

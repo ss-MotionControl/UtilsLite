@@ -92,27 +92,24 @@ namespace Utils {
     m_dim           = n;
     m_r_dim         = Real(1)/Real(n);
     m_dim_factorial = 1;
-    for ( integer i = 2; i <= n+1; ++i ) m_dim_factorial *= i;
+    for ( integer i{2}; i <= n+1; ++i ) m_dim_factorial *= i;
 
     m_dim_regular_simplex_volume = (sqrt(Real(n+1))/Real(m_dim_factorial))/std::pow(Real(2),Real(n)/2);
 
-    integer ntot = (3*n+10)*n+2;
+    integer ntot{ (3*n+10)*n+2 };
     m_base_value.reallocate( ntot );
 
-    size_t N  = size_t(n);
-    size_t N1 = size_t(n+1);
+    new (&this->m_f)      MapVec( m_base_value( n+1 ),         n+1           );
+    new (&this->m_p)      MapMat( m_base_value( n*(n+1) ),     n,   n+1 );
+    new (&this->m_p_work) MapMat( m_base_value( n*n ),         n,   n   );
+    new (&this->m_dist)   MapMat( m_base_value( (n+1)*(n+1) ), n+1, n+1 );
 
-    new (&this->m_f)      MapVec( m_base_value( N1 ),    n+1      );
-    new (&this->m_p)      MapMat( m_base_value( N*N1 ),  n,   n+1 );
-    new (&this->m_p_work) MapMat( m_base_value( N*N ),   n,   n   );
-    new (&this->m_dist)   MapMat( m_base_value( N1*N1 ), n+1, n+1 );
-
-    new (&this->m_psum)   MapVec( m_base_value( N ), n );
-    new (&this->m_f_work) MapVec( m_base_value( N ), n );
-    new (&this->m_grad)   MapVec( m_base_value( N ), n );
-    new (&this->m_pr)     MapVec( m_base_value( N ), n );
-    new (&this->m_pe)     MapVec( m_base_value( N ), n );
-    new (&this->m_pc)     MapVec( m_base_value( N ), n );
+    new (&this->m_psum)   MapVec( m_base_value( n ), n );
+    new (&this->m_f_work) MapVec( m_base_value( n ), n );
+    new (&this->m_grad)   MapVec( m_base_value( n ), n );
+    new (&this->m_pr)     MapVec( m_base_value( n ), n );
+    new (&this->m_pe)     MapVec( m_base_value( n ), n );
+    new (&this->m_pc)     MapVec( m_base_value( n ), n );
 
     m_base_value.must_be_empty("NelderMead<Real>::allocate");
   }
@@ -123,7 +120,7 @@ namespace Utils {
 
   template <typename Real>
   void
-  NelderMead<Real>::setup( integer dim, NMFunc & fun, Console const * console ) {
+  NelderMead<Real>::setup( integer const dim, NMFunc & fun, Console const * console ) {
     // HJPatternSearch The constructor initialize the solver
     // parameters and check the inputs when the class is instanciated.
     m_fun     = fun;
@@ -306,7 +303,7 @@ namespace Utils {
   template <typename Real>
   string
   NelderMead<Real>::info() const {
-    string res = "";
+    string res;
     if ( m_verbose > 0 ) {
       Real Vd = std::pow(m_simplex_volume,m_r_dim);
       string const line = "-------------------------------------------------------------------------\n";
@@ -334,7 +331,7 @@ namespace Utils {
   NelderMead<Real>::message( Real rtol ) const {
     if ( m_console == nullptr ) return;
     Real Vd = std::pow(m_simplex_volume,m_r_dim);
-    string msg = fmt::format(
+    string const msg = fmt::format(
       "#it={:<4} #f={:<5} {:<12} f(x)={:<12} grad(x)={:<12}"
       " |err|={:<10} V^(1/d)/D={:<10} [{}/{}]\n",
       m_iteration_count, m_fun_evaluation_count, to_string(m_which_step),

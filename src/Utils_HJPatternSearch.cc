@@ -85,13 +85,13 @@ namespace Utils {
     integer ntot = n*10;
     m_base_value.reallocate( ntot );
 
-    new (&this->m_dir)         MapVec( m_base_value( size_t(n) ), n );
-    new (&this->m_new_x)       MapVec( m_base_value( size_t(n) ), n );
-    new (&this->m_search_sign) MapVec( m_base_value( size_t(n) ), n );
-    new (&this->m_x_old)       MapVec( m_base_value( size_t(n) ), n );
-    new (&this->m_x_best)      MapVec( m_base_value( size_t(n) ), n );
-    new (&this->m_p)           MapVec( m_base_value( size_t(n) ), n );
-    new (&this->m_p1)          MapVec( m_base_value( size_t(n) ), n );
+    new (&this->m_dir)         MapVec( m_base_value( n ), n );
+    new (&this->m_new_x)       MapVec( m_base_value( n ), n );
+    new (&this->m_search_sign) MapVec( m_base_value( n ), n );
+    new (&this->m_x_old)       MapVec( m_base_value( n ), n );
+    new (&this->m_x_best)      MapVec( m_base_value( n ), n );
+    new (&this->m_p)           MapVec( m_base_value( n ), n );
+    new (&this->m_p1)          MapVec( m_base_value( n ), n );
   }
 
   // =================================================================
@@ -99,7 +99,7 @@ namespace Utils {
   // =================================================================
   template <typename Real>
   void
-  HJPatternSearch<Real>::setup( integer dim, HJFunc & fun, Console const * console ) {
+  HJPatternSearch<Real>::setup( integer const dim, HJFunc & fun, Console const * console ) {
     // HJPatternSearch The constructor initialize the solver
     // parameters and check the inputs when the class is instanciated.
     m_fun     = fun;

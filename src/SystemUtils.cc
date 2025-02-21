@@ -53,7 +53,7 @@ namespace Utils {
    * \return True if the environment variable was found and its value retrieved,
    *         false otherwise.
    */
-   bool get_environment( string_view ename, string &res);
+   bool get_environment( string_view ename, string & res );
 
    //! Sets the value of an environment variable.
    /*!
@@ -80,9 +80,9 @@ namespace Utils {
      * interfaces on the system and stores them in the provided map, with
      * interface names as the keys and MAC addresses as the values.
      *
-     * \param mac_addr A reference to a map where the MAC addresses will be stored.
+     * \param addr A reference to a map where the MAC addresses will be stored.
      */
-    void get_MAC_address(map<string,string> &mac_addr);
+    void get_MAC_address( map<string,string> & addr );
 
     //! Fetches the IP addresses of the system.
     /*!
@@ -91,7 +91,7 @@ namespace Utils {
      *
      * \param addr A reference to a vector where the IP addresses will be stored.
      */
-    void get_IP_address(vector<string> &addr);
+    void get_IP_address( vector<string> & addr );
 
     //! Retrieves the username of the current user.
     /*!
@@ -145,7 +145,7 @@ namespace Utils {
     char   buffer[20];
     time_t rawtime;
     time( &rawtime );
-    struct tm timeinfo;
+    tm timeinfo;
     localtime_r( &rawtime, &timeinfo );
     strftime( buffer, 20, "%F", &timeinfo );
     return string{buffer};
@@ -156,7 +156,7 @@ namespace Utils {
     char   buffer[20];
     time_t rawtime;
     time( &rawtime );
-    struct tm timeinfo;
+    tm timeinfo;
     localtime_r( &rawtime, &timeinfo );
     strftime( buffer, 20, "%T", &timeinfo );
     return string{buffer};
@@ -167,7 +167,7 @@ namespace Utils {
     char   buffer[20];
     time_t rawtime;
     time( &rawtime );
-    struct tm timeinfo;
+    tm timeinfo;
     localtime_r( &rawtime, &timeinfo );
     strftime( buffer, 20, "%T %F", &timeinfo );
     return string{buffer};
@@ -178,7 +178,7 @@ namespace Utils {
     char   buffer[100];
     time_t rawtime;
     time( &rawtime );
-    struct tm timeinfo;
+    tm timeinfo;
     localtime_r( &rawtime, &timeinfo );
     strftime( buffer, 100, "date_%Y-%m-%d_time_%H-%M-%S", &timeinfo );
     return string{buffer};

@@ -122,11 +122,11 @@ namespace Utils {
   */
   template <typename Real>
   void
-  Poly<Real>::derivative( Poly<Real> & der ) const {
-    der.resize( m_order-1 ); // nuovo polinomio contenente il risultato
+  Poly<Real>::derivative( Poly & result ) const {
+    result.resize( m_order-1 ); // nuovo polinomio contenente il risultato
     for( Integer i = 1; i < m_order; ++i )
-      der.coeffRef(i-1) = i * this->coeff(i);
-    der.m_order = m_order-1;
+      result.coeffRef(i-1) = i * this->coeff(i);
+    result.m_order = m_order-1;
   }
 
   /*
@@ -134,12 +134,12 @@ namespace Utils {
   */
   template <typename Real>
   void
-  Poly<Real>::integral( Poly<Real> & itg ) const {
-    itg.resize( m_order+1 ); // nuovo polinomio contenente il risultato
-    itg.coeffRef(0) = 0;
+  Poly<Real>::integral( Poly & result ) const {
+    result.resize( m_order+1 ); // nuovo polinomio contenente il risultato
+    result.coeffRef(0) = 0;
     for ( Integer i = 1; i <= m_order; ++i )
-      itg.coeffRef(i) = this->coeff(i-1)/i;
-    itg.m_order = m_order+1;
+      result.coeffRef(i) = this->coeff(i-1)/i;
+    result.m_order = m_order+1;
   }
 
   /*
@@ -208,10 +208,10 @@ namespace Utils {
   */
   template <typename Real>
   Poly<Real> &
-  Poly<Real>::operator = ( Poly<Real> const & b ) {
-    this->resize( b.m_order );
-    this->to_eigen().noalias() = b.to_eigen();
-    m_order = b.m_order;
+  Poly<Real>::operator = ( Poly const & c ) {
+    this->resize( c.m_order );
+    this->to_eigen().noalias() = c.to_eigen();
+    m_order = c.m_order;
     return *this;
   }
 
@@ -220,17 +220,19 @@ namespace Utils {
   */
   template <typename Real>
   Poly<Real> &
-  Poly<Real>::operator += ( Poly<Real> const & b ) {
-    Integer max_order = std::max( m_order, b.m_order );
-    Integer min_order = std::min( m_order, b.m_order );
+  Poly<Real>::operator += ( Poly const & q ) {
+    Integer max_order = std::max( m_order, q.m_order );
+    Integer min_order = std::min( m_order, q.m_order );
 
     // ridimensiona vettore coefficienti senza distruggere il contenuto
     this->conservativeResize( max_order );
 
     // somma i coefficienti fino al grado comune ad entrambi i polinomi
-    this->head( min_order ).noalias() += b.head(min_order);
-    Integer n_tail = b.m_order - m_order;
-    if ( n_tail > 0 ) this->tail( n_tail ).noalias() = b.tail(n_tail);
+    this->head( min_order ).noalias() += q.head(min_order);
+
+    if ( Integer n_tail{ q.m_order - m_order }; n_tail > 0 )
+      this->tail( n_tail ).noalias() = q.tail(n_tail);
+
     m_order = max_order;
     return *this;
   }
@@ -240,11 +242,11 @@ namespace Utils {
   */
   template <typename Real>
   Poly<Real> &
-  Poly<Real>::operator += ( Real b ) {
-    if ( m_order > 0 ) this->coeffRef(0) += b;
+  Poly<Real>::operator += ( Real a ) {
+    if ( m_order > 0 ) this->coeffRef(0) += a;
     else {
       this->resize(1);
-      this->coeffRef(0) = b;
+      this->coeffRef(0) = a;
       m_order = 1;
     }
     return *this;
@@ -255,17 +257,19 @@ namespace Utils {
   */
   template <typename Real>
   Poly<Real> &
-  Poly<Real>::operator -= ( Poly<Real> const & b ) {
-    Integer max_order{ std::max( m_order, b.m_order ) };
-    Integer min_order{ std::min( m_order, b.m_order ) };
+  Poly<Real>::operator -= ( Poly const & q ) {
+    Integer max_order{ std::max( m_order, q.m_order ) };
+    Integer min_order{ std::min( m_order, q.m_order ) };
 
     // ridimensiona vettore coefficienti senza distruggere il contenuto
     this->conservativeResize( max_order );
 
     // somma i coefficienti fino al grado comune ad entrambi i polinomi
-    this->head( min_order ).noalias() -= b.head(min_order);
-    Integer n_tail = b.m_order - m_order;
-    if ( n_tail > 0 ) this->tail( n_tail ).noalias() = -b.tail(n_tail);
+    this->head( min_order ).noalias() -= q.head(min_order);
+
+    if (  Integer n_tail{ q.m_order - m_order }; n_tail > 0 )
+      this->tail( n_tail ).noalias() = -q.tail(n_tail);
+
     m_order = max_order;
     return *this;
   }
@@ -275,11 +279,11 @@ namespace Utils {
   */
   template <typename Real>
   Poly<Real> &
-  Poly<Real>::operator -= ( Real b ) {
-    if ( m_order > 0 ) this->coeffRef(0) -= b;
+  Poly<Real>::operator -= ( Real a ) {
+    if ( m_order > 0 ) this->coeffRef(0) -= a;
     else {
       this->resize(1);
-      this->coeffRef(0) = -b;
+      this->coeffRef(0) = -a;
       m_order = 1;
     }
     return *this;
@@ -290,14 +294,14 @@ namespace Utils {
   */
   template <typename Real>
   Poly<Real> &
-  Poly<Real>::operator *= ( Poly<Real> const & b ) {
+  Poly<Real>::operator *= ( Poly const & q ) {
     dvec_t a(this->to_eigen()); // fa una copia dei coefficienti del vettore
-    Integer new_order{ m_order + b.m_order - 1 };
-    this->resize( m_order + b.m_order - 1 ); // nuovo polinomio contenente il risultato
+    Integer const new_order{ m_order + q.m_order - 1 };
+    this->resize( m_order + q.m_order - 1 ); // nuovo polinomio contenente il risultato
     this->setZero();
     for( Integer i=0; i<m_order; ++i )
-      for( Integer j=0; j<b.m_order; ++j )
-        this->coeffRef(i+j) += a.coeff(i) * b.coeff(j);
+      for( Integer j=0; j<q.m_order; ++j )
+        this->coeffRef(i+j) += a.coeff(i) * q.coeff(j);
     m_order = new_order;
     return *this;
   }
@@ -307,8 +311,8 @@ namespace Utils {
   */
   template <typename Real>
   Poly<Real> &
-  Poly<Real>::operator *= ( Real b ) {
-    this->to_eigen() *= b;
+  Poly<Real>::operator *= ( Real a ) {
+    this->to_eigen() *= a;
     return *this;
   }
 
@@ -579,13 +583,13 @@ namespace Utils {
   */
   template <typename Real>
   void
-  Sturm<Real>::build( Poly_t const & P ) {
+  Sturm<Real>::build( Poly_t const & p ) {
     m_intervals.clear();
     Poly_t DP, M, R;
-    P.derivative( DP );
+    p.derivative( DP );
     m_sturm.clear();
-    m_sturm.reserve(P.order());
-    m_sturm.emplace_back(P);  m_sturm.back().adjust_degree();
+    m_sturm.reserve(p.order());
+    m_sturm.emplace_back(p);  m_sturm.back().adjust_degree();
     m_sturm.emplace_back(DP); m_sturm.back().adjust_degree();
     Integer ns{1};
     while ( true ) {
@@ -609,10 +613,10 @@ namespace Utils {
   template <typename Real>
   typename Sturm<Real>::Integer
   Sturm<Real>::sign_variations( Real x, bool & on_root ) const {
-    Integer sign_var  { 0 };
-    Integer last_sign { 0 };
-    Integer npoly     { Integer(m_sturm.size()) };
-    Real    v         { m_sturm[0].eval(x) };
+    Integer const npoly     { static_cast<Integer>(m_sturm.size()) };
+    Integer       sign_var  { 0 };
+    Integer       last_sign { 0 };
+    Real          v         { m_sturm[0].eval(x) };
     on_root = false;
     if      ( v > 0 ) last_sign = 1;
     else if ( v < 0 ) last_sign = -1;
@@ -638,7 +642,7 @@ namespace Utils {
   */
   template <typename Real>
   typename Sturm<Real>::Integer
-  Sturm<Real>::separate_roots( Real a_in, Real b_in ) {
+  Sturm<Real>::separate_roots( Real a, Real b ) {
     using std::abs;
     using std::max;
 
@@ -646,8 +650,8 @@ namespace Utils {
     m_intervals.reserve( m_sturm.size() );
 
     Interval I0, I1;
-    m_a = I0.a = a_in;
-    m_b = I0.b = b_in;
+    m_a = I0.a = a;
+    m_b = I0.b = b;
 
     I0.va = sign_variations( I0.a, I0.a_on_root );
     I0.vb = sign_variations( I0.b, I0.b_on_root );
@@ -670,7 +674,7 @@ namespace Utils {
         I1.a_on_root = I1.b_on_root = true;
         m_intervals.push_back(I1);
       }
-      return Integer(m_intervals.size());
+      return static_cast<Integer>(m_intervals.size());
     }
 
     // search intervals
@@ -742,7 +746,7 @@ namespace Utils {
       m_intervals.end(),
       []( Interval const & Sa, Interval const & Sb ) { return Sa.a < Sb.a; }
     );
-    return Integer(m_intervals.size());
+    return static_cast<Integer>(m_intervals.size());
   }
 
   /*
