@@ -204,7 +204,7 @@ namespace Utils {
       void value( string_view val ) { m_Value = val; }
 
       Alignment alignment() const { return m_Align; }
-      void alignment( Alignment align ) { m_Align = align; }
+      void alignment( Alignment const & align ) { m_Align = align; }
 
       integer col_span() const { return m_col_span; }
       void col_span( integer col_span ) { m_col_span = col_span; }

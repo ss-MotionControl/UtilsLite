@@ -138,7 +138,7 @@ namespace Utils {
 
   void
   SHA3::m_absorb_buffer(){
-    uint64_t *x = m_message_buffer_64;
+    uint64_t const * x { m_message_buffer_64 };
     for( int i = 0; i*64 < m_sponge_rate; ++i ) m_state[i/5][i%5] ^= x[i]; // TODO: unroll
     m_perform_rounds( ROUNDS );
   }

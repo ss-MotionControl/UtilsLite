@@ -276,7 +276,7 @@ namespace Utils {
     /*!
      * \return Number of objects that can be allocated.
      */
-    size_t size() const { return mem_size; }
+    static size_t size() { return mem_size; }
 
     //! Allocate memory for `sz` objects and return the pointer.
     /*!
