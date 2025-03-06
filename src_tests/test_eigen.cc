@@ -30,8 +30,8 @@ static std::mt19937 generator(seed1);
 
 static
 real_type
-rand( real_type xmin, real_type xmax ) {
-  real_type random = real_type(generator())/generator.max();
+rand( real_type const xmin, real_type const xmax ) {
+  real_type const random{ static_cast<real_type>(generator())/generator.max() };
   return xmin + (xmax-xmin)*random;
 }
 
@@ -42,8 +42,8 @@ template <int N>
 void
 testVV() {
 
-  int     N_TIMES = (1000000/N);
-  double  to_ps   = 1000000.0/N_TIMES;
+  int    const N_TIMES { 1000000/N };
+  double const to_ps   { 1000000.0/N_TIMES };
 
   using vecN_t = Eigen::Matrix<real_type,N,1>;
 
@@ -88,7 +88,7 @@ testVV() {
   // ===========================================================================
 
   {
-    Eigen::Map<dvec_t> vv1(NULL,0), vv2(NULL,0), vv3(NULL,0);
+    Eigen::Map<dvec_t> vv1(nullptr,0), vv2(nullptr,0), vv3(nullptr,0);
     new (&vv1) Eigen::Map<dvec_t>(V1,N);
     new (&vv2) Eigen::Map<dvec_t>(V2,N);
     new (&vv3) Eigen::Map<dvec_t>(V3,N);
@@ -187,7 +187,7 @@ testMM() {
   // ===========================================================================
 
   {
-    Eigen::Map<dmat_t> mm1(NULL,0,0), mm2(NULL,0,0), mm3(NULL,0,0);
+    Eigen::Map<dmat_t> mm1(nullptr,0,0), mm2(nullptr,0,0), mm3(nullptr,0,0);
     tm.tic();
     for ( int i = 0; i < N_TIMES; ++i ) {
       new (&mm1) Eigen::Map<dmat_t>(M1,N,N);
@@ -287,8 +287,8 @@ testMv() {
   // ===========================================================================
 
   {
-    Eigen::Map<dmat_t> mm(NULL,0,0);
-    Eigen::Map<dvec_t> vv(NULL,0), rr(R,0);
+    Eigen::Map<dmat_t> mm(nullptr,0,0);
+    Eigen::Map<dvec_t> vv(nullptr,0), rr(R,0);
     tm.tic();
     for ( int i = 0; i < N_TIMES; ++i ) {
       new (&mm) Eigen::Map<dmat_t>(M,N,N);
@@ -392,8 +392,8 @@ testCopy() {
 
   // ===========================================================================
   {
-    Eigen::Map<dmat_t> mm1(NULL,0,0);
-    Eigen::Map<dmat_t> mm2(NULL,0,0);
+    Eigen::Map<dmat_t> mm1(nullptr,0,0);
+    Eigen::Map<dmat_t> mm2(nullptr,0,0);
     tm.tic();
     for ( int i = 0; i < N_TIMES; ++i ) {
       new (&mm1) Eigen::Map<dmat_t>(M1,N,N);

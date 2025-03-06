@@ -35,8 +35,8 @@ test1() {
   P.normalize();
   S.build( P );
 
-  double a = -2;
-  double b = 2;
+  double const a{-2};
+  double const b{2};
 
   fmt::print("p(x) = {}\n",P.to_string() );
 
@@ -69,8 +69,8 @@ test2() {
   P.normalize();
   S.build( P );
 
-  double a = 0;
-  double b = 0.1094;
+  double const a{0};
+  double const b{0.1094};
 
   fmt::print("p(x) = {}\n",P.to_string() );
 
@@ -104,8 +104,8 @@ test3() {
   P.normalize();
   S.build( P );
 
-  double a = 0;
-  double b = 0.1094;
+  double const a{0};
+  double const b{0.1094};
 
   fmt::print("p(x) = {}\n",P.to_string() );
 
@@ -163,8 +163,8 @@ test4() {
   //P.normalize();
   S.build( P );
 
-  double a = 0;
-  double b = 0.1100001;
+  double const a{0};
+  double const b{0.1100001};
 
   fmt::print("p(x) = {}\n",P.to_string() );
 
@@ -191,8 +191,8 @@ test5() {
   //P.normalize();
   S.build( P );
 
-  double a = 0;
-  double b = 0.15;
+  double const a{0};
+  double const b{0.15};
 
   fmt::print("p(x) = {}\n",P.to_string() );
 
@@ -220,8 +220,8 @@ test6() {
   //P.normalize();
   S.build( P );
 
-  double a = -4;
-  double b = 4;
+  double const a{-4};
+  double const b{4};
 
   fmt::print("p(x) = {}\n",P.to_string() );
 
@@ -250,8 +250,8 @@ test7() {
   //P.normalize();
   S.build( P );
 
-  double a = -2;
-  double b = 0;
+  double const a{-2};
+  double const b{0};
 
   fmt::print("p(x) = {}\n",P.to_string() );
 

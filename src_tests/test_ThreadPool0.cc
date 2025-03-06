@@ -22,14 +22,14 @@
 
 using std::cout;
 
-static void do_test( int, int ) { return; }
+static void do_test( int, int ) {}
 
 template <class TP>
 void
-test_TP( int NN, int nt, int sz ) {
+test_TP( int const NN, int nt, int sz ) {
   Utils::TicToc tm;
 
-  double t_launch, t_wait, t_delete;
+  double t_launch, t_wait;
   {
     TP pool(nt);
 
@@ -46,7 +46,7 @@ test_TP( int NN, int nt, int sz ) {
     tm.tic();
   }
   tm.toc();
-  t_delete = tm.elapsed_mus();
+  double t_delete{ tm.elapsed_mus() };
 
   fmt::print(
     "[{:30}] [LAUNCH: {:12.8}mus, WAIT {:12.8}mus, DELETE {:12.8}mus] {:.8}mus\n",
@@ -55,7 +55,7 @@ test_TP( int NN, int nt, int sz ) {
 }
 
 int
-main( int argc, char *argv[] ) {
+main( int const argc, char *argv[] ) {
   Utils::TicToc tm;
 
   int nt = 16;

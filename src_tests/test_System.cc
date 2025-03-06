@@ -41,8 +41,8 @@ main() {
 
     map<string,string> mac_addr;
     Utils::get_MAC_address( mac_addr );
-    for ( auto & s: mac_addr )
-      fmt::print( "get_MAC_address {} -> {}\n", s.first, s.second );
+    for ( auto &[fst, snd]: mac_addr )
+      fmt::print( "get_MAC_address {} -> {}\n", fst, snd );
 
     vector<string> addr;
     Utils::get_IP_address( addr );

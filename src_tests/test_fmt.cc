@@ -38,12 +38,12 @@ main() {
   fmt::print("Hello, {name}! The answer is {number}. Goodbye, {name}.\n\n",
              "name"_a="World", "number"_a=42);
 
-  std::string message = fmt::format("The answer is {}.", 42);
+  std::string const message{ fmt::format("The answer is {}.", 42) };
   std::cout << message << "\n\n";
 
   //  run time error
   // std::string s = fmt::format(FMT_STRING("{:d}"), "foo");
-  std::time_t t = std::time(nullptr);
+  std::time_t const t{ std::time(nullptr) };
 
   // Prints "The date is 2020-11-07." (with the current date):
   fmt::print("The date is {:%Y-%m-%d}.", fmt::localtime(t));
@@ -67,7 +67,7 @@ main() {
   fmt::printf("Elapsed time: %.2f seconds\n\n", 1.23);
 
 
-  std::cout 
+  std::cout
     << Utils::fmt_table_top_row( 50, " PIPPO " )
     << Utils::fmt_table_row( 50 )
     << Utils::fmt_table_row( 50 )

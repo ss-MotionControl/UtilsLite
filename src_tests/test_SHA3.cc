@@ -34,12 +34,12 @@ main() {
 
   string a{"pippo"};
   string b{"pluto"};
-  sha3_1.hash_string( a.data() );
-  sha3_2.hash_string( b.data() );
+  sha3_1.hash_string( a );
+  sha3_2.hash_string( b );
   fmt::print( "{} -> {}\n", a, sha3_1.digest_in_hex() );
   fmt::print( "{} -> {}\n", b, sha3_2.digest_in_hex() );
-  sha3_1.hash_string( b.data() );
-  sha3_2.hash_string( a.data() );
+  sha3_1.hash_string( b );
+  sha3_2.hash_string( a );
   fmt::print( "{} -> {}\n", b, sha3_1.digest_in_hex() );
   fmt::print( "{} -> {}\n", a, sha3_2.digest_in_hex() );
 

@@ -35,7 +35,7 @@ std::uniform_int_distribution<> distrib(2,25);
 
 class BlockMult {
 
-  std::mutex mtx;
+  std::mutex         mtx;
   Utils::ThreadPool0 Pool0{5};
   Utils::ThreadPool1 Pool1{5};
   Utils::ThreadPool2 Pool2{5};
@@ -43,9 +43,9 @@ class BlockMult {
   Utils::ThreadPool4 Pool4{5};
   Utils::ThreadPool5 Pool5{5};
 
-  std::vector<integer> const * m_i_block;
-  std::vector<integer> const * m_j_block;
-  std::vector<integer> const * m_k_block;
+  std::vector<integer> const * m_i_block{nullptr};
+  std::vector<integer> const * m_j_block{nullptr};
+  std::vector<integer> const * m_k_block{nullptr};
 
   // (n x m) * (m x p)
   void
@@ -55,23 +55,23 @@ class BlockMult {
     mat       & C,
     integer     i,
     integer     j
-  );
+  ) const;
 
 public:
   BlockMult() {}
 
   bool
   multiply(
-    integer                    ntp,
-    mat const                  & A,
-    mat const                  & B,
+    integer                      ntp,
+    mat                  const & A,
+    mat                  const & B,
     mat                        & C,
     std::vector<integer> const & i_block,
     std::vector<integer> const & j_block,
     std::vector<integer> const & k_block
   );
 
-  ~BlockMult() {}
+  ~BlockMult() = default;
 
 };
 
@@ -79,14 +79,14 @@ public:
 
 void
 BlockMult::Compute_C_block(
-  mat const & A,
-  mat const & B,
-  mat       & C,
-  integer     i,
-  integer     j
-) {
-  auto II = Eigen::seqN( (*m_i_block)[i-1], (*m_i_block)[i]-(*m_i_block)[i-1] );
-  auto JJ = Eigen::seqN( (*m_j_block)[j-1], (*m_j_block)[j]-(*m_j_block)[j-1] );
+  mat     const & A,
+  mat     const & B,
+  mat           & C,
+  integer const   i,
+  integer const   j
+) const {
+  auto const II = Eigen::seqN( (*m_i_block)[i-1], (*m_i_block)[i]-(*m_i_block)[i-1] );
+  auto const JJ = Eigen::seqN( (*m_j_block)[j-1], (*m_j_block)[j]-(*m_j_block)[j-1] );
   for ( size_t k{1}; k < m_k_block->size(); ++k ) {
     auto KK = Eigen::seqN( (*m_k_block)[k-1], (*m_k_block)[k]-(*m_k_block)[k-1] );
     C(II,JJ) += A(II,KK)*B(KK,JJ);
@@ -97,9 +97,9 @@ BlockMult::Compute_C_block(
 
 bool
 BlockMult::multiply(
-  integer                    ntp,
-  mat const                  & A,
-  mat const                  & B,
+  integer              const   ntp,
+  mat                  const & A,
+  mat                  const & B,
   mat                        & C,
   std::vector<integer> const & i_block,
   std::vector<integer> const & j_block,
@@ -155,18 +155,18 @@ main() {
   Utils::TicToc tm;
   Eigen::initParallel();
   fmt::print("Eigen Test\n");
-  double mean   = 0.0;
-  double stdDev = 0.0;
+  double mean   { 0 };
+  double stdDev { 0 };
   Eigen::MatrixXd M1, M2, M3a, M3b;
   int n_runs = 3;
   Eigen::VectorXd times(n_runs);
   Eigen::VectorXd stdDev_vec(n_runs);
-  int N = 800;
-  int P = 400;
-  int M = 1200;
-  int n = N/40;
-  int p = P/30;
-  int m = M/50;
+  int N { 800 };
+  int P { 400 };
+  int M { 1200 };
+  int n { N/40 };
+  int p { P/30 };
+  int m { M/50 };
   M1.resize(N,P);
   M2.resize(P,M);
   M3a.resize(N,M);
@@ -183,7 +183,7 @@ main() {
     times(i) = tm.elapsed_ms();
   }
   mean   = times.mean();
-  stdDev = (((times.array() - mean) * (times.array() - mean)).sqrt()).sum()/((double)(n_runs-1));
+  stdDev = (((times.array() - mean) * (times.array() - mean)).sqrt()).sum()/(static_cast<double>(n_runs-1));
   fmt::print( "time: {:8.4}ms {:8.4}ms (sdev)\n\n\n", mean, stdDev );
 
   std::vector<integer> i_block;
@@ -228,7 +228,7 @@ main() {
       times(i) = tm.elapsed_ms();
     }
     mean   = times.mean();
-    stdDev = (((times.array() - mean) * (times.array() - mean)).sqrt()).sum()/((double)(n_runs-1));
+    stdDev = (((times.array() - mean) * (times.array() - mean)).sqrt()).sum()/static_cast<double>(n_runs - 1);
     fmt::print(
       "time (#{:30}): {:8.4}ms {:8.4}ms (sdev) Check M3a - M3b: {:8.4}\n\n",
       name, mean, stdDev, (M3a-M3b).norm()

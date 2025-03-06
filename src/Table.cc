@@ -90,8 +90,8 @@ namespace Utils::Table {
 
   integer
   Cell::width( integer const col ) const {
-    integer const padding    = (m_col_span - 1) * m_Table->cell_spacing();
-    integer       innerWidth = 0;
+    integer const padding    { (m_col_span - 1) * m_Table->cell_spacing() };
+    integer       innerWidth { 0 };
 
     for( integer i{0}; i < m_col_span; ++i )
       innerWidth += m_Table->column_width(col + i);
@@ -106,7 +106,7 @@ namespace Utils::Table {
 
   integer
   Cell::maximum_line_width() const {
-    integer maxlen = 0;
+    integer maxlen{0};
     string  line;
     istringstream stream( m_Value );
     while( getline(stream, line) ) {
@@ -154,9 +154,9 @@ namespace Utils::Table {
         break;
       case Alignment::CENTER:
       {
-        string  const val        = this->line(line);
-        integer const innerWidth = width + m_Table->cell_padding();
-        integer const spaceLeft  = (innerWidth-static_cast<integer>(val.length()))/2;
+        string  const val        { this->line(line) };
+        integer const innerWidth { width + m_Table->cell_padding() };
+        integer const spaceLeft  { (innerWidth-static_cast<integer>(val.length()))/2 };
         ss << string(spaceLeft, ' ')
             << setw(innerWidth - spaceLeft) << left << setfill(' ') << this->line(line);
       }
@@ -166,7 +166,7 @@ namespace Utils::Table {
   }
 
   Row::Row( Table * table, vecstr const & cells )
-    : m_Table(table) {
+  : m_Table(table) {
     for_each(
       cells.begin(), cells.end(),
       bind(
@@ -383,8 +383,8 @@ namespace Utils::Table {
     );
 
     if ( !m_Title.empty() ) {
-      integer innerWidth = (this->num_columns() - 1) * this->cell_spacing() + this->cell_padding();
-      for ( integer c = 0; c < this->num_columns(); ++c )
+      integer innerWidth{ (this->num_columns() - 1) * this->cell_spacing() + this->cell_padding() };
+      for ( integer c{0}; c < this->num_columns(); ++c )
         innerWidth += this->column_width(c);
 
       integer const spaceLeft { (innerWidth - static_cast<integer>(m_Title.length())) / 2 };

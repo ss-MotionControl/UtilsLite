@@ -26,7 +26,7 @@ using namespace rang;
 
 static
 void
-printHeading( string_view heading ) {
+printHeading( string_view const heading ) {
   cout
     << '\n'
     << style::reset << heading << style::reset << bg::reset << fg::reset
@@ -35,7 +35,7 @@ printHeading( string_view heading ) {
 
 static
 void
-test_colors( ostream &os, winTerm opt ) {
+test_colors( ostream & os, winTerm const opt ) {
   setWinTermMode(opt);
 
   printHeading("Text Style Test:");

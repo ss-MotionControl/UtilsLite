@@ -36,8 +36,8 @@ namespace Utils {
 
   template <typename Real>
   bool
-  AABBtree<Real>::overlap1( Real const bb1[], Real const bb2[], integer ) {
-    return bb1[0] <= bb2[1] && bb1[1] >= bb2[0];
+  AABBtree<Real>::overlap1( Real const bbox1[], Real const bbox2[], integer ) {
+    return bbox1[0] <= bbox2[1] && bbox1[1] >= bbox2[0];
   }
 
   template <typename Real>
@@ -125,65 +125,65 @@ namespace Utils {
 
   template <typename Real>
   bool
-  AABBtree<Real>::pnt_overlap3( Real const pnt[], Real const bb2[], integer ) {
-    return pnt[0] <= bb2[3] && pnt[0] >= bb2[0] &&
-           pnt[1] <= bb2[4] && pnt[1] >= bb2[1] &&
-           pnt[2] <= bb2[5] && pnt[2] >= bb2[2];
+  AABBtree<Real>::pnt_overlap3( Real const pnt[], Real const bbox2[], integer ) {
+    return pnt[0] <= bbox2[3] && pnt[0] >= bbox2[0] &&
+           pnt[1] <= bbox2[4] && pnt[1] >= bbox2[1] &&
+           pnt[2] <= bbox2[5] && pnt[2] >= bbox2[2];
   }
 
   template <typename Real>
   bool
-  AABBtree<Real>::pnt_overlap4( Real const pnt[], Real const bb2[], integer ) {
-    return pnt[0] <= bb2[4] && pnt[0] >= bb2[0] &&
-           pnt[1] <= bb2[5] && pnt[1] >= bb2[1] &&
-           pnt[2] <= bb2[6] && pnt[2] >= bb2[2] &&
-           pnt[3] <= bb2[7] && pnt[3] >= bb2[3];
+  AABBtree<Real>::pnt_overlap4( Real const pnt[], Real const bbox2[], integer ) {
+    return pnt[0] <= bbox2[4] && pnt[0] >= bbox2[0] &&
+           pnt[1] <= bbox2[5] && pnt[1] >= bbox2[1] &&
+           pnt[2] <= bbox2[6] && pnt[2] >= bbox2[2] &&
+           pnt[3] <= bbox2[7] && pnt[3] >= bbox2[3];
   }
 
   template <typename Real>
   bool
-  AABBtree<Real>::pnt_overlap5( Real const pnt[], Real const bb2[], integer ) {
-    return pnt[0] <= bb2[5] && pnt[0] >= bb2[0] &&
-           pnt[1] <= bb2[6] && pnt[1] >= bb2[1] &&
-           pnt[2] <= bb2[7] && pnt[2] >= bb2[2] &&
-           pnt[3] <= bb2[8] && pnt[3] >= bb2[3] &&
-           pnt[4] <= bb2[9] && pnt[4] >= bb2[4];
+  AABBtree<Real>::pnt_overlap5( Real const pnt[], Real const bbox2[], integer ) {
+    return pnt[0] <= bbox2[5] && pnt[0] >= bbox2[0] &&
+           pnt[1] <= bbox2[6] && pnt[1] >= bbox2[1] &&
+           pnt[2] <= bbox2[7] && pnt[2] >= bbox2[2] &&
+           pnt[3] <= bbox2[8] && pnt[3] >= bbox2[3] &&
+           pnt[4] <= bbox2[9] && pnt[4] >= bbox2[4];
   }
 
   template <typename Real>
   bool
-  AABBtree<Real>::pnt_overlap6( Real const pnt[], Real const bb2[], integer ) {
-    return pnt[0] <= bb2[6]  && pnt[0] >= bb2[0] &&
-           pnt[1] <= bb2[7]  && pnt[1] >= bb2[1] &&
-           pnt[2] <= bb2[8]  && pnt[2] >= bb2[2] &&
-           pnt[3] <= bb2[9]  && pnt[3] >= bb2[3] &&
-           pnt[4] <= bb2[10] && pnt[4] >= bb2[4] &&
-           pnt[5] <= bb2[11] && pnt[5] >= bb2[5];
+  AABBtree<Real>::pnt_overlap6( Real const pnt[], Real const bbox2[], integer ) {
+    return pnt[0] <= bbox2[6]  && pnt[0] >= bbox2[0] &&
+           pnt[1] <= bbox2[7]  && pnt[1] >= bbox2[1] &&
+           pnt[2] <= bbox2[8]  && pnt[2] >= bbox2[2] &&
+           pnt[3] <= bbox2[9]  && pnt[3] >= bbox2[3] &&
+           pnt[4] <= bbox2[10] && pnt[4] >= bbox2[4] &&
+           pnt[5] <= bbox2[11] && pnt[5] >= bbox2[5];
   }
 
   template <typename Real>
   bool
-  AABBtree<Real>::pnt_overlap7( Real const pnt[], Real const bb2[], integer ) {
-    return pnt[0] <= bb2[7]  && pnt[0] >= bb2[0] &&
-           pnt[1] <= bb2[8]  && pnt[1] >= bb2[1] &&
-           pnt[2] <= bb2[9]  && pnt[2] >= bb2[2] &&
-           pnt[3] <= bb2[10] && pnt[3] >= bb2[3] &&
-           pnt[4] <= bb2[11] && pnt[4] >= bb2[4] &&
-           pnt[5] <= bb2[12] && pnt[5] >= bb2[5] &&
-           pnt[6] <= bb2[13] && pnt[6] >= bb2[6];
+  AABBtree<Real>::pnt_overlap7( Real const pnt[], Real const bbox2[], integer ) {
+    return pnt[0] <= bbox2[7]  && pnt[0] >= bbox2[0] &&
+           pnt[1] <= bbox2[8]  && pnt[1] >= bbox2[1] &&
+           pnt[2] <= bbox2[9]  && pnt[2] >= bbox2[2] &&
+           pnt[3] <= bbox2[10] && pnt[3] >= bbox2[3] &&
+           pnt[4] <= bbox2[11] && pnt[4] >= bbox2[4] &&
+           pnt[5] <= bbox2[12] && pnt[5] >= bbox2[5] &&
+           pnt[6] <= bbox2[13] && pnt[6] >= bbox2[6];
   }
 
   template <typename Real>
   bool
-  AABBtree<Real>::pnt_overlap8( Real const pnt[], Real const bb2[], integer ) {
-    return pnt[0] <= bb2[8]  && pnt[0] >= bb2[0] &&
-           pnt[1] <= bb2[9]  && pnt[1] >= bb2[1] &&
-           pnt[2] <= bb2[10] && pnt[2] >= bb2[2] &&
-           pnt[3] <= bb2[11] && pnt[3] >= bb2[3] &&
-           pnt[4] <= bb2[12] && pnt[4] >= bb2[4] &&
-           pnt[5] <= bb2[13] && pnt[5] >= bb2[5] &&
-           pnt[6] <= bb2[14] && pnt[6] >= bb2[6] &&
-           pnt[7] <= bb2[15] && pnt[7] >= bb2[7];
+  AABBtree<Real>::pnt_overlap8( Real const pnt[], Real const bbox2[], integer ) {
+    return pnt[0] <= bbox2[8]  && pnt[0] >= bbox2[0] &&
+           pnt[1] <= bbox2[9]  && pnt[1] >= bbox2[1] &&
+           pnt[2] <= bbox2[10] && pnt[2] >= bbox2[2] &&
+           pnt[3] <= bbox2[11] && pnt[3] >= bbox2[3] &&
+           pnt[4] <= bbox2[12] && pnt[4] >= bbox2[4] &&
+           pnt[5] <= bbox2[13] && pnt[5] >= bbox2[5] &&
+           pnt[6] <= bbox2[14] && pnt[6] >= bbox2[6] &&
+           pnt[7] <= bbox2[15] && pnt[7] >= bbox2[7];
   }
 
   template <typename Real>
@@ -692,11 +692,11 @@ namespace Utils {
         Real vo{1};
         Real vL{1};
         Real vR{1};
-        for ( integer j = 0l; j < m_dim; ++j ) {
-          Real Lmin = bb_left_min[j];
-          Real Lmax = bb_left_max[j];
-          Real Rmin = bb_right_min[j];
-          Real Rmax = bb_right_max[j];
+        for ( integer j{0}; j < m_dim; ++j ) {
+          Real Lmin { bb_left_min[j]  };
+          Real Lmax { bb_left_max[j]  };
+          Real Rmin { bb_right_min[j] };
+          Real Rmax { bb_right_max[j] };
           vo *= max(min(Lmax,Rmax) - max(Lmin,Rmin), Real(0));
           vL *= Lmax - Lmin;
           vR *= Rmax - Rmin;

@@ -58,7 +58,7 @@ main() {
   C.gray    ( "gray\n"    );
 
   C.black_reversed   ( "black_reversed\n"   );
-  C.red_reversed     ( "red_reversed\n"     );
+  C.red_reversed     ( "red_reversed\n" );
   C.green_reversed   ( "green_reversed\n"   );
   C.yellow_reversed  ( "yellow_reversed\n"  );
   C.blue_reversed    ( "blue_reversed\n"    );
@@ -68,21 +68,21 @@ main() {
 
   for ( int i = 0; i <= 100; ++i ) {
     cout << Utils::progress_bar( i/100.0, 70 ) << '\r' << std::flush;
-    Utils::sleep_for_milliseconds(50);
+    Utils::sleep_for_milliseconds(2);
   }
 
   std::cout << "\n\n";
 
   for ( int i = 0; i <= 100; ++i ) {
     Utils::progress_bar( std::cout, i/100.0, 70, "working" );
-    Utils::sleep_for_milliseconds(50);
+    Utils::sleep_for_milliseconds(2);
   }
 
   std::cout << "\n\n";
 
   for ( int i = 0; i <= 100; ++i ) {
     Utils::progress_bar2( std::cout, i/100.0, 70, "working" );
-    Utils::sleep_for_milliseconds(50);
+    Utils::sleep_for_milliseconds(2);
   }
 
   cout << "\n\nAll Done Folks!\n";

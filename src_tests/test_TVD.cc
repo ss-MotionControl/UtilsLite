@@ -29,23 +29,22 @@ using dvec_t    = Eigen::Matrix<real_type,Eigen::Dynamic,1>;
 
 int
 main() {
-
-  integer N = 1000;
+  constexpr integer N{1000};
 
   // Generate test signal: piecewise smooth with noise corruption
   dvec_t t, y, x;
   t.resize(N);
   x.resize(N);
   y.resize(N);
-  for ( integer i = 0; i < N; ++i ) t(i) = (i*4*3.1415)/N;
+  for ( integer i{0}; i < N; ++i ) t(i) = (i*4*3.1415)/N;
   y = sin(t.array())+(t.array()-floor(t.array())) + 0.1*sin(100*t.array());
 
-  real_type lambda = 0.1;
+  constexpr real_type lambda{0.1};
   Utils::TVD<real_type>::denoise( N, y.data(), lambda, x.data() );
 
   ofstream file("TVD.txt");
   file << "t\ty\tx\n";
-  for ( integer i = 0; i < N; ++i )
+  for ( integer i{0}; i < N; ++i )
     file << t(i) << '\t'
          << y(i) << '\t'
          << x(i) << '\n';

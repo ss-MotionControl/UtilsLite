@@ -32,17 +32,17 @@ public:
   }
 
   void
-  inc() {
+  inc() const {
     bool ok;
-    int * pdata = bs.search( std::this_thread::get_id(), ok );
+    int * pdata{ bs.search( std::this_thread::get_id(), ok ) };
     if ( !ok ) std::cerr << "Counter::inc failed thread\n";
     ++(*pdata);
   }
 
   void
-  print() {
+  print() const {
     bool ok;
-    int * pdata = bs.search( std::this_thread::get_id(), ok );
+    int * pdata{ bs.search( std::this_thread::get_id(), ok ) };
     if ( !ok ) std::cerr << "Counter::inc failed thread\n";
     fmt::print( "thread {}, counter = {}\n", std::this_thread::get_id(), *pdata );
   }
@@ -61,7 +61,7 @@ do_test() {
 
 static
 void
-do_passa( int ii ) {
+do_passa( int const ii ) {
   cout << "passa ii=" << ii << '\n';
 }
 

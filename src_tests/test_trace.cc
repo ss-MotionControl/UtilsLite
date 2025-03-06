@@ -37,12 +37,12 @@ fun5( char const str[] ) {
 
 static
 void
-fun1( int i ) {
+fun1( int const i ) {
   cout << "in fun1\n";
   if ( i > 0 ) {
     fun2( i-1 );
   } else {
-    std::string str = fmt::format("format {}",i);
+    std::string const str{ fmt::format("format {}",i) };
     fun5( str.data() );
   }
 }
@@ -54,7 +54,7 @@ fun2( int i ) {
   if ( i > 0 ) {
     fun3( i-1 );
   } else {
-    std::string str = fmt::format("format {}",i);
+    std::string const str{ fmt::format("format {}",i) };
     fun5( str.data() );
   }
 }
@@ -66,7 +66,7 @@ fun3( int i ) {
   if ( i > 0 ) {
     fun4( i-1 );
   } else {
-    std::string str = fmt::format("format {}",i);
+    std::string const str{ fmt::format("format {}",i) };
     fun5( str.data() );
   }
 }
@@ -78,7 +78,7 @@ fun4( int i ) {
   if ( i > 0 ) {
     fun1( i-1 );
   } else {
-    std::string str = fmt::format("format {}",i);
+    std::string const str{ fmt::format("format {}",i) };
     fun5( str.data() );
   }
 }
@@ -86,7 +86,7 @@ fun4( int i ) {
 int
 main() {
   try {
-    int i = 6;
+    constexpr int i{6};
     cout << "call fun1\n";
     fun1( i );
   } catch ( std::exception const & exc ) {

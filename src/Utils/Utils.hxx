@@ -221,22 +221,110 @@ namespace Utils {
     return fs::path(path).extension().string();
   }
 
-  bool   get_environment( string_view ename, string & res );
-  void   set_environment( string_view ename, string_view newval, bool overwrite );
-  void   get_MAC_address( std::map<string,string> & addr );
+  /*!
+   * \addtogroup OS
+   * @{
+   */
+
+  //! Fetches the value of an environment variable.
+  /*!
+   * This function retrieves the value of the environment variable with the name
+   * specified by `ename` and stores it in the reference `res`.
+   *
+   * \param ename Name of the environment variable to retrieve.
+   * \param res Reference to a string where the result will be stored.
+   * \return True if the environment variable was found and its value retrieved,
+   *         false otherwise.
+   */
+  bool get_environment( string_view ename, string & res );
+
+  //! Sets the value of an environment variable.
+  /*!
+   * This function sets the value of the environment variable specified by
+   * `ename` to `newval`. If the variable already exists, it will be overwritten
+   * if the `overwrite` flag is true.
+   *
+   * \param ename Name of the environment variable to set.
+   * \param newval The new value to set for the environment variable.
+   * \param overwrite Flag to indicate whether the environment variable should be
+   *                  overwritten if it already exists.
+   */
+  void set_environment( string_view ename, string_view newval, bool overwrite );
+
+  //! Retrieves the MAC addresses of network interfaces.
+  /*!
+   * This function retrieves the MAC addresses for all available network
+   * interfaces on the system and stores them in the provided map, with
+   * interface names as the keys and MAC addresses as the values.
+   *
+   * \param addr A reference to a map where the MAC addresses will be stored.
+   */
+  void get_MAC_address( std::map<string,string> & addr );
+
+  //! Retrieves the hostname of the system.
+  /*!
+   * \return A string containing the system's hostname.
+   */
   string get_host_name();
-  void   get_IP_address( std::vector<string> & addr );
+
+  //! Fetches the IP addresses of the system.
+  /*!
+   * This function retrieves all IP addresses associated with the current system's
+   * network interfaces and stores them in the provided vector `addr`.
+   *
+   * \param addr A reference to a vector where the IP addresses will be stored.
+   */
+  void get_IP_address( std::vector<string> & addr );
+
+  //! Retrieves the username of the current user.
+  /*!
+   * \return A string containing the username of the current user.
+   */
+  string get_user_name();
+
+  //! Retrieves the home directory of the current user.
+  /*!
+   * \return A string containing the home directory path of the current user.
+   */
+  string get_home_directory();
+
+  //! Retrieves the full path to the current executable.
+  /*!
+   * \return A string containing the full path to the executable.
+   */
+  string get_executable_path_name();
+
+  //! Checks if a file exists.
+  /*!
+   * \param fname The path to the file to check.
+   * \return True if the file exists and is a regular file, false otherwise.
+   */
+  bool check_if_file_exists( string_view fname );
+
+  //! Checks if a directory exists.
+  /*!
+   * \param dirname The path to the directory to check.
+   * \return True if the directory exists and is valid, false otherwise.
+   */
+  bool check_if_dir_exists( string_view dirname );
+
+  //! Creates a directory if it does not exist.
+  /*!
+   * This function creates a directory with the specified mode if it does not
+   * already exist.
+   *
+   * \param dirname The path to the directory to create.
+   * \param mode The permissions mode to set for the new directory.
+   * \return True if the directory was created or already exists, false otherwise.
+   */
+  bool make_directory( string_view dirname, unsigned mode = 0777 );
+
   string get_date();
   string get_day_time();
   string get_day_time_and_date();
   string get_log_date_time();
-  string get_user_name();
-  string get_home_directory();
-  string get_executable_path_name();
-  bool   check_if_file_exists( string_view fname );
-  bool   check_if_dir_exists( string_view dirname );
-  bool   make_directory( string_view dirname, unsigned mode = 0777 );
 
+  /*! @} */  // End of OS group
 
   template <typename T_int, typename T_real>
   void

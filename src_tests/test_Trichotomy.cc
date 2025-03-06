@@ -67,29 +67,29 @@ do_solve1( real_type x0, real_type h, FUN f ) {
 int
 main() {
 
-  do_solve(  0.5, 1.0, [](real_type x) { return exp(x)+1/x; });
-  do_solve(  0.5, 2.0, [](real_type x) { return 5/x+x*x; });
-  do_solve(  0.8, 2.0, [](real_type x) { return -5/(x*(x-2)+5); });
-  do_solve(  0.0, 1.5, [](real_type x) { return exp(-2*x)+x*x/2; });
-  do_solve(  0.0, 1.5, [](real_type x) { return exp(x-1)+1/x; });
-  do_solve(  0.0, 1.0, [](real_type x) { return x*(x-exp(-x)); });
-  do_solve(  0.0, 2.5, [](real_type x) { return 5*x*x+1/x; });
-  do_solve( -3.0, 0.0, [](real_type x) { return exp(-x)+1/(1-x); });
-  do_solve(  0.0, 2.0, [](real_type x) { return 2+x*(x-1); });
-  do_solve(  0.0, 3.0, [](real_type x) { return -x*exp(-0.5*x); });
-  do_solve(  0.0, 3.0, [](real_type x) { return -(0.2*x+sin(2*x)); });
-  do_solve(  0.0, 0.5, [](real_type x) { return (exp(-x)-1/x); });
-  do_solve( -1.0, 0.0, [](real_type x) { return exp(x)+x*x; });
-  do_solve( -1.0, 0.0, [](real_type x) { return x*(4+x*(2+x*x)); });
-  do_solve( -1.0, 0.0, [](real_type x) { return x*x+sin(x); });
-  do_solve( -1.0, 1.0, [](real_type x) { return exp(x)+1/(x+2); });
-  do_solve( -2.0, 0.0, [](real_type x) { return 2/(x*x); });
-  do_solve(  2.0, 6.0, [](real_type x) { return -5*x*x*exp(-0.5*x); });
-  do_solve(  4.0, 9.0, [](real_type x) { return -(0.1*x+cos(x)); });
-  do_solve(  4.0, 9.0, [](real_type x) { return x*x-cos(1.5*x)/sin(1.5*x); });
+  do_solve(  0.5, 1.0, [](real_type const x) { return exp(x)+1/x; });
+  do_solve(  0.5, 2.0, [](real_type const x) { return 5/x+x*x; });
+  do_solve(  0.8, 2.0, [](real_type const x) { return -5/(x*(x-2)+5); });
+  do_solve(  0.0, 1.5, [](real_type const x) { return exp(-2*x)+x*x/2; });
+  do_solve(  0.0, 1.5, [](real_type const x) { return exp(x-1)+1/x; });
+  do_solve(  0.0, 1.0, [](real_type const x) { return x*(x-exp(-x)); });
+  do_solve(  0.0, 2.5, [](real_type const x) { return 5*x*x+1/x; });
+  do_solve( -3.0, 0.0, [](real_type const x) { return exp(-x)+1/(1-x); });
+  do_solve(  0.0, 2.0, [](real_type const x) { return 2+x*(x-1); });
+  do_solve(  0.0, 3.0, [](real_type const x) { return -x*exp(-0.5*x); });
+  do_solve(  0.0, 3.0, [](real_type const x) { return -(0.2*x+sin(2*x)); });
+  do_solve(  0.0, 0.5, [](real_type const x) { return (exp(-x)-1/x); });
+  do_solve( -1.0, 0.0, [](real_type const x) { return exp(x)+x*x; });
+  do_solve( -1.0, 0.0, [](real_type const x) { return x*(4+x*(2+x*x)); });
+  do_solve( -1.0, 0.0, [](real_type const x) { return x*x+sin(x); });
+  do_solve( -1.0, 1.0, [](real_type const x) { return exp(x)+1/(x+2); });
+  do_solve( -2.0, 0.0, [](real_type const x) { return 2/(x*x); });
+  do_solve(  2.0, 6.0, [](real_type const x) { return -5*x*x*exp(-0.5*x); });
+  do_solve(  4.0, 9.0, [](real_type const x) { return -(0.1*x+cos(x)); });
+  do_solve(  4.0, 9.0, [](real_type const x) { return x*x-cos(1.5*x)/sin(1.5*x); });
 
-  do_solve1(  4.0, 0.1, [](real_type x) { return x*x; });
-  do_solve1( -4.0, 0.1, [](real_type x) { return x*x; });
+  do_solve1(  4.0, 0.1, [](real_type const x) { return x*x; });
+  do_solve1( -4.0, 0.1, [](real_type const x) { return x*x; });
 
   cout << "All done folks!\n\n";
 

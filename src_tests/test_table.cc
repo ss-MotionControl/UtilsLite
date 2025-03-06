@@ -10,7 +10,7 @@ main() {
   cout << "Starting table test ...\n\n";
   try {
 
-    std::vector<std::vector<std::string>> rows{
+    std::vector<std::vector<std::string>> const rows{
       {"Karl Kangaroo", "13. Sep 1988", "jumping"},
       {"Austin Ape", "24. Jul 2000", "climbing, jumping,\nsurfing"},
       {"..."},

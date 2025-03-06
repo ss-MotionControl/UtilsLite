@@ -26,7 +26,7 @@ using Utils::AlgoBracket;
 
 #include "1D_fun.cxx"
 
-int const NA{8};
+constexpr int NA{8};
 
 static int ntest{0};
 static int nfuneval[NA]{0,0,0,0,0,0,0,0};
@@ -37,7 +37,7 @@ do_solve( string_view name, real_type a, real_type b, FUN f ) {
   fmt::print( "\n#{:<3} {}\n", ntest, name );
   ++ntest;
 
-  for ( unsigned ialgo : {0,1,2,3,4,5,6} ) {
+  for ( const unsigned ialgo : {0,1,2,3,4,5,6} ) {
     AlgoBracket<real_type> solver;
     solver.select( ialgo );
     real_type res  = solver.eval2( a, b, f );
@@ -77,8 +77,8 @@ main() {
   std::vector<std::unique_ptr<fun1D>> f_list;
 
   build_1dfun_list( f_list );
-  
-  for ( auto & f : f_list )
+
+  for (const auto & f : f_list )
     do_solve( f->info(), f->a0(), f->b0(), f->function() );
 
   //do_solve( "fun_penalty(x,0)",              -1.0, 1.0,    [] ( real_type x ) { return fun_penalty(x,0); } );
@@ -86,7 +86,7 @@ main() {
   //do_solve2( -1, 1.1498547501802843, -100, 100, [] ( real_type x ) { return fun_penalty(x,-229.970950036057); } );
 
 
-  for ( unsigned ialgo : {0,1,2,3,4,5,6} ) {
+  for ( unsigned const ialgo : {0,1,2,3,4,5,6} ) {
     AlgoBracket<real_type> solver;
     solver.select( ialgo );
     fmt::print( "{:15} = {}\n", solver.algo(), nfuneval[ialgo] );

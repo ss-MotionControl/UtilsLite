@@ -38,8 +38,8 @@ using Utils::m_pi;
 
 static
 real_type
-rand( real_type xmin, real_type xmax ) {
-  real_type random = real_type(generator())/generator.max();
+rand( real_type const xmin, real_type const xmax ) {
+  real_type const random{ static_cast<real_type>(generator())/generator.max() };
   return xmin + (xmax-xmin)*random;
 }
 
@@ -48,8 +48,8 @@ main() {
 
   TicToc tm;
 
-  integer const NS  = 10000;
-  integer const dim = 2;
+  constexpr integer NS  { 10000 };
+  constexpr integer dim { 2 };
   real_type bb_min1[NS*dim];
   real_type bb_max1[NS*dim];
   real_type bb_min2[NS*dim];
@@ -153,7 +153,7 @@ main() {
   */
 
   std::set<integer> bb_index;
-  real_type const pnt[2] = { 4, 4 };
+  constexpr real_type pnt[2]{ 4, 4 };
   tm.tic();
   T1.intersect_with_one_point( pnt, bb_index );
   tm.toc();

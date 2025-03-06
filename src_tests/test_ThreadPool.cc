@@ -34,25 +34,25 @@ public:
   }
 
   void
-  inc() {
+  inc() const {
     bool ok;
-    int * pdata = bs.search( std::this_thread::get_id(), ok );
+    int * pdata{ bs.search( std::this_thread::get_id(), ok ) };
     if ( !ok ) fmt::print("Counter::inc failed thread\n");
     ++(*pdata);
   }
 
   int
-  get() {
+  get() const {
     bool ok;
-    int * pdata = bs.search( std::this_thread::get_id(), ok );
+    int const * pdata{ bs.search( std::this_thread::get_id(), ok ) };
     if ( !ok ) fmt::print("Counter::inc failed thread\n");
     return *pdata;
   }
 
   void
-  print() {
+  print() const {
     bool ok;
-    int * pdata = bs.search( std::this_thread::get_id(), ok );
+    int * pdata{ bs.search( std::this_thread::get_id(), ok ) };
     if ( !ok ) fmt::print("Counter::inc failed thread\n");
     fmt::print(
       "thread {}, counter = {}\n",
@@ -64,14 +64,14 @@ public:
 
 static
 void
-do_test( int n, int sz ) {
+do_test( int const n, int const sz ) {
   Counter c;
-  int nn = 1+((n*111)%sz);
+  int const nn{ 1+((n*111)%sz) };
   //int nn = 40;
-  for ( int i = 0; i < nn; ++i ) {
+  for ( int i{0}; i < nn; ++i ) {
     //Utils::sleep_for_nanoseconds(1);
-    int mm = 1+((i*11)%64);
-    for ( int j = 0; j < mm; ++j ) c.inc();
+    int const mm{ 1+((i*11)%64) };
+    for ( int j{0}; j < mm; ++j ) c.inc();
   }
   accumulator += c.get();
   //c.print();
@@ -80,11 +80,11 @@ do_test( int n, int sz ) {
 
 template <class TP>
 void
-test_TP( int NN, int nt, int sz ) {
+test_TP( int const NN, int nt, int sz ) {
   Utils::TicToc tm;
 
   accumulator = 0;
-  double t_launch, t_wait, t_delete;
+  double t_launch, t_wait;
   {
     TP pool(nt);
 
@@ -101,7 +101,7 @@ test_TP( int NN, int nt, int sz ) {
     tm.tic();
   }
   tm.toc();
-  t_delete = tm.elapsed_mus();
+  double t_delete{ tm.elapsed_mus() };
 
   fmt::print(
      "[{:30}] result {} [LAUNCH (AVE): {:12.8} mus, WAIT {:12.8} mus, DELETE {:12.8} mus] {:.8} mus\n",
@@ -110,7 +110,7 @@ test_TP( int NN, int nt, int sz ) {
 }
 
 int
-main( int argc, char *argv[] ) {
+main( int const argc, char *argv[] ) {
   Utils::TicToc tm;
 
   int nt = 16;
