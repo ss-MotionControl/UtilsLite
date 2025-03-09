@@ -118,13 +118,13 @@ main() {
   #endif
   #if 0
     real_type X0[2]{1,1};
-    real_type delta = 1;
+    real_type delta{1};
     std::function<real_type(real_type const[])> F(fun2);
     do_solve( F, X0, delta );
   #endif
   #if 1
     real_type X0[2]{-1,1};
-    real_type delta = 0.1;
+    real_type delta{0.1};
     std::function<real_type(real_type const[])> F(fun3);
     do_solve( F, X0, delta );
   #endif

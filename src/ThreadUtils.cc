@@ -37,8 +37,8 @@ namespace Utils {
   : m_active(true)
   , m_running(false) // block
   , m_do_job(false)
+  , m_job([]()->void{})
   {
-    m_job            = []()->void{}; // empty job
     m_running_thread = std::thread( &WorkerLoop::worker_loop, this );
   }
 
