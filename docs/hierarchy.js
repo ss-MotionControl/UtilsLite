@@ -11,9 +11,6 @@ var hierarchy =
     [ "Utils::Bracket_base_fun< Real >", "df/dbf/class_utils_1_1_bracket__base__fun.html", null ],
     [ "Utils::Table::Cell", "d8/d2b/class_utils_1_1_table_1_1_cell.html", null ],
     [ "Utils::Console", "d1/df8/class_utils_1_1_console.html", null ],
-    [ "std::function", null, [
-      [ "Utils::unique_function< T >", "d8/d6f/class_utils_1_1unique__function.html", null ]
-    ] ],
     [ "Utils::HJPatternSearch< Real >", "d7/d30/class_utils_1_1_h_j_pattern_search.html", null ],
     [ "Utils::Malloc< T >", "dc/d87/class_utils_1_1_malloc.html", null ],
     [ "Utils::MallocFixed< T, mem_size >", "d1/d7a/class_utils_1_1_malloc_fixed.html", null ],

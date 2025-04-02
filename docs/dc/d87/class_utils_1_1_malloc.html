@@ -152,12 +152,18 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a4a29eab209311174b15b3489d95b068f" id="r_a4a29eab209311174b15b3489d95b068f"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a4a29eab209311174b15b3489d95b068f">~Malloc</a> ()</td></tr>
 <tr class="memdesc:a4a29eab209311174b15b3489d95b068f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Destructor.  <br /></td></tr>
 <tr class="separator:a4a29eab209311174b15b3489d95b068f"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad370911c11e3610447274af8620c1afe" id="r_ad370911c11e3610447274af8620c1afe"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad370911c11e3610447274af8620c1afe">allocate</a> (std::size_t n)</td></tr>
-<tr class="memdesc:ad370911c11e3610447274af8620c1afe"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate memory for <code>n</code> objects, error if already allocated.  <br /></td></tr>
-<tr class="separator:ad370911c11e3610447274af8620c1afe"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:ad529bba2a82bad73028378a8190fca84" id="r_ad529bba2a82bad73028378a8190fca84"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ad529bba2a82bad73028378a8190fca84">reallocate</a> (std::size_t n)</td></tr>
-<tr class="memdesc:ad529bba2a82bad73028378a8190fca84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reallocate memory for <code>n</code> objects, even if already allocated.  <br /></td></tr>
-<tr class="separator:ad529bba2a82bad73028378a8190fca84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a2eafcc9243bdad372ea35c00f3e94f9b" id="r_a2eafcc9243bdad372ea35c00f3e94f9b"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a2eafcc9243bdad372ea35c00f3e94f9b">allocate</a> (size_t n)</td></tr>
+<tr class="memdesc:a2eafcc9243bdad372ea35c00f3e94f9b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate memory for <code>n</code> objects, error if already allocated.  <br /></td></tr>
+<tr class="separator:a2eafcc9243bdad372ea35c00f3e94f9b"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a93c952ce2eeb271a51c278785efc2966" id="r_a93c952ce2eeb271a51c278785efc2966"><td class="memTemplParams" colspan="2">template&lt;typename T2&gt; </td></tr>
+<tr class="memitem:a93c952ce2eeb271a51c278785efc2966"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a93c952ce2eeb271a51c278785efc2966">allocate</a> (T2 n)</td></tr>
+<tr class="separator:a93c952ce2eeb271a51c278785efc2966"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac498c7b66465a5fadb11e68b17d01b12" id="r_ac498c7b66465a5fadb11e68b17d01b12"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac498c7b66465a5fadb11e68b17d01b12">reallocate</a> (size_t n)</td></tr>
+<tr class="memdesc:ac498c7b66465a5fadb11e68b17d01b12"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reallocate memory for <code>n</code> objects, even if already allocated.  <br /></td></tr>
+<tr class="separator:ac498c7b66465a5fadb11e68b17d01b12"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:afb3cb1dea6fd27314333782fde80d52c" id="r_afb3cb1dea6fd27314333782fde80d52c"><td class="memTemplParams" colspan="2">template&lt;typename T2&gt; </td></tr>
+<tr class="memitem:afb3cb1dea6fd27314333782fde80d52c"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#afb3cb1dea6fd27314333782fde80d52c">reallocate</a> (T2 n)</td></tr>
+<tr class="separator:afb3cb1dea6fd27314333782fde80d52c"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a817592d2e181aa4bf36306c6169a30cb" id="r_a817592d2e181aa4bf36306c6169a30cb"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a817592d2e181aa4bf36306c6169a30cb">free</a> ()</td></tr>
 <tr class="memdesc:a817592d2e181aa4bf36306c6169a30cb"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free memory without deallocating the pointer.  <br /></td></tr>
 <tr class="separator:a817592d2e181aa4bf36306c6169a30cb"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -167,27 +173,39 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a7bc4a699abcd8b259270fa4245b644a0" id="r_a7bc4a699abcd8b259270fa4245b644a0"><td class="memItemLeft" align="right" valign="top">size_t&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a7bc4a699abcd8b259270fa4245b644a0">size</a> () const</td></tr>
 <tr class="memdesc:a7bc4a699abcd8b259270fa4245b644a0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the number of allocated objects.  <br /></td></tr>
 <tr class="separator:a7bc4a699abcd8b259270fa4245b644a0"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a49e7e22bc02c39b124d5f63c8b6ce3e3" id="r_a49e7e22bc02c39b124d5f63c8b6ce3e3"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a49e7e22bc02c39b124d5f63c8b6ce3e3">operator()</a> (std::size_t sz)</td></tr>
-<tr class="memdesc:a49e7e22bc02c39b124d5f63c8b6ce3e3"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate memory for <code>sz</code> objects and return the pointer.  <br /></td></tr>
-<tr class="separator:a49e7e22bc02c39b124d5f63c8b6ce3e3"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a3a2115fae260e7ec70890a31d670d1da" id="r_a3a2115fae260e7ec70890a31d670d1da"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a3a2115fae260e7ec70890a31d670d1da">pop</a> (std::size_t sz)</td></tr>
-<tr class="memdesc:a3a2115fae260e7ec70890a31d670d1da"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free memory for <code>sz</code> objects.  <br /></td></tr>
-<tr class="separator:a3a2115fae260e7ec70890a31d670d1da"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a82e39e136320f5965006d2782612f843" id="r_a82e39e136320f5965006d2782612f843"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a82e39e136320f5965006d2782612f843">malloc</a> (std::size_t n)</td></tr>
-<tr class="memdesc:a82e39e136320f5965006d2782612f843"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate memory for <code>n</code> objects.  <br /></td></tr>
-<tr class="separator:a82e39e136320f5965006d2782612f843"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:aa4afd4a56503a668d8333e6c59ce163c" id="r_aa4afd4a56503a668d8333e6c59ce163c"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#aa4afd4a56503a668d8333e6c59ce163c">realloc</a> (std::size_t n)</td></tr>
-<tr class="memdesc:aa4afd4a56503a668d8333e6c59ce163c"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reallocate memory for <code>n</code> objects.  <br /></td></tr>
-<tr class="separator:aa4afd4a56503a668d8333e6c59ce163c"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:af7cff9476fb7d4eaa8bdfdcb70701528" id="r_af7cff9476fb7d4eaa8bdfdcb70701528"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#af7cff9476fb7d4eaa8bdfdcb70701528">operator()</a> (size_t sz)</td></tr>
+<tr class="memdesc:af7cff9476fb7d4eaa8bdfdcb70701528"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate memory for <code>sz</code> objects and return the pointer.  <br /></td></tr>
+<tr class="separator:af7cff9476fb7d4eaa8bdfdcb70701528"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a18fa97c8a7a54d406616450e5660ae48" id="r_a18fa97c8a7a54d406616450e5660ae48"><td class="memTemplParams" colspan="2">template&lt;typename T2&gt; </td></tr>
+<tr class="memitem:a18fa97c8a7a54d406616450e5660ae48"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#a18fa97c8a7a54d406616450e5660ae48">operator()</a> (T2 sz)</td></tr>
+<tr class="separator:a18fa97c8a7a54d406616450e5660ae48"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ac993c7b8123725a9a4729b937ae2e662" id="r_ac993c7b8123725a9a4729b937ae2e662"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ac993c7b8123725a9a4729b937ae2e662">pop</a> (size_t sz)</td></tr>
+<tr class="memdesc:ac993c7b8123725a9a4729b937ae2e662"><td class="mdescLeft">&#160;</td><td class="mdescRight">Free memory for <code>sz</code> objects.  <br /></td></tr>
+<tr class="separator:ac993c7b8123725a9a4729b937ae2e662"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acf5bbdd37ba2efd607942384e4b4defb" id="r_acf5bbdd37ba2efd607942384e4b4defb"><td class="memTemplParams" colspan="2">template&lt;typename T2&gt; </td></tr>
+<tr class="memitem:acf5bbdd37ba2efd607942384e4b4defb"><td class="memTemplItemLeft" align="right" valign="top">void&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#acf5bbdd37ba2efd607942384e4b4defb">pop</a> (T2 n)</td></tr>
+<tr class="separator:acf5bbdd37ba2efd607942384e4b4defb"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae0f3fba69ad5b6129e6f658cecc65348" id="r_ae0f3fba69ad5b6129e6f658cecc65348"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ae0f3fba69ad5b6129e6f658cecc65348">malloc</a> (size_t n)</td></tr>
+<tr class="memdesc:ae0f3fba69ad5b6129e6f658cecc65348"><td class="mdescLeft">&#160;</td><td class="mdescRight">Allocate memory for <code>n</code> objects.  <br /></td></tr>
+<tr class="separator:ae0f3fba69ad5b6129e6f658cecc65348"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ae13128e10001e9a3fab3b42ebd4fe262" id="r_ae13128e10001e9a3fab3b42ebd4fe262"><td class="memTemplParams" colspan="2">template&lt;typename T2&gt; </td></tr>
+<tr class="memitem:ae13128e10001e9a3fab3b42ebd4fe262"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#ae13128e10001e9a3fab3b42ebd4fe262">malloc</a> (T2 n)</td></tr>
+<tr class="separator:ae13128e10001e9a3fab3b42ebd4fe262"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:ace81d9c522b594f1c2e807e3fd8916dc" id="r_ace81d9c522b594f1c2e807e3fd8916dc"><td class="memItemLeft" align="right" valign="top">T *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ace81d9c522b594f1c2e807e3fd8916dc">realloc</a> (size_t n)</td></tr>
+<tr class="memdesc:ace81d9c522b594f1c2e807e3fd8916dc"><td class="mdescLeft">&#160;</td><td class="mdescRight">Reallocate memory for <code>n</code> objects.  <br /></td></tr>
+<tr class="separator:ace81d9c522b594f1c2e807e3fd8916dc"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:acebc4bf5908f58e78bd78d8a437de100" id="r_acebc4bf5908f58e78bd78d8a437de100"><td class="memTemplParams" colspan="2">template&lt;typename T2&gt; </td></tr>
+<tr class="memitem:acebc4bf5908f58e78bd78d8a437de100"><td class="memTemplItemLeft" align="right" valign="top">T *&#160;</td><td class="memTemplItemRight" valign="bottom"><a class="el" href="#acebc4bf5908f58e78bd78d8a437de100">realloc</a> (T2 n)</td></tr>
+<tr class="separator:acebc4bf5908f58e78bd78d8a437de100"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a50ff55be6ee5d9e07ca0e967c9b28760" id="r_a50ff55be6ee5d9e07ca0e967c9b28760"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a50ff55be6ee5d9e07ca0e967c9b28760">is_empty</a> () const</td></tr>
 <tr class="memdesc:a50ff55be6ee5d9e07ca0e967c9b28760"><td class="mdescLeft">&#160;</td><td class="mdescRight">Check if the memory is fully allocated.  <br /></td></tr>
 <tr class="separator:a50ff55be6ee5d9e07ca0e967c9b28760"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:adcd1c2ec289aaf07a628e1dfd6119d31" id="r_adcd1c2ec289aaf07a628e1dfd6119d31"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#adcd1c2ec289aaf07a628e1dfd6119d31">must_be_empty</a> (char const *where) const</td></tr>
-<tr class="memdesc:adcd1c2ec289aaf07a628e1dfd6119d31"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ensure that memory is fully used.  <br /></td></tr>
-<tr class="separator:adcd1c2ec289aaf07a628e1dfd6119d31"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a430305874f3e45c0645dd49bc69a8c84" id="r_a430305874f3e45c0645dd49bc69a8c84"><td class="memItemLeft" align="right" valign="top">std::string&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a430305874f3e45c0645dd49bc69a8c84">info</a> (char const *where) const</td></tr>
-<tr class="memdesc:a430305874f3e45c0645dd49bc69a8c84"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get memory allocation information.  <br /></td></tr>
-<tr class="separator:a430305874f3e45c0645dd49bc69a8c84"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a756af49f55a78732ed3c7e8ee5193bf0" id="r_a756af49f55a78732ed3c7e8ee5193bf0"><td class="memItemLeft" align="right" valign="top">void&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a756af49f55a78732ed3c7e8ee5193bf0">must_be_empty</a> (string_view where) const</td></tr>
+<tr class="memdesc:a756af49f55a78732ed3c7e8ee5193bf0"><td class="mdescLeft">&#160;</td><td class="mdescRight">Ensure that memory is fully used.  <br /></td></tr>
+<tr class="separator:a756af49f55a78732ed3c7e8ee5193bf0"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a97fb58497159b5faaf90b29eecefbc09" id="r_a97fb58497159b5faaf90b29eecefbc09"><td class="memItemLeft" align="right" valign="top"><a class="el" href="../../d1/d7c/namespace_utils.html#a47dce01e91215c02efe186bcdad52efc">string</a>&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a97fb58497159b5faaf90b29eecefbc09">info</a> (string_view where) const</td></tr>
+<tr class="memdesc:a97fb58497159b5faaf90b29eecefbc09"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get memory allocation information.  <br /></td></tr>
+<tr class="separator:a97fb58497159b5faaf90b29eecefbc09"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;typename T&gt;<br />
@@ -314,8 +332,8 @@ template&lt;typename T&gt; </div>
 </div>
 </div>
 <h2 class="groupheader">Member Function Documentation</h2>
-<a id="ad370911c11e3610447274af8620c1afe" name="ad370911c11e3610447274af8620c1afe"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad370911c11e3610447274af8620c1afe">&#9670;&#160;</a></span>allocate()</h2>
+<a id="a2eafcc9243bdad372ea35c00f3e94f9b" name="a2eafcc9243bdad372ea35c00f3e94f9b"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a2eafcc9243bdad372ea35c00f3e94f9b">&#9670;&#160;</a></span>allocate() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -325,7 +343,7 @@ template&lt;typename T&gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::allocate </td>
           <td>(</td>
-          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -338,6 +356,35 @@ template&lt;typename T&gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="a93c952ce2eeb271a51c278785efc2966" name="a93c952ce2eeb271a51c278785efc2966"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a93c952ce2eeb271a51c278785efc2966">&#9670;&#160;</a></span>allocate() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T&gt; </div>
+<div class="memtemplate">
+template&lt;typename T2&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::allocate </td>
+          <td>(</td>
+          <td class="paramtype">T2</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -391,8 +438,8 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
-<a id="a430305874f3e45c0645dd49bc69a8c84" name="a430305874f3e45c0645dd49bc69a8c84"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a430305874f3e45c0645dd49bc69a8c84">&#9670;&#160;</a></span>info()</h2>
+<a id="a97fb58497159b5faaf90b29eecefbc09" name="a97fb58497159b5faaf90b29eecefbc09"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a97fb58497159b5faaf90b29eecefbc09">&#9670;&#160;</a></span>info()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -400,9 +447,9 @@ template&lt;typename T&gt; </div>
 template&lt;typename T&gt; </div>
       <table class="memname">
         <tr>
-          <td class="memname">std::string <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::info </td>
+          <td class="memname"><a class="el" href="../../d1/d7c/namespace_utils.html#a47dce01e91215c02efe186bcdad52efc">string</a> <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::info </td>
           <td>(</td>
-          <td class="paramtype">char const *</td>          <td class="paramname"><span class="paramname"><em>where</em></span></td><td>)</td>
+          <td class="paramtype">string_view</td>          <td class="paramname"><span class="paramname"><em>where</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
@@ -449,8 +496,8 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
-<a id="a82e39e136320f5965006d2782612f843" name="a82e39e136320f5965006d2782612f843"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a82e39e136320f5965006d2782612f843">&#9670;&#160;</a></span>malloc()</h2>
+<a id="ae0f3fba69ad5b6129e6f658cecc65348" name="ae0f3fba69ad5b6129e6f658cecc65348"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae0f3fba69ad5b6129e6f658cecc65348">&#9670;&#160;</a></span>malloc() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -460,7 +507,7 @@ template&lt;typename T&gt; </div>
         <tr>
           <td class="memname">T * <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::malloc </td>
           <td>(</td>
-          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -477,8 +524,37 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
-<a id="adcd1c2ec289aaf07a628e1dfd6119d31" name="adcd1c2ec289aaf07a628e1dfd6119d31"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#adcd1c2ec289aaf07a628e1dfd6119d31">&#9670;&#160;</a></span>must_be_empty()</h2>
+<a id="ae13128e10001e9a3fab3b42ebd4fe262" name="ae13128e10001e9a3fab3b42ebd4fe262"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ae13128e10001e9a3fab3b42ebd4fe262">&#9670;&#160;</a></span>malloc() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T&gt; </div>
+<div class="memtemplate">
+template&lt;typename T2&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T * <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::malloc </td>
+          <td>(</td>
+          <td class="paramtype">T2</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="a756af49f55a78732ed3c7e8ee5193bf0" name="a756af49f55a78732ed3c7e8ee5193bf0"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a756af49f55a78732ed3c7e8ee5193bf0">&#9670;&#160;</a></span>must_be_empty()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -488,7 +564,7 @@ template&lt;typename T&gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::must_be_empty </td>
           <td>(</td>
-          <td class="paramtype">char const *</td>          <td class="paramname"><span class="paramname"><em>where</em></span></td><td>)</td>
+          <td class="paramtype">string_view</td>          <td class="paramname"><span class="paramname"><em>where</em></span></td><td>)</td>
           <td> const</td>
         </tr>
       </table>
@@ -504,8 +580,8 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
-<a id="a49e7e22bc02c39b124d5f63c8b6ce3e3" name="a49e7e22bc02c39b124d5f63c8b6ce3e3"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a49e7e22bc02c39b124d5f63c8b6ce3e3">&#9670;&#160;</a></span>operator()()</h2>
+<a id="af7cff9476fb7d4eaa8bdfdcb70701528" name="af7cff9476fb7d4eaa8bdfdcb70701528"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#af7cff9476fb7d4eaa8bdfdcb70701528">&#9670;&#160;</a></span>operator()() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -518,7 +594,7 @@ template&lt;typename T&gt; </div>
         <tr>
           <td class="memname">T * <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::operator() </td>
           <td>(</td>
-          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>sz</em></span></td><td>)</td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>sz</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -537,6 +613,35 @@ template&lt;typename T&gt; </div>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>Pointer to the allocated memory. </dd></dl>
+
+</div>
+</div>
+<a id="a18fa97c8a7a54d406616450e5660ae48" name="a18fa97c8a7a54d406616450e5660ae48"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a18fa97c8a7a54d406616450e5660ae48">&#9670;&#160;</a></span>operator()() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T&gt; </div>
+<div class="memtemplate">
+template&lt;typename T2&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T * <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::operator() </td>
+          <td>(</td>
+          <td class="paramtype">T2</td>          <td class="paramname"><span class="paramname"><em>sz</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>
@@ -569,8 +674,8 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
-<a id="a3a2115fae260e7ec70890a31d670d1da" name="a3a2115fae260e7ec70890a31d670d1da"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a3a2115fae260e7ec70890a31d670d1da">&#9670;&#160;</a></span>pop()</h2>
+<a id="ac993c7b8123725a9a4729b937ae2e662" name="ac993c7b8123725a9a4729b937ae2e662"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac993c7b8123725a9a4729b937ae2e662">&#9670;&#160;</a></span>pop() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -583,7 +688,7 @@ template&lt;typename T&gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::pop </td>
           <td>(</td>
-          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>sz</em></span></td><td>)</td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>sz</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -604,8 +709,37 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
-<a id="aa4afd4a56503a668d8333e6c59ce163c" name="aa4afd4a56503a668d8333e6c59ce163c"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#aa4afd4a56503a668d8333e6c59ce163c">&#9670;&#160;</a></span>realloc()</h2>
+<a id="acf5bbdd37ba2efd607942384e4b4defb" name="acf5bbdd37ba2efd607942384e4b4defb"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acf5bbdd37ba2efd607942384e4b4defb">&#9670;&#160;</a></span>pop() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T&gt; </div>
+<div class="memtemplate">
+template&lt;typename T2&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::pop </td>
+          <td>(</td>
+          <td class="paramtype">T2</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ace81d9c522b594f1c2e807e3fd8916dc" name="ace81d9c522b594f1c2e807e3fd8916dc"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ace81d9c522b594f1c2e807e3fd8916dc">&#9670;&#160;</a></span>realloc() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -615,7 +749,7 @@ template&lt;typename T&gt; </div>
         <tr>
           <td class="memname">T * <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::realloc </td>
           <td>(</td>
-          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -632,8 +766,37 @@ template&lt;typename T&gt; </div>
 
 </div>
 </div>
-<a id="ad529bba2a82bad73028378a8190fca84" name="ad529bba2a82bad73028378a8190fca84"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ad529bba2a82bad73028378a8190fca84">&#9670;&#160;</a></span>reallocate()</h2>
+<a id="acebc4bf5908f58e78bd78d8a437de100" name="acebc4bf5908f58e78bd78d8a437de100"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#acebc4bf5908f58e78bd78d8a437de100">&#9670;&#160;</a></span>realloc() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T&gt; </div>
+<div class="memtemplate">
+template&lt;typename T2&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">T * <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::realloc </td>
+          <td>(</td>
+          <td class="paramtype">T2</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
+
+</div>
+</div>
+<a id="ac498c7b66465a5fadb11e68b17d01b12" name="ac498c7b66465a5fadb11e68b17d01b12"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#ac498c7b66465a5fadb11e68b17d01b12">&#9670;&#160;</a></span>reallocate() <span class="overload">[1/2]</span></h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -643,7 +806,7 @@ template&lt;typename T&gt; </div>
         <tr>
           <td class="memname">void <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::reallocate </td>
           <td>(</td>
-          <td class="paramtype">std::size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
+          <td class="paramtype">size_t</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
           <td></td>
         </tr>
       </table>
@@ -656,6 +819,35 @@ template&lt;typename T&gt; </div>
   </table>
   </dd>
 </dl>
+
+</div>
+</div>
+<a id="afb3cb1dea6fd27314333782fde80d52c" name="afb3cb1dea6fd27314333782fde80d52c"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#afb3cb1dea6fd27314333782fde80d52c">&#9670;&#160;</a></span>reallocate() <span class="overload">[2/2]</span></h2>
+
+<div class="memitem">
+<div class="memproto">
+<div class="memtemplate">
+template&lt;typename T&gt; </div>
+<div class="memtemplate">
+template&lt;typename T2&gt; </div>
+<table class="mlabels">
+  <tr>
+  <td class="mlabels-left">
+      <table class="memname">
+        <tr>
+          <td class="memname">void <a class="el" href="../../dc/d87/class_utils_1_1_malloc.html">Utils::Malloc</a>&lt; T &gt;::reallocate </td>
+          <td>(</td>
+          <td class="paramtype">T2</td>          <td class="paramname"><span class="paramname"><em>n</em></span></td><td>)</td>
+          <td></td>
+        </tr>
+      </table>
+  </td>
+  <td class="mlabels-right">
+<span class="mlabels"><span class="mlabel inline">inline</span></span>  </td>
+  </tr>
+</table>
+</div><div class="memdoc">
 
 </div>
 </div>

@@ -50,7 +50,6 @@ var annotated_dup =
       [ "Trichotomy", "df/d88/class_utils_1_1_trichotomy.html", "df/d88/class_utils_1_1_trichotomy" ],
       [ "Trichotomy_base_fun", "d0/dfa/class_utils_1_1_trichotomy__base__fun.html", "d0/dfa/class_utils_1_1_trichotomy__base__fun" ],
       [ "TVD", "db/d96/class_utils_1_1_t_v_d.html", null ],
-      [ "unique_function", "d8/d6f/class_utils_1_1unique__function.html", "d8/d6f/class_utils_1_1unique__function" ],
       [ "WaitWorker", "d6/dde/class_utils_1_1_wait_worker.html", "d6/dde/class_utils_1_1_wait_worker" ],
       [ "WorkerLoop", "d3/d7a/class_utils_1_1_worker_loop.html", "d3/d7a/class_utils_1_1_worker_loop" ],
       [ "Zeros", "d1/dad/class_utils_1_1_zeros.html", "d1/dad/class_utils_1_1_zeros" ],

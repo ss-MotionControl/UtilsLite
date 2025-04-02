@@ -1,11 +1,11 @@
 var class_utils_1_1_h_j_pattern_search =
 [
-    [ "HJPatternSearch", "d7/d30/class_utils_1_1_h_j_pattern_search.html#ae5af96f0e974e0647adad8f0eadc2b22", null ],
+    [ "HJPatternSearch", "d7/d30/class_utils_1_1_h_j_pattern_search.html#a4ec68d16739d0e8dbcb7886de4d7ef4d", null ],
     [ "best_nearby", "d7/d30/class_utils_1_1_h_j_pattern_search.html#ac1b7df8c2e3b998731dac0579075b92c", null ],
     [ "change_console", "d7/d30/class_utils_1_1_h_j_pattern_search.html#a4b3c00e9043f179505ef8587ef0ce162", null ],
     [ "get_last_solution", "d7/d30/class_utils_1_1_h_j_pattern_search.html#a834ac5a31b5db28471c5133aff70587b", null ],
     [ "info", "d7/d30/class_utils_1_1_h_j_pattern_search.html#ab80b2fed846d79e3a3e0252e8652b4f3", null ],
-    [ "name", "d7/d30/class_utils_1_1_h_j_pattern_search.html#a745a0267993cd54c430e9d02c8e55f26", null ],
+    [ "name", "d7/d30/class_utils_1_1_h_j_pattern_search.html#a8a98509a5d4a568119b52a9ebb6b0b79", null ],
     [ "print_info", "d7/d30/class_utils_1_1_h_j_pattern_search.html#ae191df19bd943ebd2009cc4faaf84326", null ],
     [ "run", "d7/d30/class_utils_1_1_h_j_pattern_search.html#aa9197600459d5790d8021949a7d05821", null ],
     [ "search", "d7/d30/class_utils_1_1_h_j_pattern_search.html#abacab762b5bd05f3da69bfefe2632895", null ],

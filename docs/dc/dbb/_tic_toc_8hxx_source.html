@@ -136,7 +136,7 @@ $(function(){initNavTree('dc/dbb/_tic_toc_8hxx_source.html','../../'); initResiz
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> |                                                                          |</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> |      Enrico Bertolazzi                                                   |</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> |      Dipartimento di Ingegneria Industriale                              |</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> |      Universita` degli Studi di Trento                                   |</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> |      Università degli Studi di Trento                                    |</span></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> |      Via Sommarive 9, I-38123 Povo, Trento, Italy                        |</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> |      email: enrico.bertolazzi@unitn.it                                   |</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment"> |                                                                          |</span></div>
@@ -162,9 +162,9 @@ $(function(){initNavTree('dc/dbb/_tic_toc_8hxx_source.html','../../'); initResiz
 <div class="line"><a id="l00063" name="l00063"></a><span class="lineno">   63</span>  <span class="keyword">class </span><a class="code hl_class" href="../../d7/df9/class_utils_1_1_tic_toc.html">TicToc</a> {</div>
 <div class="line"><a id="l00064" name="l00064"></a><span class="lineno">   64</span> </div>
 <div class="line"><a id="l00065" name="l00065"></a><span class="lineno">   65</span>    <span class="keyword">using </span>real_type = double;</div>
-<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    int64_t   m_frequency;   <span class="comment">// ticks per second</span></div>
-<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    int64_t   m_t1, m_t2;    <span class="comment">// ticks</span></div>
-<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    real_type m_elapsed_time;</div>
+<div class="line"><a id="l00066" name="l00066"></a><span class="lineno">   66</span>    int64_t   m_frequency{0};   <span class="comment">// ticks per second</span></div>
+<div class="line"><a id="l00067" name="l00067"></a><span class="lineno">   67</span>    int64_t   m_t1{0}, m_t2{0};    <span class="comment">// ticks</span></div>
+<div class="line"><a id="l00068" name="l00068"></a><span class="lineno">   68</span>    real_type m_elapsed_time{0};</div>
 <div class="line"><a id="l00069" name="l00069"></a><span class="lineno">   69</span> </div>
 <div class="line"><a id="l00070" name="l00070"></a><span class="lineno">   70</span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a45a074011eea46904f9447ca880bb829">TicToc</a>( <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a> <span class="keyword">const</span> &amp; ) = <span class="keyword">delete</span>;</div>
 <div class="line"><a id="l00071" name="l00071"></a><span class="lineno">   71</span>    <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a> <span class="keyword">const</span> &amp; <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#a007e023131fe7532f02ccdef0766065e">operator = </a>( <a class="code hl_function" href="../../d7/df9/class_utils_1_1_tic_toc.html#ad721d498ee3f3410c7e849b9b7c516da">TicToc</a> <span class="keyword">const</span> &amp; ) <span class="keyword">const</span> = <span class="keyword">delete</span>;</div>

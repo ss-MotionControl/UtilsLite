@@ -1,7 +1,7 @@
 var _numbers_8hxx =
 [
-    [ "Utils::check_NaN", "d1/d7c/namespace_utils.html#a84193bd72a370c0c097ca89f118135f7", null ],
-    [ "Utils::check_NaN", "d1/d7c/namespace_utils.html#a365ff1c77a771cceb7d205554907f1ef", null ],
+    [ "Utils::check_NaN", "d1/d7c/namespace_utils.html#aa5687b755a623ab8aa00e17ec8abe5ba", null ],
+    [ "Utils::check_NaN", "d1/d7c/namespace_utils.html#ab7b2e1a083ecc2307480157a427aba91", null ],
     [ "Utils::found_NaN", "d1/d7c/namespace_utils.html#a3895f693284de68f895073abe709ac06", null ],
     [ "Utils::found_NaN", "d1/d7c/namespace_utils.html#a5e75b533b6cba2fefb0cd02133ba56dd", null ],
     [ "Utils::Inf", "d1/d7c/namespace_utils.html#ac2aacbd589c58cfda69bd58d4c2cc89e", null ],

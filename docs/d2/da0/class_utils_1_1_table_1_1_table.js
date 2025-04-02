@@ -29,6 +29,6 @@ var class_utils_1_1_table_1_1_table =
     [ "setup", "d2/da0/class_utils_1_1_table_1_1_table.html#aa7d2b57075a589340b4e436bef634065", null ],
     [ "style", "d2/da0/class_utils_1_1_table_1_1_table.html#ae8639326905921da80976b912bc8148a", null ],
     [ "style", "d2/da0/class_utils_1_1_table_1_1_table.html#a6e5977862c26b1d7ec6d2eb7302683b6", null ],
-    [ "title", "d2/da0/class_utils_1_1_table_1_1_table.html#ae69372b2a9d482541f176098dc668856", null ],
-    [ "title", "d2/da0/class_utils_1_1_table_1_1_table.html#a3d6e9ddfec03d13e6789e3fdbc67a0d2", null ]
+    [ "title", "d2/da0/class_utils_1_1_table_1_1_table.html#a557aa1284bac10e16f1672811dde6997", null ],
+    [ "title", "d2/da0/class_utils_1_1_table_1_1_table.html#ac3004a321f6383e85bbd30e005f82976", null ]
 ];

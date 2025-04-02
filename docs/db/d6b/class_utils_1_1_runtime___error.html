@@ -139,12 +139,9 @@ Inheritance diagram for Utils::Runtime_Error:</div>
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
 Public Member Functions</h2></td></tr>
-<tr class="memitem:ab599007c5dd46bcd9385a95f5ce68556" id="r_ab599007c5dd46bcd9385a95f5ce68556"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#ab599007c5dd46bcd9385a95f5ce68556">Runtime_Error</a> (std::string const &amp;reason, char const *file, int line)</td></tr>
-<tr class="memdesc:ab599007c5dd46bcd9385a95f5ce68556"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a <a class="el" href="../../db/d6b/class_utils_1_1_runtime___error.html" title="Custom runtime error class for handling runtime exceptions.">Runtime_Error</a> instance with a given reason.  <br /></td></tr>
-<tr class="separator:ab599007c5dd46bcd9385a95f5ce68556"><td class="memSeparator" colspan="2">&#160;</td></tr>
-<tr class="memitem:a897bbcbb7bedeb004ff4bfc62f65ed5d" id="r_a897bbcbb7bedeb004ff4bfc62f65ed5d"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a897bbcbb7bedeb004ff4bfc62f65ed5d">Runtime_Error</a> (char const *reason, char const *file, int line)</td></tr>
-<tr class="memdesc:a897bbcbb7bedeb004ff4bfc62f65ed5d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a <a class="el" href="../../db/d6b/class_utils_1_1_runtime___error.html" title="Custom runtime error class for handling runtime exceptions.">Runtime_Error</a> instance with a given reason.  <br /></td></tr>
-<tr class="separator:a897bbcbb7bedeb004ff4bfc62f65ed5d"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a6aa811521ae2a0bfe6c20bd58297a089" id="r_a6aa811521ae2a0bfe6c20bd58297a089"><td class="memItemLeft" align="right" valign="top">&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a6aa811521ae2a0bfe6c20bd58297a089">Runtime_Error</a> (string_view reason, string_view file, int line)</td></tr>
+<tr class="memdesc:a6aa811521ae2a0bfe6c20bd58297a089"><td class="mdescLeft">&#160;</td><td class="mdescRight">Constructs a <a class="el" href="../../db/d6b/class_utils_1_1_runtime___error.html" title="Custom runtime error class for handling runtime exceptions.">Runtime_Error</a> instance with a given reason.  <br /></td></tr>
+<tr class="separator:a6aa811521ae2a0bfe6c20bd58297a089"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a97671cb4b95c134043ee4e9af50d385f" id="r_a97671cb4b95c134043ee4e9af50d385f"><td class="memItemLeft" align="right" valign="top">char const *&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="#a97671cb4b95c134043ee4e9af50d385f">what</a> () const noexcept override</td></tr>
 <tr class="memdesc:a97671cb4b95c134043ee4e9af50d385f"><td class="mdescLeft">&#160;</td><td class="mdescRight">Returns a C-style string describing the error.  <br /></td></tr>
 <tr class="separator:a97671cb4b95c134043ee4e9af50d385f"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -154,16 +151,16 @@ Public Member Functions</h2></td></tr>
 <p>This class extends the standard <code>std::runtime_error</code> to include additional context information, specifically the file name and line number where the error occurred. It provides constructors that accept a reason for the error and formats the error message accordingly.</p>
 <p><b>Usage</b></p>
 <div class="fragment"><div class="line"><span class="keywordflow">try</span> {</div>
-<div class="line">    <span class="keywordflow">throw</span> <a class="code hl_function" href="#ab599007c5dd46bcd9385a95f5ce68556">Runtime_Error</a>(<span class="stringliteral">&quot;An error occurred&quot;</span>, __FILE__, __LINE__);</div>
+<div class="line">    <span class="keywordflow">throw</span> <a class="code hl_function" href="#a6aa811521ae2a0bfe6c20bd58297a089">Runtime_Error</a>(<span class="stringliteral">&quot;An error occurred&quot;</span>, __FILE__, __LINE__);</div>
 <div class="line">} <span class="keywordflow">catch</span> (<span class="keyword">const</span> <a class="code hl_class" href="../../db/d6b/class_utils_1_1_runtime___error.html">Runtime_Error</a>&amp; e) {</div>
 <div class="line">    std::cerr &lt;&lt; e.<a class="code hl_function" href="#a97671cb4b95c134043ee4e9af50d385f">what</a>();</div>
 <div class="line">}</div>
-<div class="ttc" id="aclass_utils_1_1_runtime___error_html"><div class="ttname"><a href="../../db/d6b/class_utils_1_1_runtime___error.html">Utils::Runtime_Error</a></div><div class="ttdoc">Custom runtime error class for handling runtime exceptions.</div><div class="ttdef"><b>Definition</b> Utils_fmt.hh:116</div></div>
+<div class="ttc" id="aclass_utils_1_1_runtime___error_html"><div class="ttname"><a href="../../db/d6b/class_utils_1_1_runtime___error.html">Utils::Runtime_Error</a></div><div class="ttdoc">Custom runtime error class for handling runtime exceptions.</div><div class="ttdef"><b>Definition</b> Utils_fmt.hh:119</div></div>
+<div class="ttc" id="aclass_utils_1_1_runtime___error_html_a6aa811521ae2a0bfe6c20bd58297a089"><div class="ttname"><a href="#a6aa811521ae2a0bfe6c20bd58297a089">Utils::Runtime_Error::Runtime_Error</a></div><div class="ttdeci">Runtime_Error(string_view reason, string_view file, int line)</div><div class="ttdoc">Constructs a Runtime_Error instance with a given reason.</div><div class="ttdef"><b>Definition</b> Utils_fmt.hh:133</div></div>
 <div class="ttc" id="aclass_utils_1_1_runtime___error_html_a97671cb4b95c134043ee4e9af50d385f"><div class="ttname"><a href="#a97671cb4b95c134043ee4e9af50d385f">Utils::Runtime_Error::what</a></div><div class="ttdeci">char const * what() const noexcept override</div><div class="ttdoc">Returns a C-style string describing the error.</div></div>
-<div class="ttc" id="aclass_utils_1_1_runtime___error_html_ab599007c5dd46bcd9385a95f5ce68556"><div class="ttname"><a href="#ab599007c5dd46bcd9385a95f5ce68556">Utils::Runtime_Error::Runtime_Error</a></div><div class="ttdeci">Runtime_Error(std::string const &amp;reason, char const *file, int line)</div><div class="ttdoc">Constructs a Runtime_Error instance with a given reason.</div><div class="ttdef"><b>Definition</b> Utils_fmt.hh:130</div></div>
 </div><!-- fragment --> </div><h2 class="groupheader">Constructor &amp; Destructor Documentation</h2>
-<a id="ab599007c5dd46bcd9385a95f5ce68556" name="ab599007c5dd46bcd9385a95f5ce68556"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#ab599007c5dd46bcd9385a95f5ce68556">&#9670;&#160;</a></span>Runtime_Error() <span class="overload">[1/2]</span></h2>
+<a id="a6aa811521ae2a0bfe6c20bd58297a089" name="a6aa811521ae2a0bfe6c20bd58297a089"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a6aa811521ae2a0bfe6c20bd58297a089">&#9670;&#160;</a></span>Runtime_Error()</h2>
 
 <div class="memitem">
 <div class="memproto">
@@ -174,12 +171,12 @@ Public Member Functions</h2></td></tr>
         <tr>
           <td class="memname">Utils::Runtime_Error::Runtime_Error </td>
           <td>(</td>
-          <td class="paramtype">std::string const &amp;</td>          <td class="paramname"><span class="paramname"><em>reason</em></span>, </td>
+          <td class="paramtype">string_view</td>          <td class="paramname"><span class="paramname"><em>reason</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
           <td></td>
-          <td class="paramtype">char const *</td>          <td class="paramname"><span class="paramname"><em>file</em></span>, </td>
+          <td class="paramtype">string_view</td>          <td class="paramname"><span class="paramname"><em>file</em></span>, </td>
         </tr>
         <tr>
           <td class="paramkey"></td>
@@ -199,51 +196,6 @@ Public Member Functions</h2></td></tr>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">reason</td><td>A string that describes the reason for the error. </td></tr>
-    <tr><td class="paramname">file</td><td>The name of the file where the error occurred. </td></tr>
-    <tr><td class="paramname">line</td><td>The line number in the file where the error occurred. </td></tr>
-  </table>
-  </dd>
-</dl>
-
-</div>
-</div>
-<a id="a897bbcbb7bedeb004ff4bfc62f65ed5d" name="a897bbcbb7bedeb004ff4bfc62f65ed5d"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#a897bbcbb7bedeb004ff4bfc62f65ed5d">&#9670;&#160;</a></span>Runtime_Error() <span class="overload">[2/2]</span></h2>
-
-<div class="memitem">
-<div class="memproto">
-<table class="mlabels">
-  <tr>
-  <td class="mlabels-left">
-      <table class="memname">
-        <tr>
-          <td class="memname">Utils::Runtime_Error::Runtime_Error </td>
-          <td>(</td>
-          <td class="paramtype">char const *</td>          <td class="paramname"><span class="paramname"><em>reason</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">char const *</td>          <td class="paramname"><span class="paramname"><em>file</em></span>, </td>
-        </tr>
-        <tr>
-          <td class="paramkey"></td>
-          <td></td>
-          <td class="paramtype">int</td>          <td class="paramname"><span class="paramname"><em>line</em></span>&#160;)</td>
-        </tr>
-      </table>
-  </td>
-  <td class="mlabels-right">
-<span class="mlabels"><span class="mlabel inline">inline</span><span class="mlabel explicit">explicit</span></span>  </td>
-  </tr>
-</table>
-</div><div class="memdoc">
-
-<p>Constructs a <a class="el" href="../../db/d6b/class_utils_1_1_runtime___error.html" title="Custom runtime error class for handling runtime exceptions.">Runtime_Error</a> instance with a given reason. </p>
-<p>This constructor initializes the error with a specified reason, the file where the error occurred, and the line number. It formats the error message accordingly.</p>
-<dl class="params"><dt>Parameters</dt><dd>
-  <table class="params">
-    <tr><td class="paramname">reason</td><td>A C-style string that describes the reason for the error. </td></tr>
     <tr><td class="paramname">file</td><td>The name of the file where the error occurred. </td></tr>
     <tr><td class="paramname">line</td><td>The line number in the file where the error occurred. </td></tr>
   </table>

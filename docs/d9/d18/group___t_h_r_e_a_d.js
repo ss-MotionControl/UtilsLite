@@ -2,7 +2,7 @@ var group___t_h_r_e_a_d =
 [
     [ "Utils::tp", "df/d8c/namespace_utils_1_1tp.html", null ],
     [ "Utils::ThreadPool0", "df/d9e/class_utils_1_1_thread_pool0.html", [
-      [ "ThreadPool0", "df/d9e/class_utils_1_1_thread_pool0.html#a6435258da5f21f46e37988daab67fbb6", null ],
+      [ "ThreadPool0", "df/d9e/class_utils_1_1_thread_pool0.html#a90a2be64c6d223b7a9add7acf1f86742", null ],
       [ "~ThreadPool0", "df/d9e/class_utils_1_1_thread_pool0.html#a8d5bcf5b9b93daf780958282c9628e36", null ],
       [ "exec", "df/d9e/class_utils_1_1_thread_pool0.html#a041396170a5f51dad20b80f49e9b7402", null ],
       [ "name", "df/d9e/class_utils_1_1_thread_pool0.html#a0178826a1dcefd57246801be4f0ad659", null ],
@@ -138,15 +138,6 @@ var group___t_h_r_e_a_d =
       [ "~at_scope_exit_impl", "db/da5/class_utils_1_1at__scope__exit__impl.html#ab9046a58f43c0aecc1b111da7b84238c", null ],
       [ "operator=", "db/da5/class_utils_1_1at__scope__exit__impl.html#a7f61a8487c809f48515651edb173a3f4", null ],
       [ "operator=", "db/da5/class_utils_1_1at__scope__exit__impl.html#ad452f0c0959db75a4a12af6da7f2174e", null ]
-    ] ],
-    [ "Utils::unique_function< T >", "d8/d6f/class_utils_1_1unique__function.html", [
-      [ "unique_function", "d8/d6f/class_utils_1_1unique__function.html#ad8b431f70ba0fc7573f620f3f06c520b", null ],
-      [ "unique_function", "d8/d6f/class_utils_1_1unique__function.html#aa9d09fd0b6e19f95674dd36d5b62501c", null ],
-      [ "unique_function", "d8/d6f/class_utils_1_1unique__function.html#aec48b9ade9c4d0e9c5989b0666525825", null ],
-      [ "unique_function", "d8/d6f/class_utils_1_1unique__function.html#ae1111282e435a5e58a0cdb8972cb06a1", null ],
-      [ "operator=", "d8/d6f/class_utils_1_1unique__function.html#acdfcee698000335867d1e2f3383548d2", null ],
-      [ "operator=", "d8/d6f/class_utils_1_1unique__function.html#a5ec03b9929e05ab36ac9cdffcd579ed8", null ],
-      [ "operator=", "d8/d6f/class_utils_1_1unique__function.html#a506cf9dc9ead13d34c287f3b36b19fb2", null ]
     ] ],
     [ "UTILS_BARRIER", "d9/d18/group___t_h_r_e_a_d.html#ga9d67a741ef0c5750d4017b965ea713c3", null ],
     [ "UTILS_MUTEX", "d9/d18/group___t_h_r_e_a_d.html#gad6d92cfbcf1e0d9723c451696dd8b7fa", null ],

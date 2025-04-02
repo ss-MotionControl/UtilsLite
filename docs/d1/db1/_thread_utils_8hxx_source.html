@@ -136,7 +136,7 @@ $(function(){initNavTree('d1/db1/_thread_utils_8hxx_source.html','../../'); init
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment"> |                                                                          |</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="comment"> |      Enrico Bertolazzi                                                   |</span></div>
 <div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><span class="comment"> |      Dipartimento di Ingegneria Industriale                              |</span></div>
-<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> |      Universita` degli Studi di Trento                                   |</span></div>
+<div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span><span class="comment"> |      Università degli Studi di Trento                                    |</span></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span><span class="comment"> |      email: enrico.bertolazzi@unitn.it                                   |</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span><span class="comment"> |                                                                          |</span></div>
 <div class="line"><a id="l00018" name="l00018"></a><span class="lineno">   18</span><span class="comment">\*--------------------------------------------------------------------------*/</span></div>
@@ -259,7 +259,7 @@ $(function(){initNavTree('d1/db1/_thread_utils_8hxx_source.html','../../'); init
 <div class="line"><a id="l00151" name="l00151"></a><span class="lineno">  151</span>    WinCriticalSection m_critical;</div>
 <div class="line"><a id="l00152" name="l00152"></a><span class="lineno">  152</span>    CONDITION_VARIABLE m_condition;</div>
 <div class="line"><a id="l00153" name="l00153"></a><span class="lineno">  153</span> </div>
-<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="keywordtype">void</span> notify_one() noexcept { WakeConditionVariable( &amp;m_condition ); }</div>
+<div class="line"><a id="l00154" name="l00154"></a><span class="lineno">  154</span>    <span class="comment">//void notify_one() noexcept { WakeConditionVariable( &amp;m_condition ); }</span></div>
 <div class="line"><a id="l00155" name="l00155"></a><span class="lineno">  155</span>    <span class="keywordtype">void</span> notify_all() noexcept { WakeAllConditionVariable( &amp;m_condition ); }</div>
 <div class="line"><a id="l00156" name="l00156"></a><span class="lineno">  156</span>    <span class="keywordtype">void</span> wait_cond() noexcept { SleepConditionVariableCS( &amp;m_condition, &amp;m_critical.data(), INFINITE ); }</div>
 <div class="line"><a id="l00157" name="l00157"></a><span class="lineno">  157</span> </div>
@@ -603,7 +603,7 @@ $(function(){initNavTree('d1/db1/_thread_utils_8hxx_source.html','../../'); init
 <div class="line"><a id="l00458" name="l00458"></a><span class="lineno">  458</span><span class="preprocessor">    #ifdef UTILS_OS_WINDOWS</span></div>
 <div class="line"><a id="l00459" name="l00459"></a><span class="lineno">  459</span>    std::atomic&lt;int&gt; n_worker;</div>
 <div class="line"><a id="l00460" name="l00460"></a><span class="lineno">  460</span><span class="preprocessor">    #else</span></div>
-<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>    std::atomic&lt;int&gt; n_worker = {0};</div>
+<div class="line"><a id="l00461" name="l00461"></a><span class="lineno">  461</span>    std::atomic&lt;int&gt; n_worker{0};</div>
 <div class="line"><a id="l00462" name="l00462"></a><span class="lineno">  462</span><span class="preprocessor">    #endif</span></div>
 <div class="line"><a id="l00463" name="l00463"></a><span class="lineno">  463</span>  <span class="keyword">public</span>:</div>
 <div class="line"><a id="l00464" name="l00464"></a><span class="lineno">  464</span><span class="preprocessor">    #ifdef UTILS_OS_WINDOWS</span></div>
@@ -652,7 +652,7 @@ $(function(){initNavTree('d1/db1/_thread_utils_8hxx_source.html','../../'); init
 <div class="foldopen" id="foldopen00501" data-start="{" data-end="}">
 <div class="line"><a id="l00501" name="l00501"></a><span class="lineno"><a class="line" href="../../d9/d96/class_utils_1_1_binary_search.html#aad23652466e1007371480644ca1fbba2">  501</a></span>    <a class="code hl_function" href="../../d9/d96/class_utils_1_1_binary_search.html#aad23652466e1007371480644ca1fbba2">~BinarySearch</a>() {</div>
 <div class="line"><a id="l00502" name="l00502"></a><span class="lineno">  502</span>      m_spin_write.wait();</div>
-<div class="line"><a id="l00503" name="l00503"></a><span class="lineno">  503</span>      <span class="keywordflow">for</span> ( <span class="keyword">auto</span> &amp; a : m_data ) <span class="keyword">delete</span> a.second;</div>
+<div class="line"><a id="l00503" name="l00503"></a><span class="lineno">  503</span>      <span class="keywordflow">for</span> ( <span class="keyword">auto</span> <span class="keyword">const</span> &amp; a : m_data ) <span class="keyword">delete</span> a.second;</div>
 <div class="line"><a id="l00504" name="l00504"></a><span class="lineno">  504</span>      m_data.clear();</div>
 <div class="line"><a id="l00505" name="l00505"></a><span class="lineno">  505</span>      m_spin_write.wait();</div>
 <div class="line"><a id="l00506" name="l00506"></a><span class="lineno">  506</span>    }</div>
@@ -662,7 +662,7 @@ $(function(){initNavTree('d1/db1/_thread_utils_8hxx_source.html','../../'); init
 <div class="foldopen" id="foldopen00509" data-start="{" data-end="}">
 <div class="line"><a id="l00509" name="l00509"></a><span class="lineno"><a class="line" href="../../d9/d96/class_utils_1_1_binary_search.html#a3958f4ccfaa77f40a215d79e7d4b45ad">  509</a></span>    <a class="code hl_function" href="../../d9/d96/class_utils_1_1_binary_search.html#a3958f4ccfaa77f40a215d79e7d4b45ad">clear</a>() {</div>
 <div class="line"><a id="l00510" name="l00510"></a><span class="lineno">  510</span>      m_spin_write.wait();</div>
-<div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span>      <span class="keywordflow">for</span> ( <span class="keyword">auto</span> &amp; a : m_data ) <span class="keyword">delete</span> a.second;</div>
+<div class="line"><a id="l00511" name="l00511"></a><span class="lineno">  511</span>      <span class="keywordflow">for</span> ( <span class="keyword">auto</span> <span class="keyword">const</span> &amp; a : m_data ) <span class="keyword">delete</span> a.second;</div>
 <div class="line"><a id="l00512" name="l00512"></a><span class="lineno">  512</span>      m_data.clear(); m_data.reserve(64);</div>
 <div class="line"><a id="l00513" name="l00513"></a><span class="lineno">  513</span>      m_spin_write.wait();</div>
 <div class="line"><a id="l00514" name="l00514"></a><span class="lineno">  514</span>    }</div>
@@ -777,125 +777,126 @@ $(function(){initNavTree('d1/db1/_thread_utils_8hxx_source.html','../../'); init
 <div class="line"><a id="l00614" name="l00614"></a><span class="lineno">  614</span>      m_destructor = std::move(x.m_destructor);</div>
 <div class="line"><a id="l00615" name="l00615"></a><span class="lineno">  615</span>      m_active     = x.m_active;</div>
 <div class="line"><a id="l00616" name="l00616"></a><span class="lineno">  616</span>      x.m_active   = <span class="keyword">false</span>;</div>
-<div class="line"><a id="l00617" name="l00617"></a><span class="lineno">  617</span>    }</div>
+<div class="line"><a id="l00617" name="l00617"></a><span class="lineno">  617</span>      <span class="keywordflow">return</span> *<span class="keyword">this</span>;</div>
+<div class="line"><a id="l00618" name="l00618"></a><span class="lineno">  618</span>    }</div>
 </div>
-<div class="line"><a id="l00618" name="l00618"></a><span class="lineno">  618</span> </div>
-<div class="line"><a id="l00619" name="l00619"></a><span class="lineno"><a class="line" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html#ab9046a58f43c0aecc1b111da7b84238c">  619</a></span>    <a class="code hl_function" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html#ab9046a58f43c0aecc1b111da7b84238c">~at_scope_exit_impl</a>() { <span class="keywordflow">if</span> (m_active) m_destructor(); }</div>
-<div class="line"><a id="l00620" name="l00620"></a><span class="lineno">  620</span>  };</div>
+<div class="line"><a id="l00619" name="l00619"></a><span class="lineno">  619</span> </div>
+<div class="line"><a id="l00620" name="l00620"></a><span class="lineno"><a class="line" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html#ab9046a58f43c0aecc1b111da7b84238c">  620</a></span>    <a class="code hl_function" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html#ab9046a58f43c0aecc1b111da7b84238c">~at_scope_exit_impl</a>() { <span class="keywordflow">if</span> (m_active) m_destructor(); }</div>
+<div class="line"><a id="l00621" name="l00621"></a><span class="lineno">  621</span>  };</div>
 </div>
-<div class="line"><a id="l00621" name="l00621"></a><span class="lineno">  621</span></div>
-<div class="line"><a id="l00639" name="l00639"></a><span class="lineno">  639</span>  <span class="keyword">template</span>&lt;<span class="keyword">class</span> Function&gt;</div>
-<div class="foldopen" id="foldopen00640" data-start="{" data-end="}">
-<div class="line"><a id="l00640" name="l00640"></a><span class="lineno"><a class="line" href="../../d9/d18/group___t_h_r_e_a_d.html#ga633cf79a96f127c0d378eb35197fb000">  640</a></span>  <span class="keyword">auto</span> <a class="code hl_function" href="../../d9/d18/group___t_h_r_e_a_d.html#ga633cf79a96f127c0d378eb35197fb000">at_scope_exit</a>(Function&amp;&amp; fun) -&gt; <a class="code hl_class" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html">at_scope_exit_impl&lt;Function&gt;</a></div>
-<div class="line"><a id="l00641" name="l00641"></a><span class="lineno">  641</span>  { <span class="keywordflow">return</span> <a class="code hl_class" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html">at_scope_exit_impl&lt;Function&gt;</a>(std::forward&lt;Function&gt;(fun)); }</div>
+<div class="line"><a id="l00622" name="l00622"></a><span class="lineno">  622</span></div>
+<div class="line"><a id="l00640" name="l00640"></a><span class="lineno">  640</span>  <span class="keyword">template</span>&lt;<span class="keyword">class</span> Function&gt;</div>
+<div class="foldopen" id="foldopen00641" data-start="{" data-end="}">
+<div class="line"><a id="l00641" name="l00641"></a><span class="lineno"><a class="line" href="../../d9/d18/group___t_h_r_e_a_d.html#ga633cf79a96f127c0d378eb35197fb000">  641</a></span>  <span class="keyword">auto</span> <a class="code hl_function" href="../../d9/d18/group___t_h_r_e_a_d.html#ga633cf79a96f127c0d378eb35197fb000">at_scope_exit</a>(Function&amp;&amp; fun) -&gt; <a class="code hl_class" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html">at_scope_exit_impl&lt;Function&gt;</a></div>
+<div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span>  { <span class="keywordflow">return</span> <a class="code hl_class" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html">at_scope_exit_impl&lt;Function&gt;</a>(std::forward&lt;Function&gt;(fun)); }</div>
 </div>
-<div class="line"><a id="l00642" name="l00642"></a><span class="lineno">  642</span> </div>
-<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span>  <span class="keyword">template</span>&lt;<span class="keyword">class</span> Function&gt;</div>
-<div class="foldopen" id="foldopen00644" data-start="{" data-end="}">
-<div class="line"><a id="l00644" name="l00644"></a><span class="lineno"><a class="line" href="../../d9/d18/group___t_h_r_e_a_d.html#gab6249efe6e74bdd4433bd606292cbb36">  644</a></span>  <span class="keyword">auto</span> <a class="code hl_function" href="../../d9/d18/group___t_h_r_e_a_d.html#ga633cf79a96f127c0d378eb35197fb000">at_scope_exit</a>(Function <span class="keyword">const</span> &amp; fun) -&gt; <a class="code hl_class" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html">at_scope_exit_impl&lt;Function const &amp;&gt;</a></div>
-<div class="line"><a id="l00645" name="l00645"></a><span class="lineno">  645</span>  { <span class="keywordflow">return</span> <a class="code hl_class" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html">at_scope_exit_impl&lt;Function const &amp;&gt;</a>(fun); }</div>
+<div class="line"><a id="l00643" name="l00643"></a><span class="lineno">  643</span> </div>
+<div class="line"><a id="l00644" name="l00644"></a><span class="lineno">  644</span>  <span class="keyword">template</span>&lt;<span class="keyword">class</span> Function&gt;</div>
+<div class="foldopen" id="foldopen00645" data-start="{" data-end="}">
+<div class="line"><a id="l00645" name="l00645"></a><span class="lineno"><a class="line" href="../../d9/d18/group___t_h_r_e_a_d.html#gab6249efe6e74bdd4433bd606292cbb36">  645</a></span>  <span class="keyword">auto</span> <a class="code hl_function" href="../../d9/d18/group___t_h_r_e_a_d.html#ga633cf79a96f127c0d378eb35197fb000">at_scope_exit</a>(Function <span class="keyword">const</span> &amp; fun) -&gt; <a class="code hl_class" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html">at_scope_exit_impl&lt;Function const &amp;&gt;</a></div>
+<div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span>  { <span class="keywordflow">return</span> <a class="code hl_class" href="../../db/da5/class_utils_1_1at__scope__exit__impl.html">at_scope_exit_impl&lt;Function const &amp;&gt;</a>(fun); }</div>
 </div>
-<div class="line"><a id="l00646" name="l00646"></a><span class="lineno">  646</span></div>
-<div class="line"><a id="l00651" name="l00651"></a><span class="lineno">  651</span> </div>
-<div class="line"><a id="l00652" name="l00652"></a><span class="lineno">  652</span>  <span class="comment">// from https://coliru.stacked-crooked.com/a/933248d6a9f07094</span></div>
-<div class="line"><a id="l00653" name="l00653"></a><span class="lineno">  653</span>  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
-<div class="foldopen" id="foldopen00654" data-start="{" data-end="};">
-<div class="line"><a id="l00654" name="l00654"></a><span class="lineno"><a class="line" href="../../d8/d6f/class_utils_1_1unique__function.html">  654</a></span>  <span class="keyword">class </span><a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#ad8b431f70ba0fc7573f620f3f06c520b">unique_function</a> : <span class="keyword">public</span> std::function&lt;T&gt; {</div>
-<div class="line"><a id="l00655" name="l00655"></a><span class="lineno">  655</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn, <span class="keyword">typename</span> En = <span class="keywordtype">void</span>&gt; <span class="keyword">struct </span>wrapper;</div>
-<div class="line"><a id="l00656" name="l00656"></a><span class="lineno">  656</span> </div>
-<div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>    <span class="comment">// specialization for CopyConstructible Fn</span></div>
-<div class="line"><a id="l00658" name="l00658"></a><span class="lineno">  658</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn&gt;</div>
-<div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span>    <span class="keyword">struct </span>wrapper&lt;Fn, std::enable_if_t&lt; std::is_copy_constructible&lt;Fn&gt;::value &gt;&gt;</div>
-<div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>    {</div>
-<div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span>      Fn fn;</div>
-<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>      <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
-<div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span>      <span class="keyword">auto</span> operator()(Args&amp;&amp;... args) { <span class="keywordflow">return</span> fn(std::forward&lt;Args&gt;(args)...); }</div>
-<div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span>    };</div>
-<div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span> </div>
-<div class="line"><a id="l00666" name="l00666"></a><span class="lineno">  666</span>    <span class="comment">// specialization for MoveConstructible-only Fn</span></div>
-<div class="line"><a id="l00667" name="l00667"></a><span class="lineno">  667</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn&gt;</div>
-<div class="line"><a id="l00668" name="l00668"></a><span class="lineno">  668</span>    <span class="keyword">struct </span>wrapper&lt;Fn, std::enable_if_t&lt; !std::is_copy_constructible&lt;Fn&gt;::value &amp;&amp; std::is_move_constructible&lt;Fn&gt;::value &gt;&gt;</div>
-<div class="line"><a id="l00669" name="l00669"></a><span class="lineno">  669</span>    {</div>
-<div class="line"><a id="l00670" name="l00670"></a><span class="lineno">  670</span>      Fn fn;</div>
-<div class="line"><a id="l00671" name="l00671"></a><span class="lineno">  671</span> </div>
-<div class="line"><a id="l00672" name="l00672"></a><span class="lineno">  672</span>      wrapper(Fn&amp;&amp; fn) : fn(std::forward&lt;Fn&gt;(fn)) { }</div>
-<div class="line"><a id="l00673" name="l00673"></a><span class="lineno">  673</span> </div>
-<div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span>      wrapper(wrapper&amp;&amp;) = <span class="keywordflow">default</span>;</div>
-<div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span>      wrapper&amp; <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#a506cf9dc9ead13d34c287f3b36b19fb2">operator=</a>(wrapper&amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00647" name="l00647"></a><span class="lineno">  647</span> </div>
+<div class="line"><a id="l00648" name="l00648"></a><span class="lineno">  648</span><span class="preprocessor">  #if 0</span></div>
+<div class="line"><a id="l00649" name="l00649"></a><span class="lineno">  649</span></div>
+<div class="line"><a id="l00654" name="l00654"></a><span class="lineno">  654</span> </div>
+<div class="line"><a id="l00655" name="l00655"></a><span class="lineno">  655</span>  <span class="comment">// from https://coliru.stacked-crooked.com/a/933248d6a9f07094</span></div>
+<div class="line"><a id="l00656" name="l00656"></a><span class="lineno">  656</span>  <span class="keyword">template</span>&lt;<span class="keyword">typename</span> T&gt;</div>
+<div class="line"><a id="l00657" name="l00657"></a><span class="lineno">  657</span>  <span class="keyword">class </span>unique_function : <span class="keyword">public</span> std::function&lt;T&gt; {</div>
+<div class="line"><a id="l00658" name="l00658"></a><span class="lineno">  658</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn, <span class="keyword">typename</span> En = <span class="keywordtype">void</span>&gt; <span class="keyword">struct </span>wrapper;</div>
+<div class="line"><a id="l00659" name="l00659"></a><span class="lineno">  659</span> </div>
+<div class="line"><a id="l00660" name="l00660"></a><span class="lineno">  660</span>    <span class="comment">// specialization for CopyConstructible Fn</span></div>
+<div class="line"><a id="l00661" name="l00661"></a><span class="lineno">  661</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn&gt;</div>
+<div class="line"><a id="l00662" name="l00662"></a><span class="lineno">  662</span>    <span class="keyword">struct </span>wrapper&lt;Fn, std::enable_if_t&lt; std::is_copy_constructible&lt;Fn&gt;::value &gt;&gt;</div>
+<div class="line"><a id="l00663" name="l00663"></a><span class="lineno">  663</span>    {</div>
+<div class="line"><a id="l00664" name="l00664"></a><span class="lineno">  664</span>      Fn fn;</div>
+<div class="line"><a id="l00665" name="l00665"></a><span class="lineno">  665</span>      <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt;</div>
+<div class="line"><a id="l00666" name="l00666"></a><span class="lineno">  666</span>      <span class="keyword">auto</span> operator()(Args&amp;&amp;... args) { <span class="keywordflow">return</span> fn(std::forward&lt;Args&gt;(args)...); }</div>
+<div class="line"><a id="l00667" name="l00667"></a><span class="lineno">  667</span>    };</div>
+<div class="line"><a id="l00668" name="l00668"></a><span class="lineno">  668</span> </div>
+<div class="line"><a id="l00669" name="l00669"></a><span class="lineno">  669</span>    <span class="comment">// specialization for MoveConstructible-only Fn</span></div>
+<div class="line"><a id="l00670" name="l00670"></a><span class="lineno">  670</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn&gt;</div>
+<div class="line"><a id="l00671" name="l00671"></a><span class="lineno">  671</span>    <span class="keyword">struct </span>wrapper&lt;Fn, std::enable_if_t&lt; !std::is_copy_constructible&lt;Fn&gt;::value &amp;&amp; std::is_move_constructible&lt;Fn&gt;::value &gt;&gt;</div>
+<div class="line"><a id="l00672" name="l00672"></a><span class="lineno">  672</span>    {</div>
+<div class="line"><a id="l00673" name="l00673"></a><span class="lineno">  673</span>      Fn fn;</div>
+<div class="line"><a id="l00674" name="l00674"></a><span class="lineno">  674</span> </div>
+<div class="line"><a id="l00675" name="l00675"></a><span class="lineno">  675</span>      wrapper(Fn&amp;&amp; fn) : fn(std::forward&lt;Fn&gt;(fn)) { }</div>
 <div class="line"><a id="l00676" name="l00676"></a><span class="lineno">  676</span> </div>
-<div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span>      <span class="comment">// these two functions are instantiated by std::function</span></div>
-<div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>      <span class="comment">// and are never called</span></div>
-<div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span>      wrapper(<span class="keyword">const</span> wrapper&amp; rhs) : fn(<span class="keyword">const_cast&lt;</span>Fn&amp;&amp;<span class="keyword">&gt;</span>(rhs.fn)) { <span class="keywordflow">throw</span> 0; } <span class="comment">// hack to initialize fn for non-DefaultContructible types</span></div>
-<div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>      </div>
-<div class="line"><a id="l00681" name="l00681"></a><span class="lineno">  681</span>      wrapper&amp; <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#a506cf9dc9ead13d34c287f3b36b19fb2">operator=</a>(wrapper&amp;) { <span class="keywordflow">throw</span> 0; }</div>
-<div class="line"><a id="l00682" name="l00682"></a><span class="lineno">  682</span> </div>
-<div class="line"><a id="l00683" name="l00683"></a><span class="lineno">  683</span>      <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt; <span class="keyword">auto</span> operator()(Args&amp;&amp;... args) { <span class="keywordflow">return</span> fn(std::forward&lt;Args&gt;(args)...); }</div>
-<div class="line"><a id="l00684" name="l00684"></a><span class="lineno">  684</span>    };</div>
+<div class="line"><a id="l00677" name="l00677"></a><span class="lineno">  677</span>      wrapper(wrapper&amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00678" name="l00678"></a><span class="lineno">  678</span>      wrapper&amp; operator=(wrapper&amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00679" name="l00679"></a><span class="lineno">  679</span> </div>
+<div class="line"><a id="l00680" name="l00680"></a><span class="lineno">  680</span>      <span class="comment">// these two functions are instantiated by std::function</span></div>
+<div class="line"><a id="l00681" name="l00681"></a><span class="lineno">  681</span>      <span class="comment">// and are never called</span></div>
+<div class="line"><a id="l00682" name="l00682"></a><span class="lineno">  682</span>      wrapper(<span class="keyword">const</span> wrapper&amp; rhs) : fn(const_cast&lt;Fn&amp;&amp;&gt;(rhs.fn)) { <span class="keywordflow">throw</span> 0; } <span class="comment">// hack to initialize fn for non-DefaultContructible types</span></div>
+<div class="line"><a id="l00683" name="l00683"></a><span class="lineno">  683</span>      </div>
+<div class="line"><a id="l00684" name="l00684"></a><span class="lineno">  684</span>      wrapper&amp; operator=(wrapper&amp;) { <span class="keywordflow">throw</span> 0; <span class="keywordflow">return</span> *<span class="keyword">this</span>; }</div>
 <div class="line"><a id="l00685" name="l00685"></a><span class="lineno">  685</span> </div>
-<div class="line"><a id="l00686" name="l00686"></a><span class="lineno">  686</span>    <span class="keyword">using </span>base = std::function&lt;T&gt;;</div>
-<div class="line"><a id="l00687" name="l00687"></a><span class="lineno">  687</span> </div>
-<div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span>  <span class="keyword">public</span>:</div>
-<div class="line"><a id="l00689" name="l00689"></a><span class="lineno"><a class="line" href="../../d8/d6f/class_utils_1_1unique__function.html#ad8b431f70ba0fc7573f620f3f06c520b">  689</a></span>    <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#ad8b431f70ba0fc7573f620f3f06c520b">unique_function</a>() noexcept = default;</div>
-<div class="line"><a id="l00690" name="l00690"></a><span class="lineno"><a class="line" href="../../d8/d6f/class_utils_1_1unique__function.html#aa9d09fd0b6e19f95674dd36d5b62501c">  690</a></span>    <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#ad8b431f70ba0fc7573f620f3f06c520b">unique_function</a>(std::nullptr_t) noexcept : base(<span class="keywordtype">nullptr</span>) { }</div>
-<div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span> </div>
-<div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn&gt;</div>
-<div class="line"><a id="l00693" name="l00693"></a><span class="lineno"><a class="line" href="../../d8/d6f/class_utils_1_1unique__function.html#aec48b9ade9c4d0e9c5989b0666525825">  693</a></span>    <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#aec48b9ade9c4d0e9c5989b0666525825">unique_function</a>(Fn&amp;&amp; f) : base(wrapper&lt;Fn&gt;{ std::forward&lt;Fn&gt;(f) }) { }</div>
+<div class="line"><a id="l00686" name="l00686"></a><span class="lineno">  686</span>      <span class="keyword">template</span>&lt;<span class="keyword">typename</span>... Args&gt; <span class="keyword">auto</span> operator()(Args&amp;&amp;... args) { <span class="keywordflow">return</span> fn(std::forward&lt;Args&gt;(args)...); }</div>
+<div class="line"><a id="l00687" name="l00687"></a><span class="lineno">  687</span>    };</div>
+<div class="line"><a id="l00688" name="l00688"></a><span class="lineno">  688</span> </div>
+<div class="line"><a id="l00689" name="l00689"></a><span class="lineno">  689</span>    <span class="keyword">using </span>base = std::function&lt;T&gt;;</div>
+<div class="line"><a id="l00690" name="l00690"></a><span class="lineno">  690</span> </div>
+<div class="line"><a id="l00691" name="l00691"></a><span class="lineno">  691</span>  <span class="keyword">public</span>:</div>
+<div class="line"><a id="l00692" name="l00692"></a><span class="lineno">  692</span>    unique_function() noexcept = default;</div>
+<div class="line"><a id="l00693" name="l00693"></a><span class="lineno">  693</span>    unique_function(std::nullptr_t) noexcept : base(<span class="keywordtype">nullptr</span>) { }</div>
 <div class="line"><a id="l00694" name="l00694"></a><span class="lineno">  694</span> </div>
-<div class="line"><a id="l00695" name="l00695"></a><span class="lineno"><a class="line" href="../../d8/d6f/class_utils_1_1unique__function.html#ae1111282e435a5e58a0cdb8972cb06a1">  695</a></span>    <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#ae1111282e435a5e58a0cdb8972cb06a1">unique_function</a>(<a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#ad8b431f70ba0fc7573f620f3f06c520b">unique_function</a>&amp;&amp;) = <span class="keywordflow">default</span>;</div>
-<div class="line"><a id="l00696" name="l00696"></a><span class="lineno"><a class="line" href="../../d8/d6f/class_utils_1_1unique__function.html#a506cf9dc9ead13d34c287f3b36b19fb2">  696</a></span>    <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#ad8b431f70ba0fc7573f620f3f06c520b">unique_function</a>&amp; <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#a506cf9dc9ead13d34c287f3b36b19fb2">operator=</a>(<a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#ad8b431f70ba0fc7573f620f3f06c520b">unique_function</a>&amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00695" name="l00695"></a><span class="lineno">  695</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn&gt;</div>
+<div class="line"><a id="l00696" name="l00696"></a><span class="lineno">  696</span>    unique_function(Fn&amp;&amp; f) : base(wrapper&lt;Fn&gt;{ std::forward&lt;Fn&gt;(f) }) { }</div>
 <div class="line"><a id="l00697" name="l00697"></a><span class="lineno">  697</span> </div>
-<div class="line"><a id="l00698" name="l00698"></a><span class="lineno"><a class="line" href="../../d8/d6f/class_utils_1_1unique__function.html#a5ec03b9929e05ab36ac9cdffcd579ed8">  698</a></span>    <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#ad8b431f70ba0fc7573f620f3f06c520b">unique_function</a>&amp; <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#a5ec03b9929e05ab36ac9cdffcd579ed8">operator=</a>(std::nullptr_t) { base::operator=(<span class="keyword">nullptr</span>); <span class="keywordflow">return</span> *<span class="keyword">this</span>; }</div>
-<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span> </div>
-<div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn&gt;</div>
-<div class="foldopen" id="foldopen00701" data-start="{" data-end="}">
-<div class="line"><a id="l00701" name="l00701"></a><span class="lineno"><a class="line" href="../../d8/d6f/class_utils_1_1unique__function.html#acdfcee698000335867d1e2f3383548d2">  701</a></span>    <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#ad8b431f70ba0fc7573f620f3f06c520b">unique_function</a>&amp; <a class="code hl_function" href="../../d8/d6f/class_utils_1_1unique__function.html#acdfcee698000335867d1e2f3383548d2">operator=</a>(Fn&amp;&amp; f)</div>
-<div class="line"><a id="l00702" name="l00702"></a><span class="lineno">  702</span>    { base::operator=(wrapper&lt;Fn&gt;{ std::forward&lt;Fn&gt;(f) }); <span class="keywordflow">return</span> *<span class="keyword">this</span>; }</div>
-</div>
-<div class="line"><a id="l00703" name="l00703"></a><span class="lineno">  703</span> </div>
-<div class="line"><a id="l00704" name="l00704"></a><span class="lineno">  704</span>    <span class="keyword">using </span>base::operator();</div>
-<div class="line"><a id="l00705" name="l00705"></a><span class="lineno">  705</span>  };</div>
-</div>
-<div class="line"><a id="l00706" name="l00706"></a><span class="lineno">  706</span>  </div>
-<div class="line"><a id="l00707" name="l00707"></a><span class="lineno">  707</span>  <span class="comment">/*</span></div>
-<div class="line"><a id="l00708" name="l00708"></a><span class="lineno">  708</span><span class="comment">  using std::cout; using std::endl;</span></div>
-<div class="line"><a id="l00709" name="l00709"></a><span class="lineno">  709</span><span class="comment"></span> </div>
-<div class="line"><a id="l00710" name="l00710"></a><span class="lineno">  710</span><span class="comment">  struct move_only {</span></div>
-<div class="line"><a id="l00711" name="l00711"></a><span class="lineno">  711</span><span class="comment">    move_only(std::size_t) { }</span></div>
-<div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span><span class="comment"></span> </div>
-<div class="line"><a id="l00713" name="l00713"></a><span class="lineno">  713</span><span class="comment">    move_only(move_only&amp;&amp;) = default;</span></div>
-<div class="line"><a id="l00714" name="l00714"></a><span class="lineno">  714</span><span class="comment">    move_only&amp; operator=(move_only&amp;&amp;) = default;</span></div>
-<div class="line"><a id="l00715" name="l00715"></a><span class="lineno">  715</span><span class="comment"></span> </div>
-<div class="line"><a id="l00716" name="l00716"></a><span class="lineno">  716</span><span class="comment">    move_only(move_only const&amp;) = delete;</span></div>
-<div class="line"><a id="l00717" name="l00717"></a><span class="lineno">  717</span><span class="comment">    move_only&amp; operator=(move_only const&amp;) = delete;</span></div>
-<div class="line"><a id="l00718" name="l00718"></a><span class="lineno">  718</span><span class="comment"></span> </div>
-<div class="line"><a id="l00719" name="l00719"></a><span class="lineno">  719</span><span class="comment">    void operator()() { cout &lt;&lt; &quot;move_only&quot; &lt;&lt; endl; }</span></div>
-<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span><span class="comment">  };</span></div>
-<div class="line"><a id="l00721" name="l00721"></a><span class="lineno">  721</span><span class="comment"></span> </div>
-<div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span><span class="comment">  int main()</span></div>
-<div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span><span class="comment">  {</span></div>
-<div class="line"><a id="l00724" name="l00724"></a><span class="lineno">  724</span><span class="comment">    using fn = unique_function&lt;void()&gt;;</span></div>
-<div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span><span class="comment"></span> </div>
-<div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span><span class="comment">    fn f0;</span></div>
-<div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span><span class="comment">    fn f1 { nullptr };</span></div>
-<div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span><span class="comment">    fn f2 { [](){ cout &lt;&lt; &quot;f2&quot; &lt;&lt; endl; } }; f2();</span></div>
-<div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span><span class="comment">    fn f3 { move_only(42) }; f3();</span></div>
-<div class="line"><a id="l00730" name="l00730"></a><span class="lineno">  730</span><span class="comment">    fn f4 { std::move(f2) }; f4();</span></div>
-<div class="line"><a id="l00731" name="l00731"></a><span class="lineno">  731</span><span class="comment"></span> </div>
-<div class="line"><a id="l00732" name="l00732"></a><span class="lineno">  732</span><span class="comment">    f0 = std::move(f3); f0();</span></div>
-<div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span><span class="comment">    f0 = nullptr;</span></div>
-<div class="line"><a id="l00734" name="l00734"></a><span class="lineno">  734</span><span class="comment">    f2 = [](){ cout &lt;&lt; &quot;new f2&quot; &lt;&lt; endl; }; f2();</span></div>
-<div class="line"><a id="l00735" name="l00735"></a><span class="lineno">  735</span><span class="comment">    f3 = move_only(69); f3();</span></div>
+<div class="line"><a id="l00698" name="l00698"></a><span class="lineno">  698</span>    unique_function(unique_function&amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00699" name="l00699"></a><span class="lineno">  699</span>    unique_function&amp; operator=(unique_function&amp;&amp;) = <span class="keywordflow">default</span>;</div>
+<div class="line"><a id="l00700" name="l00700"></a><span class="lineno">  700</span> </div>
+<div class="line"><a id="l00701" name="l00701"></a><span class="lineno">  701</span>    unique_function&amp; operator=(std::nullptr_t) { base::operator=(<span class="keyword">nullptr</span>); <span class="keywordflow">return</span> *<span class="keyword">this</span>; }</div>
+<div class="line"><a id="l00702" name="l00702"></a><span class="lineno">  702</span> </div>
+<div class="line"><a id="l00703" name="l00703"></a><span class="lineno">  703</span>    <span class="keyword">template</span>&lt;<span class="keyword">typename</span> Fn&gt;</div>
+<div class="line"><a id="l00704" name="l00704"></a><span class="lineno">  704</span>    unique_function&amp; operator=(Fn&amp;&amp; f)</div>
+<div class="line"><a id="l00705" name="l00705"></a><span class="lineno">  705</span>    { base::operator=(wrapper&lt;Fn&gt;{ std::forward&lt;Fn&gt;(f) }); <span class="keywordflow">return</span> *<span class="keyword">this</span>; }</div>
+<div class="line"><a id="l00706" name="l00706"></a><span class="lineno">  706</span> </div>
+<div class="line"><a id="l00707" name="l00707"></a><span class="lineno">  707</span>    <span class="keyword">using </span>base::operator();</div>
+<div class="line"><a id="l00708" name="l00708"></a><span class="lineno">  708</span>  };</div>
+<div class="line"><a id="l00709" name="l00709"></a><span class="lineno">  709</span> </div>
+<div class="line"><a id="l00710" name="l00710"></a><span class="lineno">  710</span><span class="preprocessor">  #endif</span></div>
+<div class="line"><a id="l00711" name="l00711"></a><span class="lineno">  711</span>  </div>
+<div class="line"><a id="l00712" name="l00712"></a><span class="lineno">  712</span>  <span class="comment">/*</span></div>
+<div class="line"><a id="l00713" name="l00713"></a><span class="lineno">  713</span><span class="comment">  using std::cout; using std::endl;</span></div>
+<div class="line"><a id="l00714" name="l00714"></a><span class="lineno">  714</span><span class="comment"></span> </div>
+<div class="line"><a id="l00715" name="l00715"></a><span class="lineno">  715</span><span class="comment">  struct move_only {</span></div>
+<div class="line"><a id="l00716" name="l00716"></a><span class="lineno">  716</span><span class="comment">    move_only(std::size_t) { }</span></div>
+<div class="line"><a id="l00717" name="l00717"></a><span class="lineno">  717</span><span class="comment"></span> </div>
+<div class="line"><a id="l00718" name="l00718"></a><span class="lineno">  718</span><span class="comment">    move_only(move_only&amp;&amp;) = default;</span></div>
+<div class="line"><a id="l00719" name="l00719"></a><span class="lineno">  719</span><span class="comment">    move_only&amp; operator=(move_only&amp;&amp;) = default;</span></div>
+<div class="line"><a id="l00720" name="l00720"></a><span class="lineno">  720</span><span class="comment"></span> </div>
+<div class="line"><a id="l00721" name="l00721"></a><span class="lineno">  721</span><span class="comment">    move_only(move_only const&amp;) = delete;</span></div>
+<div class="line"><a id="l00722" name="l00722"></a><span class="lineno">  722</span><span class="comment">    move_only&amp; operator=(move_only const&amp;) = delete;</span></div>
+<div class="line"><a id="l00723" name="l00723"></a><span class="lineno">  723</span><span class="comment"></span> </div>
+<div class="line"><a id="l00724" name="l00724"></a><span class="lineno">  724</span><span class="comment">    void operator()() { cout &lt;&lt; &quot;move_only&quot; &lt;&lt; endl; }</span></div>
+<div class="line"><a id="l00725" name="l00725"></a><span class="lineno">  725</span><span class="comment">  };</span></div>
+<div class="line"><a id="l00726" name="l00726"></a><span class="lineno">  726</span><span class="comment"></span> </div>
+<div class="line"><a id="l00727" name="l00727"></a><span class="lineno">  727</span><span class="comment">  int main()</span></div>
+<div class="line"><a id="l00728" name="l00728"></a><span class="lineno">  728</span><span class="comment">  {</span></div>
+<div class="line"><a id="l00729" name="l00729"></a><span class="lineno">  729</span><span class="comment">    using fn = unique_function&lt;void()&gt;;</span></div>
+<div class="line"><a id="l00730" name="l00730"></a><span class="lineno">  730</span><span class="comment"></span> </div>
+<div class="line"><a id="l00731" name="l00731"></a><span class="lineno">  731</span><span class="comment">    fn f0;</span></div>
+<div class="line"><a id="l00732" name="l00732"></a><span class="lineno">  732</span><span class="comment">    fn f1 { nullptr };</span></div>
+<div class="line"><a id="l00733" name="l00733"></a><span class="lineno">  733</span><span class="comment">    fn f2 { [](){ cout &lt;&lt; &quot;f2&quot; &lt;&lt; endl; } }; f2();</span></div>
+<div class="line"><a id="l00734" name="l00734"></a><span class="lineno">  734</span><span class="comment">    fn f3 { move_only(42) }; f3();</span></div>
+<div class="line"><a id="l00735" name="l00735"></a><span class="lineno">  735</span><span class="comment">    fn f4 { std::move(f2) }; f4();</span></div>
 <div class="line"><a id="l00736" name="l00736"></a><span class="lineno">  736</span><span class="comment"></span> </div>
-<div class="line"><a id="l00737" name="l00737"></a><span class="lineno">  737</span><span class="comment">    return 0;</span></div>
-<div class="line"><a id="l00738" name="l00738"></a><span class="lineno">  738</span><span class="comment">  }</span></div>
-<div class="line"><a id="l00739" name="l00739"></a><span class="lineno">  739</span><span class="comment">  */</span></div>
-<div class="line"><a id="l00740" name="l00740"></a><span class="lineno">  740</span></div>
-<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span> </div>
-<div class="line"><a id="l00743" name="l00743"></a><span class="lineno">  743</span>}</div>
-<div class="line"><a id="l00744" name="l00744"></a><span class="lineno">  744</span> </div>
-<div class="line"><a id="l00745" name="l00745"></a><span class="lineno">  745</span><span class="comment">//</span></div>
-<div class="line"><a id="l00746" name="l00746"></a><span class="lineno">  746</span><span class="comment">// eof: ThreadUtils.hxx</span></div>
-<div class="line"><a id="l00747" name="l00747"></a><span class="lineno">  747</span><span class="comment">//</span></div>
+<div class="line"><a id="l00737" name="l00737"></a><span class="lineno">  737</span><span class="comment">    f0 = std::move(f3); f0();</span></div>
+<div class="line"><a id="l00738" name="l00738"></a><span class="lineno">  738</span><span class="comment">    f0 = nullptr;</span></div>
+<div class="line"><a id="l00739" name="l00739"></a><span class="lineno">  739</span><span class="comment">    f2 = [](){ cout &lt;&lt; &quot;new f2&quot; &lt;&lt; endl; }; f2();</span></div>
+<div class="line"><a id="l00740" name="l00740"></a><span class="lineno">  740</span><span class="comment">    f3 = move_only(69); f3();</span></div>
+<div class="line"><a id="l00741" name="l00741"></a><span class="lineno">  741</span><span class="comment"></span> </div>
+<div class="line"><a id="l00742" name="l00742"></a><span class="lineno">  742</span><span class="comment">    return 0;</span></div>
+<div class="line"><a id="l00743" name="l00743"></a><span class="lineno">  743</span><span class="comment">  }</span></div>
+<div class="line"><a id="l00744" name="l00744"></a><span class="lineno">  744</span><span class="comment">  */</span></div>
+<div class="line"><a id="l00745" name="l00745"></a><span class="lineno">  745</span></div>
+<div class="line"><a id="l00747" name="l00747"></a><span class="lineno">  747</span> </div>
+<div class="line"><a id="l00748" name="l00748"></a><span class="lineno">  748</span>}</div>
+<div class="line"><a id="l00749" name="l00749"></a><span class="lineno">  749</span> </div>
+<div class="line"><a id="l00750" name="l00750"></a><span class="lineno">  750</span><span class="comment">//</span></div>
+<div class="line"><a id="l00751" name="l00751"></a><span class="lineno">  751</span><span class="comment">// eof: ThreadUtils.hxx</span></div>
+<div class="line"><a id="l00752" name="l00752"></a><span class="lineno">  752</span><span class="comment">//</span></div>
 <div class="ttc" id="aclass_utils_1_1_barrier_html_a050e6ea6f94416c2b3edb27b931eb575"><div class="ttname"><a href="../../d8/d20/class_utils_1_1_barrier.html#a050e6ea6f94416c2b3edb27b931eb575">Utils::Barrier::setup</a></div><div class="ttdeci">void setup(int nthreads)</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:306</div></div>
 <div class="ttc" id="aclass_utils_1_1_barrier_html_a14ed62044081ac0e7f16bd1d38ca9505"><div class="ttname"><a href="../../d8/d20/class_utils_1_1_barrier.html#a14ed62044081ac0e7f16bd1d38ca9505">Utils::Barrier::Barrier</a></div><div class="ttdeci">Barrier()</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:303</div></div>
 <div class="ttc" id="aclass_utils_1_1_barrier_html_a88d8be95ae28ecbfc7a82fee0a6468fd"><div class="ttname"><a href="../../d8/d20/class_utils_1_1_barrier.html#a88d8be95ae28ecbfc7a82fee0a6468fd">Utils::Barrier::count_down_and_wait</a></div><div class="ttdeci">void count_down_and_wait()</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:322</div></div>
@@ -947,16 +948,10 @@ $(function(){initNavTree('d1/db1/_thread_utils_8hxx_source.html','../../'); init
 <div class="ttc" id="aclass_utils_1_1at__scope__exit__impl_html_a33f8601dda5b1c003ba336d7f6e6e52b"><div class="ttname"><a href="../../db/da5/class_utils_1_1at__scope__exit__impl.html#a33f8601dda5b1c003ba336d7f6e6e52b">Utils::at_scope_exit_impl::at_scope_exit_impl</a></div><div class="ttdeci">at_scope_exit_impl(at_scope_exit_impl const &amp;)=delete</div></div>
 <div class="ttc" id="aclass_utils_1_1at__scope__exit__impl_html_a5235abb66802c9e51373aaff2bc8bff4"><div class="ttname"><a href="../../db/da5/class_utils_1_1at__scope__exit__impl.html#a5235abb66802c9e51373aaff2bc8bff4">Utils::at_scope_exit_impl::at_scope_exit_impl</a></div><div class="ttdeci">at_scope_exit_impl(Destructor const &amp;destructor)</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:602</div></div>
 <div class="ttc" id="aclass_utils_1_1at__scope__exit__impl_html_a7f61a8487c809f48515651edb173a3f4"><div class="ttname"><a href="../../db/da5/class_utils_1_1at__scope__exit__impl.html#a7f61a8487c809f48515651edb173a3f4">Utils::at_scope_exit_impl::operator=</a></div><div class="ttdeci">at_scope_exit_impl &amp; operator=(at_scope_exit_impl &amp;&amp;x)</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:613</div></div>
-<div class="ttc" id="aclass_utils_1_1at__scope__exit__impl_html_ab9046a58f43c0aecc1b111da7b84238c"><div class="ttname"><a href="../../db/da5/class_utils_1_1at__scope__exit__impl.html#ab9046a58f43c0aecc1b111da7b84238c">Utils::at_scope_exit_impl::~at_scope_exit_impl</a></div><div class="ttdeci">~at_scope_exit_impl()</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:619</div></div>
+<div class="ttc" id="aclass_utils_1_1at__scope__exit__impl_html_ab9046a58f43c0aecc1b111da7b84238c"><div class="ttname"><a href="../../db/da5/class_utils_1_1at__scope__exit__impl.html#ab9046a58f43c0aecc1b111da7b84238c">Utils::at_scope_exit_impl::~at_scope_exit_impl</a></div><div class="ttdeci">~at_scope_exit_impl()</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:620</div></div>
 <div class="ttc" id="aclass_utils_1_1at__scope__exit__impl_html_ac31a5c4ec041556cd6dadde56f22ab1f"><div class="ttname"><a href="../../db/da5/class_utils_1_1at__scope__exit__impl.html#ac31a5c4ec041556cd6dadde56f22ab1f">Utils::at_scope_exit_impl::at_scope_exit_impl</a></div><div class="ttdeci">at_scope_exit_impl()</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:593</div></div>
 <div class="ttc" id="aclass_utils_1_1at__scope__exit__impl_html_ad452f0c0959db75a4a12af6da7f2174e"><div class="ttname"><a href="../../db/da5/class_utils_1_1at__scope__exit__impl.html#ad452f0c0959db75a4a12af6da7f2174e">Utils::at_scope_exit_impl::operator=</a></div><div class="ttdeci">at_scope_exit_impl &amp; operator=(at_scope_exit_impl const &amp;)=delete</div></div>
-<div class="ttc" id="aclass_utils_1_1unique__function_html_a506cf9dc9ead13d34c287f3b36b19fb2"><div class="ttname"><a href="../../d8/d6f/class_utils_1_1unique__function.html#a506cf9dc9ead13d34c287f3b36b19fb2">Utils::unique_function::operator=</a></div><div class="ttdeci">unique_function &amp; operator=(unique_function &amp;&amp;)=default</div></div>
-<div class="ttc" id="aclass_utils_1_1unique__function_html_a5ec03b9929e05ab36ac9cdffcd579ed8"><div class="ttname"><a href="../../d8/d6f/class_utils_1_1unique__function.html#a5ec03b9929e05ab36ac9cdffcd579ed8">Utils::unique_function::operator=</a></div><div class="ttdeci">unique_function &amp; operator=(std::nullptr_t)</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:698</div></div>
-<div class="ttc" id="aclass_utils_1_1unique__function_html_acdfcee698000335867d1e2f3383548d2"><div class="ttname"><a href="../../d8/d6f/class_utils_1_1unique__function.html#acdfcee698000335867d1e2f3383548d2">Utils::unique_function::operator=</a></div><div class="ttdeci">unique_function &amp; operator=(Fn &amp;&amp;f)</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:701</div></div>
-<div class="ttc" id="aclass_utils_1_1unique__function_html_ad8b431f70ba0fc7573f620f3f06c520b"><div class="ttname"><a href="../../d8/d6f/class_utils_1_1unique__function.html#ad8b431f70ba0fc7573f620f3f06c520b">Utils::unique_function::unique_function</a></div><div class="ttdeci">unique_function() noexcept=default</div></div>
-<div class="ttc" id="aclass_utils_1_1unique__function_html_ae1111282e435a5e58a0cdb8972cb06a1"><div class="ttname"><a href="../../d8/d6f/class_utils_1_1unique__function.html#ae1111282e435a5e58a0cdb8972cb06a1">Utils::unique_function::unique_function</a></div><div class="ttdeci">unique_function(unique_function &amp;&amp;)=default</div></div>
-<div class="ttc" id="aclass_utils_1_1unique__function_html_aec48b9ade9c4d0e9c5989b0666525825"><div class="ttname"><a href="../../d8/d6f/class_utils_1_1unique__function.html#aec48b9ade9c4d0e9c5989b0666525825">Utils::unique_function::unique_function</a></div><div class="ttdeci">unique_function(Fn &amp;&amp;f)</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:693</div></div>
-<div class="ttc" id="agroup___t_h_r_e_a_d_html_ga633cf79a96f127c0d378eb35197fb000"><div class="ttname"><a href="../../d9/d18/group___t_h_r_e_a_d.html#ga633cf79a96f127c0d378eb35197fb000">Utils::at_scope_exit</a></div><div class="ttdeci">auto at_scope_exit(Function &amp;&amp;fun) -&gt; at_scope_exit_impl&lt; Function &gt;</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:640</div></div>
+<div class="ttc" id="agroup___t_h_r_e_a_d_html_ga633cf79a96f127c0d378eb35197fb000"><div class="ttname"><a href="../../d9/d18/group___t_h_r_e_a_d.html#ga633cf79a96f127c0d378eb35197fb000">Utils::at_scope_exit</a></div><div class="ttdeci">auto at_scope_exit(Function &amp;&amp;fun) -&gt; at_scope_exit_impl&lt; Function &gt;</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:641</div></div>
 <div class="ttc" id="agroup___t_h_r_e_a_d_html_ga9a7df7eef57e668f70be53a096042015"><div class="ttname"><a href="../../d9/d18/group___t_h_r_e_a_d.html#ga9a7df7eef57e668f70be53a096042015">UTILS_SPINLOCK</a></div><div class="ttdeci">#define UTILS_SPINLOCK</div><div class="ttdef"><b>Definition</b> ThreadUtils.hxx:44</div></div>
 <div class="ttc" id="anamespace_utils_html"><div class="ttname"><a href="../../d1/d7c/namespace_utils.html">Utils</a></div><div class="ttdef"><b>Definition</b> SystemUtils.cc:39</div></div>
 <div class="ttc" id="anamespacerang_html_a41a68f6ed991b29fa720fcfbcd319ef9a9f27410725ab8cc8854a2769c7a516b8"><div class="ttname"><a href="../../d1/df2/namespacerang.html#a41a68f6ed991b29fa720fcfbcd319ef9a9f27410725ab8cc8854a2769c7a516b8">rang::fg::green</a></div><div class="ttdeci">@ green</div><div class="ttdef"><b>Definition</b> rang.hxx:41</div></div>

@@ -7,6 +7,7 @@ var group___zeros =
     [ "Utils::AlgoBracket< Real >", "d6/df4/class_utils_1_1_algo_bracket.html", [
       [ "AlgoBracket", "d6/df4/class_utils_1_1_algo_bracket.html#a8ca4119043b2ba2b44ea7f436abf9c17", null ],
       [ "~AlgoBracket", "d6/df4/class_utils_1_1_algo_bracket.html#abb86b8edbef50ecb8e0923ac4c98e09a", null ],
+      [ "AlgoBracket", "d6/df4/class_utils_1_1_algo_bracket.html#a2efd6df9174fdc30a4a2dc0e846e2023", null ],
       [ "a", "d6/df4/class_utils_1_1_algo_bracket.html#a41c792181919f31f817e512810b91765", null ],
       [ "algo", "d6/df4/class_utils_1_1_algo_bracket.html#ae197afb6bea6dee373d6e049f69f1f74", null ],
       [ "b", "d6/df4/class_utils_1_1_algo_bracket.html#a667c538bc45ff549f3df6c2569a49a12", null ],
@@ -22,7 +23,8 @@ var group___zeros =
       [ "select", "d6/df4/class_utils_1_1_algo_bracket.html#af86b8d344d982a7811da94c77921b1a1", null ],
       [ "set_max_fun_evaluation", "d6/df4/class_utils_1_1_algo_bracket.html#a06b2fabaa0985b3ba8806e3363b8b01f", null ],
       [ "set_max_iterations", "d6/df4/class_utils_1_1_algo_bracket.html#a4f5eece49f71f8c4f63b1fee32112323", null ],
-      [ "tolerance", "d6/df4/class_utils_1_1_algo_bracket.html#a608c9e78143f543546df91f48208e5fd", null ],
+      [ "tolerance_f", "d6/df4/class_utils_1_1_algo_bracket.html#a28712c522eb03606dd3c244eea68f694", null ],
+      [ "tolerance_x", "d6/df4/class_utils_1_1_algo_bracket.html#a981b986870688ffc84f74ef11c5b1a83", null ],
       [ "used_iter", "d6/df4/class_utils_1_1_algo_bracket.html#ad1c68be6e6abf12205544c32de7d9af0", null ]
     ] ],
     [ "Utils::AlgoHNewton_base_fun< Real >", "db/dee/class_utils_1_1_algo_h_newton__base__fun.html", [

@@ -1,4 +1,5 @@
 var searchData=
 [
-  ['unique_5ffunction_0',['unique_function',['../d8/d6f/class_utils_1_1unique__function.html',1,'Utils']]]
+  ['waitworker_0',['WaitWorker',['../d6/dde/class_utils_1_1_wait_worker.html',1,'Utils']]],
+  ['workerloop_1',['WorkerLoop',['../d3/d7a/class_utils_1_1_worker_loop.html',1,'Utils']]]
 ];

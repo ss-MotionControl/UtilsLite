@@ -6,6 +6,6 @@ var class_utils_1_1_s_h_a3 =
     [ "digest_in_hex", "d5/dc2/class_utils_1_1_s_h_a3.html#af26126bd934f037df7a7e526f934b0cd", null ],
     [ "digest_size", "d5/dc2/class_utils_1_1_s_h_a3.html#a644a1a6beff0ea3253b08201977a1523", null ],
     [ "hash", "d5/dc2/class_utils_1_1_s_h_a3.html#a845781b31b5fea397f76f9d80f17abb4", null ],
-    [ "hash_hex_string", "d5/dc2/class_utils_1_1_s_h_a3.html#a2de6c0078b73104c2cf055d800458eb4", null ],
-    [ "hash_string", "d5/dc2/class_utils_1_1_s_h_a3.html#a2e2e33c6a8646cc0f67e53a640511d5c", null ]
+    [ "hash_hex_string", "d5/dc2/class_utils_1_1_s_h_a3.html#a4e8a078254bb6661780be50913d8edc8", null ],
+    [ "hash_string", "d5/dc2/class_utils_1_1_s_h_a3.html#a60e9c6d3b3ecc74dd27a3b6c018c7035", null ]
 ];
