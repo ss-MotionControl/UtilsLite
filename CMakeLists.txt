@@ -38,6 +38,13 @@ project(
 include( "${HOME}/CMakeLists-cflags.txt" )
 include( "${HOME}/CMakeLists-utilities.txt" )
 
+
+if( CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang" )
+  add_compile_options( "$<$<COMPILE_LANGUAGE:C,CXX>:-Wno-poison-system-directories>" )
+  add_compile_options( "$<$<COMPILE_LANGUAGE:C,CXX>:-Wno-switch-default>" )
+  add_compile_options( "$<$<COMPILE_LANGUAGE:C,CXX>:-Wno-exit-time-destructors>" )
+endif()
+
 # Evaluating the suffix to append to target built by this CMake file
 utils_artifacts_suffix(ARTIFACTS_STATIC_SUFFIX TRUE)
 if( UTILS_BUILD_SHARED )
@@ -113,7 +120,7 @@ endforeach(F ${S})
 list(FILTER PUBLIC_HEADERS EXCLUDE REGEX "\.DS")
 
 # extra include directory for compilation
-include_directories( ./src ./src/UtilsLite ./lib3rd/include )
+include_directories( ./src ./src/Utils )
 
 #   _____                  _
 #  |_   _|_ _ _ _ __ _ ___| |_ ___
