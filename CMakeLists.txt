@@ -216,6 +216,7 @@ install(
   ARCHIVE DESTINATION ${INSTALL_PREFIX}/lib
   RUNTIME DESTINATION ${INSTALL_PREFIX}/bin
   PUBLIC_HEADER DESTINATION ${PROJECT_PUBLIC_HEADER_DESTINATION}
+  EXCLUDE_FROM_ALL
 )
 
 #   ___         _
@@ -228,3 +229,22 @@ install(
 include( "${HOME}/CMakeLists-cpack.txt" )
 
 utils_final_messages()
+
+#
+# Remove warning for 3rd
+#
+get_property(all_targets DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
+
+foreach(target IN LISTS all_targets)
+  if (TARGET ${target})
+    get_target_property(type ${target} TYPE)
+    if(type STREQUAL "EXECUTABLE" OR
+       type STREQUAL "STATIC_LIBRARY" OR
+       type STREQUAL "SHARED_LIBRARY" OR
+       type STREQUAL "MODULE_LIBRARY" OR
+       type STREQUAL "OBJECT_LIBRARY")
+      target_include_directories(${target} SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/src/Utils/3rd)
+      target_include_directories(${target} SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/include/Utils/3rd)
+    endif()
+  endif()
+endforeach()

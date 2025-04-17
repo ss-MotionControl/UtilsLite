@@ -250,19 +250,19 @@ namespace Utils {
   template <typename Real>
   void
   NelderMead<Real>::shrink() {
-    Real c1 = 1-m_sigma;
-    Real c2 = m_sigma;
-    for ( integer i = 0; i <= m_dim; ++i ) {
+    Real const c1{ 1-m_sigma };
+    Real const c2{ m_sigma   };
+    for ( integer i{0}; i <= m_dim; ++i ) {
       if ( i != m_low ) {
         m_p.col(i) = c1 * m_p.col(i) + c2 * m_p.col(m_low);
         REF(m_f,i) = this->eval_function( m_p.col(i).data() );
       }
     }
     m_psum.noalias() = m_p.col(m_dim);
-    for ( integer i = 0 ; i < m_dim; ++i ) m_psum.noalias() += m_p.col(i);
+    for ( integer i{0}; i < m_dim; ++i ) m_psum.noalias() += m_p.col(i);
     m_dist           *= c1;
     m_diameter       *= c1;
-    m_simplex_volume *= std::pow(c1,m_dim);
+    m_simplex_volume *= std::pow( c1, static_cast<Real>(m_dim) );
   }
 
   // =================================================================

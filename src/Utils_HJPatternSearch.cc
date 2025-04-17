@@ -198,7 +198,7 @@ namespace Utils {
         m_f_best = new_f;
         //lambda *= 2;
       }
-      lambda *= 0.5;
+      lambda /= 2;
     }
   }
 
