@@ -371,7 +371,6 @@ namespace Utils {
   }
 }
 
-#ifdef UTILS_USE_IOSTREAM
 //!
 //! \brief Stream insertion operator for rendering a table row to an output stream.
 //!
@@ -389,7 +388,6 @@ Utils::ostream_type&
 operator << ( Utils::ostream_type& stream, Utils::Table::Table const & table ) {
   return stream << table.render();
 }
-#endif
 
 //
 // eof: Table.hxx

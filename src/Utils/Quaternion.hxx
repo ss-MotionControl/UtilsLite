@@ -24,9 +24,7 @@
 namespace Utils {
 
   #ifndef DOXYGEN_SHOULD_SKIP_THIS
-  #ifdef UTILS_USE_IOSTREAM
   using std::ostream;
-  #endif
   #endif
 
   //!
@@ -111,7 +109,6 @@ namespace Utils {
       m_Q[3] = D;
     }
 
-    #ifdef UTILS_USE_IOSTREAM
     //!
     //! Prints the quaternion to the specified output stream.
     //!
@@ -125,7 +122,6 @@ namespace Utils {
          << m_Q[2] << "j, "
          << m_Q[3] << "k ]";
     }
-    #endif
 
     //!
     //! Accesses the \f$i\f$-th component of the quaternion.
@@ -306,7 +302,6 @@ namespace Utils {
                           a[0] * b[3] + a[1] * b[2] - a[2] * b[1] + a[3] * b[0] );
   }
 
-  #ifdef UTILS_USE_IOSTREAM
   //!
   //! Overloads the output stream operator for quaternions.
   //!
@@ -320,7 +315,6 @@ namespace Utils {
     Q.print(os);
     return os;
   }
-  #endif
 }
 
 //
