@@ -23,11 +23,13 @@
 
 #include "Utils_AABB_tree.hh"
 #ifndef UTILS_MINIMAL_BUILD
-#include "Utils_fmt.hh"
+    #include "Utils_fmt.hh"
 #endif
 
-#include <algorithm>
-#include <utility>
+#ifndef UTILS_MINIMAL_BUILD
+    #include <algorithm>
+    #include <utility>
+#endif
 
 namespace Utils {
 
