@@ -28,20 +28,27 @@
 #endif
 
 #include "Utils.hh"
+#ifdef UTILS_USE_IOSTREAM
 #include "Utils_fmt.hh"
 #include "Utils_trace.hh"
 
 #include <iostream>
+#endif
 
 namespace Utils {
-
+#ifdef UTILS_USE_THREADS
   using std::mutex;
   using std::lock_guard;
+#endif
   using std::exception;
   using std::exit;
+#ifdef UTILS_USE_IOSTREAM
   using std::cerr;
+#endif
 
+#ifdef UTILS_USE_THREADS
   std::mutex MallocMutex;
+#endif
 
   int64_t CountAlloc            { 0 };
   int64_t CountFreed            { 0 };
@@ -49,6 +56,7 @@ namespace Utils {
   int64_t MaximumAllocatedBytes { 0 };
   bool    MallocDebug           { false };
 
+#ifdef UTILS_USE_IOSTREAM
   string
   out_bytes( size_t nb ) {
     size_t const Kb { nb>>10 };
@@ -67,6 +75,7 @@ namespace Utils {
     }
     return fmt::format( "{}bytes", nb );
   }
+#endif
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
@@ -76,7 +85,9 @@ namespace Utils {
     try {
       size_t nb;
       {
+#ifdef UTILS_USE_THREADS
         lock_guard lock(Utils::MallocMutex);
+#endif
         nb = m_num_total_reserved*sizeof(T);
         ++CountFreed; AllocatedBytes -= nb;
       }
@@ -87,7 +98,9 @@ namespace Utils {
       m_p_memory           = new T[m_num_total_reserved];
 
       {
+#ifdef UTILS_USE_THREADS
         lock_guard lock(Utils::MallocMutex);
+#endif
         ++CountAlloc;
         nb = m_num_total_reserved*sizeof(T);
         AllocatedBytes += nb;
@@ -95,22 +108,30 @@ namespace Utils {
           MaximumAllocatedBytes = AllocatedBytes;
       }
 
+#ifdef UTILS_USE_IOSTREAM
       if ( MallocDebug )
         fmt::print( "Allocating {} for {}\n", out_bytes( nb ), m_name );
+#endif
     }
     catch ( exception const & exc ) {
+#ifdef UTILS_USE_IOSTREAM
       string const reason = fmt::format(
         "Memory allocation failed: {}\nTry to allocate {} bytes for {}\n",
         exc.what(), n, m_name
       );
       print_trace( __LINE__, __FILE__, reason, cerr );
+#else
+      exc;
+#endif
       exit(0);
     }
     catch (...) {
+#ifdef UTILS_USE_IOSTREAM
       string const reason = fmt::format(
         "Memory allocation failed for {}: memory exausted\n", m_name
       );
       print_trace( __LINE__, __FILE__, reason, cerr );
+#endif
       exit(0);
     }
     m_num_total_values = n;
@@ -176,13 +197,17 @@ namespace Utils {
     if ( m_p_memory != nullptr ) {
       size_t nb;
       {
+#ifdef UTILS_USE_THREADS
         lock_guard lock(Utils::MallocMutex);
+#endif
         nb = m_num_total_reserved*sizeof(T);
         ++CountFreed; AllocatedBytes -= nb;
       }
 
+#ifdef UTILS_USE_IOSTREAM
       if ( MallocDebug )
         fmt::print( "Freeing {} for {}\n", out_bytes( nb ), m_name );
+#endif
 
       delete [] m_p_memory; m_p_memory = nullptr;
       m_num_total_values   = 0;
@@ -196,10 +221,12 @@ namespace Utils {
   template <typename T>
   void
   Malloc<T>::memory_exausted( size_t sz ) {
+#ifdef UTILS_USE_IOSTREAM
     string const reason = fmt::format(
       "Malloc<{}>::operator () ({}) -- Memory EXAUSTED\n", m_name, sz
     );
     print_trace( __LINE__, __FILE__, reason, cerr );
+#endif
     exit(0);
   }
 
@@ -208,10 +235,12 @@ namespace Utils {
   template <typename T>
   void
   Malloc<T>::pop_exausted( size_t sz ) {
+#ifdef UTILS_USE_IOSTREAM
     string const reason = fmt::format(
       "Malloc<{}>::pop({}) -- Not enough element on Stack\n", m_name, sz
     );
     print_trace( __LINE__, __FILE__, reason, cerr );
+#endif
     exit(0);
   }
 
@@ -221,23 +250,28 @@ namespace Utils {
   void
   Malloc<T>::must_be_empty( string_view const where ) const {
     if ( m_num_allocated < m_num_total_values ) {
+#ifdef UTILS_USE_IOSTREAM
       string const tmp = fmt::format(
         "in {} {}: not fully used!\nUnused: {} values\n",
         m_name, where, m_num_total_values - m_num_allocated
       );
       print_trace( __LINE__,__FILE__, tmp, cerr );
+#endif
     }
     if ( m_num_allocated > m_num_total_values ) {
+#ifdef UTILS_USE_IOSTREAM
       string const tmp = fmt::format(
         "in {} {}: too much used!\nMore used: {} values\n",
         m_name, where, m_num_allocated - m_num_total_values
       );
       print_trace( __LINE__,__FILE__, tmp, cerr );
+#endif
     }
   }
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 
+#ifdef UTILS_USE_IOSTREAM
   template <typename T>
   std::string
   Malloc<T>::info( string_view where ) const {
@@ -252,6 +286,7 @@ namespace Utils {
       m_name, where, m_num_allocated, m_num_total_values, diff
     );
   }
+#endif
 
   template class Malloc<char>;
   template class Malloc<uint16_t>;

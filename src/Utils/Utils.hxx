@@ -158,9 +158,6 @@
     #include <condition_variable>
     #include <atomic>
 #endif
-#else
-    // TODO : the following should be removed
-    #include <mutex>
 #endif
 
 #ifdef _MSC_VER
@@ -192,10 +189,10 @@ using istream_type = std::basic_istream<char>;
 #include "Numbers.hxx"
 #ifdef UTILS_USE_OS
 #include "TicToc.hxx"
-#endif
 #include "Quaternion.hxx"
 #include "Table.hxx"
 #include "Token.hxx"
+#endif
 
 // order must be preserved
 #ifdef UTILS_USE_THREADS

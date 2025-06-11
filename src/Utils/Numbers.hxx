@@ -195,6 +195,7 @@ namespace Utils {
   //! \return True if a NaN value is found, otherwise false.
   bool found_NaN(float const* pv, int DIM);
 
+#ifdef UTILS_USE_IOSTREAM
   //! Checks for NaN values in an array of doubles and logs an error if found.
   //!
   //! \param pv Pointer to the array of double values.
@@ -212,6 +213,7 @@ namespace Utils {
   //! \param line The line number where the check is performed.
   //! \param file The name of the file where the check is performed.
   void check_NaN( float const* pv, string_view v_name, int DIM, int line, string_view file );
+#endif
 
   //============================================================================
 
