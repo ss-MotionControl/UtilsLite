@@ -39,13 +39,13 @@ namespace Utils {
   #ifndef DOXYGEN_SHOULD_SKIP_THIS
   using std::int64_t;
   using std::string;
-  #ifdef UTILS_USE_THREADS
+  #ifndef UTILS_MINIMAL_BUILD
   using std::mutex;
   #endif
   using std::size_t;
   #endif
 
-  #ifdef UTILS_USE_THREADS
+  #ifndef UTILS_MINIMAL_BUILD
   //! Global mutex for thread-safe memory operations.
   extern std::mutex MallocMutex;
   #endif
@@ -57,7 +57,7 @@ namespace Utils {
   extern int64_t MaximumAllocatedBytes;
   extern bool    MallocDebug;
 
-#ifdef UTILS_USE_IOSTREAM
+#ifndef UTILS_MINIMAL_BUILD
   //! Utility function to convert byte size into a human-readable format.
   /*!
    * \param nb The number of bytes.
@@ -239,7 +239,7 @@ namespace Utils {
      */
     void must_be_empty( string_view where ) const;
 
-#ifdef UTILS_USE_IOSTREAM
+#ifndef UTILS_MINIMAL_BUILD
     //! Get memory allocation information.
     /*!
      * \param where Identifier for where the information is retrieved.

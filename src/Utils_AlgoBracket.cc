@@ -18,7 +18,9 @@
 \*--------------------------------------------------------------------------*/
 
 #include "Utils_AlgoBracket.hh"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 
 #include <vector>
 #include <cmath>

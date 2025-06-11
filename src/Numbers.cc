@@ -30,7 +30,7 @@
 #endif
 
 #include "Utils.hh"
-#ifdef UTILS_USE_IOSTREAM
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
 #endif
 
@@ -69,7 +69,7 @@ namespace Utils {
 
   #define LINE_LINE_LINE_LINE "--------------------------------------------------------------------------------"
 
-  #ifdef UTILS_USE_IOSTREAM
+  #ifndef UTILS_MINIMAL_BUILD
   //! check if the vector `pv` os size `DIM` contains only regular floats. If not an error is issued
   void
   check_NaN(

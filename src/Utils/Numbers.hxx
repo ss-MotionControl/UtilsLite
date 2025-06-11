@@ -195,7 +195,7 @@ namespace Utils {
   //! \return True if a NaN value is found, otherwise false.
   bool found_NaN(float const* pv, int DIM);
 
-#ifdef UTILS_USE_IOSTREAM
+#ifndef UTILS_MINIMAL_BUILD
   //! Checks for NaN values in an array of doubles and logs an error if found.
   //!
   //! \param pv Pointer to the array of double values.

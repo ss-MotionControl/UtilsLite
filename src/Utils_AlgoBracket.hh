@@ -26,8 +26,10 @@
 #ifndef UTILS_ALGO_BRACKET_dot_HH
 #define UTILS_ALGO_BRACKET_dot_HH
 
+#ifndef UTILS_MINIMAL_BUILD
 #include <iostream>
 #include <sstream>
+#endif
 #include <string>
 #include <algorithm>
 #include <cmath>

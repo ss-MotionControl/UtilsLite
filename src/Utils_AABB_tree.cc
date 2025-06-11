@@ -22,7 +22,7 @@
 //
 
 #include "Utils_AABB_tree.hh"
-#ifdef UTILS_USE_IOSTREAM
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
 #endif
 
@@ -272,7 +272,7 @@ string AABBtree<Real>::info() const
             ++nlong;
     }
     string res = "-------- AABB tree info --------\n";
-#ifdef UTILS_USE_IOSTREAM
+#ifndef UTILS_MINIMAL_BUILD
     res += fmt::format( "  Dimension                {}\n", m_dim );
     res += fmt::format( "  Number of nodes          {}\n", m_num_tree_nodes );
     res += fmt::format( "  Number of leaf           {}\n", nleaf );
@@ -282,7 +282,7 @@ string AABBtree<Real>::info() const
     res += fmt::format( "  bbox_long_edge_ratio     {}\n", m_bbox_long_edge_ratio );
     res += fmt::format( "  bbox_overlap_tolerance   {}\n", m_bbox_overlap_tolerance );
 #else
-    res += std::string( "  TODO refactoring\n" );
+    res += std::string( "  TODO\n" );
 #endif
     res += "--------------------------------\n";
     return res;

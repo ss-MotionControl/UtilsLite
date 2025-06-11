@@ -56,7 +56,7 @@
         #endif
     #endif
     // windows headers, order matters!
-    #ifdef UTILS_USE_OS
+    #ifndef UTILS_MINIMAL_BUILD
     #include <Winsock2.h>
     #include <Windows.h>
     #include <Ws2tcpip.h>
@@ -110,13 +110,13 @@
 #include <limits>
 
 // I/O
-#ifdef UTILS_USE_IOSTREAM
+#ifndef UTILS_MINIMAL_BUILD
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #endif
 #include <cstdlib>
-#ifdef UTILS_USE_OS
+#ifndef UTILS_MINIMAL_BUILD
 #include <filesystem>
 #endif
 
@@ -142,7 +142,7 @@
     #endif
 #endif
 
-#ifdef UTILS_USE_OS
+#ifndef UTILS_MINIMAL_BUILD
 #ifdef UTILS_USE_MINGW_PORTABLE_THREADS
     #include "mingw-std-threads/mingw.future.h"
     #include "mingw-std-threads/mingw.mutex.h"
@@ -174,20 +174,20 @@ namespace Utils {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 using string = std::string;
 using string_view = std::string_view;
-#ifdef UTILS_USE_IOSTREAM
+#ifndef UTILS_MINIMAL_BUILD
 using ostream_type = std::basic_ostream<char>;
 using istream_type = std::basic_istream<char>;
 #endif
 #endif
 } // namespace Utils
 
-#ifdef UTILS_USE_OS
+#ifndef UTILS_MINIMAL_BUILD
 #include "rang.hxx"
 #include "Console.hxx"
 #endif
 #include "Malloc.hxx"
 #include "Numbers.hxx"
-#ifdef UTILS_USE_OS
+#ifndef UTILS_MINIMAL_BUILD
 #include "TicToc.hxx"
 #include "Quaternion.hxx"
 #include "Table.hxx"
@@ -195,7 +195,7 @@ using istream_type = std::basic_istream<char>;
 #endif
 
 // order must be preserved
-#ifdef UTILS_USE_THREADS
+#ifndef UTILS_MINIMAL_BUILD
 #include "ThreadUtils.hxx"
 #include "ThreadPoolBase.hxx"
 #include "ThreadPool0.hxx"
@@ -207,7 +207,7 @@ using istream_type = std::basic_istream<char>;
 #endif
 // -----------------------
 
-#ifndef UTILS_USE_IOSTREAM
+#ifdef UTILS_MINIMAL_BUILD
     #define UTILS_ERROR( ... ) \
         { __VA_ARGS__; throw std::runtime_error( "Error! (Refactoring TODO)" ); }
 
@@ -235,7 +235,7 @@ namespace Utils {
 :|:
 \*/
 
-#ifdef UTILS_USE_OS
+#ifndef UTILS_MINIMAL_BUILD
 inline string get_basename( string_view path )
 {
     namespace fs = std::filesystem;
@@ -450,7 +450,7 @@ static inline unsigned iLog2( uint64_t N )
     return tab64[uint64_t( ( N - ( N >> 1 ) ) * 0x07EDD5E59A4E28C2 ) >> 58];
 }
 
-#if UTILS_USE_IOSTREAM
+#ifndef UTILS_MINIMAL_BUILD
 string progress_bar( double progress, int width );
 void progress_bar( ostream_type&, double progress, int width, string_view msg );
 void progress_bar2( ostream_type&, double progress, int width, string_view msg );
