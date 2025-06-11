@@ -22,8 +22,8 @@
 //
 
 #include "Utils_AABB_tree.hh"
-#ifdef CLOTHOIDS_USE_IOSTREAM
-    #include "Utils_fmt.hh"
+#ifdef UTILS_USE_IOSTREAM
+#include "Utils_fmt.hh"
 #endif
 
 #include <algorithm>
@@ -272,7 +272,7 @@ string AABBtree<Real>::info() const
             ++nlong;
     }
     string res = "-------- AABB tree info --------\n";
-#ifdef CLOTHOIDS_USE_IOSTREAM
+#ifdef UTILS_USE_IOSTREAM
     res += fmt::format( "  Dimension                {}\n", m_dim );
     res += fmt::format( "  Number of nodes          {}\n", m_num_tree_nodes );
     res += fmt::format( "  Number of leaf           {}\n", nleaf );

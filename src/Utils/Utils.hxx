@@ -56,11 +56,13 @@
         #endif
     #endif
     // windows headers, order matters!
+    #ifdef UTILS_USE_OS
     #include <Winsock2.h>
     #include <Windows.h>
     #include <Ws2tcpip.h>
     #include <iptypes.h>
     #include <Iphlpapi.h>
+    #endif
     // --------------------
     #include <tchar.h>
     #include <stdio.h>
@@ -108,11 +110,15 @@
 #include <limits>
 
 // I/O
+#ifdef UTILS_USE_IOSTREAM
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#endif
 #include <cstdlib>
+#ifdef UTILS_USE_OS
 #include <filesystem>
+#endif
 
 // C/C++
 #include <cstddef>
@@ -136,6 +142,7 @@
     #endif
 #endif
 
+#ifdef UTILS_USE_OS
 #ifdef UTILS_USE_MINGW_PORTABLE_THREADS
     #include "mingw-std-threads/mingw.future.h"
     #include "mingw-std-threads/mingw.mutex.h"
@@ -150,6 +157,10 @@
     #include <thread>
     #include <condition_variable>
     #include <atomic>
+#endif
+#else
+    // TODO : the following should be removed
+    #include <mutex>
 #endif
 
 #ifdef _MSC_VER
@@ -166,21 +177,28 @@ namespace Utils {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 using string = std::string;
 using string_view = std::string_view;
+#ifdef UTILS_USE_IOSTREAM
 using ostream_type = std::basic_ostream<char>;
 using istream_type = std::basic_istream<char>;
 #endif
+#endif
 } // namespace Utils
 
+#ifdef UTILS_USE_OS
 #include "rang.hxx"
 #include "Console.hxx"
+#endif
 #include "Malloc.hxx"
 #include "Numbers.hxx"
+#ifdef UTILS_USE_OS
 #include "TicToc.hxx"
+#endif
 #include "Quaternion.hxx"
 #include "Table.hxx"
 #include "Token.hxx"
 
 // order must be preserved
+#ifdef UTILS_USE_THREADS
 #include "ThreadUtils.hxx"
 #include "ThreadPoolBase.hxx"
 #include "ThreadPool0.hxx"
@@ -189,10 +207,12 @@ using istream_type = std::basic_istream<char>;
 #include "ThreadPool3.hxx"
 #include "ThreadPool4.hxx"
 #include "ThreadPool5.hxx"
+#endif
 // -----------------------
 
-#ifndef CLOTHOIDS_USE_IOSTREAM
-    #define UTILS_ERROR( ... ) throw std::runtime_error( "Error! (Refactoring TODO)" )
+#ifndef UTILS_USE_IOSTREAM
+    #define UTILS_ERROR( ... ) \
+        { __VA_ARGS__; throw std::runtime_error( "Error! (Refactoring TODO)" ); }
 
     #define UTILS_WARNING( COND, ... ) \
         if ( !( COND ) ) UTILS_ERROR( __VA_ARGS__ )
@@ -206,8 +226,7 @@ using istream_type = std::basic_istream<char>;
         if ( !( COND ) ) UTILS_ERROR0( MSG )
 
     #define UTILS_ASSERT_DEBUG( COND, ... ) UTILS_ASSERT( COND, __VA_ARGS__ )
-
-#endif // !CLOTHOIDS_USE_IOSTREAM
+#endif
 
 namespace Utils {
 
@@ -219,6 +238,7 @@ namespace Utils {
 :|:
 \*/
 
+#ifdef UTILS_USE_OS
 inline string get_basename( string_view path )
 {
     namespace fs = std::filesystem;
@@ -341,6 +361,7 @@ string get_day_time_and_date();
 string get_log_date_time();
 
 /*! @} */ // End of OS group
+#endif
 
 template<typename T_int, typename T_real>
 void search_interval(
@@ -432,9 +453,11 @@ static inline unsigned iLog2( uint64_t N )
     return tab64[uint64_t( ( N - ( N >> 1 ) ) * 0x07EDD5E59A4E28C2 ) >> 58];
 }
 
+#if UTILS_USE_IOSTREAM
 string progress_bar( double progress, int width );
 void progress_bar( ostream_type&, double progress, int width, string_view msg );
 void progress_bar2( ostream_type&, double progress, int width, string_view msg );
+#endif
 
 } // namespace Utils
 
