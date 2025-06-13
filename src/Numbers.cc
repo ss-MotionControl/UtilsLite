@@ -69,7 +69,7 @@ namespace Utils {
 
   #define LINE_LINE_LINE_LINE "--------------------------------------------------------------------------------"
 
-  #ifndef UTILS_MINIMAL_BUILD
+#ifndef UTILS_MINIMAL_BUILD
   //! check if the vector `pv` os size `DIM` contains only regular floats. If not an error is issued
   void
   check_NaN(
