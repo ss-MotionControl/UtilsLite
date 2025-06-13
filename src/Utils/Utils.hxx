@@ -57,15 +57,16 @@
     #endif
     // windows headers, order matters!
     #ifndef UTILS_MINIMAL_BUILD
-    #include <Winsock2.h>
-    #include <Windows.h>
-    #include <Ws2tcpip.h>
-    #include <iptypes.h>
-    #include <Iphlpapi.h>
+        #include <Winsock2.h>
+        #include <Windows.h>
+        #include <Ws2tcpip.h>
+        #include <iptypes.h>
+        #include <Iphlpapi.h>
+
+        // --------------------
+        #include <tchar.h>
+        #include <stdio.h>
     #endif
-    // --------------------
-    #include <tchar.h>
-    #include <stdio.h>
 #else
     #error "unsupported OS!"
 #endif
@@ -94,13 +95,17 @@
 #endif
 
 // STL
-#include <cassert>
-#include <iterator>
+#ifndef UTILS_MINIMAL_BUILD
+    #include <cassert>
+    #include <iterator>
+#endif
 #include <utility> // For std::move(), std::forward()
 #include <algorithm>
-#include <type_traits> // For std::remove_reference()
-#include <functional> // For std::bind()
-#include <cctype>
+#ifndef UTILS_MINIMAL_BUILD
+    #include <type_traits> // For std::remove_reference()
+    #include <functional> // For std::bind()
+    #include <cctype>
+#endif
 
 #include <string>
 #include <string_view>
@@ -111,19 +116,21 @@
 
 // I/O
 #ifndef UTILS_MINIMAL_BUILD
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-#endif
-#include <cstdlib>
-#ifndef UTILS_MINIMAL_BUILD
-#include <filesystem>
+    #include <iostream>
+    #include <iomanip>
+    #include <sstream>
+    #include <cstdlib>
+    #include <filesystem>
 #endif
 
 // C/C++
-#include <cstddef>
+#ifndef UTILS_MINIMAL_BUILD
+    #include <cstddef>
+#endif
 #include <cmath>
-#include <cstdint>
+#ifndef UTILS_MINIMAL_BUILD
+    #include <cstdint>
+#endif
 #include <stdexcept>
 #include <memory>
 
@@ -143,21 +150,21 @@
 #endif
 
 #ifndef UTILS_MINIMAL_BUILD
-#ifdef UTILS_USE_MINGW_PORTABLE_THREADS
-    #include "mingw-std-threads/mingw.future.h"
-    #include "mingw-std-threads/mingw.mutex.h"
-    #include "mingw-std-threads/mingw.invoke.h"
-    #include "mingw-std-threads/mingw.shared_mutex.h"
-    #include "mingw-std-threads/mingw.thread.h"
-    #include "mingw-std-threads/mingw.condition_variable.h"
-#else
-    #include <future>
-    #include <mutex>
-    #include <shared_mutex>
-    #include <thread>
-    #include <condition_variable>
-    #include <atomic>
-#endif
+    #ifdef UTILS_USE_MINGW_PORTABLE_THREADS
+        #include "mingw-std-threads/mingw.future.h"
+        #include "mingw-std-threads/mingw.mutex.h"
+        #include "mingw-std-threads/mingw.invoke.h"
+        #include "mingw-std-threads/mingw.shared_mutex.h"
+        #include "mingw-std-threads/mingw.thread.h"
+        #include "mingw-std-threads/mingw.condition_variable.h"
+    #else
+        #include <future>
+        #include <mutex>
+        #include <shared_mutex>
+        #include <thread>
+        #include <condition_variable>
+        #include <atomic>
+    #endif
 #endif
 
 #ifdef _MSC_VER
@@ -174,42 +181,45 @@ namespace Utils {
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 using string = std::string;
 using string_view = std::string_view;
-#ifndef UTILS_MINIMAL_BUILD
+    #ifndef UTILS_MINIMAL_BUILD
 using ostream_type = std::basic_ostream<char>;
 using istream_type = std::basic_istream<char>;
-#endif
+    #endif
 #endif
 } // namespace Utils
 
 #ifndef UTILS_MINIMAL_BUILD
-#include "rang.hxx"
-#include "Console.hxx"
+    #include "rang.hxx"
+    #include "Console.hxx"
 #endif
 #include "Malloc.hxx"
 #include "Numbers.hxx"
 #ifndef UTILS_MINIMAL_BUILD
-#include "TicToc.hxx"
-#include "Quaternion.hxx"
-#include "Table.hxx"
-#include "Token.hxx"
+    #include "TicToc.hxx"
+    #include "Quaternion.hxx"
+    #include "Table.hxx"
+    #include "Token.hxx"
 #endif
 
 // order must be preserved
 #ifndef UTILS_MINIMAL_BUILD
-#include "ThreadUtils.hxx"
-#include "ThreadPoolBase.hxx"
-#include "ThreadPool0.hxx"
-#include "ThreadPool1.hxx"
-#include "ThreadPool2.hxx"
-#include "ThreadPool3.hxx"
-#include "ThreadPool4.hxx"
-#include "ThreadPool5.hxx"
+    #include "ThreadUtils.hxx"
+    #include "ThreadPoolBase.hxx"
+    #include "ThreadPool0.hxx"
+    #include "ThreadPool1.hxx"
+    #include "ThreadPool2.hxx"
+    #include "ThreadPool3.hxx"
+    #include "ThreadPool4.hxx"
+    #include "ThreadPool5.hxx"
 #endif
 // -----------------------
 
 #ifdef UTILS_MINIMAL_BUILD
-    #define UTILS_ERROR( ... ) \
-        { __VA_ARGS__; throw std::runtime_error( "Error! (Refactoring TODO)" ); }
+    #define UTILS_ERROR( ... )                                       \
+        {                                                            \
+            __VA_ARGS__;                                             \
+            throw std::runtime_error( "Error! (Refactoring TODO)" ); \
+        }
 
     #define UTILS_WARNING( COND, ... ) \
         if ( !( COND ) ) UTILS_ERROR( __VA_ARGS__ )
