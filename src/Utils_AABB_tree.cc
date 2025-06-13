@@ -260,6 +260,7 @@ Real AABBtree<Real>::max_bbox_distance( Real const bbox[], Real const pnt[] ) co
 
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
+#ifndef UTILS_MINIMAL_BUILD
 template<typename Real>
 string AABBtree<Real>::info() const
 {
@@ -272,7 +273,6 @@ string AABBtree<Real>::info() const
             ++nlong;
     }
     string res = "-------- AABB tree info --------\n";
-#ifndef UTILS_MINIMAL_BUILD
     res += fmt::format( "  Dimension                {}\n", m_dim );
     res += fmt::format( "  Number of nodes          {}\n", m_num_tree_nodes );
     res += fmt::format( "  Number of leaf           {}\n", nleaf );
@@ -281,12 +281,10 @@ string AABBtree<Real>::info() const
     res += fmt::format( "  max_num_objects_per_node {}\n", m_max_num_objects_per_node );
     res += fmt::format( "  bbox_long_edge_ratio     {}\n", m_bbox_long_edge_ratio );
     res += fmt::format( "  bbox_overlap_tolerance   {}\n", m_bbox_overlap_tolerance );
-#else
-    res += std::string( "  TODO\n" );
-#endif
     res += "--------------------------------\n";
     return res;
 }
+#endif
 
 // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
