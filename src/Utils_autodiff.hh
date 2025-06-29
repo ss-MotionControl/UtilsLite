@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------*\
  |                                                                          |
- |  Copyright (C) 2017                                                      |
+ |  Copyright (C) 2025                                                      |
  |                                                                          |
  |         , __                 , __                                        |
  |        /|/  \               /|/  \                                       |
@@ -38,8 +38,10 @@
 #include "Utils/3rd/autodiff/forward/real.hpp"
 
 namespace fmt {
-  template <> struct formatter<autodiff::dual> : ostream_formatter {};
+  template <> struct formatter<autodiff::dual1st> : ostream_formatter {};
   template <> struct formatter<autodiff::dual2nd> : ostream_formatter {};
+  template <> struct formatter<autodiff::dual3rd> : ostream_formatter {};
+  template <> struct formatter<autodiff::dual4th> : ostream_formatter {};
 }
 
 #include <type_traits>
@@ -61,7 +63,7 @@ namespace autodiff::detail {
     }();
   };
 
-  template<typename T> using GetDual_t = HigherOrderDual<NumberTraits<T>::Order, typename NumberTraits<T>::NumericType>;
+  template <typename T> using GetDual_t = HigherOrderDual<NumberTraits<T>::Order, typename NumberTraits<T>::NumericType>;
 
   template <typename T> constexpr auto to_dual( T const & x ) { return GetDual_t<T>(x); }
 
@@ -243,6 +245,48 @@ namespace autodiff::detail {
   // overload per tipi floating-point (double, float, ...)
   template <typename T> constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type
   log1p(T const& x) { return log1p(Real<0, T>{x})[0]; }
+  
+  /*
+  //         _              _
+  //    __ _| |_ __ _ _ __ | |__
+  //   / _` | __/ _` | '_ \| '_ \
+  //  | (_| | || (_| | | | | | | |
+  //   \__,_|\__\__,_|_| |_|_| |_|
+  */
+  
+  UTILS_AUTODIFF_ADD_UNARY_FUNCTION(atanh) {
+    using std::atanh;
+    self.val = atanh(self.val);
+    self.grad *= One<T>() / (1-self.val*self.val);
+  }
+
+  /*
+  //             _       _
+  //    __ _ ___(_)_ __ | |__
+  //   / _` / __| | '_ \| '_ \
+  //  | (_| \__ \ | | | | | | |
+  //   \__,_|___/_|_| |_|_| |_|
+  */
+
+  UTILS_AUTODIFF_ADD_UNARY_FUNCTION(asinh) {
+    using std::asinh;
+    self.val = asinh(self.val);
+    self.grad *= One<T>() / (1+self.val*self.val);
+  }
+
+  /*
+  //                       _
+  //    __ _  ___ ___  ___| |__
+  //   / _` |/ __/ _ \/ __| '_ \
+  //  | (_| | (_| (_) \__ \ | | |
+  //   \__,_|\___\___/|___/_| |_|
+  */
+
+  UTILS_AUTODIFF_ADD_UNARY_FUNCTION(acosh) {
+    using std::acosh;
+    self.val = asinh(self.val);
+    self.grad *= One<T>() / sqrt(self.val*self.val-1);
+  }
 
   /*
   //  
@@ -275,6 +319,9 @@ namespace Utils {
   using autodiff::detail::floor;
   using autodiff::detail::ceil;
   using autodiff::detail::log1p;
+  using autodiff::detail::atanh;
+  using autodiff::detail::asinh;
+  using autodiff::detail::acosh;
   using autodiff::detail::erfc;
   using autodiff::detail::power2;
   using autodiff::detail::power3;
@@ -291,6 +338,325 @@ namespace Utils {
   using autodiff::detail::rpower7;
   using autodiff::detail::rpower8;
 }
+
+#define UTILS_AUTODIFF_DERIV_1ARG(INLINE,CLASS,PREFIX,FUN,CONST) \
+INLINE real_type                                                 \
+CLASS PREFIX##D( real_type const x ) CONST {                     \
+  autodiff::dual1st X{x};                                        \
+  X.grad = 1;                                                    \
+  autodiff::dual1st res{ FUN( X ) };                             \
+  return res.grad;                                               \
+}                                                                \
+                                                                 \
+INLINE real_type                                                 \
+CLASS PREFIX##DD( real_type const x ) CONST {                    \
+  autodiff::dual2nd X{x};                                        \
+  X.val.grad = 1;                                                \
+  X.grad.val = 1;                                                \
+  autodiff::dual2nd res{ FUN( X ) };                             \
+  return res.grad.grad;                                          \
+}
+
+
+#define UTILS_AUTODIFF_DERIV_2ARG(INLINE,CLASS,PREFIX,FUN,CONST)     \
+INLINE real_type                                                     \
+CLASS PREFIX##D_1( real_type const x, real_type const y ) CONST {    \
+  autodiff::dual1st X{x};                                            \
+  X.grad = 1;                                                        \
+  autodiff::dual1st res{ FUN( X, y ) };                              \
+  return res.grad;                                                   \
+}                                                                    \
+                                                                     \
+INLINE real_type                                                     \
+CLASS PREFIX##D_2( real_type const x, real_type const y ) CONST {    \
+  autodiff::dual1st Y{y};                                            \
+  Y.grad = 1;                                                        \
+  autodiff::dual1st res{ FUN( x, Y ) };                              \
+  return res.grad;                                                   \
+}                                                                    \
+                                                                     \
+INLINE real_type                                                     \
+CLASS PREFIX##D_1_1( real_type const x, real_type const y ) CONST {  \
+  autodiff::dual2nd X{x};                                            \
+  X.val.grad = 1;                                                    \
+  X.grad.val = 1;                                                    \
+  autodiff::dual2nd res{ FUN( X, y ) };                              \
+  return res.grad.grad;                                              \
+}                                                                    \
+                                                                     \
+INLINE real_type                                                     \
+CLASS PREFIX##D_1_2( real_type const x, real_type const y ) CONST {  \
+  autodiff::dual2nd X{x}, Y{y};                                      \
+  X.val.grad = 1;                                                    \
+  Y.grad.val = 1;                                                    \
+  autodiff::dual2nd res{ FUN( X, Y ) };                              \
+  return res.grad.grad;                                              \
+}                                                                    \
+                                                                     \
+INLINE real_type                                                     \
+CLASS PREFIX##D_2_2( real_type const x, real_type const y ) CONST {  \
+  autodiff::dual2nd Y{y};                                            \
+  Y.val.grad = 1;                                                    \
+  Y.grad.val = 1;                                                    \
+  autodiff::dual2nd res{ FUN( x, Y ) };                              \
+  return res.grad.grad;                                              \
+}
+
+
+#define UTILS_AUTODIFF_DERIV_3ARG(INLINE,CLASS,PREFIX,FUN,CONST)                        \
+INLINE real_type                                                                        \
+CLASS PREFIX##D_1( real_type const x, real_type const y, real_type const z ) CONST {    \
+  autodiff::dual1st X{x};                                                               \
+  X.grad = 1;                                                                           \
+  autodiff::dual1st res{ FUN( X, y, z ) };                                              \
+  return res.grad;                                                                      \
+}                                                                                       \
+                                                                                        \
+INLINE real_type                                                                        \
+CLASS PREFIX##D_2( real_type const x, real_type const y, real_type const z ) CONST {    \
+  autodiff::dual1st Y{y};                                                               \
+  Y.grad = 1;                                                                           \
+  autodiff::dual1st res{ FUN( x, Y, z ) };                                              \
+  return res.grad;                                                                      \
+}                                                                                       \
+                                                                                        \
+INLINE real_type                                                                        \
+CLASS PREFIX##D_3( real_type const x, real_type const y, real_type const z ) CONST {    \
+  autodiff::dual1st Z{z};                                                               \
+  Z.grad = 1;                                                                           \
+  autodiff::dual1st res{ FUN( x, y, Z ) };                                              \
+  return res.grad;                                                                      \
+}                                                                                       \
+                                                                                        \
+INLINE real_type                                                                        \
+CLASS PREFIX##D_1_1( real_type const x, real_type const y, real_type const z ) CONST {  \
+  autodiff::dual2nd X{x};                                                               \
+  X.val.grad = 1;                                                                       \
+  X.grad.val = 1;                                                                       \
+  autodiff::dual2nd res{ FUN( X, y, z ) };                                              \
+  return res.grad.grad;                                                                 \
+}                                                                                       \
+                                                                                        \
+INLINE real_type                                                                        \
+CLASS PREFIX##D_1_2( real_type const x, real_type const y, real_type const z ) CONST {  \
+  autodiff::dual2nd X{x}, Y{y};                                                         \
+  X.val.grad = 1;                                                                       \
+  Y.grad.val = 1;                                                                       \
+  autodiff::dual2nd res{ FUN( X, Y, z ) };                                              \
+  return res.grad.grad;                                                                 \
+}                                                                                       \
+                                                                                        \
+INLINE real_type                                                                        \
+CLASS PREFIX##D_1_3( real_type const x, real_type const y, real_type const z ) CONST {  \
+  autodiff::dual2nd X{x}, Z{z};                                                         \
+  X.val.grad = 1;                                                                       \
+  Z.grad.val = 1;                                                                       \
+  autodiff::dual2nd res{ FUN( X, y, Z ) };                                              \
+  return res.grad.grad;                                                                 \
+}                                                                                       \
+                                                                                        \
+INLINE real_type                                                                        \
+CLASS PREFIX##D_2_2( real_type const x, real_type const y, real_type const z ) CONST {  \
+  autodiff::dual2nd Y{y};                                                               \
+  Y.val.grad = 1;                                                                       \
+  Y.grad.val = 1;                                                                       \
+  autodiff::dual2nd res{ FUN( x, Y, z ) };                                              \
+  return res.grad.grad;                                                                 \
+}                                                                                       \
+                                                                                        \
+INLINE real_type                                                                        \
+CLASS PREFIX##D_2_3( real_type const x, real_type const y, real_type const z ) CONST {  \
+  autodiff::dual2nd Y{y}, Z{z};                                                         \
+  Y.val.grad = 1;                                                                       \
+  Z.grad.val = 1;                                                                       \
+  autodiff::dual2nd res{ FUN( x, Y, Z ) };                                              \
+  return res.grad.grad;                                                                 \
+}                                                                                       \
+                                                                                        \
+INLINE real_type                                                                        \
+CLASS PREFIX##D_3_3( real_type const x, real_type const y, real_type const z ) CONST {  \
+  autodiff::dual2nd Z{z};                                                               \
+  Z.val.grad = 1;                                                                       \
+  Z.grad.val = 1;                                                                       \
+  autodiff::dual2nd res{ FUN( x, y, Z ) };                                              \
+  return res.grad.grad;                                                                 \
+}
+
+
+#define UTILS_AUTODIFF_DERIV_4ARG(INLINE,CLASS,PREFIX,FUN,CONST)      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_1( real_type const x, real_type const y,              \
+                   real_type const z, real_type const w ) CONST {     \
+  autodiff::dual1st X{x};                                             \
+  X.grad = 1;                                                         \
+  autodiff::dual1st res{ FUN( X, y, z, w ) };                         \
+  return res.grad;                                                    \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_2( real_type const x, real_type const y,              \
+                   real_type const z, real_type const w ) CONST {     \
+  autodiff::dual1st Y{y};                                             \
+  Y.grad = 1;                                                         \
+  autodiff::dual1st res{ FUN( x, Y, z, w ) };                         \
+  return res.grad;                                                    \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_3( real_type const x, real_type const y,              \
+                   real_type const z, real_type const w ) CONST {     \
+  autodiff::dual1st Z{z};                                             \
+  Z.grad = 1;                                                         \
+  autodiff::dual1st res{ FUN( x, y, Z, w ) };                         \
+  return res.grad;                                                    \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_4( real_type const x, real_type const y,              \
+                   real_type const z, real_type const w ) CONST {     \
+  autodiff::dual1st W{w};                                             \
+  W.grad = 1;                                                         \
+  autodiff::dual1st res{ FUN( x, y, z, W ) };                         \
+  return res.grad;                                                    \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_1_1( real_type const x, real_type const y,            \
+                     real_type const z, real_type const w ) CONST {   \
+  autodiff::dual2nd X{x};                                             \
+  X.val.grad = 1;                                                     \
+  X.grad.val = 1;                                                     \
+  autodiff::dual2nd res{ FUN( X, y, z, w ) };                         \
+  return res.grad.grad;                                               \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_1_2( real_type const x, real_type const y,            \
+                     real_type const z, real_type const w ) CONST {   \
+  autodiff::dual2nd X{x}, Y{y};                                       \
+  X.val.grad = 1;                                                     \
+  Y.grad.val = 1;                                                     \
+  autodiff::dual2nd res{ FUN( X, Y, z, w ) };                         \
+  return res.grad.grad;                                               \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_1_3( real_type const x, real_type const y,            \
+                     real_type const z, real_type const w ) CONST {   \
+  autodiff::dual2nd X{x}, Z{z};                                       \
+  X.val.grad = 1;                                                     \
+  Z.grad.val = 1;                                                     \
+  autodiff::dual2nd res{ FUN( X, y, Z, w ) };                         \
+  return res.grad.grad;                                               \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_1_4( real_type const x, real_type const y,            \
+                     real_type const z, real_type const w ) CONST {   \
+  autodiff::dual2nd X{x}, W{w};                                       \
+  X.val.grad = 1;                                                     \
+  W.grad.val = 1;                                                     \
+  autodiff::dual2nd res{ FUN( X, y, z, W ) };                         \
+  return res.grad.grad;                                               \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_2_2( real_type const x, real_type const y,            \
+                     real_type const z, real_type const w ) CONST {   \
+  autodiff::dual2nd Y{y};                                             \
+  Y.val.grad = 1;                                                     \
+  Y.grad.val = 1;                                                     \
+  autodiff::dual2nd res{ FUN( x, Y, z, w ) };                         \
+  return res.grad.grad;                                               \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_2_3( real_type const x, real_type const y,            \
+                     real_type const z, real_type const w ) CONST {   \
+  autodiff::dual2nd Y{y}, Z{z};                                       \
+  Y.val.grad = 1;                                                     \
+  Z.grad.val = 1;                                                     \
+  autodiff::dual2nd res{ FUN( x, Y, Z, w ) };                         \
+  return res.grad.grad;                                               \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_2_4( real_type const x, real_type const y,            \
+                     real_type const z, real_type const w ) CONST {   \
+  autodiff::dual2nd Y{y}, W{w};                                       \
+  Y.val.grad = 1;                                                     \
+  W.grad.val = 1;                                                     \
+  autodiff::dual2nd res{ FUN( x, Y, z, W ) };                         \
+  return res.grad.grad;                                               \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_3_3( real_type const x, real_type const y,            \
+                     real_type const z, real_type const w ) CONST {   \
+  autodiff::dual2nd Z{z};                                             \
+  Z.val.grad = 1;                                                     \
+  Z.grad.val = 1;                                                     \
+  autodiff::dual2nd res{ FUN( x, y, Z, w ) };                         \
+  return res.grad.grad;                                               \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_3_4( real_type const x, real_type const y,            \
+                     real_type const z, real_type const w ) CONST {   \
+  autodiff::dual2nd Z{z}, W{w};                                       \
+  Z.val.grad = 1;                                                     \
+  W.grad.val = 1;                                                     \
+  autodiff::dual2nd res{ FUN( x, y, Z, W ) };                         \
+  return res.grad.grad;                                               \
+}                                                                     \
+                                                                      \
+INLINE real_type                                                      \
+CLASS PREFIX##D_4_4( real_type const x, real_type const y,            \
+                     real_type const z, real_type const w ) CONST {   \
+  autodiff::dual2nd W{w};                                             \
+  W.val.grad = 1;                                                     \
+  W.grad.val = 1;                                                     \
+  autodiff::dual2nd res{ FUN( x, y, z, W ) };                         \
+  return res.grad.grad;                                               \
+}
+
+#define UTILS_AUTODIFF_DERIV_1ARG_DEF(PREFIX,CONST) \
+real_type PREFIX##D( real_type const x ) CONST;     \
+real_type PREFIX##DD( real_type const x ) CONST;
+
+#define UTILS_AUTODIFF_DERIV_2ARG_DEF(PREFIX,CONST)                    \
+real_type PREFIX##D_1( real_type const x, real_type const y ) CONST;   \
+real_type PREFIX##D_2( real_type const x, real_type const y ) CONST;   \
+real_type PREFIX##D_1_1( real_type const x, real_type const y ) CONST; \
+real_type PREFIX##D_1_2( real_type const x, real_type const y ) CONST; \
+real_type PREFIX##D_2_2( real_type const x, real_type const y ) CONST;
+
+#define UTILS_AUTODIFF_DERIV_3ARG_DEF(PREFIX,CONST)                                       \
+real_type PREFIX##D_1  ( real_type const x, real_type const y, real_type const z ) CONST; \
+real_type PREFIX##D_2  ( real_type const x, real_type const y, real_type const z ) CONST; \
+real_type PREFIX##D_3  ( real_type const x, real_type const y, real_type const z ) CONST; \
+real_type PREFIX##D_1_1( real_type const x, real_type const y, real_type const z ) CONST; \
+real_type PREFIX##D_1_2( real_type const x, real_type const y, real_type const z ) CONST; \
+real_type PREFIX##D_1_3( real_type const x, real_type const y, real_type const z ) CONST; \
+real_type PREFIX##D_2_2( real_type const x, real_type const y, real_type const z ) CONST; \
+real_type PREFIX##D_2_3( real_type const x, real_type const y, real_type const z ) CONST; \
+real_type PREFIX##D_3_3( real_type const x, real_type const y, real_type const z ) CONST;
+
+#define UTILS_AUTODIFF_DERIV_4ARG_DEF(PREFIX,CONST)                                                          \
+real_type PREFIX##D_1  ( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_2  ( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_3  ( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_4  ( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_1_1( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_1_2( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_1_3( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_1_4( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_2_2( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_2_3( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_2_4( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_3_3( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_3_4( real_type const x, real_type const y, real_type const z, real_type const w ) CONST; \
+real_type PREFIX##D_4_4( real_type const x, real_type const y, real_type const z, real_type const w ) CONST;
 
 #endif
 
