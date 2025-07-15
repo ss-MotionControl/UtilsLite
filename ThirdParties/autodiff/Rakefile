@@ -81,7 +81,23 @@ task :install => [:build] do
       File.write(file, new_content)
       puts "Updated: #{file}"
     end
-  end 
+  end
+  
+sed_cmd = if RbConfig::CONFIG['host_os'] =~ /darwin/
+  "sed -i ''"
+else
+  "sed -i"
+end
+
+cmd = <<~EOS
+  #{sed_cmd} '/apply(Dual<.*TanhOp)/,/^}/ {
+    s|const T aux = One<T>() / cosh(self.val);||;
+    s|self\\.grad \\*= aux \\* aux;|self.grad *=  1 - self.val * self.val;|;
+  }' lib/include/autodiff/forward/dual/dual.hpp
+EOS
+
+sh cmd
+
   FileUtils.cp_r "lib/include/autodiff", hdrdir
 end
 

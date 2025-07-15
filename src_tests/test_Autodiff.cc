@@ -309,5 +309,16 @@ main() {
       std::cout << "(erfc(x)+erf(x))'' (computed) = " << Cxx << "\n";
     }
   }
-
+  {
+    double kappa{ 3800.2011672501994 };
+    autodiff::dual2nd x{0.62608392663111712};
+    x.val.grad  = 0.43333335406161871;
+    x.grad.val  = 0.43333335406161871;
+    x.grad.grad = 0;
+    autodiff::dual2nd X{kappa * x };
+    autodiff::dual2nd res{ tanh( X ) };
+    std::cout << res << "\n";
+    std::cout << res.grad << "\n";
+    std::cout << res.grad.grad << "\n";
+  }
 }
