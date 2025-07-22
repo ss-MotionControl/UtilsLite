@@ -366,12 +366,14 @@ namespace Utils {
     //!
     void get_bbox_indexes_of_a_node( integer i_pos, AABB_SET & bb_index ) const;
 
+#ifndef UTILS_MINIMAL_BUILD
     //!
     //! \brief Returns information about the AABB tree.
     //!
     //! \return A string containing information about the tree.
     //!
     string info() const;
+#endif
   };
 
   /*

@@ -24,7 +24,9 @@
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #include "Utils.hh"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 
 namespace Utils {
 

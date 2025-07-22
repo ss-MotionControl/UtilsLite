@@ -56,6 +56,7 @@
     #endif
   #endif
   // windows headers, order matters!
+#ifndef UTILS_MINIMAL_BUILD
   #include <Winsock2.h>
   #include <Windows.h>
   #include <Ws2tcpip.h>
@@ -64,6 +65,7 @@
   // --------------------
   #include <tchar.h>
   #include <stdio.h>
+#endif
 #else
   #error "unsupported OS!"
 #endif
@@ -91,13 +93,17 @@
 #endif
 
 // STL
+#ifndef UTILS_MINIMAL_BUILD
 #include <cassert>
 #include <iterator>
+#endif
 #include <utility>	    // For std::move(), std::forward()
 #include <algorithm>
+#ifndef UTILS_MINIMAL_BUILD
 #include <type_traits>  // For std::remove_reference()
 #include <functional>		// For std::bind()
 #include <cctype>
+#endif
 
 #include <string>
 #include <string_view>
@@ -107,16 +113,22 @@
 #include <limits>
 
 // I/O
+#ifndef UTILS_MINIMAL_BUILD
 #include <iostream>
 #include <iomanip>
 #include <sstream>
 #include <cstdlib>
 #include <filesystem>
+#endif
 
 // C/C++
+#ifndef UTILS_MINIMAL_BUILD
 #include <cstddef>
+#endif
 #include <cmath>
+#ifndef UTILS_MINIMAL_BUILD
 #include <cstdint>
+#endif
 #include <stdexcept>
 #include <memory>
 
@@ -135,6 +147,7 @@
   #endif
 #endif
 
+#ifndef UTILS_MINIMAL_BUILD
 #ifdef UTILS_USE_MINGW_PORTABLE_THREADS
   #include "mingw-std-threads/mingw.future.h"
   #include "mingw-std-threads/mingw.mutex.h"
@@ -149,6 +162,7 @@
   #include <thread>
   #include <condition_variable>
   #include <atomic>
+#endif
 #endif
 
 #ifdef _MSC_VER
@@ -165,21 +179,28 @@ namespace Utils {
   #ifndef DOXYGEN_SHOULD_SKIP_THIS
   using string       = std::string;
   using string_view  = std::string_view;
+#ifndef UTILS_MINIMAL_BUILD
   using ostream_type = std::basic_ostream<char>;
   using istream_type = std::basic_istream<char>;
   #endif
+#endif
 }
 
+#ifndef UTILS_MINIMAL_BUILD
 #include "rang.hxx"
 #include "Console.hxx"
+#endif
 #include "Malloc.hxx"
 #include "Numbers.hxx"
+#ifndef UTILS_MINIMAL_BUILD
 #include "TicToc.hxx"
 #include "Quaternion.hxx"
 #include "Table.hxx"
 #include "Token.hxx"
+#endif
 
 // order must be preserved
+#ifndef UTILS_MINIMAL_BUILD
 #include "ThreadUtils.hxx"
 #include "ThreadPoolBase.hxx"
 #include "ThreadPool0.hxx"
@@ -188,8 +209,29 @@ namespace Utils {
 #include "ThreadPool3.hxx"
 #include "ThreadPool4.hxx"
 #include "ThreadPool5.hxx"
+#endif
 // -----------------------
 
+#ifdef UTILS_MINIMAL_BUILD
+#define UTILS_ERROR( ... )                                       \
+    {                                                            \
+        __VA_ARGS__;                                             \
+        throw std::runtime_error( "Error! (Refactoring TODO)" ); \
+    }
+
+#define UTILS_WARNING( COND, ... ) \
+    if ( !( COND ) ) UTILS_ERROR( __VA_ARGS__ )
+
+#define UTILS_ASSERT( COND, ... ) \
+    if ( !( COND ) ) UTILS_ERROR( __VA_ARGS__ )
+
+#define UTILS_ERROR0( MSG ) throw std::runtime_error( MSG )
+
+#define UTILS_ASSERT0( COND, MSG ) \
+    if ( !( COND ) ) UTILS_ERROR0( MSG )
+
+#define UTILS_ASSERT_DEBUG( COND, ... ) UTILS_ASSERT( COND, __VA_ARGS__ )
+#endif
 namespace Utils {
 
   /*\
@@ -200,6 +242,7 @@ namespace Utils {
   :|:
   \*/
 
+#ifndef UTILS_MINIMAL_BUILD
   inline
   string
   get_basename( string_view path ) {
@@ -325,6 +368,7 @@ namespace Utils {
   string get_log_date_time();
 
   /*! @} */  // End of OS group
+#endif
 
   template <typename T_int, typename T_real>
   void
@@ -440,9 +484,11 @@ namespace Utils {
     return tab64[uint64_t((N - (N>>1))*0x07EDD5E59A4E28C2) >> 58];
   }
 
+#ifndef UTILS_MINIMAL_BUILD
   string progress_bar( double progress, int width );
   void   progress_bar( ostream_type &, double progress, int width, string_view msg );
   void   progress_bar2( ostream_type &, double progress, int width, string_view msg );
+#endif
 
 }
 

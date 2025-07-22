@@ -22,10 +22,14 @@
 //
 
 #include "Utils_AABB_tree.hh"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 
+#ifndef UTILS_MINIMAL_BUILD
 #include <algorithm>
 #include <utility>
+#endif
 
 namespace Utils {
 
@@ -287,6 +291,7 @@ namespace Utils {
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
+#ifndef UTILS_MINIMAL_BUILD
   template <typename Real>
   string
   AABBtree<Real>::info() const {
@@ -308,6 +313,7 @@ namespace Utils {
     res += "--------------------------------\n";
     return res;
   }
+#endif
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 

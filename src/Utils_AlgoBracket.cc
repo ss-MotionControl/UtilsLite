@@ -18,11 +18,15 @@
 \*--------------------------------------------------------------------------*/
 
 #include "Utils_AlgoBracket.hh"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 
 #include <vector>
 #include <cmath>
+#ifndef UTILS_MINIMAL_BUILD
 #include <algorithm>
+#endif
 
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wsign-conversion"
