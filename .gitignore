@@ -6,6 +6,7 @@ build
 *.dll
 *.obj
 *.bak
+*.zip
 *~
 /vs_*
 *.mexmaci64
@@ -13,9 +14,7 @@ Xcode
 bin
 lib
 ThirdParties/Eigen/eigen-3.4.0
-ThirdParties/fmt/fmt-10.2.1
-src/Utils/fmt
-src/Eigen
+ThirdParties/spdlog/spdlog-1.15.3
 doxygen/docs
 .idea
 cmake-build-debug
