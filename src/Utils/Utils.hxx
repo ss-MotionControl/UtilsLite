@@ -129,7 +129,9 @@
 #ifndef UTILS_MINIMAL_BUILD
 #include <cstdint>
 #endif
+#ifndef UTILS_NO_EXCEPTIONS
 #include <stdexcept>
+#endif
 #include <memory>
 
 // disable mingw-std-threads for mingw on MATLAB
@@ -213,11 +215,19 @@ namespace Utils {
 // -----------------------
 
 #ifdef UTILS_MINIMAL_BUILD
-#define UTILS_ERROR( ... )                                       \
-    {                                                            \
-        __VA_ARGS__;                                             \
-        throw std::runtime_error( "Error! (Refactoring TODO)" ); \
+#ifdef UTILS_NO_EXCEPTIONS
+#define UTILS_ERROR( ... )                                   \
+    {                                                        \
+        __VA_ARGS__;                                         \
+        std::terminate();                                    \
+    }                                                        
+#else                                                        
+#define UTILS_ERROR( ... )                                   \
+    {                                                        \
+        __VA_ARGS__;                                         \
+        throw std::runtime_error( "Error has been thrown" ); \
     }
+#endif
 
 #define UTILS_WARNING( COND, ... ) \
     if ( !( COND ) ) UTILS_ERROR( __VA_ARGS__ )
@@ -225,7 +235,15 @@ namespace Utils {
 #define UTILS_ASSERT( COND, ... ) \
     if ( !( COND ) ) UTILS_ERROR( __VA_ARGS__ )
 
+#ifdef UTILS_NO_EXCEPTIONS
+#define UTILS_ERROR0( MSG ) \
+    {                       \
+        MSG;                \
+        std::terminate();   \
+    }
+#else
 #define UTILS_ERROR0( MSG ) throw std::runtime_error( MSG )
+#endif
 
 #define UTILS_ASSERT0( COND, MSG ) \
     if ( !( COND ) ) UTILS_ERROR0( MSG )
