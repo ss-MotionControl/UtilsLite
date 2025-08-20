@@ -43,8 +43,8 @@ namespace Utils {
 #ifndef UTILS_NO_EXCEPTIONS
   using std::exception;
 #endif
-  using std::exit;
 #ifndef UTILS_MINIMAL_BUILD
+  using std::exit;
   using std::cerr;
 #endif
 

@@ -106,7 +106,9 @@
 #endif
 
 #include <string>
+#ifndef UTILS_NO_STRING_VIEW
 #include <string_view>
+#endif
 #include <vector>
 #include <list>
 #include <map>
@@ -180,12 +182,16 @@
 namespace Utils {
   #ifndef DOXYGEN_SHOULD_SKIP_THIS
   using string       = std::string;
+#ifndef UTILS_NO_STRING_VIEW
   using string_view  = std::string_view;
+#else
+  using string_view  = std::string;
+#endif
 #ifndef UTILS_MINIMAL_BUILD
   using ostream_type = std::basic_ostream<char>;
   using istream_type = std::basic_istream<char>;
-  #endif
 #endif
+  #endif
 }
 
 #ifndef UTILS_MINIMAL_BUILD
