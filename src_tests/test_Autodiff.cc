@@ -69,13 +69,13 @@ dual f4(dual x, const Params& params)
 
 // Define functions A, Ax, Ay using double; analytical derivatives are available.
 double  A(double x, double y) { return x*y; }
-double Ax(double x, double y) { return y; }
-double Ay(double x, double y) { return x; }
+double Ax(double  , double y) { return y; }
+double Ay(double x, double  ) { return x; }
 
 // Define functions B, Bx, By using double; analytical derivatives are available.
 double  B(double x, double y) { return x + y; }
-double Bx(double x, double y) { return 1.0; }
-double By(double x, double y) { return 1.0; }
+double Bx(double  , double  ) { return 1.0; }
+double By(double  , double  ) { return 1.0; }
 
 // Wrap A into Adual function so that it can be used within autodiff-enabled codes.
 dual Adual(dual const& x, dual const& y)
@@ -271,8 +271,8 @@ main() {
 
   {
     dual2nd x = 1.1;
-    double z = {4.5};
-    double pz = power6(z);
+    //double z = {4.5};
+    //double pz = power6(z);
 
     auto fun = []( dual2nd x) -> dual2nd {
       return power6(log1p( x )*x);

@@ -896,7 +896,7 @@ CLASS PREFIX##D_6( real_type const x1, real_type const x2,            \
                    real_type const x3, real_type const x4,            \
                    real_type const x5, real_type const x6  ) CONST {  \
   autodiff::dual1st X6{x6};                                           \
-  X5.grad = 1;                                                        \
+  X6.grad = 1;                                                        \
   autodiff::dual1st res{ FUN( x1, x2, x3, x4, x5, X6 ) };             \
   return res.grad;                                                    \
 }                                                                     \
