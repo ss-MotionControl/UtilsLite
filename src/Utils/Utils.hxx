@@ -102,8 +102,8 @@
 #ifndef UTILS_MINIMAL_BUILD
 #include <type_traits>  // For std::remove_reference()
 #include <functional>		// For std::bind()
-#include <cctype>
 #endif
+#include <cctype>
 
 #include <string>
 #ifndef UTILS_NO_STRING_VIEW

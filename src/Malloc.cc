@@ -44,9 +44,9 @@ namespace Utils {
   using std::exception;
 #endif
 #ifndef UTILS_MINIMAL_BUILD
-  using std::exit;
   using std::cerr;
 #endif
+  using std::abort;
 
 #ifndef UTILS_MINIMAL_BUILD
   std::mutex MallocMutex;
@@ -126,7 +126,7 @@ namespace Utils {
       );
       print_trace( __LINE__, __FILE__, reason, cerr );
 #endif
-      exit(0);
+      abort();
     }
     catch (...) {
 #ifndef UTILS_MINIMAL_BUILD
@@ -135,7 +135,7 @@ namespace Utils {
       );
       print_trace( __LINE__, __FILE__, reason, cerr );
 #endif
-      exit(0);
+      abort();
     }
 #endif
     m_num_total_values = n;
@@ -231,7 +231,7 @@ namespace Utils {
     );
     print_trace( __LINE__, __FILE__, reason, cerr );
 #endif
-    exit(0);
+    abort();
   }
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -245,7 +245,7 @@ namespace Utils {
     );
     print_trace( __LINE__, __FILE__, reason, cerr );
 #endif
-    exit(0);
+    abort();
   }
 
   // - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
