@@ -19,7 +19,8 @@ end
 
 desc "untar SPDLOG file"
 task :targz => [:download] do
-  tar_gz_archive = "spdlog-#{VER}.tar.gz"
+  #tar_gz_archive = "spdlog-#{VER}.tar.gz"
+  tar_gz_archive = "v#{VER}.tar.gz"
   if File.directory?("spdlog-#{VER}")
     puts "directory: `spdlog` present, nothing to do".bold.green
   else
