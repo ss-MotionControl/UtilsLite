@@ -89,7 +89,7 @@ namespace Utils {
 
   private:
 
-    string m_name;                   //!< Name identifier for the allocated memory.
+    string_view m_name;                   //!< Name identifier for the allocated memory.
     size_t m_num_total_values{0};    //!< Total number of objects allocated.
     size_t m_num_total_reserved{0};  //!< Total reserved space.
     size_t m_num_allocated{0};       //!< Number of currently allocated objects.
@@ -117,7 +117,7 @@ namespace Utils {
      * \param name A string identifier for the allocated memory block.
      */
     explicit
-    Malloc( string name )
+    Malloc( string_view name )
     : m_name(std::move(name))
     { }
 
@@ -293,7 +293,7 @@ namespace Utils {
 
   private:
 
-    string    m_name;             //!< Name identifier for the allocated memory.
+    string_view    m_name;             //!< Name identifier for the allocated memory.
     size_t    m_num_allocated{0}; //!< Number of currently allocated objects.
     valueType m_data[mem_size];   //!< Array to store objects of type `T`.
 
@@ -310,7 +310,7 @@ namespace Utils {
      * \param name A string identifier for the allocated memory block.
      */
     explicit
-    MallocFixed( string name )
+    MallocFixed( string_view name )
     : m_name(std::move(name))
     {}
 
