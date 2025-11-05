@@ -9,7 +9,7 @@ end
 
 task :default => [:install_osx]
 
-VER = "1.15.3"
+VER = "1.16.0"
 
 desc "download SPDLOG sources"
 task :download do

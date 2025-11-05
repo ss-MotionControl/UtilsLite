@@ -558,7 +558,7 @@ testCopyAll() {
 
 int
 main() {
-  Eigen::initParallel();
+  //Eigen::initParallel();
   Eigen::setNbThreads(4);
 
   testVVall();

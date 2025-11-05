@@ -46,7 +46,7 @@ main() {
   std::time_t const t{ std::time(nullptr) };
 
   // Prints "The date is 2020-11-07." (with the current date):
-  fmt::print("The date is {:%Y-%m-%d}.", fmt::localtime(t));
+  fmt::print("The date is {:%Y-%m-%d}.\n", fmt::gmtime(t));
 
   // C++14
   using namespace std::literals::chrono_literals;

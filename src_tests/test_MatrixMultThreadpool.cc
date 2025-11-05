@@ -153,7 +153,7 @@ BlockMult::multiply(
 int
 main() {
   Utils::TicToc tm;
-  Eigen::initParallel();
+  //Eigen::initParallel();
   fmt::print("Eigen Test\n");
   double mean   { 0 };
   double stdDev { 0 };
