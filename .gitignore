@@ -20,3 +20,6 @@ doxygen/docs
 .idea
 cmake-build-debug
 .DS_Store
+.ninja_deps
+.ninja_log
+.build
