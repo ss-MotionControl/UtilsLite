@@ -38,7 +38,6 @@ project(
 include( "${HOME}/CMakeLists-cflags.txt" )
 include( "${HOME}/CMakeLists-utilities.txt" )
 
-
 if( CMAKE_CXX_COMPILER_ID MATCHES "Clang|AppleClang" )
   add_compile_options( "$<$<COMPILE_LANGUAGE:C,CXX>:-Wno-poison-system-directories>" )
   add_compile_options( "$<$<COMPILE_LANGUAGE:C,CXX>:-Wno-switch-default>" )
@@ -108,7 +107,10 @@ endforeach(F ${S})
 set( PUBLIC_HEADERS )
 file(
   GLOB_RECURSE S
-  ${SOURCE_DIR}/*.h*
+  ${SOURCE_DIR}/*.h
+  ${SOURCE_DIR}/*.hpp
+  ${SOURCE_DIR}/*.hh
+  ${SOURCE_DIR}/*.hxx
   ${SOURCE_DIR}/Utils/3rd/Eigen/*
 )
 foreach (F ${S})
@@ -117,7 +119,33 @@ foreach (F ${S})
   list( APPEND PUBLIC_HEADERS ${RF} )
 endforeach(F ${S})
 
+# Aggiungi esplicitamente Utils.hh se esiste e non è stato trovato
+if(EXISTS "${SOURCE_DIR}/Utils.hh")
+    set(UTILS_HH_FOUND FALSE)
+    foreach(H ${PUBLIC_HEADERS})
+        if(H STREQUAL "Utils.hh")
+            set(UTILS_HH_FOUND TRUE)
+        endif()
+    endforeach()
+    if(NOT UTILS_HH_FOUND)
+        list(APPEND PUBLIC_HEADERS "Utils.hh")
+        message(STATUS "Added Utils.hh explicitly to public headers")
+    endif()
+endif()
+
 list(FILTER PUBLIC_HEADERS EXCLUDE REGEX "\.DS")
+
+# Debug: stampa gli header trovati
+message(STATUS "Public headers found (${PUBLIC_HEADERS}):")
+foreach(H ${PUBLIC_HEADERS})
+    message(STATUS "  - ${H}")
+endforeach()
+
+# Crea lista completa di path assoluti per gli header (necessario per Xcode)
+set(PUBLIC_HEADERS_FULL)
+foreach(H ${PUBLIC_HEADERS})
+    list(APPEND PUBLIC_HEADERS_FULL "${SOURCE_DIR}/${H}")
+endforeach()
 
 # extra include directory for compilation
 include_directories( ./src ./src/Utils )
@@ -128,7 +156,7 @@ include_directories( ./src ./src/Utils )
 #    |_|\__,_|_| \__, \___|\__/__/
 #                |___/
 #
-# define target
+# define target - STATIC
 utils_setup_target(
   ${PROJECT_NAME}
   TRUE # build static
@@ -137,6 +165,20 @@ utils_setup_target(
   "${SOURCE_DIR}"
   "${PUBLIC_HEADERS}"
 )
+
+# Imposta esplicitamente gli header pubblici per Xcode per la libreria statica
+if(TARGET ${UTILS_NAMESPACE}_${PROJECT_NAME}_Static)
+    target_sources(${UTILS_NAMESPACE}_${PROJECT_NAME}_Static 
+        PUBLIC 
+        ${PUBLIC_HEADERS_FULL}
+    )
+    set_target_properties(${UTILS_NAMESPACE}_${PROJECT_NAME}_Static PROPERTIES
+        XCODE_ATTRIBUTE_PUBLIC_HEADERS "${PUBLIC_HEADERS_FULL}"
+        XCODE_ATTRIBUTE_HEADER_SEARCH_PATHS "${SOURCE_DIR}"
+    )
+endif()
+
+# define target - SHARED
 if ( UTILS_BUILD_SHARED )
   utils_setup_target(
     ${PROJECT_NAME}
@@ -146,6 +188,18 @@ if ( UTILS_BUILD_SHARED )
     "${SOURCE_DIR}"
     "${PUBLIC_HEADERS}"
   )
+  
+  # Imposta esplicitamente gli header pubblici per Xcode per la libreria shared
+  if(TARGET ${UTILS_NAMESPACE}_${PROJECT_NAME})
+      target_sources(${UTILS_NAMESPACE}_${PROJECT_NAME} 
+          PUBLIC 
+          ${PUBLIC_HEADERS_FULL}
+      )
+      set_target_properties(${UTILS_NAMESPACE}_${PROJECT_NAME} PROPERTIES
+          XCODE_ATTRIBUTE_PUBLIC_HEADERS "${PUBLIC_HEADERS_FULL}"
+          XCODE_ATTRIBUTE_HEADER_SEARCH_PATHS "${SOURCE_DIR}"
+      )
+  endif()
 endif()
 
 #   _____       _
@@ -167,13 +221,6 @@ if ( UTILS_ENABLE_TESTS )
       set( LIBS ${LIBS} Threads::Threads )
     endif()
   else()
-    #libcmt.lib
-    #find_library( WS2 ws2_32 REQUIRED )
-    #find_library( IPH iphlpapi REQUIRED )
-    #find_library( KER kernel32 REQUIRED )
-    #find_library( IPP ippsmt REQUIRED )
-    #find_library( WPTH pthread REQUIRED )
-    #set( LIBS ${LIBS} ${WS2} ${IPH} ${KER} )
     set( LIBS ${LIBS} ws2_32 iphlpapi kernel32 )
     if (UTILS_BUILD_SHARED)
       target_link_libraries( ${UTILS_NAMESPACE}_${PROJECT_NAME} ${LIBS} ${CMAKE_DL_LIBS} )
@@ -185,7 +232,6 @@ if ( UTILS_ENABLE_TESTS )
     GLOB S
     ${CMAKE_CURRENT_SOURCE_DIR}/src_tests/*.cc
   )
-  #list(FILTER S EXCLUDE REGEX "eigen")
   foreach(F ${S})
     file( RELATIVE_PATH RF "${CMAKE_CURRENT_SOURCE_DIR}/src_tests/" "${F}" )
     get_filename_component( RFF ${RF} NAME_WLE )
@@ -200,6 +246,11 @@ if ( UTILS_ENABLE_TESTS )
     target_link_libraries( ${S} ${LIBS} )
     add_test( NAME "${S}" COMMAND ./bin/${S}.exe WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     add_dependencies( "${PROJECT_NAME}_all_tests" ${S} )
+    
+    # Imposta proprietà per Xcode per gli eseguibili di test
+    set_target_properties( ${S} PROPERTIES
+      XCODE_ATTRIBUTE_HEADER_SEARCH_PATHS "${SOURCE_DIR}"
+    )
   endforeach()
 
 endif()

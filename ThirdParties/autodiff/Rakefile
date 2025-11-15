@@ -35,7 +35,7 @@ task :build => [:targz] do
     FileUtils.rm_rf '.build'
     FileUtils.mkdir '.build'
     FileUtils.cd '.build'
-      sh "cmake -G Ninja .. -DAUTODIFF_BUILD_TESTS=OFF -DAUTODIFF_BUILD_PYTHON=OFF -DCMAKE_INSTALL_PREFIX=../../lib"
+      sh "cmake -G Ninja -DAUTODIFF_BUILD_TESTS=OFF -DAUTODIFF_BUILD_EXAMPLES=OFF -DAUTODIFF_BUILD_PYTHON=OFF -DCMAKE_INSTALL_PREFIX=../../lib .."
       sh "cmake --build . --target install "+PARALLEL+QUIET
     FileUtils.cd '..'
   FileUtils.cd '..'
@@ -64,6 +64,7 @@ task :install => [:build] do
     content = File.read(file)
     new_content = content.gsub(/\#include \<autodiff\/(.*)\>/, '#include "../\1"')
                          .gsub(/\#include \<Eigen\/(.*)\>/, '#include "../../../Eigen/\1"')
+                         .gsub(/\#include \<eigen3\/Eigen\/(.*)\>/, '#include "../../../Eigen/\1"')
   
     if content != new_content
       File.write(file, new_content)
@@ -76,6 +77,7 @@ task :install => [:build] do
     content = File.read(file)
     new_content = content.gsub(/\#include \<autodiff\/(.*)\>/, '#include "../../\1"')
                          .gsub(/\#include \<Eigen\/(.*)\>/, '#include "../../../Eigen/\1"')
+                         .gsub(/\#include \<eigen3\/Eigen\/(.*)\>/, '#include "../../../Eigen/\1"')
   
     if content != new_content
       File.write(file, new_content)

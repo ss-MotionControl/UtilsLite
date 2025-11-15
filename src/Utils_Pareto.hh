@@ -1,3 +1,22 @@
+/*--------------------------------------------------------------------------*\
+ |                                                                          |
+ |  Copyright (C) 2025                                                      |
+ |                                                                          |
+ |         , __                 , __                                        |
+ |        /|/  \               /|/  \                                       |
+ |         | __/ _   ,_         | __/ _   ,_                                |
+ |         |   \|/  /  |  |   | |   \|/  /  |  |   |                        |
+ |         |(__/|__/   |_/ \_/|/|(__/|__/   |_/ \_/|/                       |
+ |                           /|                   /|                        |
+ |                           \|                   \|                        |
+ |                                                                          |
+ |      Enrico Bertolazzi                                                   |
+ |      Dipartimento di Ingegneria Industriale                              |
+ |      Università degli Studi di Trento                                    |
+ |      email: enrico.bertolazzi@unitn.it                                   |
+ |                                                                          |
+\*--------------------------------------------------------------------------*/
+
 /**
  * @file Utils_Pareto.hh
  * @brief Defines the ParetoFront class for maintaining the Pareto set in multi-objective optimization.
