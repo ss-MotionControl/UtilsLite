@@ -32,7 +32,6 @@ struct TestResult {
   std::string                                   problem_name;
   std::string                                   linesearch_name;
   Utils::LBFGS_minimizer<Scalar>::IterationData iteration_data;
-  Utils::LBFGS_minimizer<Scalar>::Status        status;
   Scalar                                        final_value;
   Vector                                        final_solution;
   size_t                                        dimension;
@@ -660,7 +659,7 @@ print_summary_table() {
     std::string status_str;
     bool converged = false;
         
-    switch (result.status) {
+    switch (result.iteration_data.status) {
     case Utils::LBFGS_minimizer<Scalar>::Status::CONVERGED:
       status_str = "CONVERGED";
       converged = true;
@@ -705,12 +704,17 @@ print_summary_table() {
   size_t total_tests     = global_test_results.size();
   size_t converged_tests = std::count_if(global_test_results.begin(), global_test_results.end(),
     [](const TestResult& r) {
-       return r.status == Utils::LBFGS_minimizer<Scalar>::Status::CONVERGED ||
-              r.status == Utils::LBFGS_minimizer<Scalar>::Status::GRADIENT_TOO_SMALL;
+       return r.iteration_data.status == Utils::LBFGS_minimizer<Scalar>::Status::CONVERGED ||
+              r.iteration_data.status == Utils::LBFGS_minimizer<Scalar>::Status::GRADIENT_TOO_SMALL;
   });
+  size_t accumulated_iter{0};
+  for ( auto const & r : global_test_results ) {
+     if ( r.iteration_data.status == Utils::LBFGS_minimizer<Scalar>::Status::CONVERGED ||
+          r.iteration_data.status == Utils::LBFGS_minimizer<Scalar>::Status::GRADIENT_TOO_SMALL ) accumulated_iter += r.iteration_data.iterations;
+  }
     
-  fmt::print("\nFinal Stats: {} / {} test converged ({:.1f}%)\n",
-             converged_tests, total_tests, (100.0 * converged_tests / total_tests));
+  fmt::print("\nFinal Stats: {} / {} test converged ({:.1f}%), accumulated iter: {}\n",
+             converged_tests, total_tests, (100.0 * converged_tests / total_tests), accumulated_iter );
 }
 
 // -------------------------------------------------------------------
@@ -786,23 +790,22 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
     Utils::LBFGS_minimizer<Scalar> minimizer(opts);
     minimizer.set_bounds( tp->lower(), tp->upper() );
     
-    auto [status, xf, ff, iter_data] = minimizer.minimize( x0, cb, line_search );
+    auto iter_data = minimizer.minimize( x0, cb, line_search );
     
     // Salva il risultato
     TestResult result;
-    result.problem_name = problem_name;
+    result.problem_name    = problem_name;
     result.linesearch_name = ls_name;
-    result.iteration_data = iter_data;
-    result.status = status;
-    result.final_value = ff;
-    result.final_solution = xf;
-    result.dimension = N;
+    result.iteration_data  = iter_data;
+    result.final_value     = iter_data.final_function_value;
+    result.final_solution  = minimizer.solution();
+    result.dimension       = N;
     
     global_test_results.push_back(result);
     
     // Converti status in stringa
     std::string status_str;
-    switch (status) {
+    switch (iter_data.status) {
     case Utils::LBFGS_minimizer<Scalar>::Status::CONVERGED:
       status_str = "CONVERGED";
       break;
@@ -823,9 +826,9 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
     }
       
     fmt::print("{} - {}: {} after {} iterations, f = {:.6e}\n",
-                problem_name, ls_name, status_str, iter_data.iterations, ff);
+                problem_name, ls_name, status_str, iter_data.iterations, iter_data.final_function_value );
   }
-  fmt::print("\n");
+  fmt::print("\n\n");
 }
 
 // -------------------------------------------------------------------

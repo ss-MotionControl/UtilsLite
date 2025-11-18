@@ -1894,8 +1894,17 @@ namespace Utils {
     using Vector   = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
     using Callback = std::function<Scalar(Vector const &, Vector *)>;
 
+    enum class Status {
+      CONVERGED          = 0, // Convergenza raggiunta
+      MAX_ITERATIONS     = 1, // Massimo numero di iterazioni raggiunto
+      LINE_SEARCH_FAILED = 2, // Line search fallita
+      GRADIENT_TOO_SMALL = 3, // Gradiente troppo piccolo
+      FAILED             = 4  // Fallimento generico
+    };
+
     // AGGIUNTE: Strutture per raccogliere i risultati
     struct IterationData {
+      Status status{Status::FAILED};
       size_t iterations{0};
       Scalar final_gradient_norm{0};
       Scalar final_function_value{0};
@@ -1905,26 +1914,21 @@ namespace Utils {
       size_t line_search_iterations{0};
     };
 
-    enum class Status {
-      CONVERGED          = 0, // Convergenza raggiunta
-      MAX_ITERATIONS     = 1, // Massimo numero di iterazioni raggiunto
-      LINE_SEARCH_FAILED = 2, // Line search fallita
-      GRADIENT_TOO_SMALL = 3, // Gradiente troppo piccolo
-      FAILED             = 4  // Fallimento generico
-    };
-
     struct Options {
       size_t max_iter        { 200   };
+      size_t iter_reset      { 50    };
+      size_t m               { 20    };
+
       Scalar g_tol           { 1e-8  };
       Scalar f_tol           { 1e-12 };
-      Scalar x_tol           { 1e-10 }; // Nuovo: tolleranza su x
+      Scalar x_tol           { 1e-10 };
+      
       Scalar step_max        { 1     };
-      Scalar c1              { 1e-4  };
-      size_t max_line_search { 50    }; // Aumentato
-      size_t m               { 20    };
+      Scalar sty_min_factor  { 1e-12  }; // Più permissivo
+      Scalar very_small_step { 1e-8  };
+
       bool   use_projection  { false };
       bool   verbose         { false };
-      Scalar sty_min_factor  { 1e-12 }; // Più permissivo
     };
 
   private:
@@ -1980,10 +1984,13 @@ namespace Utils {
     mutable size_t m_line_search_iterations{0};
 
   public:
+
     LBFGS_minimizer( Options opts = Options() )
     : m_options(opts)
     , m_LBFGS(opts.m)
     {}
+    
+    Vector const & solution() const { return m_x; }
 
     void
     set_bounds( Vector const & lower, Vector const & upper ) {
@@ -2004,25 +2011,31 @@ namespace Utils {
 
     void
     reset_memory() {
+      if ( m_options.verbose ) fmt::print("[LBFGS] Periodic memory reset\n");
       m_LBFGS.clear();
       m_iter_since_reset = 0;
     }
 
     template <typename Linesearch>
-    std::tuple<Status, Vector, Scalar, IterationData>
+    IterationData
     minimize(
       Vector     const & x0,
       Callback   const & callback,
       Linesearch const & linesearch = MoreThuenteLineSearch<Scalar>()
     ) {
+      
+      Status status { Status::MAX_ITERATIONS };
+      Scalar gnorm  { 0 };
+
       // AGGIUNTA: Reset contatori
       m_function_evaluations = 0;
       m_gradient_evaluations = 0;
       m_line_search_iterations = 0;
 
       auto const n{ x0.size() };
-      m_x.resize(n); m_g.resize(n); m_p.resize(n);
-      m_x_new.resize(n); m_g_new.resize(n); m_s.resize(n); m_y.resize(n);
+      m_x.resize(n);     m_g.resize(n);
+      m_x_new.resize(n); m_g_new.resize(n);
+      m_p.resize(n);     m_s.resize(n); m_y.resize(n);
       
       if ( m_options.use_projection ) {
         assert( m_lower.size() == n );
@@ -2042,56 +2055,38 @@ namespace Utils {
 
       // AGGIUNTA: Salva valore iniziale
       Scalar f_initial = f;
+      size_t iteration{ 0 };
+      bool converged = false;
 
-      for ( size_t iter{ 0 }; iter < m_options.max_iter; ++iter ) {
+      for (; iteration < m_options.max_iter && !converged; ++iteration ) {
         ++m_iter_since_reset;
         
         // Check per stagnazione
-        if ( iter > 0 ) {
+        if ( iteration > 0 ) {
           Scalar x_change = (m_x - x_prev).norm();
           if ( x_change < step_prev*m_options.x_tol ) {
             if ( m_options.verbose )
               fmt::print("[LBFGS] Converged by x change: {:.2e} < {:.2e}\n", x_change, m_options.x_tol);
-            
-            // AGGIUNTA: Ritorna con dati completi
-            IterationData data{
-              iter,
-              projected_gradient_norm(m_x, m_g),
-              f,
-              f_initial,
-              m_function_evaluations,
-              m_gradient_evaluations,
-              m_line_search_iterations
-            };
-            return {Status::CONVERGED, m_x, f, data};
+            gnorm  = projected_gradient_norm(m_x, m_g);
+            status = Status::CONVERGED;
+            converged = true;
+            break;
           }
         }
         x_prev = m_x;
 
-        Scalar gnorm{ projected_gradient_norm(m_x, m_g) };
+        gnorm = projected_gradient_norm(m_x, m_g);
         if ( m_options.verbose )
-          fmt::print("[LBFGS] iter={:3d} f={:12.4g} ‖pg‖={:12.4g} mem={}\n", iter, f, gnorm, m_LBFGS.size());
+          fmt::print("[LBFGS] iter={:3d} f={:12.4g} ‖pg‖={:12.4g} mem={}\n", iteration, f, gnorm, m_LBFGS.size());
         
         if ( gnorm <= m_options.g_tol ) {
-          // AGGIUNTA: Ritorna con dati completi
-          IterationData data{
-            iter,
-            gnorm,
-            f,
-            f_initial,
-            m_function_evaluations,
-            m_gradient_evaluations,
-            m_line_search_iterations
-          };
-          return {Status::GRADIENT_TOO_SMALL, m_x, f, data};
+          status = Status::GRADIENT_TOO_SMALL;
+          converged = true;
+          break;
         }
 
-        // Reset periodico della memoria ogni 50 iterazioni
-        if ( m_iter_since_reset > 50 ) {
-          if ( m_options.verbose ) fmt::print("[LBFGS] Periodic memory reset\n");
-          m_LBFGS.clear();
-          m_iter_since_reset = 0;
-        }
+        // Reset periodico della memoria ogni iter_reset iterazioni
+        if ( m_iter_since_reset > m_options.iter_reset ) reset_memory();
 
         // compute search direction
         Scalar h0 = m_LBFGS.compute_initial_h0(1);
@@ -2124,29 +2119,23 @@ namespace Utils {
         }
 
         if (!std::isfinite(pg) || pg >= -m_epsi) {
-          if ( m_options.verbose ) fmt::print("[LBFGS] Cannot find descent direction, stopping\n");
-          
-          // AGGIUNTA: Ritorna con dati completi
-          IterationData data{
-            iter,
-            projected_gradient_norm(m_x, m_g),
-            f,
-            f_initial,
-            m_function_evaluations,
-            m_gradient_evaluations,
-            m_line_search_iterations
-          };
-          return {Status::FAILED, m_x, f, data};
+          if ( m_options.verbose )
+            fmt::print("[LBFGS] Cannot find descent direction, stopping\n");
+          gnorm  = projected_gradient_norm(m_x, m_g);
+          status = Status::FAILED;
+          converged = true;
+          break;
         }
 
         // Line search
         auto step_opt = linesearch( f, pg, m_x, m_p, callback, m_options.step_max );
         
         if (!step_opt.has_value()) {
-          if ( m_options.verbose ) fmt::print("[LBFGS] line search failed, resetting memory\n");
+          if ( m_options.verbose )
+            fmt::print("[LBFGS] line search failed, resetting memory\n");
           m_LBFGS.clear();
           // Prova con passo fisso piccolo
-          m_x_new.noalias() = m_x + 1e-8 * m_p;
+          m_x_new.noalias() = m_x + m_options.very_small_step * m_p;
           if ( m_options.use_projection ) project_inplace(m_x_new);
           Scalar f_test = callback(m_x_new, &m_g_new);
           m_function_evaluations++;
@@ -2161,17 +2150,10 @@ namespace Utils {
             f = f_test;
             continue;
           } else {
-            // AGGIUNTA: Ritorna con dati completi
-            IterationData data{
-              iter,
-              projected_gradient_norm(m_x, m_g),
-              f,
-              f_initial,
-              m_function_evaluations,
-              m_gradient_evaluations,
-              m_line_search_iterations
-            };
-            return {Status::LINE_SEARCH_FAILED, m_x, f, data};
+            gnorm  = projected_gradient_norm(m_x, m_g);
+            status = Status::LINE_SEARCH_FAILED;
+            converged = true;
+            break;
           }
         }
 
@@ -2195,8 +2177,7 @@ namespace Utils {
         if (sty > sty_tolerance) {
           m_LBFGS.add_correction(m_s, m_y);
         } else {
-          if ( m_options.verbose && m_LBFGS.size() > 0 )
-            fmt::print("[LBFGS] curvature condition failed (s^T y = {:.2e}), skipping update\n", sty);
+          if ( m_options.verbose && m_LBFGS.size() > 0 ) fmt::print("[LBFGS] curvature condition failed (s^T y = {:.2e}), skipping update\n", sty);
           // Non cancellare la memoria, procedi senza aggiornare
         }
 
@@ -2208,35 +2189,29 @@ namespace Utils {
         // check function change
         Scalar f_change = abs(f - f_prev);
         if ( f_change <= m_options.f_tol ) {
-          if ( m_options.verbose )
-            fmt::print("[LBFGS] Converged by function change: {:.2e} < {:.2e}\n", f_change, m_options.f_tol);
-          
-          // AGGIUNTA: Ritorna con dati completi
-          IterationData data{
-            iter,
-            projected_gradient_norm(m_x, m_g),
-            f,
-            f_initial,
-            m_function_evaluations,
-            m_gradient_evaluations,
-            m_line_search_iterations
-          };
-          return {Status::CONVERGED, m_x, f, data};
+          if ( m_options.verbose ) fmt::print("[LBFGS] Converged by function change: {:.2e} < {:.2e}\n", f_change, m_options.f_tol);
+          gnorm  = projected_gradient_norm(m_x, m_g);
+          status = Status::CONVERGED;
+          converged = true;
+          break;
         }
         f_prev = f;
       }
+      
+      if (!converged) {
+        gnorm = projected_gradient_norm(m_x, m_g);
+      }
 
-      // AGGIUNTA: Ritorna con dati completi per max iterazioni
-      IterationData data{
-        m_options.max_iter,
-        projected_gradient_norm(m_x, m_g),
+      return IterationData{
+        status,
+        iteration,
+        gnorm,
         f,
         f_initial,
         m_function_evaluations,
         m_gradient_evaluations,
         m_line_search_iterations
       };
-      return {Status::MAX_ITERATIONS, m_x, f, data};
     }
   };
 }
