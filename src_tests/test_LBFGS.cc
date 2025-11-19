@@ -44,8 +44,6 @@ struct LineSearchStats {
   size_t successful_tests{0};
   size_t total_iterations{0};
   size_t total_function_evals{0};
-  size_t total_gradient_evals{0};
-  size_t total_line_search_iters{0};
   Scalar average_iterations{0};
   Scalar success_rate{0};
 };
@@ -113,6 +111,95 @@ public:
   Vector init() const override {
     Vector x0(2);
     x0 << -1.2, 1.0;
+    return x0;
+  }
+};
+
+
+// -------------------------------------------------------------------
+// ---------------- Nesterov-Chebyshev-Rosenbrock --------------------
+// -------------------------------------------------------------------
+
+template <typename T, size_t N>
+class NesterovChebyshevRosenbrock : public OptimizationProblem<T,N> {
+  using Base   = OptimizationProblem<T,N>;
+  using Vector = typename Base::Vector;
+
+public:
+  NesterovChebyshevRosenbrock() : Base() {
+    if constexpr (N < 2) throw std::invalid_argument("NesterovChebyshevRosenbrock requires N >= 2");
+  }
+
+  T operator()( Vector const & x, Vector * grad ) const override {
+    T f{0};
+
+    // First term: (1/4) * |x₁ - 1|
+    f += 0.25 * std::abs(x[0] - 1.0);
+
+    // Subsequent terms: sum from i=1 to N-1 of |x_{i+1} - 2|x_i| + 1|
+    for (size_t i{0}; i < N-1; ++i) {
+      T term = x[i+1] - 2.0 * std::abs(x[i]) + 1.0;
+      f += std::abs(term);
+    }
+
+    if (grad) {
+      grad->resize(N);
+      grad->setZero();
+
+      // Gradient for first term: ∂/∂x₁ of (1/4)|x₁ - 1|
+      if (x[0] > 1.0) {
+        (*grad)[0] += 0.25;
+      } else if (x[0] < 1.0) {
+        (*grad)[0] += -0.25;
+      }
+      // At x₁ = 1, derivative is undefined, but we set it to 0 for continuity
+
+      // Gradient for subsequent terms
+      for (size_t i{0}; i < N-1; ++i) {
+        T abs_xi = std::abs(x[i]);
+        T term = x[i+1] - 2.0 * abs_xi + 1.0;
+
+        if (term > 0) {
+          // ∂/∂x_{i+1}
+          (*grad)[i+1] += 1.0;
+          
+          // ∂/∂x_i
+          if (x[i] > 0) {
+            (*grad)[i] += -2.0;
+          } else if (x[i] < 0) {
+            (*grad)[i] += 2.0;
+          }
+          // At x_i = 0, derivative of |x_i| is undefined
+        } else if (term < 0) {
+          // ∂/∂x_{i+1}
+          (*grad)[i+1] += -1.0;
+          
+          // ∂/∂x_i
+          if (x[i] > 0) {
+            (*grad)[i] += 2.0;
+          } else if (x[i] < 0) {
+            (*grad)[i] += -2.0;
+          }
+        }
+        // If term == 0, derivative is 0 (subgradient could be any value in [-1,1] but we choose 0)
+      }
+    }
+
+    return f;
+  }
+
+  // Bounds - this function can have complex behavior, so use reasonable bounds
+  Vector lower() const override { return Vector::Constant(N, -10.0); }
+  Vector upper() const override { return Vector::Constant(N, 10.0); }
+
+  // Initial point - classic Rosenbrock starting point adapted for this function
+  Vector init() const override {
+    Vector x0 = Vector::Constant(N, 0.0);
+    x0[0] = -1.2; // Similar to classic Rosenbrock
+    // Set other coordinates to avoid being at points where derivatives are undefined
+    for (size_t i = 1; i < N; ++i) {
+      x0[i] = 1.0;
+    }
     return x0;
   }
 };
@@ -669,10 +756,8 @@ update_line_search_statistics(const TestResult& result) {
   
   if (success) {
     stats.successful_tests++;
-    stats.total_iterations += result.iteration_data.iterations;
+    stats.total_iterations     += result.iteration_data.iterations;
     stats.total_function_evals += result.iteration_data.function_evaluations;
-    stats.total_gradient_evals += result.iteration_data.gradient_evaluations;
-    stats.total_line_search_iters += result.iteration_data.line_search_iterations;
   }
 }
 
@@ -682,8 +767,8 @@ update_line_search_statistics(const TestResult& result) {
 void
 print_line_search_statistics() {
   fmt::print("\n\n{:=^80}\n", " LINE SEARCH STATISTICS ");
-  fmt::print("{:<15} {:<8} {:<8} {:<12} {:<10} {:<10} {:<10} {:<10}\n",
-             "LineSearch", "Tests", "Success", "Success%", "AvgIter", "AvgFuncEval", "AvgGradEval", "AvgLSIter");
+  fmt::print("{:<15} {:<8} {:<8} {:<12} {:<10} {:<10}\n",
+             "LineSearch", "Tests", "Success", "Success%", "AvgIter", "AvgFuncEval" );
   fmt::print("{:-<80}\n", "");
   
   for (const auto& [name, stats] : line_search_statistics) {
@@ -693,10 +778,6 @@ print_line_search_statistics() {
       static_cast<Scalar>(stats.total_iterations) / stats.successful_tests : 0.0;
     Scalar avg_func_evals = (stats.successful_tests > 0) ?
       static_cast<Scalar>(stats.total_function_evals) / stats.successful_tests : 0.0;
-    Scalar avg_grad_evals = (stats.successful_tests > 0) ?
-      static_cast<Scalar>(stats.total_gradient_evals) / stats.successful_tests : 0.0;
-    Scalar avg_ls_iters = (stats.successful_tests > 0) ?
-      static_cast<Scalar>(stats.total_line_search_iters) / stats.successful_tests : 0.0;
     
     // Colore in base al success rate
     auto color = (success_rate >= 80.0) ? fmt::fg(fmt::color::green) :
@@ -705,9 +786,8 @@ print_line_search_statistics() {
     
     fmt::print("{:<15} {:<8} {:<8} ", 
                stats.name, stats.total_tests, stats.successful_tests);
-    fmt::print(color, "{:<10.1f}% ", success_rate);
-    fmt::print("{:<10.1f} {:<12.1f} {:<10.1f} {:<10.1f}\n",
-               avg_iterations, avg_func_evals, avg_grad_evals, avg_ls_iters);
+    fmt::print(color, "{:<12} ", fmt::format( "{:.1f}%",success_rate));
+    fmt::print("{:<10.1f} {:<12.1f}\n", avg_iterations, avg_func_evals);
   }
   fmt::print("{:=^80}\n", "");
 }
@@ -796,6 +876,8 @@ static
 void
 test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
 
+  fmt::print( "\n\n\n\nTEST: {}\n", problem_name );
+
   using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
   Utils::LBFGS_minimizer<Scalar>::Options opts;
   opts.max_iter       = 20000;
@@ -808,7 +890,7 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
   auto cb = [&tp]( Vector const & x, Vector * g ) -> Scalar { return (*tp)( x, g ); };
 
   // Lista di line search da testare - usa std::function per gestire i diversi tipi
-  std::vector<std::pair<std::string, std::function<std::optional<Scalar>(
+  std::vector<std::pair<std::string, std::function<std::optional<std::tuple<Scalar,size_t>>(
     Scalar, Scalar, Vector const&, Vector const&, 
     std::function<Scalar(Vector const&, Vector*)>, Scalar)>>> line_searches;
 
@@ -897,8 +979,11 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
       status_str = "UNKNOWN";
     }
       
-    fmt::print("{} - {}: {} after {} iterations, f = {:.6e}\n",
-                problem_name, ls_name, status_str, iter_data.iterations, iter_data.final_function_value );
+    fmt::print("{} - {}: {} after {} iterations, f = {:.6e}\n{}\n",
+                problem_name, ls_name, status_str,
+                iter_data.iterations,
+                iter_data.final_function_value,
+                result.final_solution.transpose() );
   }
   fmt::print("\n\n");
 }
@@ -914,6 +999,9 @@ main(){
   // Test originali
   Rosenbrock2D<Scalar> rosen;
   test( &rosen, "Rosenbrock2D" );
+
+  NesterovChebyshevRosenbrock<Scalar,128> nesterov;
+  test( &nesterov, "NesterovChebyshevRosenbrock" );
 
   RosenbrockN<Scalar,10> rosenN;
   test( &rosenN, "Rosenbrock10D" );
