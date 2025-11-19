@@ -37,8 +37,22 @@ struct TestResult {
   size_t                                        dimension;
 };
 
+// Struttura per statistiche delle line search
+struct LineSearchStats {
+  std::string name;
+  size_t total_tests{0};
+  size_t successful_tests{0};
+  size_t total_iterations{0};
+  size_t total_function_evals{0};
+  size_t total_gradient_evals{0};
+  size_t total_line_search_iters{0};
+  Scalar average_iterations{0};
+  Scalar success_rate{0};
+};
+
 // Collettore globale dei risultati
 std::vector<TestResult> global_test_results;
+std::map<std::string, LineSearchStats> line_search_statistics;
 
 /**
  * Classe base astratta per i problemi di ottimizzazione.
@@ -642,6 +656,63 @@ public:
 };
 
 // -------------------------------------------------------------------
+// Funzione per aggiornare le statistiche delle line search
+// -------------------------------------------------------------------
+void
+update_line_search_statistics(const TestResult& result) {
+  auto& stats = line_search_statistics[result.linesearch_name];
+  stats.name = result.linesearch_name;
+  stats.total_tests++;
+  
+  bool success = (result.iteration_data.status == Utils::LBFGS_minimizer<Scalar>::Status::CONVERGED ||
+                  result.iteration_data.status == Utils::LBFGS_minimizer<Scalar>::Status::GRADIENT_TOO_SMALL);
+  
+  if (success) {
+    stats.successful_tests++;
+    stats.total_iterations += result.iteration_data.iterations;
+    stats.total_function_evals += result.iteration_data.function_evaluations;
+    stats.total_gradient_evals += result.iteration_data.gradient_evaluations;
+    stats.total_line_search_iters += result.iteration_data.line_search_iterations;
+  }
+}
+
+// -------------------------------------------------------------------
+// Funzione per stampare le statistiche delle line search
+// -------------------------------------------------------------------
+void
+print_line_search_statistics() {
+  fmt::print("\n\n{:=^80}\n", " LINE SEARCH STATISTICS ");
+  fmt::print("{:<15} {:<8} {:<8} {:<12} {:<10} {:<10} {:<10} {:<10}\n",
+             "LineSearch", "Tests", "Success", "Success%", "AvgIter", "AvgFuncEval", "AvgGradEval", "AvgLSIter");
+  fmt::print("{:-<80}\n", "");
+  
+  for (const auto& [name, stats] : line_search_statistics) {
+    Scalar success_rate = (stats.total_tests > 0) ? 
+      (100.0 * stats.successful_tests) / stats.total_tests : 0.0;
+    Scalar avg_iterations = (stats.successful_tests > 0) ?
+      static_cast<Scalar>(stats.total_iterations) / stats.successful_tests : 0.0;
+    Scalar avg_func_evals = (stats.successful_tests > 0) ?
+      static_cast<Scalar>(stats.total_function_evals) / stats.successful_tests : 0.0;
+    Scalar avg_grad_evals = (stats.successful_tests > 0) ?
+      static_cast<Scalar>(stats.total_gradient_evals) / stats.successful_tests : 0.0;
+    Scalar avg_ls_iters = (stats.successful_tests > 0) ?
+      static_cast<Scalar>(stats.total_line_search_iters) / stats.successful_tests : 0.0;
+    
+    // Colore in base al success rate
+    auto color = (success_rate >= 80.0) ? fmt::fg(fmt::color::green) :
+                 (success_rate >= 60.0) ? fmt::fg(fmt::color::yellow) :
+                 fmt::fg(fmt::color::red);
+    
+    fmt::print("{:<15} {:<8} {:<8} ", 
+               stats.name, stats.total_tests, stats.successful_tests);
+    fmt::print(color, "{:<10.1f}% ", success_rate);
+    fmt::print("{:<10.1f} {:<12.1f} {:<10.1f} {:<10.1f}\n",
+               avg_iterations, avg_func_evals, avg_grad_evals, avg_ls_iters);
+  }
+  fmt::print("{:=^80}\n", "");
+}
+
+// -------------------------------------------------------------------
 // Funzione per stampare la tabella riassuntiva
 // -------------------------------------------------------------------
 void
@@ -742,7 +813,7 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
     std::function<Scalar(Vector const&, Vector*)>, Scalar)>>> line_searches;
 
   // Inizializza le line search
-  Utils::WolfeLineSearch<Scalar>       wolfe;
+  Utils::WeakWolfeLineSearch<Scalar>   wolfe_weak;
   Utils::StrongWolfeLineSearch<Scalar> wolfe_strong;
   Utils::ArmijoLineSearch<Scalar>      armijo;
   Utils::GoldsteinLineSearch<Scalar>   gold;
@@ -756,10 +827,10 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
       return armijo(f0, Df0, x, d, callback, alpha0);
   });
 
-  line_searches.emplace_back("Wolfe", [&wolfe](
+  line_searches.emplace_back("WolfeWeak", [&wolfe_weak](
     Scalar f0, Scalar Df0, Vector const& x, Vector const& d,
     std::function<Scalar(Vector const&, Vector*)> callback, Scalar alpha0) {
-      return wolfe(f0, Df0, x, d, callback, alpha0);
+      return wolfe_weak(f0, Df0, x, d, callback, alpha0);
   });
 
   line_searches.emplace_back("WolfeStrong", [&wolfe_strong](
@@ -802,6 +873,7 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
     result.dimension       = N;
     
     global_test_results.push_back(result);
+    update_line_search_statistics(result);
     
     // Converti status in stringa
     std::string status_str;
@@ -885,6 +957,9 @@ main(){
 
   // Stampa tabella riassuntiva
   print_summary_table();
+  
+  // Stampa statistiche delle line search
+  print_line_search_statistics();
 
   return 0;
 }

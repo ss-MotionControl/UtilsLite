@@ -974,156 +974,145 @@ namespace Utils {
    * @see Nocedal & Wright (2006), Algorithm 3.5 and 3.6
    * @see Wolfe, P. (1969). "Convergence Conditions for Ascent Methods"
    */
+
   template <typename Scalar>
-  class WolfeLineSearch {
+  class WeakWolfeLineSearch {
+  
+    Scalar m_c1        = Scalar(1e-4);
+    Scalar m_c2        = Scalar(0.1);      // Weak curvature - allows longer steps
+    Scalar m_alpha_max = Scalar(50.0);
+    Scalar m_alpha_min = Scalar(1e-12);
+    Scalar w_shrink    = Scalar(0.1);
+    size_t m_max_iters = 40;
+    size_t m_max_evals = 150;
+
+    template <typename EvalFunc>
+    std::optional<Scalar> zoom(
+      Scalar a_lo, Scalar f_lo, Scalar Df_lo,
+      Scalar a_hi, Scalar f_hi, Scalar Df_hi,
+      EvalFunc const& eval, Scalar f0, Scalar Df0, 
+      Scalar c1_Df0, Scalar c2_condition
+    ) const {
+        
+      Scalar a_j, f_j, Df_j;
+
+      for (size_t iter = 0; iter < m_max_iters; ++iter) {
+        // Prefer quadratic interpolation for weak Wolfe
+        if (m_use_quadratic_interp && Df_lo != 0) {
+          a_j = a_lo - (a_lo - a_hi) * Df_lo / (Df_lo - (f_hi - f_lo)/(a_hi - a_lo));
+                
+          // Safeguard
+          Scalar low_bound  = a_lo + w_shrink * (a_hi - a_lo);
+          Scalar high_bound = a_hi - w_shrink * (a_hi - a_lo);
+                
+          if (a_j <= low_bound || a_j >= high_bound) {
+            a_j = (a_lo + a_hi) / 2;
+          }
+        } else {
+          a_j = (a_lo + a_hi) / 2;
+        }
+
+        eval(a_j, f_j, Df_j);
+
+        // Update bracket
+        if (f_j > f0 + a_j * c1_Df0 || f_j >= f_lo) {
+          a_hi = a_j;
+          f_hi = f_j;
+          Df_hi = Df_j;
+        } else {
+          // Armijo satisfied, check weak curvature
+          if (Df_j >= c2_condition) return a_j;
+
+          // Update lower bound
+          if (Df_j * (a_hi - a_lo) >= 0) a_hi = a_lo;
+          a_lo = a_j;
+          f_lo = f_j;
+          Df_lo = Df_j;
+        }
+
+        if (std::abs(a_hi - a_lo) < m_alpha_min) return a_j;
+      }
+      return std::nullopt;
+    }
+  
+  public:
+  
     using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
-    Scalar m_c1        = 1e-4;  ///< Armijo constant
-    Scalar m_c2        = 0.9;   ///< Curvature constant
-    Scalar m_alpha_max = 10;    ///< Maximum step length
-    Scalar m_epsi      = 1e-12; ///< Convergence tolerance for interval
-    size_t m_max_iters = 50;    ///< Maximum total iterations
+    WeakWolfeLineSearch() {}
     
-    mutable Vector m_g_new, m_x_new;  ///< Workspace vectors
-    
-  public:
+    // Adaptive step control
+    Scalar m_extrapolation_factor = Scalar(2.2);
+    bool m_use_quadratic_interp = true;
 
-    /**
-     * @brief Perform Wolfe conditions line search
-     *
-     * @tparam Callback Function type: Scalar(Vector const&, Vector*)
-     *                  Must compute both f and ∇f when gradient pointer is non-null
-     *
-     * @param f0 Function value at x
-     * @param Df0 Directional derivative ∇f(x)^T d (must be < 0)
-     * @param x Current point
-     * @param d Search direction
-     * @param callback Function/gradient evaluator
-     * @param alpha0 Initial step length (default: 1.0)
-     *
-     * @return Step length satisfying Wolfe conditions, or std::nullopt if failed
-     *
-     * @pre Df0 < 0 (d must be descent direction)
-     */
+    mutable Vector m_g_new, m_x_new;
+
     template <typename Callback>
     std::optional<Scalar>
-    operator()(
-      Scalar           f0,
-      Scalar           Df0,
-      Vector   const & x,
-      Vector   const & d,
-      Callback const & callback,
-      Scalar           alpha0 = 1
-    ) const {
+    operator() (
+      Scalar f0, Scalar Df0, Vector const& x, Vector const& d,
+      Callback const& callback, Scalar alpha0 = Scalar(1)) const {
+      
+      if (Df0 >= 0) return std::nullopt;
 
-      if ( !(Df0 < 0) ) return std::nullopt;
-      m_g_new.resize( x.size() );
-      m_x_new.resize( x.size() );
+      m_g_new.resize(x.size());
+      m_x_new.resize(x.size());
       size_t evals = 0;
 
-      auto eval = [&]( Scalar a, Scalar & f, Scalar & df ) {
+      auto eval = [&](Scalar a, Scalar& f, Scalar& df) {
         ++evals;
         m_x_new.noalias() = x + a * d;
-        f  = callback( m_x_new, &m_g_new );
+        f  = callback(m_x_new, &m_g_new);
         df = m_g_new.dot(d);
       };
+
+      Scalar c1_Df0 = m_c1 * Df0;
       
-      Scalar c1_Df0{ m_c1 * Df0 };
-      Scalar c2_Df0{ m_c2 * Df0 };
+      // KEY DIFFERENCE: Weak Wolfe uses der >= c2 * Df0 (not absolute value)
+      Scalar c2_condition = m_c2 * Df0;
 
-      // Initial trial
-      Scalar alpha = alpha0;
-      Scalar phi, der;
-      eval( alpha, phi, der );
-
-      // Check if immediately acceptable
-      if ( phi <= f0 + alpha * c1_Df0 && der >= c2_Df0 ) return alpha;
-
-      Scalar alpha_lo   = 0;
-      Scalar phi_lo     = f0;
-      Scalar der_lo     = Df0;
-
-      Scalar alpha_hi   = 0;
-      Scalar phi_hi     = 0;
-      Scalar der_hi     = 0;
-
-      bool   bracketed  = false;
+      Scalar alpha      = alpha0;
       Scalar alpha_prev = 0;
       Scalar phi_prev   = f0;
       Scalar der_prev   = Df0;
 
-      // === Bracketing Phase ===
-      while ( evals < m_max_iters ) {
-        if ( (phi > f0 + alpha*c1_Df0) || (evals > 1 && phi >= phi_prev) ) {
-          alpha_lo  = alpha_prev;
-          phi_lo    = phi_prev;
-          der_lo    = der_prev;
+      Scalar phi, der;
+      eval(alpha, phi, der);
 
-          alpha_hi  = alpha;
-          phi_hi    = phi;
-          der_hi    = der;
+      // Check weak Wolfe conditions
+      if (phi <= f0 + alpha * c1_Df0 && der >= c2_condition) return alpha;
 
-          bracketed = true;
-          break;
+      // Simple bracketing with more aggressive extrapolation
+      for (size_t iter = 0; iter < m_max_iters && evals < m_max_evals; ++iter) {
+            
+        // Armijo condition failed or function not decreasing
+        if (phi > f0 + alpha * c1_Df0 || (iter > 0 && phi >= phi_prev)) {
+          return zoom(alpha_prev, phi_prev, der_prev, alpha, phi, der, eval, f0, Df0, c1_Df0, c2_condition);
         }
 
-        if ( der >= c2_Df0 ) return alpha;
+        // Weak curvature satisfied
+        if (der >= c2_condition) return alpha;
 
-        if ( der >= 0 ) {
-          alpha_lo  = alpha_prev;
-          phi_lo    = phi_prev;
-          der_lo    = der_prev;
+        // Positive gradient - we've passed a minimum
+        if (der >= 0) return zoom(alpha_prev, phi_prev, der_prev, alpha, phi, der, eval, f0, Df0, c1_Df0, c2_condition);
 
-          alpha_hi  = alpha;
-          phi_hi    = phi;
-          der_hi    = der;
-
-          bracketed = true;
-          break;
-        }
-
-        Scalar new_alpha = min( 2 * alpha, m_alpha_max);
+        // Extrapolate more aggressively
         alpha_prev = alpha;
-        phi_prev   = phi;
-        der_prev   = der;
-        alpha      = new_alpha;
-        eval(alpha, phi, der );
+        phi_prev = phi;
+        der_prev = der;
 
-        if ( phi <= f0 + alpha * c1_Df0 && der >= c2_Df0 ) return alpha;
+        Scalar alpha_new = alpha * m_extrapolation_factor;
+        if (alpha_new > m_alpha_max) alpha_new = m_alpha_max;
+
+        // Prevent tiny increments
+        if (alpha_new - alpha < m_alpha_min) return zoom(alpha_prev, phi_prev, der_prev, alpha, phi, der, eval, f0, Df0, c1_Df0, c2_condition);
+
+        alpha = alpha_new;
+        eval(alpha, phi, der);
+
+        // Check if we got lucky with extrapolation
+        if (phi <= f0 + alpha * c1_Df0 && der >= c2_condition) return alpha;
       }
-
-      if (!bracketed) return std::nullopt;
-
-      // === Zoom Phase ===
-      while ( evals < m_max_iters ) {
-        Scalar a_j  = abs(alpha_hi - alpha_lo) > m_epsi ?
-                      detail::cubic_minimizer<Scalar>( alpha_lo, phi_lo, der_lo, alpha_hi, phi_hi, der_hi ) :
-                      (alpha_lo + alpha_hi) / 2;
-
-        Scalar phi_j, der_j;
-        eval(a_j,phi_j, der_j);
-
-        if ( (phi_j > f0 + a_j * c1_Df0) || (phi_j >= phi_lo) ) {
-          alpha_hi = a_j;
-          phi_hi   = phi_j;
-          der_hi   = der_j;
-        } else {
-          if ( der_j >= c2_Df0 ) return a_j;
-
-          if ( der_j * (alpha_hi - alpha_lo) >= 0 ) {
-            alpha_hi = alpha_lo;
-            phi_hi   = phi_lo;
-            der_hi   = der_lo;
-          }
-
-          alpha_lo = a_j;
-          phi_lo   = phi_j;
-          der_lo   = der_j;
-        }
-
-        if ( abs(alpha_hi - alpha_lo) < m_epsi ) return a_j;
-      }
-
       return std::nullopt;
     }
   };
@@ -1902,7 +1891,6 @@ namespace Utils {
       FAILED             = 4  // Fallimento generico
     };
 
-    // AGGIUNTE: Strutture per raccogliere i risultati
     struct IterationData {
       Status status{Status::FAILED};
       size_t iterations{0};
@@ -1915,77 +1903,114 @@ namespace Utils {
     };
 
     struct Options {
-      size_t max_iter        { 200   };
-      size_t iter_reset      { 50    };
-      size_t m               { 20    };
+      size_t max_iter        {200};
+      size_t iter_reset      {50};
+      size_t m               {20};
 
-      Scalar g_tol           { 1e-8  };
-      Scalar f_tol           { 1e-12 };
-      Scalar x_tol           { 1e-10 };
+      Scalar g_tol           {1e-8};
+      Scalar f_tol           {1e-12};
+      Scalar x_tol           {1e-10};
       
-      Scalar step_max        { 1     };
-      Scalar sty_min_factor  { 1e-12  }; // Più permissivo
-      Scalar very_small_step { 1e-8  };
+      Scalar step_max        {10};
+      Scalar sty_min_factor  {1e-12};
+      Scalar very_small_step {1e-8};
 
-      bool   use_projection  { false };
-      bool   verbose         { false };
+      bool   use_projection  {false};
+      bool   verbose         {false};
     };
 
   private:
 
-    Scalar        m_epsi{ 1e-15 };
+    Scalar        m_epsi{std::numeric_limits<Scalar>::epsilon()};
     Options       m_options;
     LBFGS<Scalar> m_LBFGS;
     Vector        m_lower;
     Vector        m_upper;
+    Vector        m_tol_lower;
+    Vector        m_tol_upper;
 
-    // project x into bounds
+    // Helper functions for bound checks with tolerances
+    bool
+    is_on_lower_bound(Scalar x_i, Scalar lower_i) const {
+      return (x_i <= lower_i + m_epsi * (1 + std::abs(lower_i)));
+    }
+
+    bool
+    is_on_upper_bound(Scalar x_i, Scalar upper_i) const {
+      return (x_i >= upper_i - m_epsi * (1 + std::abs(upper_i)));
+    }
+
     void
-    project_inplace( Vector & x ) const
-    { x = x.cwiseMax(m_lower).cwiseMin(m_upper); }
+    check_bounds_consistency() const {
+      if (m_options.use_projection && (m_lower.array() > m_upper.array()).any()) {
+        throw std::invalid_argument("Lower bounds must be <= upper bounds");
+      }
+    }
+
+    // Project x into bounds
+    void
+    project_inplace(Vector & x) const {
+      x = x.cwiseMax(m_lower).cwiseMin(m_upper);
+    }
 
     Vector
-    projected_gradient( Vector const & x, Vector const & g ) const {
-      auto freeze = ((x.array() <= m_lower.array()) && (g.array() >= 0)) ||
-                    ((x.array() >= m_upper.array()) && (g.array() <= 0));
-      return freeze.select(Vector::Zero(g.size()), g);
+    projected_gradient(Vector const & x, Vector const & g) const {
+      Vector result = g;
+      projected_gradient_inplace(x, result);
+      return result;
     }
 
     void
-    projected_gradient_inplace( Vector const & x, Vector & g ) const {
-      auto freeze = ((x.array() <= m_lower.array()) && (g.array() >= 0)) ||
-                    ((x.array() >= m_upper.array()) && (g.array() <= 0));
-      g = freeze.select(Vector::Zero(g.size()), g);
+    projected_gradient_inplace(Vector const & x, Vector & g) const {
+      
+      // Crea maschere booleane per le condizioni
+      auto on_lower_bound = (x.array() <= (m_lower.array() + m_tol_lower.array()));
+      auto on_upper_bound = (x.array() >= (m_upper.array() - m_tol_upper.array()));
+      auto grad_pointing_out_lower = (g.array() < 0);
+      auto grad_pointing_out_upper = (g.array() > 0);
+      
+      // Combina le condizioni e azzera i gradienti appropriati
+      auto freeze_mask = (on_lower_bound && grad_pointing_out_lower) || 
+                         (on_upper_bound && grad_pointing_out_upper);
+      
+      g = freeze_mask.select(Vector::Zero(g.size()), g);
     }
 
-    void
-    projected_direction_inplace( Vector const & x, Vector & d ) const {
-      auto freeze = ((x.array() <= m_lower.array()) && (d.array() < 0)) ||
-                    ((x.array() >= m_upper.array()) && (d.array() > 0));
-      d = freeze.select(Vector::Zero(d.size()), d);
+    void projected_direction_inplace(Vector const & x, Vector & d) const {
+      // Crea maschere booleane per le condizioni
+      auto on_lower_bound = (x.array() <= (m_lower.array() + m_tol_lower.array()));
+      auto on_upper_bound = (x.array() >= (m_upper.array() - m_tol_upper.array()));
+      auto dir_pointing_out_lower = (d.array() < 0);
+      auto dir_pointing_out_upper = (d.array() > 0);
+        
+      // Combina le condizioni e azzera le direzioni inappropriate
+      auto freeze_mask = (on_lower_bound && dir_pointing_out_lower) ||
+                         (on_upper_bound && dir_pointing_out_upper);
+        
+      d = freeze_mask.select(Vector::Zero(d.size()), d);
     }
 
-    Scalar
-    projected_gradient_norm( Vector const & x, Vector const & g ) const {
-      auto freeze = ((x.array() <= m_lower.array()) && (g.array() >= 0)) ||
-                    ((x.array() >= m_upper.array()) && (g.array() <= 0));
-      return freeze.select(Vector::Zero(g.size()), g)
-                   .array()
-                   .abs()
-                   .maxCoeff();
+    Scalar projected_gradient_norm(Vector const & x, Vector const & g) const {
+      return projected_gradient(x, g).template lpNorm<Eigen::Infinity>();
     }
 
+    // Helper function for descent direction validation
+    bool
+    is_valid_descent_direction(Scalar pg) const {
+      if (!std::isfinite(pg)) return false;
+      if (pg >= -m_epsi * (1 + std::abs(pg))) return false;
+      return true;
+    }
+
+    // Mutable state variables
     mutable Vector m_x, m_g, m_p, m_x_new, m_g_new, m_s, m_y;
     mutable size_t m_iter_since_reset{0};
-
-    // AGGIUNTE: Contatori per statistiche
     mutable size_t m_function_evaluations{0};
     mutable size_t m_gradient_evaluations{0};
     mutable size_t m_line_search_iterations{0};
 
   public:
-
-    LBFGS_minimizer( Options opts = Options() )
+    LBFGS_minimizer(Options opts = Options())
     : m_options(opts)
     , m_LBFGS(opts.m)
     {}
@@ -1993,81 +2018,94 @@ namespace Utils {
     Vector const & solution() const { return m_x; }
 
     void
-    set_bounds( Vector const & lower, Vector const & upper ) {
-      assert( lower.size() == upper.size() );
-      m_lower = lower;
-      m_upper = upper;
+    set_bounds(size_t n, Scalar const lower[], Scalar const upper[]) {
+      m_lower.resize(n);
+      m_upper.resize(n);
+      std::copy_n(lower, n, m_lower.data());
+      std::copy_n(upper, n, m_upper.data());
+
+      m_tol_lower.resize(n);
+      m_tol_upper.resize(n);
+  
+      // Calcola tolleranze vettoriali
+      m_tol_lower = m_epsi * (Vector::Ones(n).array() + m_lower.array().abs());
+      m_tol_upper = m_epsi * (Vector::Ones(n).array() + m_upper.array().abs());
+
       m_options.use_projection = true;
+      check_bounds_consistency();
     }
 
     void
-    set_bounds( size_t n, Scalar const lower[], Scalar const upper[] ) {
-      m_lower.resize( n );
-      m_upper.resize( n );
-      std::copy_n( lower, n, m_lower.data() );
-      std::copy_n( upper, n, m_upper.data() );
-      m_options.use_projection = true;
+    set_bounds(Vector const & lower, Vector const & upper) {
+      assert(lower.size() == upper.size());
+      set_bounds( lower.size(), lower.data(), upper.data() );
     }
 
     void
     reset_memory() {
-      if ( m_options.verbose ) fmt::print("[LBFGS] Periodic memory reset\n");
+      if (m_options.verbose) fmt::print("[LBFGS] Periodic memory reset\n");
       m_LBFGS.clear();
       m_iter_since_reset = 0;
     }
 
     template <typename Linesearch>
-    IterationData
-    minimize(
+    IterationData minimize(
       Vector     const & x0,
       Callback   const & callback,
       Linesearch const & linesearch = MoreThuenteLineSearch<Scalar>()
     ) {
-      
-      Status status { Status::MAX_ITERATIONS };
-      Scalar gnorm  { 0 };
+      Status status{Status::MAX_ITERATIONS};
+      Scalar gnorm{0};
 
-      // AGGIUNTA: Reset contatori
-      m_function_evaluations = 0;
-      m_gradient_evaluations = 0;
+      // Reset counters
+      m_function_evaluations   = 0;
+      m_gradient_evaluations   = 0;
       m_line_search_iterations = 0;
 
-      auto const n{ x0.size() };
-      m_x.resize(n);     m_g.resize(n);
-      m_x_new.resize(n); m_g_new.resize(n);
-      m_p.resize(n);     m_s.resize(n); m_y.resize(n);
-      
-      if ( m_options.use_projection ) {
-        assert( m_lower.size() == n );
-        assert( m_upper.size() == n );
+      auto const n{x0.size()};
+      m_x.resize(n);
+      m_g.resize(n);
+      m_x_new.resize(n);
+      m_g_new.resize(n);
+      m_p.resize(n);
+      m_s.resize(n);
+      m_y.resize(n);
+
+      if (m_options.use_projection) {
+        assert(m_lower.size() == n);
+        assert(m_upper.size() == n);
+        check_bounds_consistency();
       }
 
+      // Initialize and project if needed
       m_x.noalias() = x0;
-      if ( m_options.use_projection ) project_inplace(m_x);
+      if (m_options.use_projection) project_inplace(m_x);
       
+      // Initial evaluation
       Scalar f = callback(m_x, &m_g);
       m_function_evaluations++;
       m_gradient_evaluations++;
-      
-      Scalar f_prev{ f };
-      Vector x_prev    = m_x;
-      Scalar step_prev = 0;
+        
+      Scalar f_prev{f};
+      Vector x_prev = m_x;
+      Scalar step_prev = 1.0;
 
-      // AGGIUNTA: Salva valore iniziale
       Scalar f_initial = f;
-      size_t iteration{ 0 };
+      size_t iteration{0};
       bool converged = false;
 
-      for (; iteration < m_options.max_iter && !converged; ++iteration ) {
+      // Main optimization loop
+      for (; iteration < m_options.max_iter && !converged; ++iteration) {
         ++m_iter_since_reset;
-        
-        // Check per stagnazione
-        if ( iteration > 0 ) {
+            
+        // Check for stagnation in variables
+        if (iteration > 0) {
           Scalar x_change = (m_x - x_prev).norm();
-          if ( x_change < step_prev*m_options.x_tol ) {
-            if ( m_options.verbose )
-              fmt::print("[LBFGS] Converged by x change: {:.2e} < {:.2e}\n", x_change, m_options.x_tol);
-            gnorm  = projected_gradient_norm(m_x, m_g);
+          Scalar x_scale = std::max(Scalar(1), m_x.norm());
+          if (x_change < m_options.x_tol * x_scale) {
+            if (m_options.verbose)
+              fmt::print("[LBFGS] Converged by x change: {:.2e} < {:.2e}\n", x_change, m_options.x_tol * x_scale);
+            gnorm = projected_gradient_norm(m_x, m_g);
             status = Status::CONVERGED;
             converged = true;
             break;
@@ -2075,132 +2113,156 @@ namespace Utils {
         }
         x_prev = m_x;
 
+        // Check gradient norm
         gnorm = projected_gradient_norm(m_x, m_g);
-        if ( m_options.verbose )
+        if (m_options.verbose)
           fmt::print("[LBFGS] iter={:3d} f={:12.4g} ‖pg‖={:12.4g} mem={}\n", iteration, f, gnorm, m_LBFGS.size());
-        
-        if ( gnorm <= m_options.g_tol ) {
+
+        if (gnorm <= m_options.g_tol) {
           status = Status::GRADIENT_TOO_SMALL;
           converged = true;
           break;
         }
 
-        // Reset periodico della memoria ogni iter_reset iterazioni
-        if ( m_iter_since_reset > m_options.iter_reset ) reset_memory();
+        // Periodic memory reset
+        if (m_iter_since_reset >= m_options.iter_reset) reset_memory();
 
-        // compute search direction
+        // Compute search direction using L-BFGS
         Scalar h0 = m_LBFGS.compute_initial_h0(1);
         m_p = -m_LBFGS.two_loop_recursion(m_g, h0);
 
-        if ( m_options.use_projection ) {
-          projected_direction_inplace( m_x, m_p );
-          if ( m_p.isZero() ) m_p = -projected_gradient(m_x, m_g);
+        // Project direction if bounds are active
+        if (m_options.use_projection) {
+          projected_direction_inplace(m_x, m_p);
+          if (m_p.isZero(m_epsi)) m_p = -projected_gradient(m_x, m_g);
         }
 
-        // Robust descent direction check
-        Scalar pg             = m_p.dot(m_g);
+        // Robust descent direction check with fallback strategies
+        Scalar pg = m_p.dot(m_g);
         size_t fallback_count = 0;
-        size_t max_fallback   = 3;
+        const size_t max_fallback = 3;
 
-        while ((!std::isfinite(pg) || pg >= -m_epsi) && fallback_count < max_fallback) {
-          if ( fallback_count == 0 ) {
+        while (!is_valid_descent_direction(pg) && fallback_count < max_fallback) {
+          if (fallback_count == 0) {
+            // Try projected gradient direction
             m_p = -projected_gradient(m_x, m_g);
-          } else if ( fallback_count == 1 ) {
+          } else if (fallback_count == 1) {
+            // Reset L-BFGS memory and try again
             m_LBFGS.clear();
-            h0  = m_LBFGS.compute_initial_h0(1);
+            h0 = m_LBFGS.compute_initial_h0(1);
             m_p = -m_LBFGS.two_loop_recursion(m_g, h0);
-            if ( m_options.use_projection ) projected_direction_inplace(m_x, m_p);
+            if (m_options.use_projection) projected_direction_inplace(m_x, m_p);
           } else {
-            m_p = -m_g / (1 + m_g.norm());
-            if ( m_options.use_projection ) projected_direction_inplace(m_x, m_p);
+            // Normalized gradient direction as last resort
+            m_p = -m_g / (m_g.norm() + m_epsi);
+            if (m_options.use_projection) projected_direction_inplace(m_x, m_p);
           }
           pg = m_p.dot(m_g);
           fallback_count++;
         }
 
-        if (!std::isfinite(pg) || pg >= -m_epsi) {
-          if ( m_options.verbose )
+        if (!is_valid_descent_direction(pg)) {
+          if (m_options.verbose)
             fmt::print("[LBFGS] Cannot find descent direction, stopping\n");
-          gnorm  = projected_gradient_norm(m_x, m_g);
+          gnorm = projected_gradient_norm(m_x, m_g);
           status = Status::FAILED;
           converged = true;
           break;
         }
 
         // Line search
-        auto step_opt = linesearch( f, pg, m_x, m_p, callback, m_options.step_max );
+        auto step_opt = linesearch(f, pg, m_x, m_p, callback, m_options.step_max);
         
         if (!step_opt.has_value()) {
-          if ( m_options.verbose )
-            fmt::print("[LBFGS] line search failed, resetting memory\n");
+          if (m_options.verbose)
+            fmt::print("[LBFGS] line search failed, trying fallback steps\n");
+
           m_LBFGS.clear();
-          // Prova con passo fisso piccolo
-          m_x_new.noalias() = m_x + m_options.very_small_step * m_p;
-          if ( m_options.use_projection ) project_inplace(m_x_new);
-          Scalar f_test = callback(m_x_new, &m_g_new);
-          m_function_evaluations++;
-          m_gradient_evaluations++;
+            
+          // Try progressively smaller fixed steps
+          bool fallback_success = false;
+          const std::array<Scalar, 3> fallback_steps = {
+            m_options.very_small_step,
+            m_options.very_small_step * Scalar(0.1),
+            m_options.very_small_step * Scalar(0.01)
+          };
+              
+          for (Scalar fallback_step : fallback_steps) {
+            m_x_new.noalias() = m_x + fallback_step * m_p;
+            if (m_options.use_projection) project_inplace(m_x_new);
+            Scalar f_test = callback(m_x_new, &m_g_new);
+            m_function_evaluations++;
+            m_gradient_evaluations++;
+              
+            if (f_test < f) {
+              m_s.noalias() = m_x_new - m_x;
+              m_y.noalias() = m_g_new - m_g;
+              m_x.swap(m_x_new);
+              m_g.swap(m_g_new);
+              f = f_test;
+              fallback_success = true;
+              break;
+            }
+          }
           
-          if (f_test < f) {
-            // Accetta comunque il passo
-            m_s.noalias() = m_x_new - m_x;
-            m_y.noalias() = m_g_new - m_g;
-            m_x.swap(m_x_new);
-            m_g.swap(m_g_new);
-            f = f_test;
-            continue;
-          } else {
-            gnorm  = projected_gradient_norm(m_x, m_g);
+          if (!fallback_success) {
+            gnorm = projected_gradient_norm(m_x, m_g);
             status = Status::LINE_SEARCH_FAILED;
             converged = true;
             break;
           }
+          continue;
         }
 
-        Scalar step = *step_opt; step_prev = step > 1 ? step : 1 ;
+        Scalar step = *step_opt;
+        step_prev = std::max(step, Scalar(1));
         
-        // evaluate final new point
+        // Evaluate new point
         m_x_new.noalias() = m_x + step * m_p;
-        if ( m_options.use_projection ) project_inplace(m_x_new);
+        if (m_options.use_projection) project_inplace(m_x_new);
         Scalar f_new = callback(m_x_new, &m_g_new);
         m_function_evaluations++;
         m_gradient_evaluations++;
 
-        // compute s,y
+        // Compute differences for L-BFGS update
         m_s.noalias() = m_x_new - m_x;
         m_y.noalias() = m_g_new - m_g;
 
-        // Robust curvature check
-        Scalar sty           = m_s.dot(m_y);
-        Scalar sty_tolerance = max( m_options.sty_min_factor, m_epsi * m_s.squaredNorm() * m_y.squaredNorm());
+        // Robust curvature check for L-BFGS update
+        Scalar sty = m_s.dot(m_y);
+        Scalar sty_tolerance = std::max(
+          m_options.sty_min_factor,
+          m_epsi * m_s.squaredNorm() * m_y.squaredNorm()
+        );
 
         if (sty > sty_tolerance) {
           m_LBFGS.add_correction(m_s, m_y);
         } else {
-          if ( m_options.verbose && m_LBFGS.size() > 0 ) fmt::print("[LBFGS] curvature condition failed (s^T y = {:.2e}), skipping update\n", sty);
-          // Non cancellare la memoria, procedi senza aggiornare
+          if (m_options.verbose && m_LBFGS.size() > 0)
+            fmt::print("[LBFGS] curvature condition failed (s^T y = {:.2e}), skipping update\n", sty);
         }
 
-        // move
+        // Move to new point
         m_x.swap(m_x_new);
         m_g.swap(m_g_new);
         f = f_new;
 
-        // check function change
-        Scalar f_change = abs(f - f_prev);
-        if ( f_change <= m_options.f_tol ) {
-          if ( m_options.verbose ) fmt::print("[LBFGS] Converged by function change: {:.2e} < {:.2e}\n", f_change, m_options.f_tol);
-          gnorm  = projected_gradient_norm(m_x, m_g);
+        // Check function value change
+        Scalar f_change = std::abs(f - f_prev);
+        Scalar f_scale = std::max(Scalar(1), std::abs(f_prev));
+        if (f_change <= m_options.f_tol * f_scale) {
+          if (m_options.verbose)
+            fmt::print("[LBFGS] Converged by function change: {:.2e} < {:.2e}\n", f_change, m_options.f_tol * f_scale);
+          gnorm = projected_gradient_norm(m_x, m_g);
           status = Status::CONVERGED;
           converged = true;
           break;
         }
         f_prev = f;
       }
-      
-      if (!converged) {
-        gnorm = projected_gradient_norm(m_x, m_g);
-      }
+        
+      // Final gradient norm if not converged
+      if (!converged) gnorm = projected_gradient_norm(m_x, m_g);
 
       return IterationData{
         status,
