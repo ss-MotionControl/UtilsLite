@@ -20,6 +20,18 @@
 //
 // file: Utils_SPSA.hh
 //
+// Implementation of Stochastic Optimization Algorithms using Simultaneous
+// Perturbation Stochastic Approximation (SPSA) with convergence improvements.
+//
+// Main references:
+// - Spall, J. C. (1998). Implementation of the simultaneous perturbation 
+//   algorithm for stochastic optimization. IEEE Transactions on Aerospace and
+//   Electronic Systems.
+// - Spall, J. C. (2000). Adaptive stochastic approximation by the simultaneous
+//   perturbation method. IEEE Transactions on Automatic Control.
+// - Spall, J. C. (2003). Introduction to stochastic search and optimization.
+//   John Wiley & Sons.
+//
 
 #pragma once
 
@@ -72,72 +84,91 @@ namespace Utils {
   using std::max;
   using std::sqrt;
   using std::pow;
+  
+  #if 0
 
   /**
    * @class SPSAGradientEstimator
-   * @brief Stima del gradiente usando Simultaneous Perturbation Stochastic Approximation
+   * @brief Gradient estimation using Simultaneous Perturbation Stochastic Approximation
    * 
-   * Questa classe implementa l'algoritmo SPSA per stimare il gradiente di una funzione
-   * usando solo valutazioni della funzione stessa, senza bisogno di gradienti analitici.
-   * L'algoritmo è particolarmente utile per ottimizzazione di funzioni costose o non differenziabili.
+   * This class implements the SPSA algorithm for estimating the gradient of a function
+   * using only function evaluations, without needing analytical gradients.
+   * The algorithm is particularly useful for optimizing expensive or non-differentiable functions.
    * 
-   * @tparam Scalar Tipo dei dati (double, float, etc.)
+   * The method is based on the formula:
+   * \f[
+   * g_i \approx \frac{f(x + c \odot \Delta) - f(x - c \odot \Delta)}{2 c_i \Delta_i}
+   * \f]
+   * where \f$\Delta\f$ is a random perturbation vector and \f$c\f$ is the amplitude vector.
+   * 
+   * References:
+   * - Spall, J. C. (1998). Implementation of the simultaneous perturbation 
+   *   algorithm for stochastic optimization. IEEE Transactions on Aerospace and Electronic Systems.
+   * - Spall, J. C. (2000). Adaptive stochastic approximation by the simultaneous
+   *   perturbation method. IEEE Transactions on Automatic Control.
+   * 
+   * @tparam Scalar Data type (double, float, etc.)
    */
   template <typename Scalar = double>
   class SPSAGradientEstimator {
   public:
-    using Vector   = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>; ///< Tipo vettore
-    using Callback = std::function<Scalar(Vector const &, Vector *)>; ///< Tipo callback funzione
+    using Vector   = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>; ///< Vector type
+    using Callback = std::function<Scalar(Vector const &)>;    ///< Function callback type
 
     /**
      * @struct Options
-     * @brief Opzioni per lo stimatore del gradiente SPSA
+     * @brief Options for SPSA gradient estimator
      */
     struct Options {
-      size_t   repeats            = 10;            ///< Numero di ripetizioni per la media del gradiente
-      Scalar   c_base             = Scalar(1e-3);  ///< Ampiezza base di perturbazione
-      Vector   c_per_component;                    ///< Ampiezze specifiche per componente (se vuoto usa c_base)
-      bool     use_rademacher     = true;          ///< True per noise ±1, false per gaussiano N(0,1)
-      bool     apply_precond      = false;         ///< Applica precondizionamento diagonale
-      Vector   preconditioner;                     ///< Vettore pesi per precondizionamento
-      unsigned int rng_seed       = std::random_device{}(); ///< Seed per generatore random
-      Scalar   min_delta_abs      = Scalar(1e-12); ///< Valore minimo per evitare divisioni per zero
-      bool     allow_gradient_arg = false;         ///< Se true, callback può ricevere gradiente output
+      size_t   repeats            = 10;            ///< Number of repetitions for gradient averaging
+      Scalar   c_base             = Scalar(1e-3);  ///< Base perturbation amplitude
+      Vector   c_per_component;                    ///< Component-specific amplitudes (if empty, use c_base)
+      bool     use_rademacher     = true;          ///< True for ±1 noise, false for Gaussian N(0,1)
+      bool     apply_precond      = true;         ///< Apply diagonal preconditioning
+      Vector   preconditioner;                     ///< Preconditioner weights vector
+      unsigned int rng_seed       = std::random_device{}(); ///< Random generator seed
+      Scalar   min_delta_abs      = Scalar(1e-12); ///< Minimum value to avoid division by zero
     };
 
   private:
-    Options m_opts; ///< Opzioni configurate
-    Vector  m_tmp_grad; ///< Buffer temporaneo per gradienti
+    Options m_opts; ///< Configured options
+    Vector  m_tmp_grad; ///< Temporary buffer for gradients
 
   public:
 
     /**
-     * @brief Costruttore
-     * @param opts Opzioni per lo stimatore
+     * @brief Constructor
+     * @param opts Options for the estimator
      */
     SPSAGradientEstimator(Options opts = Options())
     : m_opts(std::move(opts))
     {}
 
     /**
-     * @brief Stima il gradiente nel punto x usando SPSA
+     * @brief Estimate gradient at point x using SPSA
      * 
-     * L'algoritmo stima il gradiente usando la formula:
-     * g_i ≈ [f(x + c*Δ) - f(x - c*Δ)] / (2 * c_i * Δ_i)
+     * The algorithm estimates the gradient using the formula:
+     * \f[
+     * g_i \approx \frac{f(x + c \odot \Delta) - f(x - c \odot \Delta)}{2 c_i \Delta_i}
+     * \f]
      * 
-     * dove Δ è un vettore di perturbazione casuale (±1 o gaussiano).
+     * where \f$\Delta\f$ is a random perturbation vector (±1 or Gaussian) and
+     * \f$\odot\f$ denotes component-wise product.
      * 
-     * @param x Punto in cui stimare il gradiente
-     * @param f Funzione obiettivo
-     * @param out_grad Gradiente stimato (output)
-     * @return Numero di valutazioni di funzione effettuate
+     * The method is particularly efficient for expensive functions since it requires
+     * only 2 function evaluations regardless of problem dimensionality.
+     * 
+     * @param x Point at which to estimate gradient
+     * @param f Objective function
+     * @param out_grad Estimated gradient (output)
+     * @return Number of function evaluations performed
      */
     size_t
     estimate( Vector const & x, Callback const & f, Vector & out_grad ) {
       size_t const n = static_cast<size_t>(x.size());
       assert(n > 0);
 
-      // prepara c_i
+      // Prepare c_i
       Vector c;
       if ( m_opts.c_per_component.size() == 0 ) {
         c = Vector::Constant( n, m_opts.c_base );
@@ -146,7 +177,7 @@ namespace Utils {
         c = m_opts.c_per_component;
       }
 
-      // preconditioner
+      // Preconditioner
       if ( m_opts.apply_precond ) assert( m_opts.preconditioner.size() == n );
 
       out_grad.setZero(n);
@@ -166,48 +197,48 @@ namespace Utils {
 
       for ( size_t rep{0}; rep < m_opts.repeats; ++rep ) {
 
-        // sample delta
+        // Sample delta
         if ( m_opts.use_rademacher ) {
           for ( size_t i{0}; i < n; ++i )
             delta[i] = (rademacher_dist(rng) ? Scalar(1) : Scalar(-1));
         } else {
           for ( size_t i{0}; i < n; ++i ) {
             Scalar d = gaussian_dist(rng);
-            // prevenzione di delta troppo piccolo (rare per gauss, ma utile)
+            // Prevent too small delta (rare for Gaussian, but useful)
             if ( abs(d) < m_opts.min_delta_abs )
               d = std::copysign( m_opts.min_delta_abs, d == 0 ? Scalar(1) : d );
             delta[i] = d;
           }
         }
 
-        // costruisci x± = x ± c .* delta
+        // Construct x± = x ± c .* delta
         x_plus  = x + c.cwiseProduct(delta);
         x_minus = x - c.cwiseProduct(delta);
 
-        // valuta funzione (notare: passiamo nullptr per gradient output; callback può ignorare secondo opzione)
-        y_plus  = f(x_plus,  m_opts.allow_gradient_arg ? &m_tmp_grad : nullptr);
-        y_minus = f(x_minus, m_opts.allow_gradient_arg ? &m_tmp_grad : nullptr);
+        // Evaluate function (note: we pass nullptr for gradient output; callback can ignore second argument)
+        y_plus  = f(x_plus);
+        y_minus = f(x_minus);
         eval_count += 2;
 
-        // aggiorna stima: g_i += (y+ - y-) / (2 * c_i * delta_i)
-        const Scalar denom_factor = Scalar(0.5); // we'll multiply by (y+ - y-) * 0.5 / (c_i * delta_i)
+        // Update estimate: g_i += (y+ - y-) / (2 * c_i * delta_i)
+        const Scalar denom_factor = Scalar(0.5); // Multiply by (y+ - y-) * 0.5 / (c_i * delta_i)
         Scalar diff = (y_plus - y_minus);
 
         for (size_t i{0}; i < n; ++i) {
           Scalar di = delta[i];
-          // sicurezza: se delta molto vicino a zero (solo possibile con gauss), salta o usa fallback
+          // Safety: if delta very close to zero (only possible with Gaussian), skip or use fallback
           if (std::abs(di) < m_opts.min_delta_abs) {
-            // fallback: ignora contributo di questa ripetizione per la componente i
+            // Fallback: ignore contribution of this repetition for component i
             continue;
           }
           out_grad[i] += diff * (denom_factor / (c[i] * di));
         }
       } // end repeats
 
-      // media
+      // Average
       out_grad /= static_cast<Scalar>(m_opts.repeats);
 
-      // applica precondizionamento (se richiesto): semplicemente scala componente-wise
+      // Apply preconditioning (if requested): simply scale component-wise
       if (m_opts.apply_precond) {
         out_grad = out_grad.cwiseProduct(m_opts.preconditioner);
       }
@@ -218,91 +249,112 @@ namespace Utils {
     Options const & options() const { return m_opts; }
     Options & options() { return m_opts; }
   };
+  
+  #endif
 
   /**
    * @class SPSA_minimizer
-   * @brief Minimizzatore che usa Simultaneous Perturbation Stochastic Approximation
+   * @brief Minimizer using Simultaneous Perturbation Stochastic Approximation
    * 
-   * Implementa l'algoritmo SPSA per ottimizzazione senza gradienti. Particolarmente
-   * efficace per problemi ad alta dimensionalità o con funzioni obiettivo rumorose.
+   * Implements the SPSA algorithm for gradient-free optimization. Particularly
+   * effective for high-dimensional problems or noisy objective functions.
    * 
-   * L'algoritmo principale combina:
-   * - Stima del gradiente via SPSA
-   * - Discesa stocastica con learning rate adattivo
-   * - Gestione di vincoli box via clipping
-   * - Strategie di robustezza (backtracking, restart)
+   * The main algorithm combines:
+   * - Gradient estimation via SPSA
+   * - Stochastic descent with adaptive learning rate
+   * - Box constraints handling via clipping
+   * - Robustness strategies (backtracking, restart, convergence monitoring)
    * 
-   * @tparam Scalar Tipo dei dati (double, float, etc.)
+   * Key features:
+   * - Efficient for high-dimensional problems (requires only 2 function evaluations per iteration)
+   * - Robust to noise in function evaluations
+   * - Supports box constraints through projection
+   * - Implements adaptive learning rate strategies
+   * - Convergence monitoring with multiple criteria
+   *
+   * References:
+   * - Spall, J. C. (1998). Implementation of the simultaneous perturbation 
+   *   algorithm for stochastic optimization. IEEE Transactions on Aerospace and Electronic Systems.
+   * - Spall, J. C. (2000). Adaptive stochastic approximation by the simultaneous
+   *   perturbation method. IEEE Transactions on Automatic Control.
+   * - Spall, J. C. (2003). Introduction to stochastic search and optimization.
+   *   John Wiley & Sons.
+   * 
+   * @tparam Scalar Data type (double, float, etc.)
    */
   template <typename Scalar = double>
   class SPSA_minimizer {
   public:
   
-    using Vector   = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>; ///< Tipo vettore
-    using Callback = std::function<Scalar(Vector const&, Vector*)>; ///< Tipo callback funzione
-  
-    /**
-     * @enum Variant
-     * @brief Varianti dell'algoritmo SPSA
-     */
-    enum class Variant {
-      BASIC,        ///< SPSA classica
-      RADA,         ///< Usa noise Rademacher (±1)
-      SECOND_ORDER, ///< SPSA del secondo ordine
-      PRECOND,      ///< SPSA precondizionata
-      ADAPTIVE      ///< SPSA con passi adattivi
-    };
+    using Vector   = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>; ///< Vector type
+    using Callback = std::function<Scalar(Vector const&)>; ///< Function callback type
   
     /**
      * @struct Options
-     * @brief Opzioni per il minimizzatore SPSA
+     * @brief Options for SPSA minimizer
      */
     struct Options {
-      size_t max_iter      {500};          ///< Iterazioni massime (AUMENTATO per robustezza)
-      size_t gradient_avg  {1};            ///< Medie SPSA per gradiente
-      Scalar a0            {0.3};          ///< Learning rate base (AUMENTATO per velocità)
-      Scalar c0            {0.05};         ///< Ampiezza perturbazioni (AUMENTATO)
-      Scalar alpha         {0.602};        ///< Esponente decay learning rate (standard SPSA)
-      Scalar gamma         {0.101};        ///< Esponente decay perturbazioni (standard SPSA)
-      Variant variant      {Variant::ADAPTIVE}; ///< Variante (MODIFICATO per robustezza)
-      bool   use_projection{true};         ///< Abilita proiezione sui bounds
-      bool   verbose       {false};        ///< Output verboso
+      size_t  max_iter          { 1000  }; ///< Maximum iterations
+      size_t  gradient_avg      { 2     }; ///< SPSA averages for gradient (reduces variance)
+      Scalar  a0                { 0.3   }; ///< Base learning rate
+      Scalar  c0                { 0.05  }; ///< Perturbation amplitude
+      Scalar  alpha             { 0.602 }; ///< Learning rate decay exponent (standard SPSA)
+      Scalar  gamma             { 0.101 }; ///< Perturbation decay exponent (standard SPSA)
+      bool    use_projection    { true  }; ///< Enable projection to bounds
+      bool    verbose           { false }; ///< Verbose output
+      size_t  print_every       { 100   };
+
+      // Convergence criteria
+      Scalar  tol_grad          { 1e-8  }; ///< Gradient norm tolerance
+      size_t  tol_grad_patience { 10    }; ///< Iterations without improvement before stop
+      Scalar  tol_f             { 1e-10 }; ///< Function change tolerance
+      size_t  tol_f_patience    { 10    }; ///< Iterations without improvement before stop
+      size_t  patience          { 100   }; ///< Iterations without improvement before stop
+      
+      // Adaptive step size control
+      bool    use_backtracking  { true };  ///< Enable backtracking line search
+      size_t  max_backtrack     { 10   };  ///< Maximum backtracking steps
+      Scalar  backtrack_factor  { 0.5  };  ///< Step size reduction factor
+      Scalar  max_step_ratio    { 10.0 };  ///< Maximum step size ratio for clipping
     };
   
     /**
      * @struct Result
-     * @brief Risultato della minimizzazione
+     * @brief Minimization result
      */
     struct Result {
-      Scalar final_f;      ///< Valore finale della funzione
-      Scalar grad_norm;    ///< Norma del gradiente finale
-      size_t iterations;   ///< Numero di iterazioni effettuate
-      Vector final_x;      ///< Punto finale
-      bool   converged;    ///< True se convergenza raggiunta
+      Scalar final_f;      ///< Final function value
+      Scalar grad_norm;    ///< Final gradient norm
+      size_t iterations;   ///< Number of iterations performed
+      Vector final_x;      ///< Final point
+      bool   converged;    ///< True if convergence reached
+      size_t f_eval_count; ///< Number of function evaluations
+      string message;      ///< Termination message
     };
 
   private:
-    Options m_opts;        ///< Opzioni configurate
-    Vector  m_lower;       ///< Limiti inferiori
-    Vector  m_upper;       ///< Limiti superiori
-    std::mt19937 rng{std::random_device{}()}; ///< Generatore random
-  
+    Options m_opts;        ///< Configured options
+    Vector  m_lower;       ///< Lower bounds
+    Vector  m_upper;       ///< Upper bounds
+    std::mt19937 rng{std::random_device{}()}; ///< Random generator
+
   public:
   
     /**
-     * @brief Costruttore
-     * @param o Opzioni per il minimizzatore
+     * @brief Constructor
+     * @param o Options for the minimizer
      */
     SPSA_minimizer( Options const & o = Options() )
     : m_opts(o)
     {}
   
     /**
-     * @brief Imposta i bound di ottimizzazione
-     * @param lo Limiti inferiori
-     * @param up Limiti superiori
+     * @brief Set optimization bounds
+     * @param lo Lower bounds
+     * @param up Upper bounds
      */
-    void set_bounds(Vector const& lo, Vector const& up) {
+    void
+    set_bounds( Vector const & lo, Vector const & up ) {
       assert(lo.size() == up.size());
       m_lower = lo;
       m_upper = up;
@@ -311,227 +363,277 @@ namespace Utils {
   private:
   
     /**
-     * @brief Proietta il punto x sui bounds
-     * @param x Punto da proiettare (modificato in-place)
+     * @brief Project point x onto bounds
+     * @param x Point to project (modified in-place)
      */
-    void project( Vector & x ) const {
+    void
+    project( Vector & x ) const {
       if ( m_opts.use_projection )
         x = x.cwiseMax(m_lower).cwiseMin(m_upper);
     }
   
     /**
-     * @brief Genera noise Rademacher (±1)
-     * @param d Vettore dove memorizzare il noise (output)
+     * @brief Generate sparse Rademacher noise (-1, +1)
+     *
+     * @param d Vector to store noise (output)
      */
-    void rademacher( Vector & d ) {
-      std::uniform_real_distribution<Scalar> U(0,1);
-      for ( size_t i{0}; i < d.size(); ++i )
-        d[i] = (U(rng) < 0.5 ? -1 : +1);
+    void
+    rademacher( Vector & d ) {
+      // Use uniform distribution for [0,1]
+      std::uniform_int_distribution<> U(0, 100);
+      // Generate sparse Rademacher noise
+      d = Vector::NullaryExpr(d.size(), [&]() { return -1 + 2*(U(rng)%2); });
     }
-  
+
     /**
-     * @brief Applica precondizionamento diagonale al gradiente
-     * @param g Gradiente da precondizionare (modificato in-place)
-     * @param scale Fattori di scala per precondizionamento
+     * @brief Perform backtracking line search
+     * @param x Current point
+     * @param g Current gradient
+     * @param a_k Current learning rate
+     * @param f Current function value
+     * @param fun Objective function
+     * @param x_new New point (output)
+     * @param f_new New function value (output)
+     * @param eval_count Function evaluation counter (incremented)
+     * @return True if backtracking found a better point
      */
-    void apply_precond( Vector& g, Vector const & scale ) {
-      g.array() /= (scale.array() + Scalar(1e-12));
+    bool
+    backtracking_line_search(
+      Vector   const & x,
+      Vector   const & g,
+      Scalar           a_k,
+      Scalar           f,
+      Callback const & fun,
+      Vector         & x_new,
+      Scalar         & f_new,
+      size_t         & eval_count
+    ) const {
+      if (!m_opts.use_backtracking) return false;
+      
+      Scalar a_temp = a_k;      
+      // Try up to max_backtrack reduced step sizes
+      for ( size_t backtrack{0}; backtrack < m_opts.max_backtrack; ++backtrack ) {
+        a_temp *= m_opts.backtrack_factor;
+        Vector x_temp = x - a_temp * g;
+        project(x_temp);
+        Scalar f_temp = fun(x_temp);
+        eval_count++;
+        
+        if ( f_temp < f ) {
+          x_new = x_temp;
+          f_new = f_temp;
+          return true;
+        }
+      }
+      return false;
     }
-  
+
   public:
 
     /**
-     * @brief Esegue la minimizzazione usando SPSA con gestione robusta dei bounds
+     * @brief Perform minimization using SPSA with robust convergence handling
      * 
-     * L'algoritmo implementa una versione migliorata di SPSA con:
-     * 1. Clipping delle perturbazioni per rispettare i bounds durante la stima del gradiente
-     * 2. Backtracking lineare per learning rate adattivo
-     * 3. Strategia di restart quando bloccato
-     * 4. Tracking della migliore soluzione trovata
+     * Convergence criteria:
+     * - Gradient norm below tolerance
+     * - Function value change below tolerance  
+     * - No improvement for patience iterations
+     * - Maximum iterations reached
      * 
-     * @param x0 Punto iniziale
-     * @param fun Funzione obiettivo da minimizzare
-     * @return Risultato della minimizzazione
+     * @param x0 Starting point
+     * @param fun Objective function to minimize
+     * @return Minimization result
      */
-    Result minimize( Vector const & x0, Callback const & fun ) {
+    Result
+    minimize( Vector const & x0, Callback const & fun ) {
       size_t n = x0.size();
       Vector x = x0;
-      Vector g(n), delta(n), scale = Vector::Ones(n);
+      Vector g(n), delta(n);
       Vector xp(n), xm(n);
-    
-      // Proietta punto iniziale e valuta
+      
+      // Initialize tracking variables
       project(x);
-      Scalar f = fun(x, nullptr);
-      Scalar best_f = f;
-      Vector best_x = x;
+      Scalar f                    = fun(x);
+      Scalar best_f               = f;
+      Scalar previous_f           = f;
+      Vector best_x               = x;
       size_t no_improvement_count = 0;
+      size_t f_eval_count         = 1;
+      
+      // Track step size adaptations
+      size_t total_backtrack_success = 0;
+      size_t total_consecutive_grad  = 0;
+      size_t total_consecutive_func  = 0;
+      
+      if ( m_opts.verbose )
+        fmt::print( "[SPSA] Starting optimization, dimension: {}, initial f: {}\n", n, f );
     
       for ( size_t k{0}; k < m_opts.max_iter; ++k ) {
-        // Calcola learning rate e perturbazione con decay standard SPSA
+        // Calculate learning rate and perturbation with standard SPSA decay
         Scalar a_k = m_opts.a0 / pow(Scalar(k+1), m_opts.alpha);
         Scalar c_k = m_opts.c0 / pow(Scalar(k+1), m_opts.gamma);
     
         g.setZero();
     
         // ============================
-        //      STIMA GRADIENTE SPSA
+        //   SPSA GRADIENT ESTIMATION
         // ============================
-        for (size_t rep = 0; rep < m_opts.gradient_avg; ++rep) {
+        for ( size_t rep{0}; rep < m_opts.gradient_avg; ++rep ) {
     
-          // Genera perturbazioni casuali
+          // Generate random perturbations
           rademacher(delta);
     
-          // APPLICA CLIPPING INTELLIGENTE DELLE PERTURBAZIONI
-          for (size_t i = 0; i < n; ++i) {
-            Scalar perturbation = c_k * delta[i];
+          xp = x + c_k * delta;
+          xm = x - c_k * delta;
+          
+          project( xp );
+          project( xm );
     
-            // Calcola spazio disponibile nei bounds
-            Scalar max_plus  = m_upper[i] - x[i];  // Spazio verso l'alto
-            Scalar max_minus = x[i] - m_lower[i];  // Spazio verso il basso
+          // Evaluate function at perturbed points (guaranteed within bounds)
+          Scalar fp = fun(xp);
+          Scalar fm = fun(xm);
+          f_eval_count += 2;
     
-            // Clip della perturbazione per rimanere nei bounds
-            if (perturbation > max_plus) {
-              perturbation = max_plus;
-            } else if (perturbation < -max_minus) {
-              perturbation = -max_minus;
-            }
-    
-            // Applica perturbazioni clippate - garantisce xp, xm dentro i bounds
-            xp[i] = x[i] + perturbation;
-            xm[i] = x[i] - perturbation;
-    
-            // Gestione casi di bordo: se completamente bloccato, usa perturbazione minima
-            if (std::abs(perturbation) < 1e-12 && max_plus < 1e-12 && max_minus < 1e-12) {
-              perturbation = 1e-12;
-              xp[i] = x[i] + perturbation;
-              xm[i] = x[i] - perturbation;
-            }
-          }
-    
-          // Valuta funzione nei punti perturbati (garantiti dentro i bounds)
-          Scalar fp = fun(xp, nullptr);
-          Scalar fm = fun(xm, nullptr);
-    
-          // CALCOLO GRADIENTE - matematicamente corretto grazie al clipping
-          for (size_t i = 0; i < n; ++i) {
-            if (std::abs(delta[i]) > 1e-12) {
-              // Usa formula SPSA standard con delta originale
-              g[i] += (fp - fm) / (2 * c_k * delta[i]);
-            } else {
-              // Fallback per delta zero (raro): usa perturbazione effettiva
-              Scalar actual_perturbation = xp[i] - x[i];
-              if (std::abs(actual_perturbation) > 1e-12) {
-                g[i] += (fp - fm) / (2 * actual_perturbation);
-              }
-            }
-          }
+          // GRADIENT CALCULATION
+          g.array() += (fp-fm)/(xp-xm).array();
         }
     
-        // Media delle stime del gradiente
+        // Average gradient estimates
         g.array() /= Scalar(m_opts.gradient_avg);
-    
-        // CLIPPING DEL GRADIENTE per prevenire esplosioni numeriche
-        Scalar gmax = g.template lpNorm<Eigen::Infinity>();
-        if (gmax > 1e6) {
-          g *= (1e6 / gmax);
-          if (m_opts.verbose) {
-            std::cout << "[SPSA] Gradient clipped at iter " << k << "\n";
-          }
-        }
-    
         Scalar gnorm = g.template lpNorm<Eigen::Infinity>();
     
-        // Output verboso (ogni 50 iterazioni per non appesantire)
-        if (m_opts.verbose && k % 50 == 0) {
-          std::cout << "[SPSA] iter " << k << " f=" << f << " |g|=" << gnorm
-                    << " a_k=" << a_k << " c_k=" << c_k << "\n";
+        // Verbose output (every 50 iterations to avoid clutter)
+        if ( m_opts.verbose && (k % m_opts.print_every) == 0 ) {
+          fmt::print(
+            "[SPSA] iter={:<4} f={:<10.4} |g|={:<10.4} a_k={:<8.2} c_k={:<8.2} improv_count={}\n",
+            k, f, gnorm, a_k, c_k, no_improvement_count
+          );
         }
     
-        // CRITERIO DI CONVERGENZA - norma del gradiente sotto soglia
-        if (gnorm < 1e-8 && k > 10) {
-          if (m_opts.verbose) {
-            std::cout << "[SPSA] Converged at iter " << k << " with gnorm=" << gnorm << "\n";
+        // CONVERGENCE CRITERIA
+        bool converged = false;
+        string convergence_message = "Maximum iterations reached";
+        
+        // 1. Gradient norm criterion
+        if ( !converged ) {
+          if ( gnorm < m_opts.tol_grad ) {
+            if ( ++total_consecutive_grad > m_opts.tol_grad_patience ) {
+              converged           = true;
+              convergence_message = "Gradient norm below tolerance";
+            }
+          } else {
+            total_consecutive_grad = 0;
           }
-          return {f, gnorm, k, x, true};
+        }
+        
+        // 2. Function change criterion
+        if ( !converged ) {
+          if ( abs(f - previous_f) < m_opts.tol_f * (1 + abs(previous_f))) {
+            if ( ++total_consecutive_func > m_opts.tol_f_patience ) {
+              converged           = true;
+              convergence_message = "Function change below tolerance";
+            }
+          } else {
+            total_consecutive_func = 0;
+          }
+        }
+        
+        // 3. Stagnation criterion
+        if ( !converged ) {
+          if ( no_improvement_count > m_opts.patience ) {
+            converged           = true;
+            convergence_message = "No improvement for patience iterations";
+          }
+        }
+        
+        if (converged) {
+          if (m_opts.verbose) {
+            fmt::print(
+              "[SPSA] Converged at iteration {}: {}\n",
+              "Final f: {}, gradient norm: {}, function evaluations: {}\n",
+              k, convergence_message, best_f, gnorm, f_eval_count
+            );
+          }
+          return { best_f, gnorm, k, best_x, true, f_eval_count, convergence_message };
         }
     
         // ============================
-        //       PRECONDIZIONAMENTO
-        // ============================
-        if (m_opts.variant == Variant::PRECOND) {
-          // Scaling diagonale adattivo: media mobile delle componenti del gradiente
-          scale = 0.9 * scale.array() + 0.1 * (g.cwiseAbs().array() + 1e-8);
-          apply_precond(g, scale);
-        }
-    
-        // ============================
-        //       AGGIORNAMENTO
+        //       PARAMETER UPDATE
         // ============================
         Vector x_new = x - a_k * g;
-    
-        // Proietta il nuovo punto sui bounds
         project(x_new);
     
-        Scalar f_new = fun(x_new, nullptr);
+        Scalar f_new = fun(x_new);
+        f_eval_count++;
     
-        // TRACKING MIGLIORE SOLUZIONE
-        if (f_new < best_f) {
-          best_f = f_new;
-          best_x = x_new;
-          no_improvement_count = 0; // Reset contatore
+        // TRACK BEST SOLUTION
+        if ( f_new < best_f ) {
+          best_f               = f_new;
+          best_x               = x_new;
+          no_improvement_count = 0; // Reset counter
         } else {
           no_improvement_count++;
         }
     
-        // BACKTRACKING ADATTIVO se peggioramento
-        if (m_opts.variant == Variant::ADAPTIVE || f_new > f * 1.1) {
-          bool improved = false;
-          Scalar a_temp = a_k;
-          
-          // Prova fino a 5 learning rate ridotti
-          for (int backtrack = 0; backtrack < 5; ++backtrack) {
-            a_temp *= 0.5;
-            Vector x_temp = x - a_temp * g;
-            project(x_temp);
-            Scalar f_temp = fun(x_temp, nullptr);
-    
-            if (f_temp < f) {
-              x_new = x_temp;
-              f_new = f_temp;
-              improved = true;
-              // Aggiorna migliore soluzione se trovata
-              if (f_new < best_f) {
-                best_f = f_new;
-                best_x = x_new;
-              }
-              break;
+        // BACKTRACKING LINE SEARCH if step causes deterioration
+        bool backtrack_used = false;
+        if ( f_new > f && m_opts.use_backtracking ) {
+          backtrack_used = backtracking_line_search( x, g, a_k, f, fun, x_new, f_new, f_eval_count );
+          if ( backtrack_used ) {
+            total_backtrack_success++;
+            // Update best solution if found during backtracking
+            if (f_new < best_f) {
+              best_f               = f_new;
+              best_x               = x_new;
+              no_improvement_count = 0;
             }
           }
-    
-          if (!improved && m_opts.verbose) {
-            std::cout << "[SPSA] Backtracking failed at iter " << k << "\n";
-          }
         }
     
-        // STRATEGIA DI RESTART se bloccato per molte iterazioni
-        if (no_improvement_count > 100) {
-          if (m_opts.verbose) {
-            std::cout << "[SPSA] Restarting from best point at iter " << k << "\n";
+        // RESTART STRATEGY if stuck for many iterations
+        if ( no_improvement_count > m_opts.patience / 2 ) {
+          if ( m_opts.verbose ) {
+            fmt::print(
+              "[SPSA] Restarting from best point at iteration {} (no improvement for {} iterations)\n",
+              k, no_improvement_count
+            );
           }
-          x = best_x;
-          f = best_f;
+          x                    = best_x;
+          f                    = best_f;
           no_improvement_count = 0;
-          continue; // Salta il resto dell'iterazione
+          continue; // Skip rest of iteration
         }
     
-        // ACCETTA NUOVO PUNTO
-        x = x_new;
-        f = f_new;
+        // ACCEPT NEW POINT
+        previous_f = f;
+        x          = x_new;
+        f          = f_new;
       }
     
-      // Ritorna la migliore soluzione trovata (non necessariamente l'ultima)
-      return {best_f, 0, m_opts.max_iter, best_x, false};
+      // Return best solution found (not necessarily the last one)
+      if ( m_opts.verbose ) {
+        fmt::print(
+          "[SPSA] Optimization finished:\n"
+          "best f:               {}\n"
+          "function evaluations: {}\n"
+          "backtrack successes:  {}\n",
+          best_f, f_eval_count, total_backtrack_success
+        );
+      }
+
+      return { best_f, 0, m_opts.max_iter, best_x, false, f_eval_count, "Maximum iterations reached" };
     }
+
+    /**
+     * @brief Get current options
+     * @return Current options
+     */
+    Options const & get_options() const { return m_opts; }
+    
+    /**
+     * @brief Set new options
+     * @param opts New options
+     */
+    void set_options( Options const & opts) { m_opts = opts; }
   };
 }
 

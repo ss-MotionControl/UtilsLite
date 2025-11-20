@@ -141,8 +141,8 @@ public:
   
   Vector init() const {
     Vector x0 = Vector::Constant(N, 0.0);
-    x0[0] = -1.2;
-    for (size_t i = 1; i < N; ++i) x0[i] = 1.0;
+    x0[0] = -1;
+    for (size_t i = 1; i < N; ++i) x0[i] = -1.0;
     return x0;
   }
 
@@ -473,12 +473,11 @@ void test(Problem & prob, std::string const & problem_name) {
   // Parametri SPSA più robusti
   Utils::SPSA_minimizer<Scalar>::Options opts;
   opts.max_iter = 500;        // più iterazioni
-  opts.a0 = 0.3;              // learning rate più piccolo
-  opts.c0 = 0.05;             // perturbazioni più piccole
+  opts.a0 = 0.1;              // learning rate più piccolo
+  opts.c0 = 0.5;             // perturbazioni più piccole
   opts.alpha = 0.602;
   opts.gamma = 0.101;
   opts.gradient_avg = 1;       // più medie per il gradiente
-  opts.variant = Utils::SPSA_minimizer<Scalar>::Variant::ADAPTIVE; // adattivo
   opts.verbose = true;
 
   Utils::SPSA_minimizer<Scalar> optimizer(opts);
@@ -487,9 +486,7 @@ void test(Problem & prob, std::string const & problem_name) {
   Vector x0 = prob.init();
   Vector x_final;
 
-  auto cb = [&prob](Vector const & x, Vector*) { return prob(x); };
-
-  auto iter_data = optimizer.minimize(x0, cb);
+  auto iter_data = optimizer.minimize(x0, prob);
 
   TestResult result;
   result.problem_name    = problem_name;
