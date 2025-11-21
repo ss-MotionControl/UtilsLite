@@ -70,14 +70,12 @@ if (UNIX)
     COMMAND bash "-c" "rake install_3rd"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     COMMAND_ECHO STDOUT
-    #ECHO_OUTPUT_VARIABLE
   )
 else()
   execute_process(
     COMMAND cmd /c "rake install_3rd"
     WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
     COMMAND_ECHO STDOUT
-    #ECHO_OUTPUT_VARIABLE
   )
 endif()
 
@@ -88,13 +86,14 @@ endif()
 #
 set( SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src" )
 
+# Usa CONFIGURE_DEPENDS per aggiornare automaticamente i GLOB
 set( SOURCES )
 file(
-  GLOB S
+  GLOB S CONFIGURE_DEPENDS
   ${SOURCE_DIR}/*.cc
+  ${SOURCE_DIR}/**/*.cc
 )
 foreach(F ${S})
-  # build relative path respect to source directory
   file( RELATIVE_PATH RF ${SOURCE_DIR} "${F}" )
   list( APPEND SOURCES ${RF} )
 endforeach(F ${S})
@@ -106,34 +105,25 @@ endforeach(F ${S})
 #
 set( PUBLIC_HEADERS )
 file(
-  GLOB_RECURSE S
+  GLOB_RECURSE S CONFIGURE_DEPENDS
   ${SOURCE_DIR}/*.h
-  ${SOURCE_DIR}/*.hpp
   ${SOURCE_DIR}/*.hh
+  ${SOURCE_DIR}/*.hpp
   ${SOURCE_DIR}/*.hxx
-  ${SOURCE_DIR}/Utils/3rd/Eigen/*
+  ${SOURCE_DIR}/*.h++
 )
 foreach (F ${S})
-  # build relative path respect to source directory
   file( RELATIVE_PATH RF "${SOURCE_DIR}" "${F}" )
   list( APPEND PUBLIC_HEADERS ${RF} )
 endforeach(F ${S})
 
-# Aggiungi esplicitamente Utils.hh se esiste e non è stato trovato
-if(EXISTS "${SOURCE_DIR}/Utils.hh")
-    set(UTILS_HH_FOUND FALSE)
-    foreach(H ${PUBLIC_HEADERS})
-        if(H STREQUAL "Utils.hh")
-            set(UTILS_HH_FOUND TRUE)
-        endif()
-    endforeach()
-    if(NOT UTILS_HH_FOUND)
-        list(APPEND PUBLIC_HEADERS "Utils.hh")
-        message(STATUS "Added Utils.hh explicitly to public headers")
-    endif()
-endif()
-
-list(FILTER PUBLIC_HEADERS EXCLUDE REGEX "\.DS")
+# Filtra file indesiderati
+list(FILTER PUBLIC_HEADERS EXCLUDE REGEX "\\\.DS_Store$")
+list(FILTER PUBLIC_HEADERS EXCLUDE REGEX "\\\.gitkeep$")
+list(FILTER PUBLIC_HEADERS EXCLUDE REGEX "^.*\\\.swp$")
+list(FILTER PUBLIC_HEADERS EXCLUDE REGEX "^.*\\\.swo$")
+list(FILTER PUBLIC_HEADERS EXCLUDE REGEX "cmake-build-.*")
+list(FILTER PUBLIC_HEADERS EXCLUDE REGEX "build/.*")
 
 # Debug: stampa gli header trovati
 message(STATUS "Public headers found (${PUBLIC_HEADERS}):")
@@ -141,14 +131,51 @@ foreach(H ${PUBLIC_HEADERS})
     message(STATUS "  - ${H}")
 endforeach()
 
-# Crea lista completa di path assoluti per gli header (necessario per Xcode)
+# Verifica specifica per Utils_MADS.hh
+if(NOT "Utils_MADS.hh" IN_LIST PUBLIC_HEADERS)
+    message(WARNING "Utils_MADS.hh not found in public headers!")
+    # Cerca specificamente Utils_MADS.hh
+    file(GLOB_RECURSE MADS_HEADER CONFIGURE_DEPENDS
+        ${SOURCE_DIR}/**/Utils_MADS.hh
+    )
+    if(MADS_HEADER)
+        file(RELATIVE_PATH MADS_REL "${SOURCE_DIR}" "${MADS_HEADER}")
+        list(APPEND PUBLIC_HEADERS "${MADS_REL}")
+        message(STATUS "Added missing Utils_MADS.hh: ${MADS_REL}")
+    else()
+        message(FATAL_ERROR "Utils_MADS.hh not found in source tree!")
+    endif()
+else()
+    message(STATUS "Utils_MADS.hh found in public headers")
+endif()
+
+# Crea lista completa di path assoluti per gli header
 set(PUBLIC_HEADERS_FULL)
 foreach(H ${PUBLIC_HEADERS})
     list(APPEND PUBLIC_HEADERS_FULL "${SOURCE_DIR}/${H}")
 endforeach()
 
-# extra include directory for compilation
-include_directories( ./src ./src/Utils )
+# Crea directory di inclusione principali
+set(INCLUDE_DIRS 
+    ./src 
+    ./src/Utils
+    ./src/Utils/3rd
+)
+
+# Aggiungi tutte le sottodirectory di Utils
+file(GLOB_RECURSE UTILS_SUBDIRS CONFIGURE_DEPENDS
+    ${SOURCE_DIR}/Utils/*/
+)
+foreach(DIR ${UTILS_SUBDIRS})
+    if(IS_DIRECTORY ${DIR})
+        list(APPEND INCLUDE_DIRS ${DIR})
+    endif()
+endforeach()
+
+# Rimuovi duplicati
+list(REMOVE_DUPLICATES INCLUDE_DIRS)
+
+include_directories( ${INCLUDE_DIRS} )
 
 #   _____                  _
 #  |_   _|_ _ _ _ __ _ ___| |_ ___
@@ -229,8 +256,9 @@ if ( UTILS_ENABLE_TESTS )
 
   set( EXELISTCPP )
   file(
-    GLOB S
+    GLOB S CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/src_tests/*.cc
+    ${CMAKE_CURRENT_SOURCE_DIR}/src_tests/**/*.cc
   )
   foreach(F ${S})
     file( RELATIVE_PATH RF "${CMAKE_CURRENT_SOURCE_DIR}/src_tests/" "${F}" )
@@ -244,6 +272,7 @@ if ( UTILS_ENABLE_TESTS )
     add_executable( ${S} ${CMAKE_CURRENT_SOURCE_DIR}/src_tests/${S}.cc )
     set_target_properties( ${S} PROPERTIES SUFFIX ".exe" )
     target_link_libraries( ${S} ${LIBS} )
+    target_include_directories( ${S} PRIVATE ${INCLUDE_DIRS} )
     add_test( NAME "${S}" COMMAND ./bin/${S}.exe WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} )
     add_dependencies( "${PROJECT_NAME}_all_tests" ${S} )
     
@@ -262,11 +291,17 @@ endif()
 #
 install(
   TARGETS ${TARGETS_TO_BE_INSTALLED}
-  # EXPORT (da definire)
   LIBRARY DESTINATION ${INSTALL_PREFIX}/dll
   ARCHIVE DESTINATION ${INSTALL_PREFIX}/lib
   RUNTIME DESTINATION ${INSTALL_PREFIX}/bin
   PUBLIC_HEADER DESTINATION ${PROJECT_PUBLIC_HEADER_DESTINATION}
+  EXCLUDE_FROM_ALL
+)
+
+# Installazione aggiuntiva degli header per sicurezza
+install(
+  FILES ${PUBLIC_HEADERS_FULL}
+  DESTINATION ${PROJECT_PUBLIC_HEADER_DESTINATION}
   EXCLUDE_FROM_ALL
 )
 

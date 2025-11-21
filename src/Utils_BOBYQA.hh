@@ -188,6 +188,14 @@ namespace Utils {
       m_lower = lo;
       m_upper = up;
     }
+    
+    void
+    set_bounds(size_t n, Scalar const lower[], Scalar const upper[]) {
+      m_lower.resize(n);
+      m_upper.resize(n);
+      std::copy_n(lower, n, m_lower.data());
+      std::copy_n(upper, n, m_upper.data());
+    }
 
     /**
      * @brief Initialize the minimizer state
@@ -228,7 +236,7 @@ namespace Utils {
      */
     void
     initialize_interpolation_points( Vector const & x0, Callback const & fun ) {
-      size_t n = x0.size();
+      size_t n = static_cast<size_t>(x0.size());
       m_state.interpolation_points.clear();
       m_state.interpolation_values.clear();
       

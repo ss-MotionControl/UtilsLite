@@ -202,6 +202,14 @@ namespace Utils {
       m_upper = up;
     }
 
+    void
+    set_bounds(size_t n, Scalar const lower[], Scalar const upper[]) {
+      m_lower.resize(n);
+      m_upper.resize(n);
+      std::copy_n(lower, n, m_lower.data());
+      std::copy_n(upper, n, m_upper.data());
+    }
+
     /**
      * @brief Project point onto bounds
      * @param x Point to project (modified in-place)

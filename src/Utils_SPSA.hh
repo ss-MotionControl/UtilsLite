@@ -306,9 +306,9 @@ namespace Utils {
 
       // Convergence criteria
       Scalar  tol_grad          { 1e-8  }; ///< Gradient norm tolerance
-      size_t  tol_grad_patience { 10    }; ///< Iterations without improvement before stop
+      size_t  tol_grad_patience { 100   }; ///< Iterations without improvement before stop
       Scalar  tol_f             { 1e-10 }; ///< Function change tolerance
-      size_t  tol_f_patience    { 10    }; ///< Iterations without improvement before stop
+      size_t  tol_f_patience    { 100   }; ///< Iterations without improvement before stop
       size_t  patience          { 100   }; ///< Iterations without improvement before stop
       
       // Adaptive step size control
@@ -359,7 +359,15 @@ namespace Utils {
       m_lower = lo;
       m_upper = up;
     }
-  
+      
+    void
+    set_bounds(size_t n, Scalar const lower[], Scalar const upper[]) {
+      m_lower.resize(n);
+      m_upper.resize(n);
+      std::copy_n(lower, n, m_lower.data());
+      std::copy_n(upper, n, m_upper.data());
+    }
+
   private:
   
     /**
