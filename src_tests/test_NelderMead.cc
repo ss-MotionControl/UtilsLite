@@ -22,15 +22,11 @@
 
 #include <cmath>
 
+using namespace Utils;
 using namespace std;
 
-using Utils::NelderMead;
-using Utils::m_pi;
-
-using std::abs;
-using std::pow;
-
 using real_type = double;
+using Vector = Utils::NelderMead_minimizer<real_type>::Vector;
 
 static inline real_type power2( real_type const x ) { return x*x; }
 //static inline real_type power3( real_type x ) { return x*x*x; }
@@ -40,9 +36,9 @@ static inline real_type power2( real_type const x ) { return x*x; }
 #if 0
 static
 real_type
-fun1( real_type const X[] ) {
-  real_type x = X[0];
-  real_type y = X[1];
+fun1( Vector const & X ) {
+  real_type x = X(0);
+  real_type y = X(1);
   if ( x                              > -1      ) return Utils::Inf<real_type>();
   if ( x                              < -17.001 ) return Utils::Inf<real_type>();
   if ( y                              > -1      ) return Utils::Inf<real_type>();
@@ -60,9 +56,9 @@ fun1( real_type const X[] ) {
 #if 0
 static
 real_type
-fun2( real_type const X[] ) {
-  real_type x = X[0];
-  real_type y = X[1];
+fun2( Vector const & X ) {
+  real_type x = X(0);
+  real_type y = X(1);
   if ( x > 100    ) return Utils::Inf<real_type>();
   if ( x < 0      ) return Utils::Inf<real_type>();
   if ( y > 101.01 ) return Utils::Inf<real_type>();
@@ -87,17 +83,17 @@ fun2( real_type const X[] ) {
 
 static
 real_type
-fun3( real_type const X[] ) {
-  real_type const x { X[0] };
-  real_type const y { X[1] };
+fun3( Vector const & X ) {
+  real_type const x { X(0) };
+  real_type const y { X(1) };
   return 100*power2(y-x*x)+power2(1-x);
 }
 
 static
 real_type
-fun4( real_type const X[] ) {
-  real_type const x { X[0] };
-  real_type const y { X[1] };
+fun4( Vector const & X ) {
+  real_type const x { X(0) };
+  real_type const y { X(1) };
   real_type const e { 1e-8 };
   real_type const w { 1-x*x-y*y };
   if ( w > 0 ) return x+y+e/w;
@@ -106,15 +102,22 @@ fun4( real_type const X[] ) {
 
 template <typename FUN>
 void
-do_solve( FUN f, real_type const X0[], real_type const delta ) {
-  Utils::Console console(&cout,4);
-  NelderMead<real_type> solver("NMsolver");
-  solver.setup( 2, f, &console );
-  solver.set_tolerance( 1e-20);
-  solver.run( X0, delta );
-  real_type X[2];
-  solver.get_last_solution( X );
-  fmt::print( "X={}, Y={}\n", X[0], X[1] );
+do_solve( FUN f, Vector const & X0, real_type const delta ) {
+  NelderMead_minimizer<real_type>::Options opts;
+  opts.verbose = true;
+  opts.initial_step = delta; // Usa delta come passo iniziale
+  NelderMead_minimizer<real_type> solver(opts);
+  auto result = solver.minimize( X0, f );
+  
+  fmt::print( "Solution found:\n" );
+  fmt::print( "  Status: {}\n", NelderMead_minimizer<real_type>::status_to_string(result.status) );
+  fmt::print( "  Solution: [{:.8f}, {:.8f}]\n", result.solution(0), result.solution(1) );
+  fmt::print( "  Function value: {:.8f}\n", result.final_function_value );
+  fmt::print( "  Iterations: {}\n", result.iterations );
+  fmt::print( "  Function evaluations: {}\n", result.function_evaluations );
+  fmt::print( "  Simplex diameter: {:.2e}\n", result.simplex_diameter );
+  fmt::print( "  Simplex volume: {:.2e}\n", result.simplex_volume );
+  fmt::print( "\n" );
 }
 
 int
@@ -123,32 +126,30 @@ main() {
   {
     real_type X0[2]{-1.1,-27.0};
     real_type delta = 1;
-    std::function<real_type(real_type const[])> F(fun1);
-    do_solve( F, X0, delta );
+    do_solve( fun1, X0, delta );
   }
   #endif
   #if 0
   {
     real_type X0[2]{1,1};
     real_type delta = 1;
-    std::function<real_type(real_type const[])> F(fun2);
-    do_solve( F, X0, delta );
+    do_solve( fun2, X0, delta );
   }
   #endif
   #if 1
   {
-    real_type X0[2]{-1,1};
+    Vector X0(2);
+    X0 << -1, 1;
     real_type delta = 0.1;
-    std::function<real_type(real_type const[])> F(fun3);
-    do_solve( F, X0, delta );
+    do_solve( fun3, X0, delta );
   }
   #endif
   #if 1
   {
-    real_type X0[2]{0,0};
+    Vector X0(2);
+    X0 << 0, 0;
     real_type delta = 0.01;
-    std::function<real_type(real_type const[])> F(fun4);
-    do_solve( F, X0, delta );
+    do_solve( fun4, X0, delta );
   }
   #endif
 
