@@ -37,6 +37,8 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include <random>
+#include <memory>
 
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -59,92 +61,9 @@
 #pragma clang diagnostic ignored "-Wnon-virtual-dtor"
 #pragma clang diagnostic ignored "-Wpadded"
 #pragma clang diagnostic ignored "-Wmissing-noreturn"
-#endif
+#endif  __clang__  __clang__ 
 
 namespace Utils {
-
-  /**
-   * @class NelderMead_minimizer
-   * @brief Header-only implementation of Nelder-Mead simplex optimization with box constraints
-   *
-   * This class implements the Nelder-Mead simplex algorithm for derivative-free
-   * optimization, with added support for box constraints using projection methods.
-   *
-   * ## Algorithm Overview
-   *
-   * The Nelder-Mead method is a simplex-based algorithm that uses geometric
-   * operations (reflection, expansion, contraction, shrinkage) to navigate
-   * the search space without requiring gradient information.
-   *
-   * ### Key Operations
-   *
-   * 1. **Reflection**: Reflect worst point through centroid of better points
-   * 2. **Expansion**: If reflection is good, expand further in that direction
-   * 3. **Contraction**: If reflection is poor, contract toward centroid
-   * 4. **Shrinkage**: If all else fails, shrink simplex toward best point
-   *
-   * ### Box Constraints
-   *
-   * Box constraints are handled using projection:
-   * - All simplex vertices are projected to feasible bounds
-   * - Trial points are projected before function evaluation
-   * - The algorithm maintains feasibility throughout optimization
-   *
-   * ## References
-   *
-   * -# J.A. Nelder and R. Mead (1965). "A Simplex Method for Function Minimization".
-   *    Computer Journal, 7(4), 308-313. DOI: 10.1093/comjnl/7.4.308
-   *
-   * -# F. Gao and L. Han (2010). "Implementing the Nelder-Mead simplex algorithm
-   *    with adaptive parameters". Computational Optimization and Applications,
-   *    51(1), 259-277. DOI: 10.1007/s10589-010-9329-3
-   *
-   * -# M.A. Price, C.J. Pegg, and A.J. Keane (2018). "A hybridized Nelder-Mead
-   *    simplex algorithm for constrained optimization". Engineering Optimization,
-   *    50(6), 927-944. DOI: 10.1080/0305215X.2017.1361420
-   *
-   * ## Usage Example
-   *
-   * @code{.cpp}
-   * using namespace Utils;
-   *
-   * // Define objective function (Rosenbrock)
-   * auto rosenbrock = [](Vector const& x) -> double {
-   *   return 100*(x(1)-x(0)*x(0))*(x(1)-x(0)*x(0)) + (1-x(0))*(1-x(0));
-   * };
-   *
-   * // Setup minimizer
-   * NelderMead_minimizer<double>::Options opts;
-   * opts.max_iterations = 1000;
-   * opts.tolerance = 1e-6;
-   * opts.verbose = true;
-   *
-   * NelderMead_minimizer<double> minimizer(opts);
-   *
-   * // Set bounds (optional)
-   * Vector lower(2), upper(2);
-   * lower << -2.0, -1.0;
-   * upper << 2.0, 3.0;
-   * minimizer.set_bounds(lower, upper);
-   *
-   * // Initial point
-   * Vector x0(2);
-   * x0 << -1.2, 1.0;
-   *
-   * // Minimize
-   * auto result = minimizer.minimize(x0, rosenbrock);
-   *
-   * if (result.status == NelderMead_minimizer<double>::Status::CONVERGED) {
-   *   std::cout << "Solution: " << result.solution.transpose() << std::endl;
-   *   std::cout << "Minimum: " << result.final_function_value << std::endl;
-   * }
-   * @endcode
-   *
-   * @tparam Scalar Floating-point type (double or float)
-   *
-   * @author Enrico Bertolazzi
-   * @date 2025
-   */
 
   template <typename Scalar = double>
   class NelderMead_minimizer {
@@ -152,125 +71,172 @@ namespace Utils {
     using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
     using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
     using Callback = std::function<Scalar(Vector const &)>;
+    using IndexVector = Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 1>;
 
-    /**
-     * @brief Optimization status codes
-     */
+    enum class Strategy {
+      STANDARD,
+      RANDOM_SUBSPACE,
+      BLOCK_COORDINATE,
+      ADAPTIVE_SUBSPACE,
+      MIXED_STRATEGY
+    };
+
     enum class Status {
-      CONVERGED,              ///< Converged by function value tolerance
-      MAX_ITERATIONS,         ///< Maximum iterations reached
-      MAX_FUN_EVALUATIONS,    ///< Maximum function evaluations reached
-      SIMPLEX_TOO_SMALL,      ///< Simplex diameter below tolerance
-      FAILED                  ///< General failure
+      CONVERGED,
+      MAX_ITERATIONS,
+      MAX_FUN_EVALUATIONS,
+      SIMPLEX_TOO_SMALL,
+      SUBSPACE_CONVERGED,
+      FAILED
     };
 
-    /**
-     * @brief Nelder-Mead operation types
-     */
-    enum class Operation {
-      INIT,                   ///< Initialization
-      REFLECT,                ///< Reflection operation
-      EXPAND,                 ///< Expansion operation
-      OUTSIDE_CONTRACT,       ///< Outside contraction
-      INSIDE_CONTRACT,        ///< Inside contraction
-      SHRINK,                 ///< Shrink operation
-      RESTART                 ///< Simplex restart
+    enum class SubspaceMethod {
+      RANDOM,
+      VARIABLE_IMPORTANCE,
+      CORRELATION_BASED,
+      ADAPTIVE_SIZE
     };
 
-    /**
-     * @brief Optimization results structure
-     */
     struct Result {
-      Status status{Status::FAILED};              ///< Optimization status
-      size_t iterations{0};                       ///< Number of iterations
-      size_t function_evaluations{0};             ///< Number of function evaluations
-      Scalar final_function_value{0};             ///< Best function value found
-      Scalar initial_function_value{0};           ///< Initial function value
-      Vector solution;                            ///< Best solution found
-      Scalar simplex_volume{0};                   ///< Final simplex volume
-      Scalar simplex_diameter{0};                 ///< Final simplex diameter
+      Status status{Status::FAILED};
+      size_t iterations{0};
+      size_t function_evaluations{0};
+      Scalar final_function_value{0};
+      Scalar initial_function_value{0};
+      Vector solution;
+      Scalar simplex_volume{0};
+      Scalar simplex_diameter{0};
+      size_t subspace_iterations{0};
+      std::vector<size_t> active_subspace;
     };
 
-    /**
-     * @brief Optimization options
-     */
     struct Options {
-      size_t max_iterations{1000};                ///< Maximum iterations
-      size_t max_function_evaluations{5000};      ///< Maximum function evaluations
-      Scalar tolerance{1e-8};                     ///< Function value tolerance
-      Scalar simplex_tolerance{1e-12};            ///< Simplex size tolerance
-      Scalar volume_tolerance{0.01};              ///< Volume ratio for restart
-      Scalar rho{1.0};                            ///< Reflection coefficient
-      Scalar chi{2.0};                            ///< Expansion coefficient
-      Scalar gamma{0.5};                          ///< Contraction coefficient
-      Scalar sigma{0.5};                          ///< Shrink coefficient
-      Scalar initial_step{0.1};                   ///< Initial simplex step size
-      bool verbose{false};                        ///< Print progress information
-      bool adaptive_parameters{true};             ///< Use adaptive parameters
+      // Basic options
+      size_t max_iterations{1000};
+      size_t max_function_evaluations{5000};
+      Scalar tolerance{1e-8};
+      Scalar simplex_tolerance{1e-12};
+      Scalar volume_tolerance{0.01};
+      
+      // Nelder-Mead parameters
+      Scalar rho{1.0};
+      Scalar chi{2.0};
+      Scalar gamma{0.5};
+      Scalar sigma{0.5};
+      Scalar initial_step{0.1};
+      
+      // High-dimensional strategy
+      Strategy strategy{Strategy::ADAPTIVE_SUBSPACE};
+      size_t max_dimension_standard{50};
+      
+      // Random Subspace Method options
+      SubspaceMethod subspace_method{SubspaceMethod::ADAPTIVE_SIZE};
+      size_t subspace_min_size{5};
+      size_t subspace_max_size{20};
+      size_t subspace_iterations{10};
+      Scalar subspace_tolerance{1e-6};
+      bool cyclic_subspaces{true};
+      
+      // Block Coordinate Descent options
+      size_t block_size{10};
+      size_t blocks_per_iteration{3};
+      bool random_block_order{true};
+      
+      // Adaptive parameters
+      bool adaptive_parameters{true};
+      bool adaptive_subspace_size{true};
+      Scalar subspace_size_reduction{0.95};
+      
+      // Monitoring and output
+      bool verbose{false};
+      bool monitor_subspaces{false};
+      size_t progress_frequency{100};
     };
 
   private:
-    Options m_options;                            ///< Optimization options
-    Vector  m_lower;                              ///< Lower bounds
-    Vector  m_upper;                              ///< Upper bounds
-    bool    m_use_bounds{false};                  ///< Bounds activation flag
+    Options m_options;
+    Vector  m_lower;
+    Vector  m_upper;
+    bool    m_use_bounds{false};
 
-    // Simplex storage
-    Matrix m_simplex;                             ///< Simplex vertices (n x n+1)
-    Vector m_values;                              ///< Function values at vertices
-    Vector m_centroid;                            ///< Centroid workspace
-    Vector m_trial_point;                         ///< Trial point workspace
+    // CHANGED: Use std::vector<Vector> for simplex
+    std::vector<Vector> m_simplex;                ///< Simplex vertices as vector of vectors
+    std::vector<Scalar> m_values;                 ///< Function values at vertices
+    Vector m_centroid;
+    Vector m_trial_point;
 
+    // High-dimensional optimization state
+    Vector m_current_solution;
+    Vector m_variable_importance;
+    Matrix m_correlation_estimate;
+    std::vector<std::vector<size_t>> m_blocks;
+    
+    // Random number generation
+    std::mt19937 m_rng;
+    std::uniform_real_distribution<Scalar> m_uniform_dist{0, 1};
+    
     // Internal state
-    size_t m_dim{0};                              ///< Problem dimension
+    size_t m_dim{0};
     Scalar m_eps{std::numeric_limits<Scalar>::epsilon()};
+    size_t m_subspace_size{0};
+    size_t m_current_iteration{0};
 
     /**
      * @brief Project point to feasible bounds
      */
     void project_point(Vector & x) const {
       if (m_use_bounds) {
-        x = x.cwiseMax(m_lower).cwiseMin(m_upper);
+        for (Eigen::Index i = 0; i < x.size(); ++i) {
+          if (x(i) < m_lower(i)) x(i) = m_lower(i);
+          else if (x(i) > m_upper(i)) x(i) = m_upper(i);
+        }
       }
     }
 
     /**
-     * @brief Initialize simplex using coordinate perturbation
+     * @brief Initialize standard Nelder-Mead simplex using std::vector<Vector>
      */
     void initialize_simplex(Vector const & x0, Callback const & callback) {
       m_dim = x0.size();
-      m_simplex.resize(m_dim, m_dim + 1);
+      
+      // CHANGED: Resize as vector of vectors
+      m_simplex.resize(m_dim + 1);
       m_values.resize(m_dim + 1);
       m_centroid.resize(m_dim);
       m_trial_point.resize(m_dim);
 
-      // Set first vertex to initial point
-      if (m_use_bounds) m_simplex.col(0) = x0.col(0).cwiseMax(m_lower).cwiseMin(m_upper);
-      else              m_simplex.col(0) = x0;
-  
-      m_values(0) = callback(m_simplex.col(0));
+      // Initialize all vectors with proper size
+      for (auto& vec : m_simplex) {
+        vec.resize(m_dim);
+      }
 
+      // Set first vertex to initial point
+      m_simplex[0] = x0;
+      project_point(m_simplex[0]);
+      m_values[0] = callback(m_simplex[0]);
+      
+      // BUG FIX: La logica di testing delle perturbazioni è stata corretta per non 
+      // riutilizzare il vettore, cosa che causava un simplex malformato.
       // Create other vertices by perturbing each coordinate
       for (size_t i = 0; i < m_dim; ++i) {
-        m_simplex.col(i + 1) = x0;
         
-        // Try positive perturbation first
-        m_simplex(i, i + 1) += m_options.initial_step;
-        if (m_use_bounds) m_simplex.col(i + 1) = m_simplex.col(i + 1).cwiseMax(m_lower).cwiseMin(m_upper);
-        Scalar f_plus = callback(m_simplex.col(i + 1));
+        Vector x_plus = x0;
+        x_plus(i) += m_options.initial_step;
+        project_point(x_plus);
+        Scalar f_plus = callback(x_plus);
 
-        // Try negative perturbation
-        m_simplex(i, i + 1) = x0(i) - m_options.initial_step;
-        if (m_use_bounds) m_simplex.col(i + 1) = m_simplex.col(i + 1).cwiseMax(m_lower).cwiseMin(m_upper);
-        Scalar f_minus = callback(m_simplex.col(i + 1));
+        Vector x_minus = x0;
+        x_minus(i) -= m_options.initial_step;
+        project_point(x_minus);
+        Scalar f_minus = callback(x_minus);
 
         // Keep the better perturbation
         if (f_plus < f_minus) {
-          m_simplex(i, i + 1) = x0(i) + m_options.initial_step;
-          if (m_use_bounds) m_simplex.col(i + 1) = m_simplex.col(i + 1).cwiseMax(m_lower).cwiseMin(m_upper);
-          m_values(i + 1) = f_plus;
+          m_simplex[i + 1] = x_plus;
+          m_values[i + 1] = f_plus;
         } else {
-          m_values(i + 1) = f_minus;
+          m_simplex[i + 1] = x_minus;
+          m_values[i + 1] = f_minus;
         }
       }
     }
@@ -282,7 +248,7 @@ namespace Utils {
       m_centroid.setZero();
       for (size_t i = 0; i < m_dim + 1; ++i) {
         if (i != worst_index) {
-          m_centroid += m_simplex.col(i);
+          m_centroid += m_simplex[i];
         }
       }
       m_centroid /= static_cast<Scalar>(m_dim);
@@ -295,7 +261,7 @@ namespace Utils {
       Scalar max_dist = 0;
       for (size_t i = 0; i < m_dim + 1; ++i) {
         for (size_t j = i + 1; j < m_dim + 1; ++j) {
-          Scalar dist = (m_simplex.col(i) - m_simplex.col(j)).norm();
+          Scalar dist = (m_simplex[i] - m_simplex[j]).norm();
           max_dist = std::max(max_dist, dist);
         }
       }
@@ -306,10 +272,13 @@ namespace Utils {
      * @brief Compute approximate simplex volume
      */
     Scalar compute_volume() const {
+      if (m_dim == 0) return 0;
       Matrix basis(m_dim, m_dim);
       for (size_t i = 0; i < m_dim; ++i) {
-        basis.col(i) = m_simplex.col(i + 1) - m_simplex.col(0);
+        basis.col(i) = m_simplex[i + 1] - m_simplex[0];
       }
+      // Volume = |det(basis)| / n! 
+      // std::tgamma(m_dim + 1) è la funzione Gamma che per interi è (m_dim)!
       return std::abs(basis.determinant()) / std::tgamma(m_dim + 1);
     }
 
@@ -320,15 +289,87 @@ namespace Utils {
       std::vector<size_t> indices(m_dim + 1);
       std::iota(indices.begin(), indices.end(), 0);
       std::sort(indices.begin(), indices.end(),
-                [this](size_t i, size_t j) { return m_values(i) < m_values(j); });
+                [this](size_t i, size_t j) { return m_values[i] < m_values[j]; });
       return indices;
+    }
+
+    /**
+     * @brief Core Nelder-Mead iteration
+     */
+    bool nelder_mead_iteration(Callback const & callback, size_t & function_evaluations) {
+      auto indices = sort_vertices();
+      size_t best = indices[0];
+      size_t second_worst = indices[m_dim - 1];
+      size_t worst = indices[m_dim]; // L'indice del punto peggiore nel vettore m_simplex
+
+      // Check convergence
+      Scalar value_range = m_values[worst] - m_values[best];
+      if (value_range < m_options.tolerance) return true;
+
+      update_centroid(worst);
+
+      // Reflection
+      // BUG FIX: Passato l'indice corretto del punto peggiore
+      Scalar f_reflect = reflect_point(callback, worst);
+      ++function_evaluations;
+
+      if (f_reflect < m_values[best]) {
+        // Expansion
+        Scalar f_expand = expand_point(callback);
+        ++function_evaluations;
+
+        if (f_expand < f_reflect) {
+          m_simplex[worst] = m_trial_point;
+          m_values[worst] = f_expand;
+        } else {
+          m_simplex[worst] = m_trial_point;
+          m_values[worst] = f_reflect;
+        }
+      } else if (f_reflect < m_values[second_worst]) {
+        // Accept reflection
+        m_simplex[worst] = m_trial_point;
+        m_values[worst] = f_reflect;
+      } else {
+        if (f_reflect < m_values[worst]) {
+          // Outside contraction
+          // BUG FIX: Passato l'indice corretto del punto peggiore
+          Scalar f_contract = contract_point(callback, worst, true);
+          ++function_evaluations;
+
+          if (f_contract <= f_reflect) {
+            m_simplex[worst] = m_trial_point;
+            m_values[worst] = f_contract;
+          } else {
+            // BUG FIX: Passato l'indice corretto del punto migliore
+            shrink_simplex(callback, best);
+            function_evaluations += m_dim;
+          }
+        } else {
+          // Inside contraction
+          // BUG FIX: Passato l'indice corretto del punto peggiore
+          Scalar f_contract = contract_point(callback, worst, false);
+          ++function_evaluations;
+
+          if (f_contract < m_values[worst]) {
+            m_simplex[worst] = m_trial_point;
+            m_values[worst] = f_contract;
+          } else {
+            // BUG FIX: Passato l'indice corretto del punto migliore
+            shrink_simplex(callback, best);
+            function_evaluations += m_dim;
+          }
+        }
+      }
+
+      return false;
     }
 
     /**
      * @brief Perform reflection operation
      */
-    Scalar reflect_point(Callback const & callback) {
-      m_trial_point = m_centroid + m_options.rho * (m_centroid - m_simplex.col(m_worst));
+    // BUG FIX: Aggiunto worst_index per accedere correttamente al punto peggiore
+    Scalar reflect_point(Callback const & callback, size_t worst_index) {
+      m_trial_point = m_centroid + m_options.rho * (m_centroid - m_simplex[worst_index]);
       project_point(m_trial_point);
       return callback(m_trial_point);
     }
@@ -345,11 +386,12 @@ namespace Utils {
     /**
      * @brief Perform contraction operation
      */
-    Scalar contract_point(Callback const & callback, bool outside = true) {
+    // BUG FIX: Aggiunto worst_index per accedere correttamente al punto peggiore
+    Scalar contract_point(Callback const & callback, size_t worst_index, bool outside = true) {
       if (outside) {
         m_trial_point = m_centroid + m_options.gamma * (m_trial_point - m_centroid);
       } else {
-        m_trial_point = m_centroid - m_options.gamma * (m_centroid - m_simplex.col(m_worst));
+        m_trial_point = m_centroid - m_options.gamma * (m_centroid - m_simplex[worst_index]);
       }
       project_point(m_trial_point);
       return callback(m_trial_point);
@@ -358,36 +400,394 @@ namespace Utils {
     /**
      * @brief Perform shrink operation
      */
-    void shrink_simplex(Callback const & callback) {
-      Vector best = m_simplex.col(m_best);
+    // BUG FIX: Aggiunto best_index per accedere correttamente al punto migliore
+    void shrink_simplex(Callback const & callback, size_t best_index) {
+      Vector best = m_simplex[best_index];
+      // Si restringono tutti i punti TRANNE il punto migliore
       for (size_t i = 0; i < m_dim + 1; ++i) {
-        if (i != m_best) {
-          m_simplex.col(i) = best + m_options.sigma * (m_simplex.col(i) - best);
-          if (m_use_bounds) m_simplex.col(i) = m_simplex.col(i).cwiseMax(m_lower).cwiseMin(m_upper);
-          m_values(i) = callback(m_simplex.col(i));
+        if (i != best_index) {
+          m_simplex[i] = best + m_options.sigma * (m_simplex[i] - best);
+          project_point(m_simplex[i]);
+          m_values[i] = callback(m_simplex[i]);
         }
       }
     }
 
-    // Indices for best, worst, second worst points
-    size_t m_best, m_worst, m_second_worst;
+    /**
+     * @brief Select subspace for Random Subspace Method
+     */
+    std::vector<size_t> select_subspace() {
+      std::vector<size_t> all_indices(m_dim);
+      std::iota(all_indices.begin(), all_indices.end(), 0);
+      
+      if (m_options.adaptive_subspace_size) {
+        m_subspace_size = static_cast<size_t>(
+          m_options.subspace_min_size + 
+          (m_options.subspace_max_size - m_options.subspace_min_size) *
+          std::exp(-static_cast<Scalar>(m_current_iteration) / 100.0)
+        );
+        m_subspace_size = std::max(m_options.subspace_min_size, 
+                                 std::min(m_options.subspace_max_size, m_subspace_size));
+      } else {
+        m_subspace_size = m_options.subspace_max_size;
+      }
+
+      // Gestisce il caso in cui la dimensione del sottospazio è maggiore della dimensione del problema
+      m_subspace_size = std::min(m_subspace_size, m_dim);
+
+      std::shuffle(all_indices.begin(), all_indices.end(), m_rng);
+      return std::vector<size_t>(all_indices.begin(), 
+                               all_indices.begin() + m_subspace_size);
+    }
+
+    /**
+     * @brief Create blocks for Block Coordinate Descent
+     */
+    void initialize_blocks() {
+      m_blocks.clear();
+      size_t num_blocks = (m_dim + m_options.block_size - 1) / m_options.block_size;
+      
+      for (size_t i = 0; i < num_blocks; ++i) {
+        std::vector<size_t> block;
+        size_t start = i * m_options.block_size;
+        size_t end = std::min((i + 1) * m_options.block_size, m_dim);
+        
+        for (size_t j = start; j < end; ++j) {
+          block.push_back(j);
+        }
+        m_blocks.push_back(block);
+      }
+    }
+
+    /**
+     * @brief Optimize in selected subspace
+     */
+    Result optimize_subspace(const std::vector<size_t>& subspace, 
+                           Vector const & full_x, 
+                           Callback const & callback) {
+      size_t subspace_dim = subspace.size();
+      
+      auto subspace_callback = [&](Vector const & subspace_x) -> Scalar {
+        Vector full_point = full_x;
+        for (size_t i = 0; i < subspace_dim; ++i) {
+          full_point(subspace[i]) = subspace_x(i);
+        }
+        return callback(full_point);
+      };
+
+      Vector subspace_x0(subspace_dim);
+      for (size_t i = 0; i < subspace_dim; ++i) {
+        subspace_x0(i) = full_x(subspace[i]);
+      }
+
+      Vector subspace_lower, subspace_upper;
+      if (m_use_bounds) {
+        subspace_lower.resize(subspace_dim);
+        subspace_upper.resize(subspace_dim);
+        for (size_t i = 0; i < subspace_dim; ++i) {
+          subspace_lower(i) = m_lower(subspace[i]);
+          subspace_upper(i) = m_upper(subspace[i]);
+        }
+      }
+
+      Options subspace_opts = m_options;
+      subspace_opts.max_iterations = m_options.subspace_iterations;
+      subspace_opts.tolerance = m_options.subspace_tolerance;
+      
+      // IMPORTANTE: Usa la strategia STANDARD all'interno del sottospazio 
+      subspace_opts.strategy = Strategy::STANDARD;
+      // Disattiva il verbose per il sottoproblema, a meno che non sia specificato un monitor più granulare
+      subspace_opts.verbose = m_options.monitor_subspaces;
+
+      NelderMead_minimizer<Scalar> subspace_optimizer(subspace_opts);
+      if (m_use_bounds) {
+        subspace_optimizer.set_bounds(subspace_lower, subspace_upper);
+      }
+
+      return subspace_optimizer.minimize(subspace_x0, subspace_callback);
+    }
+
+    /**
+     * @brief Standard Nelder-Mead optimization
+     */
+    Result minimize_standard(Vector const & x0, Callback const & callback) {
+      Result result;
+      result.initial_function_value = callback(x0);
+
+      m_dim = x0.size(); // Re-imposta m_dim se minimize_standard è chiamato da minimize_subspace
+      
+      // Gestisce il caso banale: se la dimensione del problema è 0
+      if (m_dim == 0) {
+        result.status = Status::CONVERGED;
+        result.solution = x0;
+        result.final_function_value = result.initial_function_value;
+        return result;
+      }
+
+
+      initialize_simplex(x0, callback);
+      result.function_evaluations = m_dim + 1;
+
+      if (m_options.adaptive_parameters && m_dim > 0) {
+        m_options.rho = 1.0;
+        // Utilizza m_dim come numero di dimensioni per i parametri adattivi
+        Scalar n = static_cast<Scalar>(m_dim);
+        m_options.chi = 1.0 + 2.0 / n;
+        m_options.gamma = 0.75 - 1.0 / (2.0 * n);
+        m_options.sigma = 1.0 - 1.0 / n;
+        if (m_options.verbose) {
+          fmt::print("[NM] Adaptive parameters set (rho={:.2f}, chi={:.2f}, gamma={:.2f}, sigma={:.2f})\n",
+                    m_options.rho, m_options.chi, m_options.gamma, m_options.sigma);
+        }
+      }
+      
+      if (m_options.verbose) {
+        fmt::print("[NM] Starting Standard Nelder-Mead (N={})\n", m_dim);
+      }
+
+      for (result.iterations = 0; 
+           result.iterations < m_options.max_iterations; 
+           ++result.iterations) {
+
+        if (result.function_evaluations >= m_options.max_function_evaluations) {
+          result.status = Status::MAX_FUN_EVALUATIONS;
+          break;
+        }
+
+        if (nelder_mead_iteration(callback, result.function_evaluations)) {
+          result.status = Status::CONVERGED;
+          break;
+        }
+
+        result.simplex_diameter = compute_diameter();
+        if (result.simplex_diameter < m_options.simplex_tolerance) {
+          result.status = Status::SIMPLEX_TOO_SMALL;
+          break;
+        }
+        
+        if (m_options.verbose && result.iterations % m_options.progress_frequency == 0) {
+          auto indices = sort_vertices();
+          Scalar progress = 100.0 * result.iterations / m_options.max_iterations;
+          fmt::print("[NM] Progress: {:5.1f}% | Iter={:4d} | F_best={:12.6g} | Diameter={:e} | Evals={}\n",
+                      progress, result.iterations, m_values[indices[0]], result.simplex_diameter,
+                      result.function_evaluations);
+        }
+      }
+
+      auto indices = sort_vertices();
+      result.solution = m_simplex[indices[0]];
+      result.final_function_value = m_values[indices[0]];
+      result.simplex_volume = compute_volume();
+      result.simplex_diameter = compute_diameter();
+      
+      if (result.iterations >= m_options.max_iterations && result.status == Status::FAILED) {
+        result.status = Status::MAX_ITERATIONS;
+      }
+      
+      if (m_options.verbose) {
+        fmt::print("\n--- Standard Nelder-Mead Optimization Results ---\n");
+        fmt::print("[INFO] Status: {}\n", status_to_string(result.status));
+        fmt::print("[INFO] Final F: {:12.6g} (Initial: {:12.6g})\n",
+                    result.final_function_value, result.initial_function_value);
+        fmt::print("[INFO] Iterations: {} | Function Evals: {}\n",
+                    result.iterations, result.function_evaluations);
+        fmt::print("[INFO] Simplex Diameter: {:e} | Volume: {:e}\n",
+                    result.simplex_diameter, result.simplex_volume);
+        fmt::print("---------------------------------------------------\n");
+      }
+
+
+      return result;
+    }
+
+    /**
+     * @brief Random Subspace Method optimization
+     */
+    Result minimize_random_subspace(Vector const & x0, Callback const & callback) {
+      Result result;
+      // Il minimizer esterno (RSM) deve usare la dimensione completa
+      m_dim = x0.size(); 
+      
+      result.initial_function_value = callback(x0);
+      result.function_evaluations = 1;
+      
+      m_current_solution = x0;
+      Scalar best_value = result.initial_function_value;
+
+      std::random_device rd;
+      m_rng.seed(rd());
+      
+      if (m_options.verbose) {
+        fmt::print("[RSM] Starting Random Subspace Method (N={}, Max Subspace Size={})\n", 
+                    m_dim, m_options.subspace_max_size);
+      }
+
+      for (result.iterations = 0; 
+           result.iterations < m_options.max_iterations; 
+           ++result.iterations) {
+        
+        m_current_iteration = result.iterations; // Aggiorna per l'adaptive size
+
+        if (result.function_evaluations >= m_options.max_function_evaluations) {
+          result.status = Status::MAX_FUN_EVALUATIONS;
+          break;
+        }
+
+        auto subspace = select_subspace();
+        result.active_subspace = subspace;
+
+        // Salva la soluzione corrente prima di ottimizzare il sottospazio
+        Vector solution_before_subspace = m_current_solution;
+
+        auto subspace_result = optimize_subspace(subspace, m_current_solution, callback);
+        result.function_evaluations += subspace_result.function_evaluations;
+        result.subspace_iterations += subspace_result.iterations;
+
+        // Aggiorna la soluzione completa con i risultati del sottospazio
+        for (size_t i = 0; i < subspace.size(); ++i) {
+          m_current_solution(subspace[i]) = subspace_result.solution(i);
+        }
+
+        // Riesegui il callback sulla soluzione completa (necessario per aggiornare best_value)
+        Scalar new_value = callback(m_current_solution);
+        result.function_evaluations++;
+
+        // Criterio di convergenza basato sulla differenza assoluta del valore della funzione
+        if (std::abs(best_value - new_value) < m_options.tolerance) {
+          result.status = Status::SUBSPACE_CONVERGED;
+          break;
+        }
+
+        best_value = new_value;
+
+        if (m_options.verbose && result.iterations % m_options.progress_frequency == 0) {
+          Scalar progress = 100.0 * result.iterations / m_options.max_iterations;
+          fmt::print("[RSM] Progress: {:5.1f}% | Iter={:4d} | F_best={:12.6g} | Subspace={}/{} | Evals={}\n",
+                      progress, result.iterations, best_value, subspace.size(), m_dim,
+                      result.function_evaluations);
+        }
+      }
+      
+      if (result.iterations >= m_options.max_iterations && result.status == Status::FAILED) {
+        result.status = Status::MAX_ITERATIONS;
+      }
+
+      result.solution = m_current_solution;
+      result.final_function_value = best_value;
+      
+      if (m_options.verbose) {
+        fmt::print("\n--- RSM Optimization Results ---\n");
+        fmt::print("[INFO] Status: {}\n", status_to_string(result.status));
+        fmt::print("[INFO] Final F: {:12.6g} (Initial: {:12.6g})\n",
+                    result.final_function_value, result.initial_function_value);
+        fmt::print("[INFO] Total Iterations: {} | Total Function Evals: {}\n",
+                    result.iterations, result.function_evaluations);
+        fmt::print("[INFO] Subspace Iterations: {}\n", result.subspace_iterations);
+        fmt::print("--------------------------------\n");
+      }
+      return result;
+    }
+
+    /**
+     * @brief Block Coordinate Descent optimization
+     */
+    Result minimize_block_coordinate(Vector const & x0, Callback const & callback) {
+      Result result;
+      // Il minimizer esterno (BCD) deve usare la dimensione completa
+      m_dim = x0.size();
+      
+      result.initial_function_value = callback(x0);
+      result.function_evaluations = 1;
+      
+      m_current_solution = x0;
+      Scalar best_value = result.initial_function_value;
+
+      initialize_blocks();
+      
+      if (m_options.verbose) {
+        fmt::print("[BCD] Starting Block Coordinate Descent (N={}, Block Size={}, Num Blocks={})\n", 
+                    m_dim, m_options.block_size, m_blocks.size());
+      }
+
+      for (result.iterations = 0; 
+           result.iterations < m_options.max_iterations; 
+           ++result.iterations) {
+
+        if (result.function_evaluations >= m_options.max_function_evaluations) {
+          result.status = Status::MAX_FUN_EVALUATIONS;
+          break;
+        }
+
+        std::vector<size_t> block_indices(m_blocks.size());
+        std::iota(block_indices.begin(), block_indices.end(), 0);
+        
+        if (m_options.random_block_order) {
+          std::shuffle(block_indices.begin(), block_indices.end(), m_rng);
+        }
+
+        size_t blocks_to_optimize = std::min(m_options.blocks_per_iteration, 
+                                           m_blocks.size());
+
+        for (size_t i = 0; i < blocks_to_optimize; ++i) {
+          auto& block = m_blocks[block_indices[i]];
+          
+          auto block_result = optimize_subspace(block, m_current_solution, callback);
+          result.function_evaluations += block_result.function_evaluations;
+          result.subspace_iterations += block_result.iterations;
+
+          for (size_t j = 0; j < block.size(); ++j) {
+            m_current_solution(block[j]) = block_result.solution(j);
+          }
+        }
+
+        Scalar new_value = callback(m_current_solution);
+        result.function_evaluations++;
+
+        if (std::abs(best_value - new_value) < m_options.tolerance) {
+          result.status = Status::SUBSPACE_CONVERGED;
+          break;
+        }
+
+        best_value = new_value;
+
+        if (m_options.verbose && result.iterations % m_options.progress_frequency == 0) {
+          Scalar progress = 100.0 * result.iterations / m_options.max_iterations;
+          fmt::print("[BCD] Progress: {:5.1f}% | Iter={:4d} | F_best={:12.6g} | Blocks={}/{} | Evals={}\n",
+                      progress, result.iterations, best_value, blocks_to_optimize, m_blocks.size(),
+                      result.function_evaluations);
+        }
+      }
+      
+      if (result.iterations >= m_options.max_iterations && result.status == Status::FAILED) {
+        result.status = Status::MAX_ITERATIONS;
+      }
+
+
+      result.solution = m_current_solution;
+      result.final_function_value = best_value;
+      
+      if (m_options.verbose) {
+        fmt::print("\n--- BCD Optimization Results ---\n");
+        fmt::print("[INFO] Status: {}\n", status_to_string(result.status));
+        fmt::print("[INFO] Final F: {:12.6g} (Initial: {:12.6g})\n",
+                    result.final_function_value, result.initial_function_value);
+        fmt::print("[INFO] Total Iterations: {} | Total Function Evals: {}\n",
+                    result.iterations, result.function_evaluations);
+        fmt::print("[INFO] Subspace Iterations: {}\n", result.subspace_iterations);
+        fmt::print("--------------------------------\n");
+      }
+      return result;
+    }
 
   public:
-    /**
-     * @brief Construct Nelder-Mead minimizer with given options
-     */
     explicit NelderMead_minimizer(Options const & opts = Options())
-    : m_options(opts) {}
+    : m_options(opts) {
+      std::random_device rd;
+      m_rng.seed(rd());
+    }
 
-    /**
-     * @brief Set box constraints for optimization
-     *
-     * @param lower Lower bounds vector
-     * @param upper Upper bounds vector
-     *
-     * @pre lower.size() == upper.size()
-     * @pre lower[i] <= upper[i] for all i
-     */
+    Vector const & solution() const { return m_current_solution; }
+
     void set_bounds(Vector const & lower, Vector const & upper) {
       UTILS_ASSERT(
         lower.size() == upper.size(),
@@ -403,8 +803,7 @@ namespace Utils {
       m_use_bounds = true;
     }
 
-    void
-    set_bounds(size_t n, Scalar const lower[], Scalar const upper[]) {
+    void set_bounds(size_t n, Scalar const lower[], Scalar const upper[]) {
       m_lower.resize(n);
       m_upper.resize(n);
       std::copy_n(lower, n, m_lower.data());
@@ -412,195 +811,108 @@ namespace Utils {
       m_use_bounds = true;
     }
 
-    /**
-     * @brief Perform Nelder-Mead optimization
-     *
-     * @param x0 Initial starting point
-     * @param callback Objective function f(x) to minimize
-     *
-     * @return Result structure containing optimization results
-     */
     Result minimize(Vector const & x0, Callback const & callback) {
-      Result result;
-      result.initial_function_value = callback(x0);
-
-      // Initialize simplex
-      initialize_simplex(x0, callback);
-      result.function_evaluations = m_dim + 1;
-
-      // Adaptive parameter adjustment
-      if (m_options.adaptive_parameters) {
-        // Gao and Han (2010) adaptive parameters
-        m_options.rho = 1.0;
-        m_options.chi = 1.0 + 2.0 / m_dim;
-        m_options.gamma = 0.75 - 1.0 / (2.0 * m_dim);
-        m_options.sigma = 1.0 - 1.0 / m_dim;
+      m_dim = x0.size();
+      m_current_solution = x0;
+      m_current_iteration = 0;
+      
+      // Gestisce il caso banale prima di selezionare la strategia
+      if (m_dim == 0) {
+        Result result;
+        result.status = Status::CONVERGED;
+        result.solution = x0;
+        result.initial_function_value = callback(x0);
+        result.final_function_value = result.initial_function_value;
+        result.function_evaluations = 1;
+        return result;
       }
 
-      // Main optimization loop
-      for (result.iterations = 0; 
-           result.iterations < m_options.max_iterations; 
-           ++result.iterations) {
-
-        // Check function evaluation limit
-        if (result.function_evaluations >= m_options.max_function_evaluations) {
-          result.status = Status::MAX_FUN_EVALUATIONS;
-          break;
-        }
-
-        // Sort vertices and get indices
-        auto indices = sort_vertices();
-        m_best = indices[0];
-        m_second_worst = indices[m_dim - 1];
-        m_worst = indices[m_dim];
-
-        // Store best solution
-        result.solution = m_simplex.col(m_best);
-        result.final_function_value = m_values(m_best);
-
-        // Check convergence by function value spread
-        Scalar value_range = m_values(m_worst) - m_values(m_best);
-        if (value_range < m_options.tolerance) {
-          result.status = Status::CONVERGED;
-          break;
-        }
-
-        // Check simplex size
-        result.simplex_diameter = compute_diameter();
-        if (result.simplex_diameter < m_options.simplex_tolerance) {
-          result.status = Status::SIMPLEX_TOO_SMALL;
-          break;
-        }
-
-        // Update centroid (excluding worst point)
-        update_centroid(m_worst);
-
-        // Reflection
-        Scalar f_reflect = reflect_point(callback);
-        ++result.function_evaluations;
-
-        if (m_options.verbose) {
-          fmt::print("[NelderMead] iter={:4d} f_best={:12.6g} f_worst={:12.6g} diameter={:12.6g}\n",
-                     result.iterations, m_values(m_best), m_values(m_worst),
-                     result.simplex_diameter);
-        }
-
-        if (f_reflect < m_values(m_best)) {
-          // Expansion
-          Scalar f_expand = expand_point(callback);
-          ++result.function_evaluations;
-
-          if (f_expand < f_reflect) {
-            m_simplex.col(m_worst) = m_trial_point;
-            m_values(m_worst) = f_expand;
-          } else {
-            m_simplex.col(m_worst) = m_trial_point;
-            m_values(m_worst) = f_reflect;
-          }
-        } else if (f_reflect < m_values(m_second_worst)) {
-          // Accept reflection
-          m_simplex.col(m_worst) = m_trial_point;
-          m_values(m_worst) = f_reflect;
+      Strategy selected_strategy = m_options.strategy;
+      if (selected_strategy == Strategy::ADAPTIVE_SUBSPACE) {
+        if (m_dim <= m_options.max_dimension_standard) {
+          selected_strategy = Strategy::STANDARD;
+        } else if (m_dim <= 100) {
+          selected_strategy = Strategy::BLOCK_COORDINATE;
         } else {
-          if (f_reflect < m_values(m_worst)) {
-            // Outside contraction
-            Scalar f_contract = contract_point(callback, true);
-            ++result.function_evaluations;
-
-            if (f_contract <= f_reflect) {
-              m_simplex.col(m_worst) = m_trial_point;
-              m_values(m_worst) = f_contract;
-            } else {
-              shrink_simplex(callback);
-              result.function_evaluations += m_dim; // n new evaluations
-            }
-          } else {
-            // Inside contraction
-            Scalar f_contract = contract_point(callback, false);
-            ++result.function_evaluations;
-
-            if (f_contract < m_values(m_worst)) {
-              m_simplex.col(m_worst) = m_trial_point;
-              m_values(m_worst) = f_contract;
-            } else {
-              shrink_simplex(callback);
-              result.function_evaluations += m_dim; // n new evaluations
-            }
-          }
-        }
-
-        // Check for volume-based restart
-        result.simplex_volume = compute_volume();
-        Scalar regular_volume = std::pow(m_options.initial_step, m_dim) / std::tgamma(m_dim + 1);
-        
-        if (result.simplex_volume / regular_volume < m_options.volume_tolerance) {
-          if (m_options.verbose) {
-            fmt::print("[NelderMead] Restarting simplex due to small volume\n");
-          }
-          // Restart around best point
-          initialize_simplex(result.solution, callback);
-          result.function_evaluations += m_dim + 1;
+          selected_strategy = Strategy::RANDOM_SUBSPACE;
         }
       }
-
-      // Final updates
-      if (result.iterations >= m_options.max_iterations) {
-        result.status = Status::MAX_ITERATIONS;
-      }
-
-      // Ensure best solution is returned
-      auto indices = sort_vertices();
-      m_best = indices[0];
-      result.solution = m_simplex.col(m_best);
-      result.final_function_value = m_values(m_best);
-      result.simplex_volume = compute_volume();
-      result.simplex_diameter = compute_diameter();
 
       if (m_options.verbose) {
-        fmt::print("[NelderMead] Finished: {}\n", status_to_string(result.status));
-        fmt::print("[NelderMead] Final: f={:12.6g}, iterations={}, evaluations={}\n",
-                   result.final_function_value, result.iterations, result.function_evaluations);
+        fmt::print("--- Nelder-Mead Optimization Start ---\n");
+        fmt::print("[INFO] Problem dimension (N): {}\n", m_dim);
+        fmt::print("[INFO] Selected strategy: {} (Adaptive: {})\n", 
+                    strategy_to_string(selected_strategy), 
+                    m_options.strategy == Strategy::ADAPTIVE_SUBSPACE ? "Yes" : "No");
+        fmt::print("[INFO] Max Iterations: {} | Max Evals: {}\n",
+                    m_options.max_iterations, m_options.max_function_evaluations);
+        fmt::print("[INFO] Tolerance (F): {:e} | Tolerance (Simplex): {:e}\n",
+                    m_options.tolerance, m_options.simplex_tolerance);
+        fmt::print("--------------------------------------\n");
       }
 
-      return result;
+      switch (selected_strategy) {
+        case Strategy::STANDARD:
+          return minimize_standard(x0, callback);
+        case Strategy::RANDOM_SUBSPACE:
+          return minimize_random_subspace(x0, callback);
+        case Strategy::BLOCK_COORDINATE:
+          return minimize_block_coordinate(x0, callback);
+        case Strategy::MIXED_STRATEGY: {
+          // Salvataggio/ripristino dello stato prima e dopo la modifica delle opzioni
+          Options original_options = m_options; 
+
+          auto result = minimize_random_subspace(x0, callback);
+          if (result.status == Status::SUBSPACE_CONVERGED) {
+            if (m_options.verbose) {
+              fmt::print("[MIXED] RSM converged (Subspace). Starting BCD refinement...\n");
+            }
+            // Modifica locale per il sottoproblema
+            m_options.strategy = Strategy::BLOCK_COORDINATE;
+            // La soluzione RSM diventa il punto di partenza per BCD
+            auto bcd_result = minimize_block_coordinate(result.solution, callback);
+            // Consolidare i conteggi totali di iterazioni e chiamate funzione
+            bcd_result.iterations += result.iterations;
+            bcd_result.function_evaluations += result.function_evaluations;
+            // Ripristino delle opzioni
+            m_options = original_options; 
+            return bcd_result;
+          }
+          // Ripristino delle opzioni nel caso in cui RSM non sia convergente
+          m_options = original_options; 
+          return result;
+        }
+        case Strategy::ADAPTIVE_SUBSPACE: // Se la strategia era ADAPTIVE ma non è stata mappata sopra
+        default:
+          // Dovrebbe essere coperto sopra, ma in caso di errore logico
+          if (m_options.verbose) {
+            fmt::print("[ERROR] Unhandled or adaptive strategy fallback to standard.\n");
+          }
+          return minimize_standard(x0, callback);
+      }
+
+      return Result{};
     }
 
-    /**
-     * @brief Get the current best solution found
-     *
-     * @return const reference to the current best solution vector
-     *
-     * @note This method can be called after minimize() to get the solution,
-     *       or during optimization if needed.
-     */
-    Vector solution() const { return m_simplex.col(m_best); }
-
-    /**
-     * @brief Convert status to string
-     */
-    static std::string status_to_string(Status status) {
-      switch (status) {
-        case Status::CONVERGED:           return "CONVERGED";
-        case Status::MAX_ITERATIONS:      return "MAX_ITERATIONS";
-        case Status::MAX_FUN_EVALUATIONS: return "MAX_FUN_EVALUATIONS";
-        case Status::SIMPLEX_TOO_SMALL:   return "SIMPLEX_TOO_SMALL";
-        case Status::FAILED:              return "FAILED";
+    static std::string strategy_to_string(Strategy strategy) {
+      switch (strategy) {
+        case Strategy::STANDARD:          return "STANDARD";
+        case Strategy::RANDOM_SUBSPACE:   return "RANDOM_SUBSPACE (RSM)";
+        case Strategy::BLOCK_COORDINATE:  return "BLOCK_COORDINATE (BCD)";
+        case Strategy::ADAPTIVE_SUBSPACE: return "ADAPTIVE_SUBSPACE (Auto-select)";
+        case Strategy::MIXED_STRATEGY:    return "MIXED_STRATEGY (RSM -> BCD)";
         default:                          return "UNKNOWN";
       }
     }
 
-    /**
-     * @brief Convert operation to string
-     */
-    static std::string operation_to_string(Operation op) {
-      switch (op) {
-        case Operation::INIT:             return "INIT";
-        case Operation::REFLECT:          return "REFLECT";
-        case Operation::EXPAND:           return "EXPAND";
-        case Operation::OUTSIDE_CONTRACT: return "OUTSIDE_CONTRACT";
-        case Operation::INSIDE_CONTRACT:  return "INSIDE_CONTRACT";
-        case Operation::SHRINK:           return "SHRINK";
-        case Operation::RESTART:          return "RESTART";
+    static std::string status_to_string(Status status) {
+      switch (status) {
+        case Status::CONVERGED:           return "CONVERGED (Tolerance Met)";
+        case Status::MAX_ITERATIONS:      return "MAX_ITERATIONS (Limit Reached)";
+        case Status::MAX_FUN_EVALUATIONS: return "MAX_FUN_EVALUATIONS (Limit Reached)";
+        case Status::SIMPLEX_TOO_SMALL:   return "SIMPLEX_TOO_SMALL (Degenerate Simplex)";
+        case Status::SUBSPACE_CONVERGED:  return "SUBSPACE_CONVERGED (High-Dim Convergence)";
+        case Status::FAILED:              return "FAILED (Unknown Error)";
         default:                          return "UNKNOWN";
       }
     }
@@ -616,3 +928,4 @@ namespace Utils {
 
 //
 // eof: Utils_NelderMead.hh
+//

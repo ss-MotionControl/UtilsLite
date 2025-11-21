@@ -236,7 +236,6 @@ namespace Utils {
      */
     void
     initialize_interpolation_points( Vector const & x0, Callback const & fun ) {
-      size_t n = static_cast<size_t>(x0.size());
       m_state.interpolation_points.clear();
       m_state.interpolation_values.clear();
       

@@ -1,159 +1,255 @@
 /*--------------------------------------------------------------------------*\
  |                                                                          |
- |  Copyright (C) 2022                                                      |
+ |  NelderMead_minimizer per problemi di ottimizzazione senza gradienti     |
  |                                                                          |
- |         , __                 , __                                        |
- |        /|/  \               /|/  \                                       |
- |         | __/ _   ,_         | __/ _   ,_                                |
- |         |   \|/  /  |  |   | |   \|/  /  |  |   |                        |
- |         |(__/|__/   |_/ \_/|/|(__/|__/   |_/ \_/|/                       |
- |                           /|                   /|                        |
- |                           \|                   \|                        |
- |                                                                          |
- |      Enrico Bertolazzi                                                   |
- |      Dipartimento di Ingegneria Industriale                              |
- |      Università degli Studi di Trento                                    |
- |      email: enrico.bertolazzi@unitn.it                                   |
- |                                                                          |
-\*--------------------------------------------------------------------------*/
+ |  Test harness aggiornato: verbose, salvataggio x_final, statistiche       |
+ \*--------------------------------------------------------------------------*/
 
 #include "Utils_NelderMead.hh"
 #include "Utils_fmt.hh"
+#include "ND_func.cxx" // problem definitions (assumed to provide lower(), upper(), init(), operator())
 
+#include <iostream>
 #include <cmath>
+#include <random>
+#include <vector>
+#include <map>
+#include <string>
 
-using namespace Utils;
-using namespace std;
+using Scalar = double;
+using Vector = Utils::NelderMead_minimizer<Scalar>::Vector;
 
-using real_type = double;
-using Vector = Utils::NelderMead_minimizer<real_type>::Vector;
+// Struttura per raccogliere i risultati dei test
+struct TestResult {
+  std::string problem_name;
+  std::string optimizer_name;
+  Utils::NelderMead_minimizer<Scalar>::Result iteration_data;
+  Scalar final_value{0};
+  Vector final_solution;
+  size_t dimension{0};
+};
 
-static inline real_type power2( real_type const x ) { return x*x; }
-//static inline real_type power3( real_type x ) { return x*x*x; }
-//static inline real_type power4( real_type x ) { return power2(power2(x)); }
-//static inline real_type power5( real_type x ) { return power4(x)*x; }
+// Statistiche optimizer
+struct OptimizerStats {
+  std::string name;
+  size_t total_tests{0};
+  size_t successful_tests{0};
+  size_t total_iterations{0};
+  size_t total_function_evals{0};
+};
 
-#if 0
-static
-real_type
-fun1( Vector const & X ) {
-  real_type x = X(0);
-  real_type y = X(1);
-  if ( x                              > -1      ) return Utils::Inf<real_type>();
-  if ( x                              < -17.001 ) return Utils::Inf<real_type>();
-  if ( y                              > -1      ) return Utils::Inf<real_type>();
-  if ( y                              < -x/3-28 ) return Utils::Inf<real_type>();
-  if ( power2(y+20)-3*x               < 51      ) return Utils::Inf<real_type>();
-  if ( abs(x+14.5)+power2(y+15)       < 3       ) return Utils::Inf<real_type>();
-  if ( power2(x+16)+pow(abs(y+8),1.5) < 20      ) return Utils::Inf<real_type>();
-  if ( power2(x+9.2)+abs(y+12)        < 7       ) return Utils::Inf<real_type>();
-  if ( power2(x+6)+power2(y+15)       < 29.8    ) return Utils::Inf<real_type>();
-  if ( power2(x+6)+pow(abs(y+1),1.5)  < 15      ) return Utils::Inf<real_type>();
-  return pow(abs(y-x),2.07) + pow(abs(x*y),1.07);
-}
-#endif
+// Collettori globali
+static std::vector<TestResult> global_test_results;
+static std::map<std::string, OptimizerStats> optimizer_statistics;
 
-#if 0
-static
-real_type
-fun2( Vector const & X ) {
-  real_type x = X(0);
-  real_type y = X(1);
-  if ( x > 100    ) return Utils::Inf<real_type>();
-  if ( x < 0      ) return Utils::Inf<real_type>();
-  if ( y > 101.01 ) return Utils::Inf<real_type>();
-  if ( y < 0      ) return Utils::Inf<real_type>();
-  {
-    real_type const v[] = {5,19,33,47,61,75,89};
-    for ( int i = 0; i < 7; ++i ) {
-      if ( abs(x)+pow( abs(y-v[i]), 3.5 ) < 99.9 )
-        return Utils::Inf<real_type>();
-    }
+// Helper: convert Eigen vector to formatted string
+static std::string vec_to_string(Vector const & v) {
+  std::string s;
+  s.reserve(v.size() * 16);
+  s.push_back('[');
+  for (Eigen::Index i = 0; i < v.size(); ++i) {
+    if (i) s += ", ";
+    s += fmt::format("{:.6e}", static_cast<double>(v(i)));
   }
-  {
-    real_type const v[] = {12,26,40,54,68,82,96};
-    for ( int i = 0; i < 7; ++i ) {
-      if ( abs(x-100)+pow( abs(y-v[i]), 3 ) < 99.9 )
-        return Utils::Inf<real_type>();
-    }
+  s.push_back(']');
+  return s;
+}
+
+// -------------------------------------------------------------------
+// Aggiorna statistiche
+// -------------------------------------------------------------------
+void update_optimizer_statistics(const TestResult& result) {
+  auto & stats = optimizer_statistics[result.optimizer_name];
+  stats.name = result.optimizer_name;
+  stats.total_tests++;
+  stats.total_iterations += result.iteration_data.iterations;
+  stats.total_function_evals += result.iteration_data.function_evaluations;
+  if (result.iteration_data.status == Utils::NelderMead_minimizer<Scalar>::Status::CONVERGED) {
+    stats.successful_tests++;
   }
-  return abs(x-100)/100 + abs(y-101);
-}
-#endif
-
-static
-real_type
-fun3( Vector const & X ) {
-  real_type const x { X(0) };
-  real_type const y { X(1) };
-  return 100*power2(y-x*x)+power2(1-x);
 }
 
-static
-real_type
-fun4( Vector const & X ) {
-  real_type const x { X(0) };
-  real_type const y { X(1) };
-  real_type const e { 1e-8 };
-  real_type const w { 1-x*x-y*y };
-  if ( w > 0 ) return x+y+e/w;
-  return Utils::Inf<real_type>();
+// -------------------------------------------------------------------
+// Stampa statistiche
+// -------------------------------------------------------------------
+void print_optimizer_statistics() {
+  fmt::print("\n\n{:=^100}\n", " Nelder Mead STATISTICS ");
+  fmt::print("{:<24} {:>8} {:>10} {:>12} {:>12}\n",
+             "Optimizer", "Tests", "Success", "AvgIter", "AvgFunEvals");
+  fmt::print("{:-<100}\n", "");
+
+  for (const auto & [name, stats] : optimizer_statistics) {
+    double success_rate = (stats.total_tests > 0) ?
+      100.0 * static_cast<double>(stats.successful_tests) / static_cast<double>(stats.total_tests) : 0.0;
+    double avg_iter = (stats.total_tests > 0) ?
+      static_cast<double>(stats.total_iterations) / static_cast<double>(stats.total_tests) : 0.0;
+    double avg_fevals = (stats.total_tests > 0) ?
+      static_cast<double>(stats.total_function_evals) / static_cast<double>(stats.total_tests) : 0.0;
+
+    auto color = (success_rate >= 80.0) ? fmt::fg(fmt::color::green) :
+                 (success_rate >= 60.0) ? fmt::fg(fmt::color::yellow) : fmt::fg(fmt::color::red);
+
+    fmt::print("{:<24} {:>8} ", stats.name, stats.total_tests);
+    fmt::print(color, "{:>9.2f}%", success_rate);
+    fmt::print(" {:>12.2f} {:>12.2f}\n", avg_iter, avg_fevals);
+  }
+
+  fmt::print("{:=^100}\n", "");
 }
 
-template <typename FUN>
-void
-do_solve( FUN f, Vector const & X0, real_type const delta ) {
-  NelderMead_minimizer<real_type>::Options opts;
+// -------------------------------------------------------------------
+// Stampa tabella riassuntiva
+// -------------------------------------------------------------------
+void print_summary_table() {
+  fmt::print("\n\n{:=^120}\n", " SUMMARY TEST RESULTS ");
+  fmt::print("{:<28} {:<20} {:>10} {:>12} {:>18} {:>12}\n",
+             "Problem", "Optimizer", "Dimension", "Iterations", "final f(x)", "Status");
+  fmt::print("{:-<120}\n", "");
+
+  for ( auto const & result : global_test_results ) {
+    std::string status_str = result.iteration_data.status == Utils::NelderMead_minimizer<Scalar>::Status::CONVERGED ? "CONVERGED" : "NOT_CONV";
+    auto const & GREEN { fmt::fg(fmt::color::green) };
+    auto const & RED   { fmt::fg(fmt::color::red)   };
+
+    fmt::print("{:<28} {:<20} {:>10} {:>12} {:>18.6e} ",
+               result.problem_name,
+               result.optimizer_name,
+               result.dimension,
+               result.iteration_data.iterations,
+               static_cast<double>(result.final_value));
+
+    if ( result.iteration_data.status == Utils::NelderMead_minimizer<Scalar>::Status::CONVERGED )
+      fmt::print( GREEN, "{:<12}\n", status_str );
+    else
+      fmt::print( RED,   "{:<12}\n", status_str );
+  }
+
+  fmt::print("{:=^120}\n", "");
+}
+
+// -------------------------------------------------------------------
+// Funzione di test Nelder Mead verbosa
+// -------------------------------------------------------------------
+template <typename Problem>
+void test(Problem & prob, std::string const & problem_name) {
+
+  fmt::print( "\n\nSTART: {}\n", problem_name );
+
+  // Parametri Nelder Mead
+  Utils::NelderMead_minimizer<Scalar>::Options opts;
   opts.verbose = true;
-  opts.initial_step = delta; // Usa delta come passo iniziale
-  NelderMead_minimizer<real_type> solver(opts);
-  auto result = solver.minimize( X0, f );
-  
-  fmt::print( "Solution found:\n" );
-  fmt::print( "  Status: {}\n", NelderMead_minimizer<real_type>::status_to_string(result.status) );
-  fmt::print( "  Solution: [{:.8f}, {:.8f}]\n", result.solution(0), result.solution(1) );
-  fmt::print( "  Function value: {:.8f}\n", result.final_function_value );
-  fmt::print( "  Iterations: {}\n", result.iterations );
-  fmt::print( "  Function evaluations: {}\n", result.function_evaluations );
-  fmt::print( "  Simplex diameter: {:.2e}\n", result.simplex_diameter );
-  fmt::print( "  Simplex volume: {:.2e}\n", result.simplex_volume );
-  fmt::print( "\n" );
+  opts.strategy = Utils::NelderMead_minimizer<Scalar>::Strategy::RANDOM_SUBSPACE;
+  opts.progress_frequency = 10; // print every iteration when verbose
+      
+  opts.max_dimension_standard=5;
+  opts.subspace_min_size=2;
+  opts.subspace_max_size=10;
+      
+  Utils::NelderMead_minimizer<Scalar> optimizer(opts);
+
+  Vector x0 = prob.init();
+
+  // Set bounds only if sizes match
+  try {
+    Vector lower = prob.lower();
+    Vector upper = prob.upper();
+    if ( lower.size() == x0.size() && upper.size() == x0.size() ) {
+      optimizer.set_bounds(lower, upper);
+    }
+  } catch(...) {
+    // ignore if problem does not provide bounds in expected form
+  }
+
+  auto callback = [&](Vector const & x)->Scalar { return prob(x); };
+
+  auto iter_data = optimizer.minimize(x0, callback);
+
+  TestResult result;
+  result.problem_name    = problem_name;
+  result.optimizer_name  = "NelderMead";
+  result.iteration_data  = iter_data;
+  result.final_value     = iter_data.final_function_value;
+  result.final_solution  = iter_data.solution;
+  result.dimension       = static_cast<size_t>(x0.size());
+
+  global_test_results.push_back(result);
+  update_optimizer_statistics(result);
+
+  // Print concise final info
+  fmt::print("\n{}: final f = {:.6e}, iterations = {}\n", problem_name,
+             static_cast<double>(iter_data.final_function_value), iter_data.iterations);
+  fmt::print("x_final = {}\n", vec_to_string(iter_data.solution));
 }
 
-int
-main() {
-  #if 0
-  {
-    real_type X0[2]{-1.1,-27.0};
-    real_type delta = 1;
-    do_solve( fun1, X0, delta );
-  }
-  #endif
-  #if 0
-  {
-    real_type X0[2]{1,1};
-    real_type delta = 1;
-    do_solve( fun2, X0, delta );
-  }
-  #endif
-  #if 1
-  {
-    Vector X0(2);
-    X0 << -1, 1;
-    real_type delta = 0.1;
-    do_solve( fun3, X0, delta );
-  }
-  #endif
-  #if 1
-  {
-    Vector X0(2);
-    X0 << 0, 0;
-    real_type delta = 0.01;
-    do_solve( fun4, X0, delta );
-  }
-  #endif
+// -------------------------------------------------------------------
+// MAIN
+// -------------------------------------------------------------------
+int main() {
+  fmt::print("Esecuzione test NelderMead_minimizer...\n");
 
-  cout << "\nAll Done Folks!\n";
+  // Lista dei test: creare istanze e chiamare test(...)
+  // Nota: ND_func.cxx deve definire le classi usate qui
+
+  try {
+    Rosenbrock2D<Scalar> rosen;
+    test( rosen, "Rosenbrock2D" );
+
+    RosenbrockN<Scalar,10> rosenN;
+    test( rosenN, "Rosenbrock10D" );
+
+    PowellSingularN<Scalar,16> powellN;
+    test( powellN, "PowellSingular16D" );
+
+    ExtendedWoodN<Scalar,16> woodN;
+    test( woodN, "ExtendedWood16D" );
+
+    // Altri problemi (se presenti in ND_func.cxx)
+    Beale2D<Scalar> beale;
+    test( beale, "Beale2D" );
+
+    Himmelblau2D<Scalar> himm;
+    test( himm, "Himmelblau2D" );
+
+    FreudensteinRoth2D<Scalar> fr;
+    test( fr, "FreudensteinRoth2D" );
+
+    HelicalValley3D<Scalar> heli;
+    test( heli, "HelicalValley3D" );
+
+    PowellBadlyScaled2D<Scalar> pbs;
+    test( pbs, "PowellBadlyScaled2D" );
+
+    BrownAlmostLinearN<Scalar,10> brown;
+    test( brown, "BrownAlmostLinear10D" );
+
+    BroydenTridiagonalN<Scalar,12> broy;
+    test( broy, "BroydenTridiagonal12D" );
+
+    IllConditionedQuadraticN<Scalar,20> illq;
+    test( illq, "IllConditionedQuadratic20D" );
+
+    TrigonometricSumN<Scalar,15> trig;
+    test( trig, "TrigonometricSum15D" );
+
+    SchwefelN<Scalar,15> schwefel;
+    test( schwefel, "SchwefelN15D" );
+
+    AckleyN<Scalar,15> ackley;
+    test( ackley, "AckleyN15D" );
+
+    RastriginN<Scalar,15> rastrigin;
+    test( rastrigin, "RastriginN15D" );
+
+  } catch (std::exception const & e) {
+    fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::red), "Errore durante l'esecuzione dei test: {}\n", e.what());
+    return 1;
+  } catch (...) {
+    fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::red), "Errore non gestito durante i test.\n");
+    return 2;
+  }
+
+  print_summary_table();
+  print_optimizer_statistics();
 
   return 0;
 }
