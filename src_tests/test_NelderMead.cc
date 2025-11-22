@@ -16,17 +16,22 @@
 #include <map>
 #include <string>
 
+
 using Scalar = double;
-using Vector = Utils::NelderMead_minimizer<Scalar>::Vector;
+using NM     = Utils::NelderMead_Hybrid<Scalar>;
+//using NM     = Utils::NelderMead_classic<Scalar>;
+using Vector = NM::Vector;
 
 // Struttura per raccogliere i risultati dei test
 struct TestResult {
   std::string problem_name;
   std::string optimizer_name;
-  Utils::NelderMead_minimizer<Scalar>::Result iteration_data;
   Scalar final_value{0};
   Vector final_solution;
   size_t dimension{0};
+  size_t iterations{0};
+  size_t function_evaluations{0};
+  bool   converged{false};
 };
 
 // Statistiche optimizer
@@ -62,11 +67,9 @@ void update_optimizer_statistics(const TestResult& result) {
   auto & stats = optimizer_statistics[result.optimizer_name];
   stats.name = result.optimizer_name;
   stats.total_tests++;
-  stats.total_iterations += result.iteration_data.iterations;
-  stats.total_function_evals += result.iteration_data.function_evaluations;
-  if (result.iteration_data.status == Utils::NelderMead_minimizer<Scalar>::Status::CONVERGED) {
-    stats.successful_tests++;
-  }
+  stats.total_iterations     += result.iterations;
+  stats.total_function_evals += result.function_evaluations;
+  if ( result.converged ) stats.successful_tests++;
 }
 
 // -------------------------------------------------------------------
@@ -107,7 +110,7 @@ void print_summary_table() {
   fmt::print("{:-<120}\n", "");
 
   for ( auto const & result : global_test_results ) {
-    std::string status_str = result.iteration_data.status == Utils::NelderMead_minimizer<Scalar>::Status::CONVERGED ? "CONVERGED" : "NOT_CONV";
+    std::string status_str = result.converged ? "CONVERGED" : "NOT_CONV";
     auto const & GREEN { fmt::fg(fmt::color::green) };
     auto const & RED   { fmt::fg(fmt::color::red)   };
 
@@ -115,13 +118,11 @@ void print_summary_table() {
                result.problem_name,
                result.optimizer_name,
                result.dimension,
-               result.iteration_data.iterations,
+               result.iterations,
                static_cast<double>(result.final_value));
 
-    if ( result.iteration_data.status == Utils::NelderMead_minimizer<Scalar>::Status::CONVERGED )
-      fmt::print( GREEN, "{:<12}\n", status_str );
-    else
-      fmt::print( RED,   "{:<12}\n", status_str );
+    if ( result.converged ) fmt::print( GREEN, "{:<12}\n", status_str );
+    else                    fmt::print( RED,   "{:<12}\n", status_str );
   }
 
   fmt::print("{:=^120}\n", "");
@@ -135,6 +136,7 @@ void test(Problem & prob, std::string const & problem_name) {
 
   fmt::print( "\n\nSTART: {}\n", problem_name );
 
+  #if 0
   // Parametri Nelder Mead
   Utils::NelderMead_minimizer<Scalar>::Options opts;
   opts.verbose = true;
@@ -144,8 +146,17 @@ void test(Problem & prob, std::string const & problem_name) {
   opts.max_dimension_standard=5;
   opts.subspace_min_size=2;
   opts.subspace_max_size=10;
-      
+
   Utils::NelderMead_minimizer<Scalar> optimizer(opts);
+  #else
+  // Parametri Nelder Mead
+  NM::Options opts;
+  opts.verbose = true;
+  opts.max_iterations = 10000;
+  opts.max_function_evaluations = 50000;
+  //opts.progress_frequency = 50; // print every iteration when verbose
+  NM optimizer(opts);
+  #endif
 
   Vector x0 = prob.init();
 
@@ -165,20 +176,23 @@ void test(Problem & prob, std::string const & problem_name) {
   auto iter_data = optimizer.minimize(x0, callback);
 
   TestResult result;
-  result.problem_name    = problem_name;
-  result.optimizer_name  = "NelderMead";
-  result.iteration_data  = iter_data;
-  result.final_value     = iter_data.final_function_value;
-  result.final_solution  = iter_data.solution;
-  result.dimension       = static_cast<size_t>(x0.size());
+  result.problem_name         = problem_name;
+  result.optimizer_name       = "NelderMead";
+  result.iterations           = iter_data.total_iterations;
+  result.converged            = iter_data.status == NM::Status::CONVERGED;
+  result.function_evaluations = iter_data.function_evaluations;
+  result.final_value          = iter_data.final_function_value;
+  result.final_solution       = iter_data.solution;
+  result.dimension            = static_cast<size_t>(x0.size());
 
   global_test_results.push_back(result);
   update_optimizer_statistics(result);
 
   // Print concise final info
   fmt::print("\n{}: final f = {:.6e}, iterations = {}\n", problem_name,
-             static_cast<double>(iter_data.final_function_value), iter_data.iterations);
+             static_cast<double>(iter_data.final_function_value), iter_data.total_iterations);
   fmt::print("x_final = {}\n", vec_to_string(iter_data.solution));
+  fmt::print("x_initial = {}\n", vec_to_string(x0));
 }
 
 // -------------------------------------------------------------------
