@@ -109,7 +109,7 @@ void test(ProblemFunc& problem, std::string const & name) {
   fmt::print("-> Final Value:    {:.8e}\n", result.final_function_value);
 
   // 4. Print Final Point & Stats
-  fmt::print("-> Final Status:   {}\n", Utils::status_to_string(result.status));
+  fmt::print("-> Final Status:   {}\n", Utils::NelderMead::status_to_string(result.status));
   fmt::print("-> Total Outer It: {}\n", result.outer_iterations);
   fmt::print("-> Total Inner It: {}\n", result.inner_iterations);
   fmt::print("-> Total Evals:    {}\n", result.total_evaluations);
@@ -118,7 +118,7 @@ void test(ProblemFunc& problem, std::string const & name) {
   tr.problem_name = name;
   tr.dimension = dim;
   tr.final_value = result.final_function_value;
-  tr.status_str = Utils::status_to_string(result.status);
+  tr.status_str = Utils::NelderMead::status_to_string(result.status);
   tr.outer_iters = result.outer_iterations;
   tr.inner_iters = result.inner_iterations;
   tr.total_evaluations = result.total_evaluations;

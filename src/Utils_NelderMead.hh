@@ -51,45 +51,107 @@ namespace Utils {
   // ENUMS & RESULT STRUCT
   // ===========================================================================
 
-  enum class NelderMeadStatus {
-    RUNNING,
-    CONVERGED,              // Function tolerance satisfied
-    CONVERGED_TOL_X,        // Simplex size tolerance satisfied
-    MAX_ITERATIONS,         // Max iterations reached
-    MAX_FUN_EVALUATIONS,    // Max evaluations reached
-    FAIL_NAN,               // NaN detected
-    FAILED
-  };
+  namespace NelderMead {
 
-  inline std::string status_to_string(NelderMeadStatus s) {
-    switch (s) {
-      case NelderMeadStatus::RUNNING: return "RUNNING";
-      case NelderMeadStatus::CONVERGED: return "CONVERGED";
-      case NelderMeadStatus::CONVERGED_TOL_X: return "CONVERGED_X";
-      case NelderMeadStatus::MAX_ITERATIONS: return "MAX_ITER";
-      case NelderMeadStatus::MAX_FUN_EVALUATIONS: return "MAX_EVAL";
-      case NelderMeadStatus::FAIL_NAN: return "FAIL_NAN";
-      case NelderMeadStatus::FAILED: return "FAILED";
-      default: return "UNKNOWN";
+    template <typename Scalar>
+    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+
+    template <typename Scalar>
+    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
+
+    template <typename Scalar>
+    using Callback = std::function<Scalar(Vector<Scalar> const &)>;
+
+    enum class Status {
+      RUNNING,
+      CONVERGED,              // Function tolerance satisfied
+      CONVERGED_TOL_X,        // Simplex size tolerance satisfied
+      MAX_ITERATIONS,         // Max iterations reached
+      MAX_FUN_EVALUATIONS,    // Max evaluations reached
+      FAIL_NAN,               // NaN detected
+      FAILED
+    };
+
+    inline
+    string
+    status_to_string( Status s ) {
+      switch (s) {
+        case Status::RUNNING:             return "RUNNING";
+        case Status::CONVERGED:           return "CONVERGED";
+        case Status::CONVERGED_TOL_X:     return "CONVERGED_X";
+        case Status::MAX_ITERATIONS:      return "MAX_ITER";
+        case Status::MAX_FUN_EVALUATIONS: return "MAX_EVAL";
+        case Status::FAIL_NAN:            return "FAIL_NAN";
+        case Status::FAILED:              return "FAILED";
+        default:                          return "UNKNOWN";
+      }
+    }
+
+    template <typename Scalar>
+    struct Result {
+      Vector<Scalar> solution;
+      Scalar         final_function_value{0};
+      Scalar         initial_function_value{0};
+      Status         status{Status::FAILED};
+  
+      // Statistics
+      size_t outer_iterations{0};      // Main loop cycles
+      size_t inner_iterations{0};      // Total simplex steps (sum of all sub-runs)
+      size_t total_iterations{0};      // Combined count
+  
+      size_t outer_evaluations{0};
+      size_t inner_evaluations{0};
+      size_t total_evaluations{0};
+    };
+
+    // Helper for vector formatting
+    template <typename Scalar>
+    inline
+    string
+    format_vector( Vector<Scalar> const & v, size_t max_size = 10 ) {
+      string tmp{"["};
+      size_t v_size = v.size();
+      if ( v_size <= max_size ) {
+        for ( size_t i = 0; i < v_size; ++i)
+          tmp += fmt::format("{:.4f}, ", v(i));
+      } else {
+        for ( size_t i{0}; i < max_size-3; ++i)
+          tmp += fmt::format("{:.4f}, ", v(i));
+        tmp.pop_back();
+        tmp += "...";
+        for ( size_t i{v_size-3}; i < v_size; ++i )
+          tmp += fmt::format("{:.4f}, ", v(i));
+      }
+      tmp.pop_back();
+      tmp.pop_back();
+      tmp += "]";
+      return tmp;
+    }
+
+    // Helper for vector formatting
+    template <typename Scalar>
+    inline
+    string
+    format_index_vector( vector<Scalar> const & v, size_t max_size = 20 ) {
+      string tmp{"["};
+      size_t v_size = v.size();
+      if ( v_size <= max_size ) {
+        for ( size_t i = 0; i < v_size; ++i)
+          tmp += fmt::format("{}, ", v[i]);
+      } else {
+        for ( size_t i{0}; i < max_size-3; ++i)
+          tmp += fmt::format("{}, ", v[i]);
+        tmp.pop_back();
+        tmp += "..., ";
+        for ( size_t i{v_size-3}; i < v_size; ++i )
+          tmp += fmt::format("{}, ", v[i]);
+      }
+      tmp.pop_back();
+      tmp.pop_back();
+      tmp += "]";
+      return tmp;
     }
   }
-
-  template <typename VectorType, typename ScalarType>
-  struct NelderMeadResult {
-    VectorType solution;
-    ScalarType final_function_value{0};
-    ScalarType initial_function_value{0};
-    NelderMeadStatus status{NelderMeadStatus::FAILED};
-
-    // Statistics
-    size_t outer_iterations{0};      // Main loop cycles
-    size_t inner_iterations{0};      // Total simplex steps (sum of all sub-runs)
-    size_t total_iterations{0};      // Combined count
-
-    size_t outer_evaluations{0};
-    size_t inner_evaluations{0};
-    size_t total_evaluations{0};
-  };
 
   // ===========================================================================
   // CLASS: NelderMead_classic (Inner Solver)
@@ -108,9 +170,10 @@ namespace Utils {
   template <typename Scalar = double>
   class NelderMead_classic {
   public:
-    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;    ///< Vector type
-    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;  ///< Matrix type
-    using Callback = std::function<Scalar(Vector const &)>;     ///< Objective function type
+  
+    using Vector   = NelderMead::Vector<Scalar>;
+    using Matrix   = NelderMead::Matrix<Scalar>;
+    using Callback = NelderMead::Callback<Scalar>;
 
     /**
      * @brief Optimization status codes
@@ -776,8 +839,12 @@ namespace Utils {
       Scalar f_reflect       = reflect_point(worst_idx);
       Vector reflected_point = m_trial_point;
 
-      if (f_reflect < best_value) {
+      bool improve{f_reflect < best_value};
+      print_inner_step("Reflect", f_reflect, improve);
+      if (improve) {
         Scalar f_expand = expand_point();
+        improve = f_expand < f_reflect;
+        print_inner_step("Expand", f_expand, improve);
         if (f_expand < f_reflect) {
           m_simplex[worst_idx] = m_trial_point;
           m_values[worst_idx]  = f_expand;
@@ -791,7 +858,9 @@ namespace Utils {
       } else {
         if (f_reflect < worst_value) {
           Scalar f_contract = contract_point(worst_idx, true);
-          if (f_contract <= f_reflect) {
+          improve = f_contract <= f_reflect;
+          print_inner_step( "Contract(out)", f_contract, improve );
+          if (improve) {
             m_simplex[worst_idx] = m_trial_point;
             m_values[worst_idx]  = f_contract;
           } else {
@@ -800,6 +869,8 @@ namespace Utils {
           }
         } else {
           Scalar f_contract = contract_point(worst_idx, false);
+          improve = f_contract < worst_value;
+          print_inner_step( "Contract(in)", f_contract, improve);
           if (f_contract < worst_value) {
             m_simplex[worst_idx] = m_trial_point;
             m_values[worst_idx]  = f_contract;
@@ -808,9 +879,28 @@ namespace Utils {
             adaptive_parameter_adjustment();
           }
         }
+
       }
       mark_simplex_unordered();
       return false;
+    }
+    
+    void
+    print_inner_step(
+      string const & step_name,
+      Scalar         fval,
+      bool           improved
+    ) const {
+      if (!m_options.verbose) return;
+      // usa fmt::fg se disponibile, altrimenti escape ANSI
+      auto col = improved ? fmt::fg(fmt::color::green) : fmt::fg(fmt::color::red);
+      // indent two spaces for inner steps
+      // stampo nome step, valore funzione e se ha migliorato
+      fmt::print( col,
+        "    ({:>4}) {:<9} | F = {:<12.6e}  Point = {}\n",
+        m_global_iterations, step_name, fval,
+        NelderMead::format_vector<Scalar>(m_trial_point)
+      );
     }
 
     /**
@@ -1186,7 +1276,7 @@ namespace Utils {
   public:
     using Vector   = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
     using Callback = std::function<Scalar(Vector const &)>;
-    using Result   = NelderMeadResult<Vector, Scalar>;
+    using Result   = NelderMead::Result<Scalar>;
 
     struct Options {
       size_t block_size{10};
@@ -1204,7 +1294,8 @@ namespace Utils {
     bool m_use_bounds{false};
 
     // Cyclic block selection
-    vector<size_t> select_block(size_t n_dims, size_t iter) {
+    vector<size_t>
+    select_block(size_t n_dims, size_t iter) {
       vector<size_t> indices;
       indices.reserve(m_options.block_size);
       size_t start = (iter * m_options.block_size) % n_dims;
@@ -1251,7 +1342,8 @@ namespace Utils {
           res.inner_evaluations = inner_res.inner_evaluations;
           res.total_evaluations = 1 + inner_res.inner_evaluations;
           res.status = inner_res.status == NelderMead_classic<Scalar>::Status::CONVERGED ? 
-                      NelderMeadStatus::CONVERGED : NelderMeadStatus::MAX_ITERATIONS;
+                                           NelderMead::Status::CONVERGED :
+                                           NelderMead::Status::MAX_ITERATIONS;
           return res;
       }
       
@@ -1266,7 +1358,7 @@ namespace Utils {
       res.initial_function_value = current_f;
 
       if (std::isnan(current_f) || std::isinf(current_f)) {
-          res.status = NelderMeadStatus::FAIL_NAN;
+          res.status = NelderMead::Status::FAIL_NAN;
           res.solution = x;
           return res;
       }
@@ -1288,16 +1380,24 @@ namespace Utils {
       while (outer_iter < m_options.max_outer_iterations && !converged) {
         outer_iter++;
         if (count_outer_evals + count_inner_evals >= m_options.max_function_evaluations) {
-          res.status = NelderMeadStatus::MAX_FUN_EVALUATIONS;
+          res.status = NelderMead::Status::MAX_FUN_EVALUATIONS;
           break;
         }
 
         vector<size_t> idxs = select_block(n, outer_iter - 1);
         size_t k = idxs.size();
 
+        if (m_options.verbose) {
+          fmt::print(
+            "→ [Outer {:>3}] Block indices: {}  (BlockDim={})\n"
+            "    Inner-loop details:\n",
+            outer_iter, Utils::NelderMead::format_index_vector<size_t>(idxs), idxs.size()
+          );
+        }
+
         // Prepare Subspace
         Vector x_sub(k), l_sub(k), u_sub(k);
-        for (size_t i = 0; i < k; ++i) {
+        for ( size_t i{0}; i < k; ++i) {
            x_sub(i) = x(idxs[i]);
            if (m_use_bounds) { l_sub(i) = m_lower(idxs[i]); u_sub(i) = m_upper(idxs[i]); }
         }
@@ -1323,25 +1423,24 @@ namespace Utils {
         }
 
         if (m_options.verbose) {
-           fmt::print("│ {:<5} │ {:<8} │ {:<14.6e} │ {:<10} │ {:<10} │\n",
-                      outer_iter, k, current_f, sub_res.inner_iterations, sub_res.inner_evaluations);
+          auto fg = sub_res.final_function_value < (res.initial_function_value - m_options.tolerance) ?
+                    fmt::fg(fmt::color::green) : fmt::fg(fmt::color::red);
+          fmt::print( fg,
+            "│ {:<5} │ {:<8} │ {:<14.6e} │ {:<10} │ {:<10} │\n",
+            outer_iter, k, current_f, sub_res.inner_iterations, sub_res.inner_evaluations
+          );
         }
 
         // Stagnation Check Logic
-        if (improvement > m_options.tolerance) {
-            no_improv_count = 0; // Reset counter on success
-        } else {
-            no_improv_count++;
-        }
+        if (improvement > m_options.tolerance) no_improv_count = 0; // Reset counter on success
+        else                                   ++no_improv_count;
 
         // Stop only if we cycled through ALL blocks twice without significant improvement
-        if (no_improv_count >= blocks_per_cycle * 2) {
-            converged = true;
-        }
+        if ( no_improv_count >= 2*blocks_per_cycle ) converged = true;
       }
 
       if (m_options.verbose) {
-         fmt::print("└───────┴──────────┴────────────────┴────────────┴────────────┘\n");
+        fmt::print("└───────┴──────────┴────────────────┴────────────┴────────────┘\n");
       }
 
       res.solution = x;
@@ -1353,9 +1452,9 @@ namespace Utils {
       res.inner_evaluations = count_inner_evals;
       res.total_evaluations = count_outer_evals + count_inner_evals;
       
-      if (res.status == NelderMeadStatus::FAILED) {
-          if (converged) res.status = NelderMeadStatus::CONVERGED;
-          else if (outer_iter >= m_options.max_outer_iterations) res.status = NelderMeadStatus::MAX_ITERATIONS;
+      if (res.status == NelderMead::Status::FAILED) {
+          if (converged) res.status = NelderMead::Status::CONVERGED;
+          else if (outer_iter >= m_options.max_outer_iterations) res.status = NelderMead::Status::MAX_ITERATIONS;
       }
       return res;
     }
