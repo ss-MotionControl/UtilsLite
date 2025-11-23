@@ -51,11 +51,11 @@ namespace Utils {
 
   enum class NelderMeadStatus {
     RUNNING,
-    CONVERGED,              // Tolleranza sulla funzione soddisfatta
-    CONVERGED_TOL_X,        // Tolleranza sulla dimensione del simplesso
-    MAX_ITERATIONS,         // Max iterazioni raggiunte
-    MAX_FUN_EVALUATIONS,    // Max valutazioni raggiunte
-    FAIL_NAN,               // Rilevato NaN durante il calcolo
+    CONVERGED,              // Function tolerance satisfied
+    CONVERGED_TOL_X,        // Simplex size tolerance satisfied
+    MAX_ITERATIONS,         // Max iterations reached
+    MAX_FUN_EVALUATIONS,    // Max evaluations reached
+    FAIL_NAN,               // NaN detected
     FAILED
   };
 
@@ -79,10 +79,10 @@ namespace Utils {
     ScalarType initial_function_value{0};
     NelderMeadStatus status{NelderMeadStatus::FAILED};
 
-    // Statistiche
-    size_t outer_iterations{0};
-    size_t inner_iterations{0};
-    size_t total_iterations{0};
+    // Statistics
+    size_t outer_iterations{0};      // Main loop cycles
+    size_t inner_iterations{0};      // Total simplex steps (sum of all sub-runs)
+    size_t total_iterations{0};      // Combined count
 
     size_t outer_evaluations{0};
     size_t inner_evaluations{0};
@@ -136,36 +136,35 @@ namespace Utils {
       size_t dim = x0.size();
       m_evals_count = 0;
 
-      // Parametri standard Nelder-Mead
+      // Standard Nelder-Mead parameters
       const Scalar rho = 1.0;  // Reflection
       const Scalar chi = 2.0;  // Expansion
       const Scalar gam = 0.5;  // Contraction
       const Scalar sig = 0.5;  // Shrink
 
-      // Allocazione Simplesso
+      // Data structures
       std::vector<Vector> simplex(dim + 1);
       std::vector<Scalar> f_values(dim + 1);
       std::vector<size_t> idx(dim + 1); 
 
-      // 1. Costruzione Simplesso
+      // 1. Build Initial Simplex
       simplex[0] = x0;
       f_values[0] = safe_evaluate(simplex[0], callback);
 
       for (size_t i = 0; i < dim; ++i) {
         Vector next = x0;
-        // euristica passo iniziale: evita passo nullo su x=0
+        // Robust initial step
         Scalar step = (std::abs(x0(i)) < 1e-6) ? 0.00025 : m_options.initial_step * x0(i);
         next(i) += step;
         simplex[i+1] = next;
         f_values[i+1] = safe_evaluate(next, callback);
       }
 
-      // Indici per ordinamento indiretto
+      // Sort helper
       std::iota(idx.begin(), idx.end(), 0);
       auto sort_simplex = [&]() {
         std::sort(idx.begin(), idx.end(), [&](size_t a, size_t b) { 
-            // Gestione robusta NaN/Inf in ordinamento: mettili in fondo
-            if (std::isnan(f_values[a])) return false;
+            if (std::isnan(f_values[a])) return false; // Push NaNs to end
             if (std::isnan(f_values[b])) return true;
             return f_values[a] < f_values[b]; 
         });
@@ -175,14 +174,14 @@ namespace Utils {
       res.initial_function_value = f_values[idx[0]];
       size_t iter = 0;
 
+      // Optimization Loop
       for (; iter < m_options.max_iterations; ++iter) {
-        // Check budget
         if (m_evals_count >= m_options.max_function_evaluations) {
           res.status = NelderMeadStatus::MAX_FUN_EVALUATIONS;
           break;
         }
 
-        // Check Convergenza (Differenza valori funzione)
+        // Convergence Check
         Scalar f_best  = f_values[idx[0]];
         Scalar f_worst = f_values[idx.back()];
         if (std::abs(f_worst - f_best) < m_options.tolerance) {
@@ -190,17 +189,17 @@ namespace Utils {
           break;
         }
 
-        // Centroide (escluso peggiore)
+        // Centroid
         Vector centroid = Vector::Zero(dim);
         for (size_t i = 0; i < dim; ++i) centroid += simplex[idx[i]];
         centroid /= static_cast<Scalar>(dim);
 
-        // --- REFLECTION ---
+        // Reflection
         Vector xr = centroid + rho * (centroid - simplex[idx.back()]);
         Scalar fr = safe_evaluate(xr, callback);
 
         if (fr < f_values[idx[0]]) {
-          // --- EXPANSION ---
+          // Expansion
           Vector xe = centroid + chi * (xr - centroid);
           Scalar fe = safe_evaluate(xe, callback);
           if (fe < fr) { 
@@ -209,15 +208,13 @@ namespace Utils {
             simplex[idx.back()] = xr; f_values[idx.back()] = fr; 
           }
         } else if (fr < f_values[idx[dim - 1]]) {
-          // --- ACCEPT REFLECTION ---
+          // Accept Reflection
           simplex[idx.back()] = xr; f_values[idx.back()] = fr;
         } else {
-          // --- CONTRACTION ---
-          // Qui siamo peggio del second-worst.
+          // Contraction
           bool contraction_ok = false;
-
           if (fr < f_values[idx.back()]) {
-            // Outside Contraction (meglio del worst, ma peggio del second-worst)
+            // Outside
             Vector xc = centroid + gam * (xr - centroid);
             Scalar fc = safe_evaluate(xc, callback);
             if (fc <= fr) {
@@ -225,7 +222,7 @@ namespace Utils {
               contraction_ok = true;
             }
           } else {
-            // Inside Contraction (peggio anche del worst)
+            // Inside
             Vector xc = centroid + gam * (simplex[idx.back()] - centroid);
             Scalar fc = safe_evaluate(xc, callback);
             if (fc < f_values[idx.back()]) {
@@ -235,10 +232,10 @@ namespace Utils {
           }
 
           if (!contraction_ok) {
-            // --- SHRINK ---
+            // Shrink
             Vector x_best = simplex[idx[0]];
             for (size_t i = 1; i <= dim; ++i) {
-               size_t k = idx[i]; // Usa indice reale
+               size_t k = idx[i];
                simplex[k] = x_best + sig * (simplex[k] - x_best);
                f_values[k] = safe_evaluate(simplex[k], callback);
             }
@@ -272,15 +269,12 @@ namespace Utils {
     using Callback = std::function<Scalar(Vector const &)>;
     using Result   = NelderMeadResult<Vector, Scalar>;
 
-    enum class BlockStrategy { SEQUENTIAL, RANDOM, ADAPTIVE };
-
     struct Options {
       size_t block_size{10};
       size_t max_outer_iterations{100};
       size_t max_function_evaluations{100000};
       Scalar tolerance{1e-6};
       bool   verbose{true};
-      BlockStrategy strategy{BlockStrategy::ADAPTIVE};
       typename NelderMead_classic<Scalar>::Options sub_options;
     };
 
@@ -290,6 +284,7 @@ namespace Utils {
     Vector m_lower, m_upper;
     bool m_use_bounds{false};
 
+    // Cyclic block selection
     vector<size_t> select_block(size_t n_dims, size_t iter) {
       vector<size_t> indices;
       indices.reserve(m_options.block_size);
@@ -310,27 +305,23 @@ namespace Utils {
     Result minimize(Vector x, Callback const & global_callback) {
       size_t n = x.size();
 
-      // --- SHORTCUT PER DIMENSIONI PICCOLE (< 10) ---
-      // Se la dimensione è piccola o il blocco copre tutto, usa direttamente il classico
-      if (n < 10 || n <= m_options.block_size) {
+      // 1. Check for small problem fallback
+      if ( 2*n <= 1+m_options.block_size) {
           if (m_options.verbose) {
-              fmt::print("   [Info] Dim < 10 o Dim <= BlockSize. Switching to DIRECT CLASSIC solver.\n");
+              fmt::print("   [Info] Dim <= BlockSize. Switching to DIRECT CLASSIC solver.\n");
           }
-          // Configura il solver interno con budget GLOBALE
           auto full_opts = m_options.sub_options;
           full_opts.max_function_evaluations = m_options.max_function_evaluations;
-          full_opts.max_iterations = m_options.max_function_evaluations; // Rimuoviamo limiti artificiali di iter
+          full_opts.max_iterations = m_options.max_function_evaluations; 
           full_opts.tolerance = m_options.tolerance;
-          full_opts.verbose = false; // Evita spam interno
+          full_opts.verbose = false;
           
           m_solver.set_options(full_opts);
           if (m_use_bounds) m_solver.set_bounds(m_lower, m_upper);
-
-          // Esegui diretto
           return m_solver.minimize(x, global_callback);
       }
       
-      // --- LOGICA A BLOCCHI (per Dim >= 10) ---
+      // 2. Block Coordinate Logic
       Result res;
       size_t count_outer_evals = 0;
       size_t count_inner_evals = 0;
@@ -348,11 +339,15 @@ namespace Utils {
 
       size_t outer_iter = 0;
       bool converged = false;
+      
+      // Stagnation control
+      size_t no_improv_count = 0;
+      size_t blocks_per_cycle = (n + m_options.block_size - 1) / m_options.block_size;
 
       if (m_options.verbose) {
-         fmt::print("   {:<5} | {:<10} | {:<14} | {:<10} | {:<10}\n", 
+         fmt::print("   {:<5} | {:<8} | {:<14} | {:<10} | {:<10}\n", 
                     "Iter", "BlockDim", "F Value", "In.Iter", "In.Eval");
-         fmt::print("   {:-<65}\n", "");
+         fmt::print("   {:-<60}\n", "");
       }
 
       while (outer_iter < m_options.max_outer_iterations && !converged) {
@@ -365,7 +360,7 @@ namespace Utils {
         vector<size_t> idxs = select_block(n, outer_iter - 1);
         size_t k = idxs.size();
 
-        // Setup Subspace
+        // Prepare Subspace
         Vector x_sub(k), l_sub(k), u_sub(k);
         for (size_t i = 0; i < k; ++i) {
            x_sub(i) = x(idxs[i]);
@@ -381,9 +376,11 @@ namespace Utils {
           return global_callback(x_temp);
         };
 
+        // Run Inner Solver
         auto sub_res = m_solver.minimize(x_sub, sub_cb);
         count_inner_iters += sub_res.inner_iterations;
 
+        // Update Global State
         Scalar improvement = current_f - sub_res.final_function_value;
         if (sub_res.final_function_value < current_f) {
            current_f = sub_res.final_function_value;
@@ -391,13 +388,20 @@ namespace Utils {
         }
 
         if (m_options.verbose) {
-           fmt::print("   {:<5} | {:<10} | {:<14.6e} | {:<10} | {:<10}\n", 
+           fmt::print("   {:<5} | {:<8} | {:<14.6e} | {:<10} | {:<10}\n", 
                       outer_iter, k, current_f, sub_res.inner_iterations, sub_res.inner_evaluations);
         }
 
-        if (improvement < m_options.tolerance && improvement >= 0) {
-            // Per ora non facciamo early exit aggressivo nel block coordinate
-            // per dare chance ad altri blocchi
+        // Stagnation Check Logic
+        if (improvement > m_options.tolerance) {
+            no_improv_count = 0; // Reset counter on success
+        } else {
+            no_improv_count++;
+        }
+
+        // Stop only if we cycled through ALL blocks twice without significant improvement
+        if (no_improv_count >= blocks_per_cycle * 2) {
+            converged = true;
         }
       }
 
@@ -411,8 +415,8 @@ namespace Utils {
       res.total_evaluations = count_outer_evals + count_inner_evals;
       
       if (res.status == NelderMeadStatus::FAILED) {
-          res.status = (outer_iter >= m_options.max_outer_iterations) ? 
-                       NelderMeadStatus::MAX_ITERATIONS : NelderMeadStatus::CONVERGED;
+          if (converged) res.status = NelderMeadStatus::CONVERGED;
+          else if (outer_iter >= m_options.max_outer_iterations) res.status = NelderMeadStatus::MAX_ITERATIONS;
       }
       return res;
     }

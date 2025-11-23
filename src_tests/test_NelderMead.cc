@@ -19,7 +19,7 @@ using Scalar = double;
 using NM_Block = Utils::NelderMead_BlockCoordinate<Scalar>;
 using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
-// --- Helper per formattare vettori ---
+// Helper for vector formatting
 std::string format_vector(const Vector& v) {
     std::stringstream ss;
     ss << "[";
@@ -44,13 +44,15 @@ struct TestResult {
   std::string problem_name;
   Scalar final_value{0};
   size_t dimension{0};
+  size_t outer_iters{0};
+  size_t inner_iters{0};
   size_t total_evaluations{0}; 
   std::string status_str;
 };
 
 static std::vector<TestResult> global_results;
 
-// --- Init Sicuro ---
+// Safe initialization
 template <typename ProblemFunc>
 Vector get_safe_initial_point(ProblemFunc& problem) {
     try { return problem.init(); } catch(...) {}
@@ -74,42 +76,51 @@ void test(ProblemFunc& problem, std::string const & name) {
   Vector U = problem.upper();
   size_t dim = L.size();
   Vector x0 = get_safe_initial_point(problem);
+  Scalar init_val = problem(x0);
 
+  // 1. Print Header
   fmt::print("\n");
   fmt::print("################################################################\n");
-  fmt::print("# TEST FUNZIONE: {:<45} #\n", name);
-  fmt::print("# Dimensione:    {:<45} #\n", dim);
+  fmt::print("# TEST FUNCTION: {:<45} #\n", name);
+  fmt::print("# Dimension:     {:<45} #\n", dim);
   fmt::print("################################################################\n");
 
-  fmt::print("-> Punto Iniziale: {}\n", format_vector(x0));
-  fmt::print("-> Valore Iniziale: {:.6e}\n", problem(x0));
-
+  // Solver Configuration
   NM_Block::Options opts;
   opts.block_size = 10; 
-  opts.max_outer_iterations = 100; 
-  opts.max_function_evaluations = 200000; 
+  opts.max_outer_iterations = 200; 
+  opts.max_function_evaluations = 500000; 
   opts.tolerance = 1e-7;
   opts.verbose = true;
   
-  // Opzioni sub-solver (usate come globali se dim < 10)
   opts.sub_options.tolerance = 1e-7;
   opts.sub_options.initial_step = 0.1; 
 
   NM_Block solver(opts);
   solver.set_bounds(L, U);
 
+  // 2. Run Optimization
   auto result = solver.minimize(x0, [&](Vector const & x) { return problem(x); });
 
-  fmt::print("\n-> STATO FINALE:   {}\n", Utils::status_to_string(result.status));
-  fmt::print("-> Punto Finale:   {}\n", format_vector(result.solution));
-  fmt::print("-> Valore Finale:  {:.8e}\n", result.final_function_value);
-  fmt::print("-> Totale Evals:   {}\n", result.total_evaluations);
+  fmt::print("\n");
+  fmt::print("-> Initial Point:  {}\n",     format_vector(x0));
+  fmt::print("-> Final Point:    {}\n",     format_vector(result.solution));
+  fmt::print("-> Initial Value:  {:.6e}\n", init_val);
+  fmt::print("-> Final Value:    {:.8e}\n", result.final_function_value);
+
+  // 4. Print Final Point & Stats
+  fmt::print("-> Final Status:   {}\n", Utils::status_to_string(result.status));
+  fmt::print("-> Total Outer It: {}\n", result.outer_iterations);
+  fmt::print("-> Total Inner It: {}\n", result.inner_iterations);
+  fmt::print("-> Total Evals:    {}\n", result.total_evaluations);
 
   TestResult tr;
   tr.problem_name = name;
   tr.dimension = dim;
   tr.final_value = result.final_function_value;
   tr.status_str = Utils::status_to_string(result.status);
+  tr.outer_iters = result.outer_iterations;
+  tr.inner_iters = result.inner_iterations;
   tr.total_evaluations = result.total_evaluations;
   global_results.push_back(tr);
 }
@@ -117,18 +128,19 @@ void test(ProblemFunc& problem, std::string const & name) {
 void print_summary_table() {
     if (global_results.empty()) return;
     fmt::print("\n\n");
-    fmt::print("╔═══════════════════════════════════════════════════════════════════════╗\n");
-    fmt::print("║                           R I E P I L O G O                           ║\n");
-    fmt::print("╠════════════════════════╤══════╤══════════╤══════════════╤═════════════╣\n");
-    fmt::print("║ Funzione               │ Dim  │ Tot Evals│ Valore Finale│ Status      ║\n");
-    fmt::print("╠════════════════════════╪══════╪══════════╪══════════════╪═════════════╣\n");
+    fmt::print("╔══════════════════════════════════════════════════════════════════════════════════╗\n");
+    fmt::print("║                                  SUMMARY                                         ║\n");
+    fmt::print("╠════════════════════════╤══════╤══════════╤══════════╤══════════════╤═════════════╣\n");
+    fmt::print("║ Function               │ Dim  │ Outer It │ Inner It │ Final Value  │ Status      ║\n");
+    fmt::print("╠════════════════════════╪══════╪══════════╪══════════╪══════════════╪═════════════╣\n");
 
     for (const auto& r : global_results) {
-        fmt::print("║ {:<22} │ {:>4} │ {:>8} │ {:<12.4e} │ {:<11} ║\n", 
+        fmt::print("║ {:<22} │ {:>4} │ {:>8} │ {:>8} │ {:<12.4e} │ {:<11} ║\n", 
                    r.problem_name.substr(0,22), r.dimension, 
-                   r.total_evaluations, r.final_value, r.status_str);
+                   r.outer_iters, r.inner_iters,
+                   r.final_value, r.status_str);
     }
-    fmt::print("╚════════════════════════╧══════╧══════════╧══════════════╧═════════════╝\n");
+    fmt::print("╚════════════════════════╧══════╧══════════╧══════════╧══════════════╧═════════════╝\n");
 }
 
 int
