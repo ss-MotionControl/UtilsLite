@@ -80,10 +80,10 @@ void test(ProblemFunc& problem, std::string const & name) {
 
   // 1. Print Header
   fmt::print("\n");
-  fmt::print("################################################################\n");
-  fmt::print("# TEST FUNCTION: {:<45} #\n", name);
-  fmt::print("# Dimension:     {:<45} #\n", dim);
-  fmt::print("################################################################\n");
+  fmt::print("╔═════════════════════════════════════════════════════════════╗\n");
+  fmt::print("║ TEST FUNCTION: {:<44} ║\n", name);
+  fmt::print("║ Dimension:     {:<44} ║\n", dim);
+  fmt::print("╚═════════════════════════════════════════════════════════════╝\n");
 
   // Solver Configuration
   NM_Block::Options opts;
@@ -129,7 +129,7 @@ void print_summary_table() {
     if (global_results.empty()) return;
     fmt::print("\n\n");
     fmt::print("╔══════════════════════════════════════════════════════════════════════════════════╗\n");
-    fmt::print("║                                  SUMMARY                                         ║\n");
+    fmt::print("║                                       SUMMARY                                    ║\n");
     fmt::print("╠════════════════════════╤══════╤══════════╤══════════╤══════════════╤═════════════╣\n");
     fmt::print("║ Function               │ Dim  │ Outer It │ Inner It │ Final Value  │ Status      ║\n");
     fmt::print("╠════════════════════════╪══════╪══════════╪══════════╪══════════════╪═════════════╣\n");

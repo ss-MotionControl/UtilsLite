@@ -42,6 +42,8 @@
 namespace Utils {
 
   using std::abs;
+  using std::max;
+  using std::min;
   using std::vector;
   using std::string;
 
@@ -93,171 +95,1088 @@ namespace Utils {
   // CLASS: NelderMead_classic (Inner Solver)
   // ===========================================================================
 
+  /**
+   * @class NelderMead_classic
+   * @brief Implementation of the classic Nelder-Mead simplex optimization algorithm
+   *
+   * @tparam Scalar Numeric type for computations (default: double)
+   *
+   * This class implements the Nelder-Mead simplex algorithm for unconstrained
+   * and bound-constrained optimization. It includes advanced features like
+   * adaptive parameters, restart mechanisms, and robust convergence checking.
+   */
   template <typename Scalar = double>
   class NelderMead_classic {
   public:
-    using Vector   = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-    using Callback = std::function<Scalar(Vector const &)>;
-    using Result   = NelderMeadResult<Vector, Scalar>;
+    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;    ///< Vector type
+    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;  ///< Matrix type
+    using Callback = std::function<Scalar(Vector const &)>;     ///< Objective function type
 
+    /**
+     * @brief Optimization status codes
+     */
+    enum class Status {
+      CONVERGED,              ///< Successfully converged to optimum
+      MAX_ITERATIONS,         ///< Reached maximum iteration limit
+      MAX_FUN_EVALUATIONS,    ///< Reached maximum function evaluation limit
+      SIMPLEX_TOO_SMALL,      ///< Simplex became too small to continue
+      STAGNATED,              ///< Algorithm stagnated (no improvement)
+      FAILED                  ///< Optimization failed
+    };
+
+    /**
+     * @brief Configuration options for Nelder-Mead algorithm
+     */
     struct Options {
-      size_t max_iterations{5000};
-      size_t max_function_evaluations{10000};
-      Scalar tolerance{1e-8};
-      Scalar initial_step{0.05}; 
-      bool   verbose{false};
+      // Global budget (including restarts)
+      size_t max_iterations{10000};           ///< Maximum total iterations
+      size_t max_function_evaluations{50000}; ///< Maximum function evaluations
+      Scalar tolerance{1e-8};                 ///< Convergence tolerance
+      Scalar stagnation_tolerance{1e-8};      ///< Stagnation detection tolerance
+      Scalar simplex_tolerance{1e-10};        ///< Minimum simplex size tolerance
+      
+      // Standard Nelder-Mead parameters
+      Scalar rho{1.0};        ///< Reflection coefficient
+      Scalar chi{2.0};        ///< Expansion coefficient
+      Scalar gamma{0.5};      ///< Contraction coefficient
+      Scalar sigma{0.5};      ///< Shrink coefficient
+      
+      Scalar initial_step{0.1};   ///< Initial step size for simplex construction
+      
+      bool   adaptive_parameters{true}; ///< Enable adaptive parameter adjustment
+      bool   verbose{false};            ///< Enable verbose output
+      size_t progress_frequency{100};   ///< Progress reporting frequency
+      
+      // Restart mechanism
+      bool   enable_restart{true};         ///< Enable restart strategy
+      size_t max_restarts{5};              ///< Maximum number of restarts
+      size_t stagnation_threshold{30};     ///< Iterations before stagnation detection
+      bool   use_relative_tolerance{true}; ///< Use relative convergence criteria
+      
+      Scalar restart_perturbation_ratio{0.25}; ///< Restart perturbation scale
+      bool   track_best_point{true};           ///< Track best point across restarts
+        
+      // Enhanced convergence parameters
+      Scalar min_step_size{1e-10};         ///< Minimum step size to avoid degeneracy
+      bool   use_robust_convergence{true}; ///< Use robust convergence criteria
+      Scalar convergence_relaxation{10.0}; ///< Convergence criterion relaxation factor
+      
+      // Restart condition thresholds
+      Scalar restart_relative_improvement_threshold{0.05};   ///< 5% min improvement for restart
+      Scalar restart_progress_per_eval_threshold{1e-6};      ///< Progress per evaluation threshold
+      Scalar restart_simplex_geometry_threshold{0.3};        ///< Improvement threshold for small simplex
+      Scalar restart_shrink_count_threshold{8};              ///< Shrink operations before restart
+      Scalar restart_after_shrink_improvement{0.02};         ///< Improvement after shrink threshold
+      Scalar restart_expected_progress_ratio{0.05};          ///< Expected progress ratio for high dimensions
+      Scalar restart_quality_metric_threshold{1e-4};         ///< Quality metric threshold
+      Scalar restart_degenerate_improvement_threshold{0.1};  ///< Improvement threshold for degenerate simplex
+      Scalar restart_improvement_ratio{0.95};                ///< Improvement ratio to accept restart
+      Scalar restart_absolute_improvement_threshold{0.1};    ///< Absolute improvement threshold
+      
+      // Geometry factors for restart conditions
+      Scalar restart_simplex_diameter_factor1{50.0};         ///< Diameter factor for condition 3
+      Scalar restart_simplex_diameter_factor2{20.0};         ///< Diameter factor for condition 7
+      Scalar restart_std_dev_factor{10.0};                   ///< Standard deviation factor
+    };
+
+    /**
+     * @brief Inner result structure for compatibility with BlockCoordinate
+     */
+    struct InnerResult {
+      Vector solution;
+      Scalar final_function_value{0};
+      Scalar initial_function_value{0};
+      Status status{Status::FAILED};
+      
+      // Statistics for single run
+      size_t iterations{0};               ///< Iterations in this run
+      size_t function_evaluations{0};     ///< Function evaluations in this run
+      Scalar simplex_volume{0};
+      Scalar simplex_diameter{0};
+      size_t restarts_performed{0};
+      size_t shrink_operations{0};
+      
+      // Compatibility fields for BlockCoordinate
+      size_t inner_iterations{0};      ///< Same as iterations
+      size_t inner_evaluations{0};     ///< Same as function_evaluations
     };
 
   private:
-    Options m_options;
-    Vector  m_lower, m_upper;
-    bool    m_use_bounds{false};
-    size_t  m_evals_count{0};
+    /**
+     * @brief Statistics for simplex analysis
+     */
+    struct SimplexStats {
+      Scalar diameter;          ///< Maximum distance between vertices
+      Scalar std_dev;           ///< Standard deviation of function values
+      Scalar value_range;       ///< Range of function values (max-min)
+      Scalar centroid_distance; ///< Average distance to centroid
+    };
 
-    Scalar safe_evaluate(Vector const & x, Callback const & cb) {
-      if (m_use_bounds) {
-        if ((x.array() < m_lower.array()).any() || (x.array() > m_upper.array()).any()) {
-          return std::numeric_limits<Scalar>::infinity();
+    Options m_options;            ///< Algorithm configuration
+    Vector  m_lower;              ///< Lower bounds (if used)
+    Vector  m_upper;              ///< Upper bounds (if used)
+    bool    m_use_bounds{false};  ///< Whether bounds are active
+    
+    Callback const * m_callback{nullptr};  ///< Objective function callback
+    size_t m_global_iterations{0};         ///< Global iteration counter
+    size_t m_global_evals{0};              ///< Global function evaluation counter
+    
+    vector<Vector> m_simplex;              ///< Simplex vertices
+    vector<Scalar> m_values;               ///< Function values at vertices
+    Vector m_centroid;                     ///< Current centroid (excluding worst)
+    Vector m_trial_point;                  ///< Trial point for operations
+    size_t m_dim{0};                       ///< Problem dimension
+
+    mutable bool           m_simplex_ordered{false}; ///< Whether simplex is sorted
+    mutable vector<size_t> m_sorted_indices;         ///< Indices sorted by function value
+
+    size_t m_stagnation_count{0};          ///< Consecutive stagnation iterations
+    Scalar m_previous_best{std::numeric_limits<Scalar>::max()}; ///< Previous best value
+    size_t m_shrink_count{0};              ///< Shrink operation counter
+    
+    Vector m_best_point;                   ///< Best point found (across restarts)
+    Scalar m_best_value{std::numeric_limits<Scalar>::max()}; ///< Best value found
+    
+    Scalar m_current_rho, m_current_chi, m_current_gamma, m_current_sigma; ///< Current adaptive parameters
+
+    /**
+     * @brief Safely evaluate objective function with bounds checking
+     * @param x Point to evaluate
+     * @return Function value or large value if out of bounds/invalid
+     */
+    Scalar
+    safe_evaluate( Vector const & x ) {
+      UTILS_ASSERT(m_callback != nullptr, "NelderMead_classic::safe_evaluate(x) Callback not set!");
+        
+      // Check bounds before evaluation
+      if ( m_use_bounds ) {
+        bool out_of_bound = (x.array() < m_lower.array()).any() ||
+                            (x.array() > m_upper.array()).any();
+        if (out_of_bound) {
+          if (m_options.verbose) {
+            fmt::print("Warning: Point outside bounds, returning large value\n");
+          }
+          return std::numeric_limits<Scalar>::max();
         }
       }
-      Scalar val = cb(x);
-      m_evals_count++;
-      return val;
+        
+      Scalar value{(*m_callback)(x)};
+      ++m_global_evals;
+        
+      if (!std::isfinite(value)) {
+        if (m_options.verbose) {
+          fmt::print("Warning: Non-finite function value at x={}\n", x.transpose());
+        }
+        return std::numeric_limits<Scalar>::max();
+      }
+      return value;
+    }
+
+    /**
+     * @brief Project point to feasible region (respect bounds)
+     * @param x Point to project (modified in-place)
+     */
+    void
+    project_point(Vector & x) const {
+      if (m_use_bounds) x = x.cwiseMax(m_lower).cwiseMin(m_upper);
+    }
+
+    /**
+     * @brief Initialize adaptive parameters based on problem dimension
+     */
+    void
+    initialize_adaptive_parameters() {
+      if (m_options.adaptive_parameters && m_dim > 0) {
+        Scalar n = static_cast<Scalar>(m_dim);
+        // More conservative parameters for high-dimensional problems
+        if (m_dim > 10) {
+          m_current_rho   = 1.0;
+          m_current_chi   = 1.0 + 1.0 / n;  // Less aggressive expansion
+          m_current_gamma = 0.75 - 0.5 / n;
+          m_current_sigma = 0.8 - 0.5 / n;  // Less aggressive shrink
+        } else {
+          m_current_rho   = 1.0;
+          m_current_chi   = 1.0 + 2.0 / n;
+          m_current_gamma = 0.75 - 0.5 / n;
+          m_current_sigma = 1.0 - 1.0 / n;
+        }
+      } else {
+        m_current_rho   = m_options.rho;
+        m_current_chi   = m_options.chi;
+        m_current_gamma = m_options.gamma;
+        m_current_sigma = m_options.sigma;
+      }
+    }
+
+    /**
+     * @brief Get sorted indices of simplex vertices by function value
+     * @return Const reference to sorted indices vector
+     */
+    vector<size_t> const &
+    get_sorted_indices() const {
+      if (!m_simplex_ordered) {
+        m_sorted_indices.resize(m_dim + 1);
+        std::iota(m_sorted_indices.begin(), m_sorted_indices.end(), 0);
+        std::sort(m_sorted_indices.begin(), m_sorted_indices.end(),
+                  [this](size_t i, size_t j) { return m_values[i] < m_values[j]; });
+        m_simplex_ordered = true;
+      }
+      return m_sorted_indices;
+    }
+
+    /**
+     * @brief Mark simplex as unordered (needs re-sorting)
+     */
+    void
+    mark_simplex_unordered() {
+      m_simplex_ordered = false;
+    }
+
+    /**
+     * @brief Compute smart step size for simplex initialization
+     * @param dimension_index Dimension index
+     * @param current_val Current coordinate value
+     * @return Appropriate step size
+     */
+    Scalar
+    get_smart_step(size_t dimension_index, Scalar current_val) const {
+      Scalar step = m_options.initial_step;
+        
+      if (m_use_bounds) {
+        Scalar lower = m_lower(dimension_index);
+        Scalar upper = m_upper(dimension_index);
+            
+        if (std::isfinite(lower) && std::isfinite(upper)) {
+          Scalar range = upper - lower;
+          if (range > std::numeric_limits<Scalar>::epsilon()) {
+            step = std::clamp(range * 0.05, m_options.min_step_size, Scalar(10.0));
+          }
+        } else if (std::isfinite(lower) && !std::isfinite(upper)) {
+          Scalar dist_from_lower = current_val - lower;
+          if (dist_from_lower > 0) {
+            step = max(m_options.initial_step, dist_from_lower * 0.1);
+          }
+        } else if (!std::isfinite(lower) && std::isfinite(upper)) {
+          Scalar dist_from_upper = upper - current_val;
+          if (dist_from_upper > 0) {
+            step = max(m_options.initial_step, dist_from_upper * 0.1);
+          }
+        }
+      }
+        
+      Scalar abs_val = abs(current_val);
+      if (abs_val > 1.0) step = max(m_options.initial_step, abs_val * 0.05);
+        
+      return max(step, m_options.min_step_size);
+    }
+
+    /**
+     * @brief Initialize simplex around starting point
+     * @param x0 Starting point
+     */
+    void
+    initialize_simplex(Vector const & x0) {
+      m_dim = x0.size();
+        
+      m_simplex.resize(m_dim + 1);
+      m_values.resize(m_dim + 1);
+      m_centroid.resize(m_dim);
+      m_trial_point.resize(m_dim);
+      m_sorted_indices.resize(m_dim + 1);
+
+      for (auto & vec : m_simplex) vec.resize(m_dim);
+
+      m_simplex[0] = x0;
+      project_point(m_simplex[0]);
+      m_values[0] = safe_evaluate(m_simplex[0]);
+        
+      Vector x_base   = m_simplex[0];
+      Scalar min_step = m_options.min_step_size;
+        
+      for ( size_t i{0}; i < m_dim; ++i ) {
+        Scalar step = get_smart_step(i, x_base(i));
+
+        // Ensure minimum step to avoid degenerate simplex
+        if (abs(step) < min_step) step = (step >= 0) ? min_step : -min_step;
+
+        Vector x_next = x_base;
+        x_next(i) += step;
+
+        project_point(x_next);
+
+        // Verify point is different from base point
+        if ((x_next - x_base).norm() < min_step) {
+          // If still too close, try opposite direction
+          x_next = x_base;
+          x_next(i) -= step;
+          project_point(x_next);
+        }
+
+        m_simplex[i + 1] = x_next;
+        m_values[i + 1] = safe_evaluate(x_next);
+      }
+
+      mark_simplex_unordered();
+        
+      // Verify simplex is not degenerate
+      if (compute_volume() < std::numeric_limits<Scalar>::epsilon()) {
+        if (m_options.verbose) {
+          fmt::print("  [Warning] Initial simplex has zero volume, adding perturbation\n");
+        }
+        // Add small random perturbation to avoid degeneracy
+        for (size_t i{1}; i <= m_dim; ++i) {
+          Vector perturbation = Vector::Random(m_dim) * min_step * 10;
+          m_simplex[i] += perturbation;
+          project_point(m_simplex[i]);
+          m_values[i] = safe_evaluate(m_simplex[i]);
+        }
+      }
+
+      if (m_options.track_best_point) {
+        auto indices = get_sorted_indices();
+        if (m_values[indices[0]] < m_best_value) {
+          m_best_value = m_values[indices[0]];
+          m_best_point = m_simplex[indices[0]];
+        }
+        m_previous_best = m_best_value;
+      }
+    }
+
+    /**
+     * @brief Update centroid excluding worst point
+     * @param worst_index Index of worst point to exclude
+     */
+    void
+    update_centroid(size_t worst_index) {
+      m_centroid.setZero();
+      for (size_t i{0}; i <= m_dim; ++i) {
+        if (i != worst_index) m_centroid += m_simplex[i];
+      }
+      m_centroid /= static_cast<Scalar>(m_dim);
+    }
+
+    /**
+     * @brief Compute simplex diameter (maximum vertex distance)
+     * @return Simplex diameter
+     */
+    Scalar
+    compute_diameter() const {
+      Scalar max_dist{0};
+      for (size_t i{0}; i <= m_dim; ++i) {
+        for (size_t j{i + 1}; j <= m_dim; ++j) {
+          Scalar dist = (m_simplex[i] - m_simplex[j]).norm();
+          max_dist = max(max_dist, dist);
+        }
+      }
+      return max_dist;
+    }
+
+    /**
+     * @brief Compute simplex volume
+     * @return Simplex volume (approximated for high dimensions)
+     */
+    Scalar
+    compute_volume() const {
+      if (m_dim == 0) return 0;
+      if (m_dim > 100) return std::pow(compute_diameter(), m_dim) * std::exp(-std::lgamma(m_dim+1));
+    
+      Matrix basis(m_dim, m_dim);
+      for (size_t i{0}; i < m_dim; ++i) {
+        basis.col(i) = m_simplex[i + 1] - m_simplex[0];
+      }
+    
+      Eigen::ColPivHouseholderQR<Matrix> qr(basis);
+      if (qr.rank() < m_dim) return 0;
+    
+      Scalar log_det   = qr.logAbsDeterminant();
+      Scalar log_gamma = std::lgamma(m_dim + 1);
+    
+      return std::exp(log_det - log_gamma);
+    }
+
+    /**
+     * @brief Compute comprehensive simplex statistics
+     * @return Simplex statistics structure
+     */
+    SimplexStats
+    compute_simplex_stats() const {
+      SimplexStats stats;
+        
+      stats.diameter = compute_diameter();
+        
+      // Use Eigen for efficient mean computation
+      Scalar mean = Eigen::Map<const Eigen::VectorXd>(m_values.data(), m_values.size()).mean();
+        
+      Scalar variance = 0;
+      for (auto const & v : m_values) {
+        variance += (v - mean) * (v - mean);
+      }
+      stats.std_dev = std::sqrt(variance / m_values.size());
+        
+      auto indices = get_sorted_indices();
+      stats.value_range = m_values[indices.back()] - m_values[indices[0]];
+        
+      Vector centroid = Vector::Zero(m_dim);
+      for (auto const & v : m_simplex) centroid += v;
+      centroid /= m_simplex.size();
+        
+      Scalar total_dist = 0;
+      for (auto const & v : m_simplex) {
+        total_dist += (v - centroid).norm();
+      }
+      stats.centroid_distance = total_dist / m_simplex.size();
+        
+      return stats;
+    }
+
+    /**
+     * @brief Check convergence using robust criteria
+     * @param best_value Best function value in simplex
+     * @param worst_value Worst function value in simplex
+     * @return True if converged
+     */
+    bool
+    check_convergence_robust(Scalar best_value, Scalar worst_value) const {
+      auto const & tolerance              = m_options.tolerance;
+      auto const & simplex_tolerance      = m_options.simplex_tolerance;
+      auto const & convergence_relaxation = m_options.convergence_relaxation;
+    
+      if (!m_options.use_robust_convergence) {
+        // Usa worst_value qui
+        auto stats              = compute_simplex_stats();
+        bool value_converged    = (worst_value - best_value) < tolerance;
+        bool geometry_converged = stats.diameter < simplex_tolerance;
+        return value_converged && geometry_converged;
+      }
+        
+      auto stats = compute_simplex_stats();
+        
+      // 1. Primary convergence: function values
+      bool value_converged;
+      if (m_options.use_relative_tolerance) {
+        Scalar relative_range = stats.value_range / (1.0 + abs(best_value));
+        value_converged = relative_range < tolerance;
+      } else {
+        value_converged = stats.value_range < tolerance;
+      }
+        
+      // 2. Secondary convergence: simplex geometry
+      bool geometry_converged = stats.diameter < simplex_tolerance * std::sqrt(m_dim);
+        
+      // 3. Variance-based convergence
+      bool variance_converged = stats.std_dev < tolerance * convergence_relaxation;
+        
+      // Converge if primary condition OR all secondary conditions are satisfied
+      bool converged = value_converged ||
+                        (geometry_converged && stats.value_range < tolerance * convergence_relaxation) ||
+                        (variance_converged && geometry_converged);
+        
+      if (m_options.verbose && (converged || m_global_iterations % m_options.progress_frequency == 0)) {
+        fmt::print(
+          " [Conv Check] V:{} G:{} S:{} | Range={:<12.4e} Diam={:<12.4e} StdDev={:<12.4e}\n",
+          (value_converged ? "✓" : "✗"),
+          (geometry_converged ? "✓" : "✗"),
+          (variance_converged ? "✓" : "✗"),
+          stats.value_range,
+          stats.diameter,
+          stats.std_dev
+        );
+      }
+      return converged;
+    }
+
+    /**
+     * @brief Check for optimization stagnation
+     * @param current_best Current best function value
+     * @return True if stagnated
+     */
+    bool
+    check_stagnation(Scalar current_best) {
+      if (!m_options.enable_restart) return false;
+        
+      Scalar improvement = abs(current_best - m_previous_best);
+      Scalar relative_improvement = improvement / (1.0 + abs(m_previous_best));
+        
+      if (relative_improvement < m_options.stagnation_tolerance) {
+        ++m_stagnation_count;
+        return m_stagnation_count >= m_options.stagnation_threshold;
+      } else {
+        m_stagnation_count = 0;
+        m_previous_best    = current_best;
+        return false;
+      }
+    }
+
+    /**
+     * @brief Determine if restart is worthwhile based on current results
+     * @param current_result Current optimization result
+     * @return True if restart should be performed
+     */
+    bool
+    is_restart_worthwhile(InnerResult const & current_result) const {
+      // Don't restart if we've reached satisfactory tolerance
+      if (current_result.status == Status::CONVERGED) return false;
+    
+      // Calculate relative improvement from start
+      Scalar absolute_improvement = abs(current_result.initial_function_value - current_result.final_function_value);
+      Scalar relative_improvement = absolute_improvement / (1.0 + abs(current_result.initial_function_value));
+    
+      // 1. Restart for stagnation with insufficient improvement
+      if (current_result.status == Status::STAGNATED) {
+        if (relative_improvement < m_options.restart_relative_improvement_threshold) {
+          return true;
+        }
+      }
+    
+      // 2. Restart for insufficient progress relative to resources used
+      Scalar progress_per_eval = relative_improvement / (1.0 + current_result.function_evaluations);
+      if (progress_per_eval < m_options.restart_progress_per_eval_threshold &&
+          current_result.iterations > 100) {
+        return true;
+      }
+    
+      // 3. Restart for problematic simplex geometry
+      Scalar scale               = 1.0 + m_best_point.norm();
+      Scalar normalized_diameter = current_result.simplex_diameter / scale;
+    
+      if (normalized_diameter < m_options.simplex_tolerance * m_options.restart_simplex_diameter_factor1 &&
+          relative_improvement < m_options.restart_simplex_geometry_threshold) {
+        return true;
+      }
+    
+      // 4. Restart for too many shrink operations without progress
+      if (m_shrink_count > m_options.restart_shrink_count_threshold &&
+          relative_improvement < m_options.restart_after_shrink_improvement) {
+        return true;
+      }
+    
+      // 5. Restart for high-dimensional problems with slow progress
+      if (m_dim > 10) {
+        Scalar expected_progress = 1.0 / std::sqrt(1.0 + current_result.iterations);
+        if (relative_improvement < expected_progress * m_options.restart_expected_progress_ratio &&
+          current_result.iterations > 200) {
+          return true;
+        }
+      }
+
+      // 6. Restart based on solution quality metric
+      Scalar quality_metric = relative_improvement / (1.0 + std::log1p(current_result.function_evaluations));
+      if (quality_metric < m_options.restart_quality_metric_threshold &&
+        current_result.function_evaluations > 500) {
+        return true;
+      }
+    
+      // 7. Restart if simplex is degenerate but not converged
+      auto stats = compute_simplex_stats();
+      Scalar normalized_std_dev = stats.std_dev / (1.0 + abs(m_best_value));
+      if (normalized_diameter < m_options.simplex_tolerance * m_options.restart_simplex_diameter_factor2 &&
+        normalized_std_dev < m_options.tolerance * m_options.restart_std_dev_factor &&
+        relative_improvement < m_options.restart_degenerate_improvement_threshold) {
+        return true;
+      }
+        
+      return false;
+    }
+
+    /**
+     * @brief Adjust adaptive parameters based on algorithm behavior
+     */
+    void
+    adaptive_parameter_adjustment() {
+      // More conservative adaptive parameters
+      if (m_shrink_count > 8) {
+        m_current_sigma = max(0.3, m_current_sigma * 0.9);
+        m_current_gamma = max(0.3, m_current_gamma * 0.95);
+        m_shrink_count  = 0;
+      }
+    }
+
+    /**
+     * @brief Perform reflection operation
+     * @param worst_index Index of worst point
+     * @return Function value at reflected point
+     */
+    Scalar
+    reflect_point(size_t worst_index) {
+      m_trial_point = m_centroid + m_current_rho * (m_centroid - m_simplex[worst_index]);
+      project_point(m_trial_point);
+      return safe_evaluate(m_trial_point);
+    }
+
+    /**
+     * @brief Perform expansion operation
+     * @return Function value at expanded point
+     */
+    Scalar
+    expand_point() {
+      m_trial_point = m_centroid + m_current_chi * (m_trial_point - m_centroid);
+      project_point(m_trial_point);
+      return safe_evaluate(m_trial_point);
+    }
+
+    /**
+     * @brief Perform contraction operation
+     * @param worst_index Index of worst point
+     * @param outside Whether to contract outside or inside
+     * @return Function value at contracted point
+     */
+    Scalar
+    contract_point(size_t worst_index, bool outside) {
+      if (outside) {
+        m_trial_point = m_centroid + m_current_gamma * (m_trial_point - m_centroid);
+      } else {
+        m_trial_point = m_centroid - m_current_gamma * (m_centroid - m_simplex[worst_index]);
+      }
+      project_point(m_trial_point);
+      return safe_evaluate(m_trial_point);
+    }
+
+    /**
+     * @brief Perform shrink operation towards best point
+     * @param best_index Index of best point
+     */
+    void
+    shrink_simplex(size_t best_index) {
+      Vector best = m_simplex[best_index];
+      for (size_t i{0}; i <= m_dim; ++i) {
+        if (i != best_index) {
+          m_simplex[i] = best + m_current_sigma * (m_simplex[i] - best);
+          project_point(m_simplex[i]);
+          m_values[i] = safe_evaluate(m_simplex[i]);
+        }
+      }
+      ++m_shrink_count;
+      //mark_simplex_unordered();
+    }
+
+    /**
+     * @brief Perform one iteration of Nelder-Mead algorithm
+     * @return True if converged
+     */
+    bool
+    nelder_mead_iteration() {
+      auto indices = get_sorted_indices();
+      size_t best_idx         = indices[0];
+      size_t second_worst_idx = indices[m_dim - 1];
+      size_t worst_idx        = indices[m_dim];
+
+      Scalar best_value  = m_values[best_idx];
+      Scalar worst_value = m_values[worst_idx];
+
+      if (m_options.track_best_point && best_value < m_best_value) {
+        m_best_value = best_value;
+        m_best_point = m_simplex[best_idx];
+      }
+
+      if (check_convergence_robust(best_value, worst_value)) {
+        return true;
+      }
+
+      update_centroid(worst_idx);
+      Scalar f_reflect       = reflect_point(worst_idx);
+      Vector reflected_point = m_trial_point;
+
+      if (f_reflect < best_value) {
+        Scalar f_expand = expand_point();
+        if (f_expand < f_reflect) {
+          m_simplex[worst_idx] = m_trial_point;
+          m_values[worst_idx]  = f_expand;
+        } else {
+          m_simplex[worst_idx] = reflected_point;
+          m_values[worst_idx]  = f_reflect;
+        }
+      } else if (f_reflect < m_values[second_worst_idx]) {
+        m_simplex[worst_idx] = reflected_point;
+        m_values[worst_idx]  = f_reflect;
+      } else {
+        if (f_reflect < worst_value) {
+          Scalar f_contract = contract_point(worst_idx, true);
+          if (f_contract <= f_reflect) {
+            m_simplex[worst_idx] = m_trial_point;
+            m_values[worst_idx]  = f_contract;
+          } else {
+            shrink_simplex(best_idx);
+            adaptive_parameter_adjustment();
+          }
+        } else {
+          Scalar f_contract = contract_point(worst_idx, false);
+          if (f_contract < worst_value) {
+            m_simplex[worst_idx] = m_trial_point;
+            m_values[worst_idx]  = f_contract;
+          } else {
+            shrink_simplex(best_idx);
+            adaptive_parameter_adjustment();
+          }
+        }
+      }
+      mark_simplex_unordered();
+      return false;
+    }
+
+    /**
+     * @brief Run single Nelder-Mead optimization (without restarts)
+     * @param x0 Starting point
+     * @return Optimization result
+     */
+    InnerResult
+    minimize_single_run(Vector const & x0) {
+      InnerResult result;
+      size_t initial_evals = m_global_evals;
+      initialize_adaptive_parameters();
+    
+      if (m_global_iterations >= m_options.max_iterations) {
+        result.status               = Status::MAX_ITERATIONS;
+        result.solution             = x0;
+        result.final_function_value = safe_evaluate(x0);
+        result.function_evaluations = m_global_evals - initial_evals;
+        // Set compatibility fields
+        result.inner_iterations = 0;
+        result.inner_evaluations = result.function_evaluations;
+        return result;
+      }
+    
+      initialize_simplex(x0);
+      auto indices = get_sorted_indices();
+      result.initial_function_value = m_values[indices[0]];
+    
+      if (m_options.verbose) {
+        fmt::print("  [NM-Run]  Start | Dim={:<10} | F_0={:<12.6e}  |", m_dim, result.initial_function_value);
+      }
+    
+      size_t local_iter = 0;
+    
+      while (true) {
+        if (m_global_iterations >= m_options.max_iterations) {
+          result.status = Status::MAX_ITERATIONS;
+          break;
+        }
+    
+        if (m_global_evals >= m_options.max_function_evaluations) {
+          result.status = Status::MAX_FUN_EVALUATIONS;
+          break;
+        }
+    
+        ++m_global_iterations;
+        ++local_iter;
+    
+        if (m_options.enable_restart && local_iter % 50 == 0) {
+          indices = get_sorted_indices();
+          if (check_stagnation(m_values[indices[0]])) {
+            result.status = Status::STAGNATED;
+            break;
+          }
+        }
+    
+        if (nelder_mead_iteration()) {
+          result.status = Status::CONVERGED;
+          break;
+        }
+    
+        result.simplex_diameter = compute_diameter();
+        if (result.simplex_diameter < m_options.simplex_tolerance) {
+          result.status = Status::SIMPLEX_TOO_SMALL;
+          break;
+        }
+    
+        if (m_options.verbose && (m_global_iterations % m_options.progress_frequency) == 0) {
+          indices = get_sorted_indices();
+          fmt::print(
+            "  [NM-Iter] {:>5} | F={:<12.6e} | Diam={:<12.6e} |",
+            m_global_iterations, m_values[indices[0]], result.simplex_diameter
+          );
+        }
+      }
+    
+      if (result.status == Status::FAILED) {
+        result.status = Status::MAX_ITERATIONS;
+      }
+    
+      indices                     = get_sorted_indices();
+      result.solution             = m_simplex[indices[0]];
+      result.final_function_value = m_values[indices[0]];
+      result.simplex_volume       = compute_volume();
+      result.simplex_diameter     = compute_diameter();
+      result.iterations           = local_iter;
+      result.function_evaluations = m_global_evals - initial_evals;
+      result.shrink_operations    = m_shrink_count;
+      
+      // Set compatibility fields for BlockCoordinate
+      result.inner_iterations = result.iterations;
+      result.inner_evaluations = result.function_evaluations;
+    
+      return result;
+    }
+
+    /**
+     * @brief Print optimization header information
+     * @param x0 Starting point
+     */
+    void
+    print_header(Vector const & x0) const {
+      if (!m_options.verbose) return;
+      fmt::print(
+        "╔════════════════════════════════════════════════════════════════╗\n"
+        "║                    Nelder-Mead Optimization                    ║\n"
+        "╠════════════════════════════════════════════════════════════════╣\n"
+        "║  Dimension          : {:<39}  ║\n"
+        "║  Max Iterations     : {:<39}  ║\n"
+        "║  Max Evals          : {:<39}  ║\n"
+        "║  Tolerance          : {:<39.6e}  ║\n"
+        "║  Restarts           : {:<39}  ║\n"
+        "║  Bounds             : {:<39}  ║\n"
+        "║  Robust Convergence : {:<39}  ║\n"
+        "╚════════════════════════════════════════════════════════════════╝\n",
+        x0.size(),
+        m_options.max_iterations,
+        m_options.max_function_evaluations,
+        m_options.tolerance,
+        (m_options.enable_restart ? fmt::format("Enabled (Max: {})", m_options.max_restarts) : "Disabled"),
+        (m_use_bounds ? "Active" : "None"),
+        (m_options.use_robust_convergence ? "Yes" : "No")
+      );
+    }
+
+    /**
+     * @brief Print optimization statistics
+     * @param res Optimization result to print
+     */
+    void
+    print_statistics(InnerResult const & res) const {
+      if (!m_options.verbose) return;
+      fmt::print(
+        "╔════════════════════════════════════════════════════════════════╗\n"
+        "║                    Optimization Finished                       ║\n"
+        "╠════════════════════════════════════════════════════════════════╣\n"
+        "║  Final Status       : {:<39}  ║\n"
+        "║  Final Value        : {:<39.6e}  ║\n"
+        "║  Total Iterations   : {:<39}  ║\n"
+        "║  Total Evals        : {:<39}  ║\n"
+        "║  Restarts           : {:<39}  ║\n"
+        "║  Shrink Operations  : {:<39}  ║\n"
+        "║  Simplex Diameter   : {:<39.6e}  ║\n"
+        "╚════════════════════════════════════════════════════════════════╝\n\n",
+        status_to_string(res.status),
+        res.final_function_value,
+        res.iterations,
+        res.function_evaluations,
+        res.restarts_performed,
+        res.shrink_operations,
+        res.simplex_diameter
+      );
     }
 
   public:
-    explicit NelderMead_classic(Options const & opts = Options()) : m_options(opts) {}
-
-    void set_options(Options const & opts) { m_options = opts; }
-    void set_bounds(Vector const & l, Vector const & u) { m_lower = l; m_upper = u; m_use_bounds = true; }
-
-    Result minimize(Vector const & x0, Callback const & callback) {
-      Result res;
-      size_t dim = x0.size();
-      m_evals_count = 0;
-
-      // Standard Nelder-Mead parameters
-      const Scalar rho = 1.0;  // Reflection
-      const Scalar chi = 2.0;  // Expansion
-      const Scalar gam = 0.5;  // Contraction
-      const Scalar sig = 0.5;  // Shrink
-
-      // Data structures
-      std::vector<Vector> simplex(dim + 1);
-      std::vector<Scalar> f_values(dim + 1);
-      std::vector<size_t> idx(dim + 1); 
-
-      // 1. Build Initial Simplex
-      simplex[0] = x0;
-      f_values[0] = safe_evaluate(simplex[0], callback);
-
-      for (size_t i = 0; i < dim; ++i) {
-        Vector next = x0;
-        // Robust initial step
-        Scalar step = (std::abs(x0(i)) < 1e-6) ? 0.00025 : m_options.initial_step * x0(i);
-        next(i) += step;
-        simplex[i+1] = next;
-        f_values[i+1] = safe_evaluate(next, callback);
-      }
-
-      // Sort helper
-      std::iota(idx.begin(), idx.end(), 0);
-      auto sort_simplex = [&]() {
-        std::sort(idx.begin(), idx.end(), [&](size_t a, size_t b) { 
-            if (std::isnan(f_values[a])) return false; // Push NaNs to end
-            if (std::isnan(f_values[b])) return true;
-            return f_values[a] < f_values[b]; 
-        });
-      };
-      sort_simplex();
-
-      res.initial_function_value = f_values[idx[0]];
-      size_t iter = 0;
-
-      // Optimization Loop
-      for (; iter < m_options.max_iterations; ++iter) {
-        if (m_evals_count >= m_options.max_function_evaluations) {
-          res.status = NelderMeadStatus::MAX_FUN_EVALUATIONS;
-          break;
-        }
-
-        // Convergence Check
-        Scalar f_best  = f_values[idx[0]];
-        Scalar f_worst = f_values[idx.back()];
-        if (std::abs(f_worst - f_best) < m_options.tolerance) {
-          res.status = NelderMeadStatus::CONVERGED;
-          break;
-        }
-
-        // Centroid
-        Vector centroid = Vector::Zero(dim);
-        for (size_t i = 0; i < dim; ++i) centroid += simplex[idx[i]];
-        centroid /= static_cast<Scalar>(dim);
-
-        // Reflection
-        Vector xr = centroid + rho * (centroid - simplex[idx.back()]);
-        Scalar fr = safe_evaluate(xr, callback);
-
-        if (fr < f_values[idx[0]]) {
-          // Expansion
-          Vector xe = centroid + chi * (xr - centroid);
-          Scalar fe = safe_evaluate(xe, callback);
-          if (fe < fr) { 
-            simplex[idx.back()] = xe; f_values[idx.back()] = fe; 
-          } else { 
-            simplex[idx.back()] = xr; f_values[idx.back()] = fr; 
-          }
-        } else if (fr < f_values[idx[dim - 1]]) {
-          // Accept Reflection
-          simplex[idx.back()] = xr; f_values[idx.back()] = fr;
-        } else {
-          // Contraction
-          bool contraction_ok = false;
-          if (fr < f_values[idx.back()]) {
-            // Outside
-            Vector xc = centroid + gam * (xr - centroid);
-            Scalar fc = safe_evaluate(xc, callback);
-            if (fc <= fr) {
-              simplex[idx.back()] = xc; f_values[idx.back()] = fc;
-              contraction_ok = true;
-            }
-          } else {
-            // Inside
-            Vector xc = centroid + gam * (simplex[idx.back()] - centroid);
-            Scalar fc = safe_evaluate(xc, callback);
-            if (fc < f_values[idx.back()]) {
-              simplex[idx.back()] = xc; f_values[idx.back()] = fc;
-              contraction_ok = true;
-            }
-          }
-
-          if (!contraction_ok) {
-            // Shrink
-            Vector x_best = simplex[idx[0]];
-            for (size_t i = 1; i <= dim; ++i) {
-               size_t k = idx[i];
-               simplex[k] = x_best + sig * (simplex[k] - x_best);
-               f_values[k] = safe_evaluate(simplex[k], callback);
-            }
-          }
-        }
-        sort_simplex();
-      }
-
-      if (res.status == NelderMeadStatus::FAILED && iter >= m_options.max_iterations) 
-         res.status = NelderMeadStatus::MAX_ITERATIONS;
-
-      res.solution = simplex[idx[0]];
-      res.final_function_value = f_values[idx[0]];
-      res.inner_iterations = iter;
-      res.inner_evaluations = m_evals_count;
-      res.total_iterations = iter;
-      res.total_evaluations = m_evals_count;
-
-      return res;
+    /**
+     * @brief Construct Nelder-Mead optimizer with given options
+     * @param opts Optimization options
+     */
+    explicit
+    NelderMead_classic(Options const & opts = Options()) : m_options(opts) {}
+    
+    /**
+     * @brief Set optimization options
+     * @param opts New options
+     */
+    void
+    set_options(Options const & opts) {
+      m_options = opts;
     }
+    
+    /**
+     * @brief Set optimization bounds
+     * @param lower Lower bounds
+     * @param upper Upper bounds
+     */
+    void
+    set_bounds(Vector const & lower, Vector const & upper) {
+      UTILS_ASSERT(lower.size() == upper.size(), "Bounds size mismatch");
+      UTILS_ASSERT((lower.array() <= upper.array()).all(), "Lower <= Upper");
+      m_lower      = lower;
+      m_upper      = upper;
+      m_use_bounds = true;
+    }
+
+    /**
+     * @brief Clear optimization bounds
+     */
+    void
+    clear_bounds() {
+      m_use_bounds = false;
+    }
+
+    /**
+     * @brief Minimize objective function starting from x0
+     * @param x0 Starting point
+     * @param callback Objective function
+     * @return Optimization result
+     */
+    InnerResult
+    minimize(Vector const & x0, Callback const & callback) {
+      m_callback = &callback;
+
+      m_stagnation_count  = 0;
+      m_shrink_count      = 0;
+      // Initialize with NaN to handle negative values properly
+      m_best_value        = std::numeric_limits<Scalar>::max();
+      m_previous_best     = std::numeric_limits<Scalar>::max();
+      m_global_iterations = 0;
+      m_global_evals      = 0;
+      m_simplex_ordered   = false;
+    
+      size_t restarts = 0;
+
+      print_header(x0);
+
+      InnerResult best_result = minimize_single_run(x0);
+    
+      // Initialize m_best_value if not yet set
+      if (std::isnan(m_best_value)) {
+        m_best_value = best_result.final_function_value;
+        m_best_point = best_result.solution;
+      }
+
+      while ( m_options.enable_restart &&
+              restarts < m_options.max_restarts &&
+              is_restart_worthwhile(best_result)) {
+        if (m_global_evals >= m_options.max_function_evaluations) break;
+        if (m_global_iterations >= m_options.max_iterations) break;
+
+        if (m_options.verbose) {
+          fmt::print(
+            "  [NM-Restart] #{}/{} | Reason: {:<16} | F={:12.6e}\n",
+            (restarts+1), m_options.max_restarts,
+            status_to_string(best_result.status),
+            best_result.final_function_value
+          );
+        }
+
+        Scalar perturbation_scale = m_options.restart_perturbation_ratio * (1.0 + restarts * 0.1);
+            
+        Vector restart_x0;
+        Vector scale_vec = Vector::Ones(x0.size());
+            
+        if (m_use_bounds) {
+          for (size_t i{0}; i < x0.size(); ++i) {
+            Scalar r = m_upper(i) - m_lower(i);
+            scale_vec(i) = std::isfinite(r) ? r : max(Scalar(1.0), abs(best_result.solution(i)));
+          }
+        } else {
+          for (size_t i{0}; i < x0.size(); ++i) {
+            scale_vec(i) = max(Scalar(1.0), abs(best_result.solution(i)));
+          }
+        }
+
+        Vector perturbation = Vector::Random(x0.size()).cwiseProduct(scale_vec) * perturbation_scale;
+            
+        if (m_options.track_best_point) {
+          restart_x0 = m_best_point + perturbation;
+        } else {
+          restart_x0 = best_result.solution + perturbation;
+        }
+
+        project_point(restart_x0);
+
+        m_stagnation_count = 0;
+        m_shrink_count = 0;
+        m_simplex_ordered = false;
+
+        InnerResult current_result = minimize_single_run(restart_x0);
+        ++restarts;
+
+        // ROBUST IMPROVEMENT CONDITION FOR POSITIVE AND NEGATIVE VALUES
+        bool improvement = false;
+            
+        if (std::isnan(current_result.final_function_value)) {
+          improvement = false;
+        } else if (std::isnan(best_result.final_function_value)) {
+          improvement = true;
+        } else {
+          // Calculate normalized relative improvement
+          Scalar abs_best = abs(best_result.final_function_value);
+          Scalar abs_current = abs(current_result.final_function_value);
+            
+          // Case 1: Both positive or zero - standard improvement
+          if (best_result.final_function_value >= 0 &&
+            current_result.final_function_value >= 0) {
+            improvement = current_result.final_function_value < best_result.final_function_value * m_options.restart_improvement_ratio;
+          }
+          // Case 2: Both negative - improvement means more negative
+          else if (best_result.final_function_value < 0 &&
+                   current_result.final_function_value < 0) {
+            improvement = current_result.final_function_value < best_result.final_function_value;
+          }
+          // Case 3: Transition from positive to negative - always improvement
+          else if (best_result.final_function_value >= 0 &&
+                   current_result.final_function_value < 0) {
+            improvement = true;
+          }
+          // Case 4: Transition from negative to positive - usually worsening
+          else {
+            improvement = false;
+          }
+                
+          // Additional check: significant absolute improvement
+          Scalar absolute_improvement = best_result.final_function_value - current_result.final_function_value;
+          Scalar relative_improvement = absolute_improvement / (1.0 + abs_best);
+                
+          if (!improvement && relative_improvement > m_options.restart_absolute_improvement_threshold) {
+            improvement = true;
+          }
+        }
+
+        if (improvement) {
+          best_result = current_result;
+          best_result.restarts_performed = restarts;
+        } else if (m_options.verbose) {
+          fmt::print("    [Restart rejected: no improvement]\n");
+        }
+      }
+
+      best_result.iterations           = m_global_iterations;
+      best_result.function_evaluations = m_global_evals;
+      best_result.restarts_performed   = restarts;
+      best_result.shrink_operations    = m_shrink_count;
+
+      // Final best point update - correct comparison for minimization
+      if (m_options.track_best_point) {
+        if ( std::isnan(best_result.final_function_value) ||
+             (!std::isnan(m_best_value) && m_best_value < best_result.final_function_value)) {
+          best_result.final_function_value = m_best_value;
+          best_result.solution = m_best_point;
+        }
+      }
+
+      print_statistics(best_result);
+
+      return best_result;
+    }
+
+    /**
+     * @brief Convert status enum to string
+     * @param status Optimization status
+     * @return String representation of status
+     */
+    static
+    string status_to_string(Status status) {
+      switch (status) {
+      case Status::CONVERGED:           return "CONVERGED";
+      case Status::MAX_ITERATIONS:      return "MAX_ITERATIONS";
+      case Status::MAX_FUN_EVALUATIONS: return "MAX_FUN_EVALUATIONS";
+      case Status::SIMPLEX_TOO_SMALL:   return "SIMPLEX_TOO_SMALL";
+      case Status::STAGNATED:           return "STAGNATED";
+      case Status::FAILED:              return "FAILED";
+      default:                          return "UNKNOWN";
+      }
+    }
+
+    // Access methods for debugging and monitoring
+    size_t get_total_evaluations() const { return m_global_evals; }  ///< Get total function evaluations
+    size_t get_total_iterations()  const { return m_global_iterations; }  ///< Get total iterations
+    Scalar get_best_value()        const { return m_best_value; }  ///< Get best function value found
+    Vector get_best_point()        const { return m_best_point; }  ///< Get best point found
   };
 
+  // Resto del codice per NelderMead_BlockCoordinate rimane invariato...
   // ===========================================================================
   // CLASS: NelderMead_BlockCoordinate (Outer Solver)
   // ===========================================================================
@@ -306,7 +1225,7 @@ namespace Utils {
       size_t n = x.size();
 
       // 1. Check for small problem fallback
-      if ( 2*n <= 1+m_options.block_size) {
+      if ( !(2*n > m_options.block_size) ) {
           if (m_options.verbose) {
               fmt::print("   [Info] Dim <= BlockSize. Switching to DIRECT CLASSIC solver.\n");
           }
@@ -318,7 +1237,22 @@ namespace Utils {
           
           m_solver.set_options(full_opts);
           if (m_use_bounds) m_solver.set_bounds(m_lower, m_upper);
-          return m_solver.minimize(x, global_callback);
+          auto inner_res = m_solver.minimize(x, global_callback);
+          
+          // Convert InnerResult to Result
+          Result res;
+          res.solution = inner_res.solution;
+          res.final_function_value = inner_res.final_function_value;
+          res.initial_function_value = inner_res.initial_function_value;
+          res.outer_iterations = 1;
+          res.inner_iterations = inner_res.inner_iterations;
+          res.total_iterations = 1 + inner_res.inner_iterations;
+          res.outer_evaluations = 1; // initial evaluation
+          res.inner_evaluations = inner_res.inner_evaluations;
+          res.total_evaluations = 1 + inner_res.inner_evaluations;
+          res.status = inner_res.status == NelderMead_classic<Scalar>::Status::CONVERGED ? 
+                      NelderMeadStatus::CONVERGED : NelderMeadStatus::MAX_ITERATIONS;
+          return res;
       }
       
       // 2. Block Coordinate Logic
@@ -345,9 +1279,10 @@ namespace Utils {
       size_t blocks_per_cycle = (n + m_options.block_size - 1) / m_options.block_size;
 
       if (m_options.verbose) {
-         fmt::print("   {:<5} | {:<8} | {:<14} | {:<10} | {:<10}\n", 
+         fmt::print("┌───────┬──────────┬────────────────┬────────────┬────────────┐\n");
+         fmt::print("│ {:<5} │ {:<8} │ {:<14} │ {:<10} │ {:<10} │\n",
                     "Iter", "BlockDim", "F Value", "In.Iter", "In.Eval");
-         fmt::print("   {:-<60}\n", "");
+         fmt::print("├───────┼──────────┼────────────────┼────────────┼────────────┤\n");
       }
 
       while (outer_iter < m_options.max_outer_iterations && !converged) {
@@ -388,7 +1323,7 @@ namespace Utils {
         }
 
         if (m_options.verbose) {
-           fmt::print("   {:<5} | {:<8} | {:<14.6e} | {:<10} | {:<10}\n", 
+           fmt::print("│ {:<5} │ {:<8} │ {:<14.6e} │ {:<10} │ {:<10} │\n",
                       outer_iter, k, current_f, sub_res.inner_iterations, sub_res.inner_evaluations);
         }
 
@@ -403,6 +1338,10 @@ namespace Utils {
         if (no_improv_count >= blocks_per_cycle * 2) {
             converged = true;
         }
+      }
+
+      if (m_options.verbose) {
+         fmt::print("└───────┴──────────┴────────────────┴────────────┴────────────┘\n");
       }
 
       res.solution = x;
