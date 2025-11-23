@@ -49,7 +49,7 @@ Vector get_safe_initial_point(ProblemFunc& problem) {
 }
 
 template <typename ProblemFunc>
-void test(ProblemFunc& problem, std::string const & name) {
+void test(ProblemFunc& problem, std::string const & name, int verbosity_level = 1) {
   
   Vector L = problem.lower();
   Vector U = problem.upper();
@@ -66,7 +66,14 @@ void test(ProblemFunc& problem, std::string const & name) {
 
   // Solver Configuration
   NM_Block::Options opts;
-  opts.block_size = 10; 
+  
+  opts.verbosity_level = verbosity_level;
+  opts.inner_progress_frequency = verbosity_level >= 2 ? 10 : 100;
+    
+  opts.sub_options.verbosity_level = verbosity_level;
+  opts.sub_options.inner_progress_frequency = verbosity_level >= 2 ? 10 : 100;
+  
+  opts.block_size = 10;
   opts.max_outer_iterations = 200; 
   opts.max_function_evaluations = 500000; 
   opts.tolerance = 1e-7;
@@ -150,23 +157,23 @@ int
 main() {
   try {
     Rosenbrock2D<Scalar> rosen;
-    test( rosen, "Rosenbrock2D" );
+    test( rosen, "Rosenbrock2D", 2 );
 
     RosenbrockN<Scalar,10> rosenN;
-    test( rosenN, "Rosenbrock10D" );
+    test( rosenN, "Rosenbrock10D", 2 );
 
     PowellSingularN<Scalar,16> powellN;
-    test( powellN, "PowellSingular16D" );
+    test( powellN, "PowellSingular16D", 1 );
 
     ExtendedWoodN<Scalar,16> woodN;
-    test( woodN, "ExtendedWood16D" );
+    test( woodN, "ExtendedWood16D", 1 );
 
     // Altri problemi (se presenti in ND_func.cxx)
     Beale2D<Scalar> beale;
-    test( beale, "Beale2D" );
+    test( beale, "Beale2D", 1 );
 
     Himmelblau2D<Scalar> himm;
-    test( himm, "Himmelblau2D" );
+    test( himm, "Himmelblau2D", 2 );
 
     FreudensteinRoth2D<Scalar> fr;
     test( fr, "FreudensteinRoth2D" );

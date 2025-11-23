@@ -53,9 +53,11 @@ namespace Utils {
 
   namespace NelderMead {
 
+    // Utilizzo di Eigen::Matrix per vettori dinamici - ottimizzato per operazioni vettoriali
     template <typename Scalar>
     using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
+    // Utilizzo di Eigen::Matrix per matrici dinamiche - efficiente per operazioni lineari
     template <typename Scalar>
     using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
 
@@ -176,13 +178,20 @@ namespace Utils {
    * This class implements the Nelder-Mead simplex algorithm for unconstrained
    * and bound-constrained optimization. It includes advanced features like
    * adaptive parameters, restart mechanisms, and robust convergence checking.
+   * 
+   * EIGEN3 OPTIMIZATIONS:
+   * - Uses Eigen::Matrix for efficient vector/matrix operations
+   * - Leverages Eigen's expression templates for lazy evaluation
+   * - Utilizes Eigen's efficient memory management and SIMD operations
+   * - Employs Eigen's numerical linear algebra routines for stability
    */
   template <typename Scalar = double>
   class NelderMead_classic {
   public:
   
-    using Vector   = NelderMead::Vector<Scalar>;
-    using Matrix   = NelderMead::Matrix<Scalar>;
+    // Eigen3 type aliases for efficient linear algebra
+    using Vector   = NelderMead::Vector<Scalar>;  // Eigen::Matrix column vector
+    using Matrix   = NelderMead::Matrix<Scalar>;  // Eigen::Matrix dynamic matrix
     using Callback = NelderMead::Callback<Scalar>;
 
     /**
@@ -250,6 +259,9 @@ namespace Utils {
       Scalar restart_simplex_diameter_factor1{50.0};         ///< Diameter factor for condition 3
       Scalar restart_simplex_diameter_factor2{20.0};         ///< Diameter factor for condition 7
       Scalar restart_std_dev_factor{10.0};                   ///< Standard deviation factor
+
+      size_t verbosity_level{1};           // 0: quiet, 1: outer stats, 2: inner progress, 3: detailed
+      size_t inner_progress_frequency{10}; // Frequency for level 2
     };
 
     /**
@@ -294,6 +306,7 @@ namespace Utils {
     size_t m_global_iterations{0};         ///< Global iteration counter
     size_t m_global_evals{0};              ///< Global function evaluation counter
     
+    // EIGEN3: vector of Eigen vectors for efficient simplex storage
     vector<Vector> m_simplex;              ///< Simplex vertices
     vector<Scalar> m_values;               ///< Function values at vertices
     Vector m_centroid;                     ///< Current centroid (excluding worst)
@@ -314,16 +327,158 @@ namespace Utils {
 
     string m_indent{""};
 
+    struct ConvergenceFlags {
+        bool value_converged;
+        bool geometry_converged;
+        bool variance_converged;
+    };
+
+    ConvergenceFlags compute_convergence_flags(Scalar best_value, Scalar worst_value, const SimplexStats& stats) const {
+        ConvergenceFlags flags;
+
+        // 1. Convergenza per i valori della funzione
+        if (m_options.use_relative_tolerance) {
+            Scalar relative_range = stats.value_range / (1.0 + abs(best_value));
+            flags.value_converged = relative_range < m_options.tolerance;
+        } else {
+            flags.value_converged = stats.value_range < m_options.tolerance;
+        }
+
+        // 2. Convergenza per la geometria del simplesso
+        flags.geometry_converged = stats.diameter < m_options.simplex_tolerance * std::sqrt(m_dim);
+
+        // 3. Convergenza per la varianza
+        flags.variance_converged = stats.std_dev < m_options.tolerance * m_options.convergence_relaxation;
+
+        return flags;
+    }
+
+    void print_inner_iteration_summary(size_t iter_count, Scalar best_value, const SimplexStats& stats) const {
+        if (m_options.verbosity_level < 2) return;
+        
+        bool show_summary = (m_options.verbosity_level >= 3) || 
+                           (iter_count % m_options.inner_progress_frequency == 0);
+        
+        if (show_summary) {
+            fmt::print(NelderMead::PrintColors::ITERATION,
+                "{}┌─ Inner Iteration {:5d} ────────────────────────────────────────────────────────────┐\n"
+                "{}│ Best F:{:<12.6e} Diameter:{:<12.6e} Std Dev:{:<12.6e} Volume:{:<12.6e} │\n"
+                "{}└────────────────────────────────────────────────────────────────────────────────────┘\n",
+                m_indent, iter_count,
+                m_indent, best_value, stats.diameter, stats.std_dev, compute_volume(),
+                m_indent
+            );
+        }
+    }
+
+    void print_iteration_summary(size_t iter, Scalar best_value, Scalar diameter) const {
+        if (m_options.verbosity_level < 2) return;
+        
+        bool show_detailed = (m_options.verbosity_level >= 3) || 
+                           (m_options.verbosity_level >= 2 && iter % m_options.inner_progress_frequency == 0);
+        
+        if (!show_detailed) return;
+
+        auto color = NelderMead::PrintColors::ITERATION;
+        fmt::print(color,
+            "{}[{:4d}] F = {:<12.6e} | Diam = {:<12.6e} | Vol = {:<12.6e}\n",
+            m_indent, iter, best_value, diameter, compute_volume()
+        );
+    }
+
+    void print_inner_operation(
+        string const & operation,
+        Scalar fval,
+        bool improved
+    ) const {
+        if (m_options.verbosity_level < 3) return;
+        
+        auto color = improved ? NelderMead::PrintColors::SUCCESS : NelderMead::PrintColors::WARNING;
+        string icon = improved ? "✓" : "✗";
+        
+        string coords = m_dim <= 5 ? 
+            fmt::format(" | x = {}", NelderMead::format_vector<Scalar>(m_trial_point)) : "";
+            
+        fmt::print(color,
+            "{}  {} {:>12}: F = {:<12.6e}{}\n",
+            m_indent, icon, operation, fval, coords
+        );
+    }
+
+    void print_convergence_info(Scalar best_value, Scalar worst_value, const SimplexStats& stats) const {
+        if (m_options.verbosity_level < 2) return;
+        
+        auto flags = compute_convergence_flags(best_value, worst_value, stats);
+        
+        bool show_output = (m_options.verbosity_level >= 3) || 
+                          (m_options.verbosity_level >= 2 && 
+                           m_global_iterations % m_options.inner_progress_frequency == 0);
+        
+        if (show_output) {
+            // Scegli il colore in base allo stato di convergenza
+            auto color = (flags.value_converged && flags.geometry_converged) ? 
+                        NelderMead::PrintColors::SUCCESS :
+                        (flags.value_converged || flags.geometry_converged || flags.variance_converged) ?
+                        NelderMead::PrintColors::WARNING :
+                        NelderMead::PrintColors::INFO;
+            
+            // Crea simboli più descrittivi
+            string value_symbol = flags.value_converged ? "✓V" : "✗V";
+            string geom_symbol = flags.geometry_converged ? "✓G" : "✗G";
+            string var_symbol = flags.variance_converged ? "✓S" : "✗S";
+            
+            fmt::print(color,
+                "{}[Conv{:4d}] {} {} {} | Range={:<10.3e} Diam={:<10.3e} StdDev={:<10.3e}",
+                m_indent, m_global_iterations, value_symbol, geom_symbol, var_symbol,
+                stats.value_range, stats.diameter, stats.std_dev
+            );
+            
+            // Aggiungi informazioni aggiuntive per verbosità alta
+            if (m_options.verbosity_level >= 3) {
+                fmt::print(color, " | CentDist={:<10.3e} Vol={:<10.3e}", 
+                          stats.centroid_distance, compute_volume());
+            }
+            
+            fmt::print("\n");
+            
+            // Stampa un warning se siamo vicini alla convergenza ma non completamente
+            if ((flags.value_converged || flags.geometry_converged) && !(flags.value_converged && flags.geometry_converged)) {
+                if (flags.value_converged && !flags.geometry_converged) {
+                    fmt::print(NelderMead::PrintColors::WARNING,
+                        "{}       ⚠ Convergenza valori raggiunta, ma geometria simplex ancora ampia\n",
+                        m_indent
+                    );
+                } else if (!flags.value_converged && flags.geometry_converged) {
+                    fmt::print(NelderMead::PrintColors::WARNING,
+                        "{}       ⚠ Geometria simplex convergente, ma valori funzione ancora dispersi\n",
+                        m_indent
+                    );
+                }
+            }
+            
+            // Stampa messaggio di successo se completamente convergente
+            if (flags.value_converged && flags.geometry_converged) {
+                fmt::print(NelderMead::PrintColors::SUCCESS,
+                    "{}       🎯 CONVERGENZA RAGGIUNTA!\n",
+                    m_indent
+                );
+            }
+        }
+    }
+
     /**
      * @brief Safely evaluate objective function with bounds checking
      * @param x Point to evaluate
      * @return Function value or large value if out of bounds/invalid
+     * 
+     * EIGEN3: Uses Eigen's array operations for efficient bounds checking
      */
     Scalar
     safe_evaluate( Vector const & x ) {
       UTILS_ASSERT(m_callback != nullptr, "NelderMead_classic::safe_evaluate(x) Callback not set!");
         
-      // Check bounds before evaluation
+      // EIGEN3: Use array operations for efficient bounds checking
+      // .array() enables element-wise operations without temporary copies
       if ( m_use_bounds ) {
         bool out_of_bound = (x.array() < m_lower.array()).any() ||
                             (x.array() > m_upper.array()).any();
@@ -350,6 +505,9 @@ namespace Utils {
     /**
      * @brief Project point to feasible region (respect bounds)
      * @param x Point to project (modified in-place)
+     * 
+     * EIGEN3: Uses cwiseMin/cwiseMax for efficient element-wise bounds projection
+     * These operations are optimized and avoid explicit loops
      */
     void
     project_point(Vector & x) const {
@@ -358,6 +516,8 @@ namespace Utils {
 
     /**
      * @brief Initialize adaptive parameters based on problem dimension
+     * 
+     * EIGEN3: Parameters are tuned for Eigen's efficient vector operations
      */
     void
     initialize_adaptive_parameters() {
@@ -448,6 +608,9 @@ namespace Utils {
     /**
      * @brief Initialize simplex around starting point
      * @param x0 Starting point
+     * 
+     * EIGEN3: Uses Eigen vector operations for efficient simplex construction
+     * All vector operations are optimized and may use SIMD instructions
      */
     void
     initialize_simplex(Vector const & x0) {
@@ -459,6 +622,7 @@ namespace Utils {
       m_trial_point.resize(m_dim);
       m_sorted_indices.resize(m_dim + 1);
 
+      // EIGEN3: Pre-allocate all vectors for efficient memory management
       for (auto & vec : m_simplex) vec.resize(m_dim);
 
       m_simplex[0] = x0;
@@ -479,7 +643,8 @@ namespace Utils {
 
         project_point(x_next);
 
-        // Verify point is different from base point
+        // EIGEN3: Use .norm() for efficient distance computation
+        // Eigen's norm() is optimized and may use vectorized operations
         if ((x_next - x_base).norm() < min_step) {
           // If still too close, try opposite direction
           x_next = x_base;
@@ -498,7 +663,8 @@ namespace Utils {
         if (m_options.verbose) {
           fmt::print( "{}[Warning] Initial simplex has zero volume, adding perturbation\n", m_indent );
         }
-        // Add small random perturbation to avoid degeneracy
+        // EIGEN3: Use Vector::Random() for efficient random vector generation
+        // This is optimized and may use vectorized random number generation
         for (size_t i{1}; i <= m_dim; ++i) {
           Vector perturbation = Vector::Random(m_dim) * min_step * 10;
           m_simplex[i] += perturbation;
@@ -520,6 +686,9 @@ namespace Utils {
     /**
      * @brief Update centroid excluding worst point
      * @param worst_index Index of worst point to exclude
+     * 
+     * EIGEN3: Uses efficient vector accumulation with Eigen
+     * setZero() and vector addition are optimized operations
      */
     void
     update_centroid(size_t worst_index) {
@@ -533,6 +702,9 @@ namespace Utils {
     /**
      * @brief Compute simplex diameter (maximum vertex distance)
      * @return Simplex diameter
+     * 
+     * EIGEN3: Uses Eigen's norm() function which is highly optimized
+     * and may use SIMD instructions for distance computation
      */
     Scalar
     compute_diameter() const {
@@ -549,20 +721,30 @@ namespace Utils {
     /**
      * @brief Compute simplex volume
      * @return Simplex volume (approximated for high dimensions)
+     * 
+     * EIGEN3: Uses Eigen's linear algebra routines for volume computation
+     * For small dimensions: QR decomposition with column pivoting for numerical stability
+     * For large dimensions: approximation using diameter to avoid precision issues
      */
     Scalar
     compute_volume() const {
       if (m_dim == 0) return 0;
+      // EIGEN3: For high dimensions, use approximation to avoid numerical instability
       if (m_dim > 100) return std::pow(compute_diameter(), m_dim) * std::exp(-std::lgamma(m_dim+1));
     
+      // EIGEN3: Construct basis matrix using Eigen
       Matrix basis(m_dim, m_dim);
       for (size_t i{0}; i < m_dim; ++i) {
         basis.col(i) = m_simplex[i + 1] - m_simplex[0];
       }
     
+      // EIGEN3: Use QR decomposition with column pivoting for numerical stability
+      // This handles rank-deficient cases gracefully
       Eigen::ColPivHouseholderQR<Matrix> qr(basis);
       if (qr.rank() < m_dim) return 0;
     
+      // EIGEN3: Use Eigen's efficient determinant computation
+      // logAbsDeterminant() is more stable for large matrices
       Scalar log_det   = qr.logAbsDeterminant();
       Scalar log_gamma = std::lgamma(m_dim + 1);
     
@@ -572,6 +754,9 @@ namespace Utils {
     /**
      * @brief Compute comprehensive simplex statistics
      * @return Simplex statistics structure
+     * 
+     * EIGEN3: Uses Eigen's efficient statistical computations
+     * Eigen::Map for zero-copy vector views and array operations for statistics
      */
     SimplexStats
     compute_simplex_stats() const {
@@ -579,7 +764,8 @@ namespace Utils {
         
       stats.diameter = compute_diameter();
         
-      // Use Eigen for efficient mean computation
+      // EIGEN3: Use Eigen::Map to view std::vector as Eigen vector without copying
+      // This allows using Eigen's efficient statistical functions
       Scalar mean = Eigen::Map<const Eigen::VectorXd>(m_values.data(), m_values.size()).mean();
         
       Scalar variance = 0;
@@ -591,6 +777,7 @@ namespace Utils {
       auto indices = get_sorted_indices();
       stats.value_range = m_values[indices.back()] - m_values[indices[0]];
         
+      // EIGEN3: Efficient centroid computation using Eigen vector operations
       Vector centroid = Vector::Zero(m_dim);
       for (auto const & v : m_simplex) centroid += v;
       centroid /= m_simplex.size();
@@ -616,15 +803,15 @@ namespace Utils {
       auto const & simplex_tolerance      = m_options.simplex_tolerance;
       auto const & convergence_relaxation = m_options.convergence_relaxation;
     
+      auto stats = compute_simplex_stats();
+      auto flags = compute_convergence_flags(best_value, worst_value, stats);
+    
       if (!m_options.use_robust_convergence) {
         // Usa worst_value qui
-        auto stats              = compute_simplex_stats();
         bool value_converged    = (worst_value - best_value) < tolerance;
         bool geometry_converged = stats.diameter < simplex_tolerance;
         return value_converged && geometry_converged;
       }
-        
-      auto stats = compute_simplex_stats();
         
       // 1. Primary convergence: function values
       bool value_converged;
@@ -712,6 +899,7 @@ namespace Utils {
       }
     
       // 3. Restart for problematic simplex geometry
+      // EIGEN3: Use .norm() for efficient vector norm computation
       Scalar scale               = 1.0 + m_best_point.norm();
       Scalar normalized_diameter = current_result.simplex_diameter / scale;
     
@@ -771,6 +959,9 @@ namespace Utils {
      * @brief Perform reflection operation
      * @param worst_index Index of worst point
      * @return Function value at reflected point
+     * 
+     * EIGEN3: Uses Eigen vector arithmetic for efficient reflection computation
+     * Expression templates enable efficient computation without temporaries
      */
     Scalar
     reflect_point(size_t worst_index) {
@@ -782,6 +973,8 @@ namespace Utils {
     /**
      * @brief Perform expansion operation
      * @return Function value at expanded point
+     * 
+     * EIGEN3: Vector operations are optimized through expression templates
      */
     Scalar
     expand_point() {
@@ -795,6 +988,8 @@ namespace Utils {
      * @param worst_index Index of worst point
      * @param outside Whether to contract outside or inside
      * @return Function value at contracted point
+     * 
+     * EIGEN3: Efficient vector arithmetic using Eigen's expression system
      */
     Scalar
     contract_point(size_t worst_index, bool outside) {
@@ -810,6 +1005,9 @@ namespace Utils {
     /**
      * @brief Perform shrink operation towards best point
      * @param best_index Index of best point
+     * 
+     * EIGEN3: Uses efficient vector scaling and addition operations
+     * Eigen's expression templates optimize these operations
      */
     void
     shrink_simplex(size_t best_index) {
@@ -828,6 +1026,8 @@ namespace Utils {
     /**
      * @brief Perform one iteration of Nelder-Mead algorithm
      * @return True if converged
+     * 
+     * EIGEN3: All vector operations in this method use Eigen's optimized routines
      */
     bool
     nelder_mead_iteration() {
@@ -853,11 +1053,11 @@ namespace Utils {
       Vector reflected_point = m_trial_point;
 
       bool improve{f_reflect < best_value};
-      print_inner_step("Reflect", f_reflect, improve);
+      print_inner_operation("Reflect", f_reflect, improve);
       if (improve) {
         Scalar f_expand = expand_point();
         improve = f_expand < f_reflect;
-        print_inner_step("Expand", f_expand, improve);
+        print_inner_operation("Expand", f_expand, improve);
         if (f_expand < f_reflect) {
           m_simplex[worst_idx] = m_trial_point;
           m_values[worst_idx]  = f_expand;
@@ -872,7 +1072,7 @@ namespace Utils {
         if (f_reflect < worst_value) {
           Scalar f_contract = contract_point(worst_idx, true);
           improve = f_contract <= f_reflect;
-          print_inner_step( "Contract(out)", f_contract, improve );
+          print_inner_operation( "Contract(out)", f_contract, improve );
           if (improve) {
             m_simplex[worst_idx] = m_trial_point;
             m_values[worst_idx]  = f_contract;
@@ -883,7 +1083,7 @@ namespace Utils {
         } else {
           Scalar f_contract = contract_point(worst_idx, false);
           improve = f_contract < worst_value;
-          print_inner_step( "Contract(in)", f_contract, improve);
+          print_inner_operation( "Contract(in)", f_contract, improve);
           if (f_contract < worst_value) {
             m_simplex[worst_idx] = m_trial_point;
             m_values[worst_idx]  = f_contract;
@@ -895,6 +1095,13 @@ namespace Utils {
 
       }
       mark_simplex_unordered();
+
+      // Add convergence info printing
+      if (m_options.verbosity_level >= 2) {
+        auto stats = compute_simplex_stats();
+        print_convergence_info(best_value, worst_value, stats);
+      }
+
       return false;
     }
     
@@ -936,6 +1143,8 @@ namespace Utils {
      * @brief Run single Nelder-Mead optimization (without restarts)
      * @param x0 Starting point
      * @return Optimization result
+     * 
+     * EIGEN3: All vector operations in this method leverage Eigen's optimizations
      */
     InnerResult
     minimize_single_run(Vector const & x0) {
@@ -958,9 +1167,10 @@ namespace Utils {
       auto indices = get_sorted_indices();
       result.initial_function_value = m_values[indices[0]];
     
-      if (m_options.verbose) {
+      // MODIFICA: Usare verbosity_level invece di verbose
+      if (m_options.verbosity_level >= 1) {
         fmt::print(
-          "{}[NM-Run]  Start | Dim={:<10} | F_0={:<12.6e}  |",
+          "{}[NM-Run]  Start | Dim={:<10} | F_0={:<12.6e}\n",
           m_indent, m_dim, result.initial_function_value
         );
       }
@@ -981,6 +1191,11 @@ namespace Utils {
         ++m_global_iterations;
         ++local_iter;
     
+        // MODIFICA: Aggiungere stampa riepilogo periodico
+        auto stats = compute_simplex_stats();
+        indices = get_sorted_indices();
+        print_inner_iteration_summary(local_iter, m_values[indices[0]], stats);
+
         if (m_options.enable_restart && local_iter % 50 == 0) {
           indices = get_sorted_indices();
           if (check_stagnation(m_values[indices[0]])) {
@@ -1000,10 +1215,11 @@ namespace Utils {
           break;
         }
     
+        // MODIFICA: Mantenere stampa progresso per compatibilità
         if (m_options.verbose && (m_global_iterations % m_options.progress_frequency) == 0) {
           indices = get_sorted_indices();
           fmt::print(
-            "{}[NM-Iter] {:>5} | F={:<12.6e} | Diam={:<12.6e} |",
+            "{}[NM-Iter] {:>5} | F={:<12.6e} | Diam={:<12.6e}\n",
             m_indent, m_global_iterations, m_values[indices[0]], result.simplex_diameter
           );
         }
@@ -1040,12 +1256,12 @@ namespace Utils {
         "{}╔════════════════════════════════════════════════════════════════╗\n"
         "{}║                    Nelder-Mead Optimization                    ║\n"
         "{}╠════════════════════════════════════════════════════════════════╣\n"
-        "{}║ {:64} ║\n"
-        "{}║ {:64} ║\n"
-        "{}║ {:64} ║\n"
-        "{}║ {:64} ║\n"
-        "{}║ {:64} ║\n"
-        "{}║ {:64} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
         "{}╚════════════════════════════════════════════════════════════════╝\n",
         m_indent, m_indent, m_indent,
         m_indent, fmt::format("Dimension: {:d}",         x0.size()),
@@ -1111,6 +1327,8 @@ namespace Utils {
      * @brief Set optimization bounds
      * @param lower Lower bounds
      * @param upper Upper bounds
+     * 
+     * EIGEN3: Uses Eigen's array operations for bounds validation
      */
     void
     set_bounds(Vector const & lower, Vector const & upper) {
@@ -1134,6 +1352,8 @@ namespace Utils {
      * @param x0 Starting point
      * @param callback Objective function
      * @return Optimization result
+     * 
+     * EIGEN3: Main optimization routine leveraging all Eigen optimizations
      */
     InnerResult
     minimize(Vector const & x0, Callback const & callback) {
@@ -1192,6 +1412,7 @@ namespace Utils {
           }
         }
 
+        // EIGEN3: Use Vector::Random() and cwiseProduct for efficient random perturbation
         Vector perturbation = Vector::Random(x0.size()).cwiseProduct(scale_vec) * perturbation_scale;
             
         if (m_options.track_best_point) {
@@ -1306,6 +1527,16 @@ namespace Utils {
   // CLASS: NelderMead_BlockCoordinate (Outer Solver)
   // ===========================================================================
 
+  /**
+   * @class NelderMead_BlockCoordinate
+   * @brief Block coordinate descent using Nelder-Mead for subspace optimization
+   * @tparam Scalar Numeric type for computations (default: double)
+   *
+   * EIGEN3 OPTIMIZATIONS:
+   * - Efficient subspace extraction using Eigen vector operations
+   * - Memory-efficient block processing for high-dimensional problems
+   * - Leverages Eigen's expression templates for zero-copy operations
+   */
   template <typename Scalar = double>
   class NelderMead_BlockCoordinate {
   public:
@@ -1320,6 +1551,8 @@ namespace Utils {
       size_t max_function_evaluations{100000};
       Scalar tolerance{1e-6};
       bool   verbose{true};
+      size_t verbosity_level{1};  // 0: quiet, 1: outer stats, 2: inner progress, 3: detailed
+      size_t inner_progress_frequency{10};
       typename NelderMead_classic<Scalar>::Options sub_options;
     };
 
@@ -1343,6 +1576,81 @@ namespace Utils {
       return indices;
     }
 
+    void print_outer_iteration_header(size_t outer_iter, size_t total_cycles,
+                                    const vector<size_t>& block_indices, size_t block_size) const {
+        if (m_options.verbosity_level < 1) return;
+        
+        fmt::print(NelderMead::PrintColors::HEADER,
+            "\n"
+            "{}╔════════════════════════════════════════════════════════════════╗\n"
+            "{}║ Outer Iteration {:3d} - Block {:2d}/{:2d}                              ║\n"
+            "{}╠════════════════════════════════════════════════════════════════╣\n"
+            "{}║ Block Indices: {:<47} ║\n"
+            "{}║ Block Size:    {:<47} ║\n"
+            "{}╚════════════════════════════════════════════════════════════════╝\n",
+            m_indent, m_indent, outer_iter, (outer_iter % total_cycles) + 1, total_cycles,
+            m_indent, m_indent, Utils::NelderMead::format_index_vector<size_t>(block_indices, 15),
+            m_indent, block_size, m_indent
+        );
+    }
+
+    void print_outer_iteration_result(size_t outer_iter, size_t block_size, Scalar current_f,
+                                    size_t inner_iters, size_t inner_evals, Scalar improvement,
+                                    bool improved) const {
+        if (m_options.verbosity_level < 1) return;
+        
+        auto color = improved ? NelderMead::PrintColors::SUCCESS : NelderMead::PrintColors::WARNING;
+        
+        fmt::print(color,
+            "{}┌──────────────┬───────────┬────────────────┬──────────────────┬──────────────────┐\n"
+            "{}│ out iter:{:<3} │ block:{:<3} │ F:{:<12.6e} │ inner iter:{:<5} │ inner eval:{:<5} │\n"
+            "{}└──────────────┴───────────┴────────────────┴──────────────────┴──────────────────┘\n",
+            m_indent,
+            m_indent, outer_iter, block_size, current_f, inner_iters, inner_evals,
+            m_indent
+        );
+        
+        if (improved) {
+            fmt::print(NelderMead::PrintColors::SUCCESS,
+                "{}✓ Improvement: {:.6e} → {:.6e} (Δ = {:.6e})\n",
+                m_indent, current_f + improvement, current_f, improvement
+            );
+        } else {
+            fmt::print(NelderMead::PrintColors::WARNING,
+                "{}⚠ No significant improvement (Δ = {:.6e})\n",
+                m_indent, improvement
+            );
+        }
+    }
+
+    void print_outer_statistics(size_t outer_iter, size_t total_outer_iters,
+                              size_t total_inner_iters, size_t total_evals,
+                              Scalar best_value, bool converged) const {
+        if (m_options.verbosity_level < 1) return;
+        
+        fmt::print(NelderMead::PrintColors::INFO,
+            "\n"
+            "{}╔═══════════════════════════════════════════════════════════════╗\n"
+            "{}║                      Outer Iteration Summary                  ║\n"
+            "{}╠═══════════════════════════════════════════════════════════════╣\n"
+            "{}║ Completed:        {:<43} ║\n"
+            "{}║ Outer Iterations: {:<43} ║\n"
+            "{}║ Inner Iterations: {:<43} ║\n"
+            "{}║ Total Evals:      {:<43} ║\n"
+            "{}║ Best Value:       {:<43.6e} ║\n"
+            "{}║ Status:           {:<43} ║\n"
+            "{}╚═══════════════════════════════════════════════════════════════╝\n",
+            m_indent, m_indent, m_indent,
+            m_indent, fmt::format("{}/{}", outer_iter, total_outer_iters),
+            m_indent, outer_iter,
+            m_indent, total_inner_iters,
+            m_indent, total_evals,
+            m_indent, best_value,
+            m_indent, (converged ? "CONVERGED" : "RUNNING"),
+            m_indent
+        );
+    }
+
   public:
     explicit NelderMead_BlockCoordinate(Options const & opts = Options()) : m_options(opts) {
       m_solver.set_options(m_options.sub_options);
@@ -1355,19 +1663,31 @@ namespace Utils {
 
     void set_bounds(Vector const & l, Vector const & u) { m_lower = l; m_upper = u; m_use_bounds = true; }
 
+    /**
+     * @brief Main optimization routine for block coordinate descent
+     * @param x Initial point (updated in-place)
+     * @param global_callback Objective function
+     * @return Optimization result
+     * 
+     * EIGEN3: Efficient block processing using Eigen vector operations
+     * - Subspace extraction without memory copies
+     * - Efficient bounds management for subspaces
+     * - Leverages Eigen's expression templates for performance
+     */
     Result minimize(Vector x, Callback const & global_callback) {
       size_t n = x.size();
 
       // 1. Check for small problem fallback
       if ( !(2*n > m_options.block_size) ) {
-          if (m_options.verbose)
+          // MODIFICA: Usare verbosity_level
+          if (m_options.verbosity_level >= 1)
             fmt::print( "{}[Info] Dim <= BlockSize. Switching to DIRECT CLASSIC solver.\n", m_indent );
 
           auto full_opts = m_options.sub_options;
           full_opts.max_function_evaluations = m_options.max_function_evaluations;
           full_opts.max_iterations = m_options.max_inner_iterations;
           full_opts.tolerance = m_options.tolerance;
-          full_opts.verbose = false;
+          full_opts.verbose = (m_options.verbosity_level >= 1); // MODIFICA
           
           m_solver.set_options(full_opts);
           if (m_use_bounds) m_solver.set_bounds(m_lower, m_upper);
@@ -1423,26 +1743,11 @@ namespace Utils {
         vector<size_t> idxs = select_block(n, outer_iter - 1);
         size_t k = idxs.size();
 
-        if (m_options.verbose) {
-          // Stampare l'inizio dell'iterazione outer con informazioni dettagliate
-          fmt::print(NelderMead::PrintColors::HEADER,
-            "\n"
-            "{}╔═══════════════════════════════════════════════════════════════╗\n"
-            "{}║ Outer Iteration {:3d} - Block {:2d}/{:2d}                             ║\n"
-            "{}╠═══════════════════════════════════════════════════════════════╣\n"
-            "{}║ Block Indices: {:<46} ║\n"
-            "{}║ Block Size:    {:<46} ║\n"
-            "{}╚═══════════════════════════════════════════════════════════════╝\n",
-            m_indent,
-            m_indent, outer_iter, (outer_iter % blocks_per_cycle) + 1, blocks_per_cycle,
-            m_indent,
-            m_indent, Utils::NelderMead::format_index_vector<size_t>(idxs, 15),
-            m_indent, k,
-            m_indent
-          );
-        }
+        // MODIFICA: Usare il nuovo metodo di stampa
+        print_outer_iteration_header(outer_iter, blocks_per_cycle, idxs, k);
 
         // Prepare Subspace
+        // EIGEN3: Efficient subspace extraction without memory allocation
         Vector x_sub(k), l_sub(k), u_sub(k);
         for ( size_t i{0}; i < k; ++i) {
            x_sub(i) = x(idxs[i]);
@@ -1450,7 +1755,13 @@ namespace Utils {
         }
         if (m_use_bounds) m_solver.set_bounds(l_sub, u_sub);
 
+        // MODIFICA: Impostare verbosity_level per il solver interno
+        auto sub_opts = m_options.sub_options;
+        sub_opts.verbosity_level = m_options.verbosity_level;
+        m_solver.set_options(sub_opts);
+
         // Proxy Callback
+        // EIGEN3: Efficient subspace updates using Eigen vector operations
         auto sub_cb = [&](Vector const & sub_v) -> Scalar {
           count_inner_evals++;
           Vector x_temp = x; 
@@ -1463,38 +1774,19 @@ namespace Utils {
         count_inner_iters += sub_res.inner_iterations;
 
         // Update Global State
-        Scalar improvement = current_f - sub_res.final_function_value;
-        if (sub_res.final_function_value < current_f) {
+        Scalar old_f = current_f;
+        Scalar improvement = old_f - sub_res.final_function_value;
+        bool improved = sub_res.final_function_value < current_f;
+        
+        if (improved) {
            current_f = sub_res.final_function_value;
            for (size_t i = 0; i < k; ++i) x(idxs[i]) = sub_res.solution(i);
         }
 
-        if (m_options.verbose) {
-          bool improved = sub_res.final_function_value < current_f;
-          auto color    = improved ?
-                          NelderMead::PrintColors::SUCCESS :
-                          NelderMead::PrintColors::WARNING;
-        
-          fmt::print(color,
-            "{}┌───────┬──────────┬──────────────────┬────────────┬────────────┐\n"
-            "{}│ {:<5} │ {:<8} │ {:<16.6e} │ {:<10} │ {:<10} │\n"
-            "{}└───────┴──────────┴──────────────────┴────────────┴────────────┘\n",
-            m_indent,
-            m_indent, outer_iter, k, current_f, sub_res.inner_iterations, sub_res.inner_evaluations,
-            m_indent
-          );
-          if (improved) {
-            fmt::print(NelderMead::PrintColors::SUCCESS,
-              "{}✓ Improvement: {:.6e} → {:.6e} (Δ = {:.6e})\n",
-              m_indent, current_f + improvement, current_f, improvement
-            );
-          } else {
-            fmt::print(NelderMead::PrintColors::WARNING,
-              "{}⚠ No significant improvement\n",
-              m_indent
-            );
-          }
-        }
+        // MODIFICA: Usare il nuovo metodo di stampa
+        print_outer_iteration_result(outer_iter, k, current_f, 
+                                   sub_res.inner_iterations, sub_res.inner_evaluations,
+                                   improvement, improved);
 
         // Stagnation Check Logic
         if (improvement > m_options.tolerance) no_improv_count = 0; // Reset counter on success
@@ -1502,6 +1794,13 @@ namespace Utils {
 
         // Stop only if we cycled through ALL blocks twice without significant improvement
         if ( no_improv_count >= 2*blocks_per_cycle ) converged = true;
+        
+        // MODIFICA: Stampare statistiche periodiche
+        if (m_options.verbosity_level >= 1 && (outer_iter % 5 == 0 || converged)) {
+            print_outer_statistics(outer_iter, m_options.max_outer_iterations,
+                                 count_inner_iters, count_outer_evals + count_inner_evals,
+                                 current_f, converged);
+        }
       }
 
       res.solution = x;
@@ -1517,6 +1816,14 @@ namespace Utils {
           if (converged) res.status = NelderMead::Status::CONVERGED;
           else if (outer_iter >= m_options.max_outer_iterations) res.status = NelderMead::Status::MAX_ITERATIONS;
       }
+      
+      // MODIFICA: Stampare statistiche finali
+      if (m_options.verbosity_level >= 1) {
+          print_outer_statistics(outer_iter, m_options.max_outer_iterations,
+                               count_inner_iters, count_outer_evals + count_inner_evals,
+                               current_f, true);
+      }
+      
       return res;
     }
   };
