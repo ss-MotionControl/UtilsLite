@@ -1,209 +1,138 @@
 /*--------------------------------------------------------------------------*\
  |                                                                          |
- |  NelderMead_minimizer per problemi di ottimizzazione senza gradienti     |
+ |  NelderMead_minimizer Test Harness                                       |
  |                                                                          |
- |  Test harness aggiornato: verbose, salvataggio x_final, statistiche       |
  \*--------------------------------------------------------------------------*/
 
 #include "Utils_NelderMead.hh"
 #include "Utils_fmt.hh"
-#include "ND_func.cxx" // problem definitions (assumed to provide lower(), upper(), init(), operator())
+#include "ND_func.cxx" 
 
 #include <iostream>
 #include <cmath>
-#include <random>
 #include <vector>
-#include <map>
 #include <string>
-
+#include <iomanip>
+#include <limits>
 
 using Scalar = double;
-using NM     = Utils::NelderMead_Hybrid<Scalar>;
-//using NM     = Utils::NelderMead_classic<Scalar>;
-using Vector = NM::Vector;
+using NM_Block = Utils::NelderMead_BlockCoordinate<Scalar>;
+using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
-// Struttura per raccogliere i risultati dei test
+// --- Helper per formattare vettori ---
+std::string format_vector(const Vector& v) {
+    std::stringstream ss;
+    ss << "[";
+    if (v.size() <= 6) {
+        for (int i = 0; i < v.size(); ++i) {
+            ss << fmt::format("{:.4f}", v(i));
+            if (i < v.size() - 1) ss << ", ";
+        }
+    } else {
+        for (int i = 0; i < 3; ++i) ss << fmt::format("{:.4f}, ", v(i));
+        ss << "... ";
+        for (int i = v.size() - 3; i < v.size(); ++i) {
+            ss << fmt::format("{:.4f}", v(i));
+            if (i < v.size() - 1) ss << ", ";
+        }
+    }
+    ss << "]";
+    return ss.str();
+}
+
 struct TestResult {
   std::string problem_name;
-  std::string optimizer_name;
   Scalar final_value{0};
-  Vector final_solution;
   size_t dimension{0};
-  size_t iterations{0};
-  size_t function_evaluations{0};
-  bool   converged{false};
+  size_t total_evaluations{0}; 
+  std::string status_str;
 };
 
-// Statistiche optimizer
-struct OptimizerStats {
-  std::string name;
-  size_t total_tests{0};
-  size_t successful_tests{0};
-  size_t total_iterations{0};
-  size_t total_function_evals{0};
-};
+static std::vector<TestResult> global_results;
 
-// Collettori globali
-static std::vector<TestResult> global_test_results;
-static std::map<std::string, OptimizerStats> optimizer_statistics;
-
-// Helper: convert Eigen vector to formatted string
-static std::string vec_to_string(Vector const & v) {
-  std::string s;
-  s.reserve(v.size() * 16);
-  s.push_back('[');
-  for (Eigen::Index i = 0; i < v.size(); ++i) {
-    if (i) s += ", ";
-    s += fmt::format("{:.6e}", static_cast<double>(v(i)));
-  }
-  s.push_back(']');
-  return s;
-}
-
-// -------------------------------------------------------------------
-// Aggiorna statistiche
-// -------------------------------------------------------------------
-void update_optimizer_statistics(const TestResult& result) {
-  auto & stats = optimizer_statistics[result.optimizer_name];
-  stats.name = result.optimizer_name;
-  stats.total_tests++;
-  stats.total_iterations     += result.iterations;
-  stats.total_function_evals += result.function_evaluations;
-  if ( result.converged ) stats.successful_tests++;
-}
-
-// -------------------------------------------------------------------
-// Stampa statistiche
-// -------------------------------------------------------------------
-void print_optimizer_statistics() {
-  fmt::print("\n\n{:=^100}\n", " Nelder Mead STATISTICS ");
-  fmt::print("{:<24} {:>8} {:>10} {:>12} {:>12}\n",
-             "Optimizer", "Tests", "Success", "AvgIter", "AvgFunEvals");
-  fmt::print("{:-<100}\n", "");
-
-  for (const auto & [name, stats] : optimizer_statistics) {
-    double success_rate = (stats.total_tests > 0) ?
-      100.0 * static_cast<double>(stats.successful_tests) / static_cast<double>(stats.total_tests) : 0.0;
-    double avg_iter = (stats.total_tests > 0) ?
-      static_cast<double>(stats.total_iterations) / static_cast<double>(stats.total_tests) : 0.0;
-    double avg_fevals = (stats.total_tests > 0) ?
-      static_cast<double>(stats.total_function_evals) / static_cast<double>(stats.total_tests) : 0.0;
-
-    auto color = (success_rate >= 80.0) ? fmt::fg(fmt::color::green) :
-                 (success_rate >= 60.0) ? fmt::fg(fmt::color::yellow) : fmt::fg(fmt::color::red);
-
-    fmt::print("{:<24} {:>8} ", stats.name, stats.total_tests);
-    fmt::print(color, "{:>9.2f}%", success_rate);
-    fmt::print(" {:>12.2f} {:>12.2f}\n", avg_iter, avg_fevals);
-  }
-
-  fmt::print("{:=^100}\n", "");
-}
-
-// -------------------------------------------------------------------
-// Stampa tabella riassuntiva
-// -------------------------------------------------------------------
-void print_summary_table() {
-  fmt::print("\n\n{:=^120}\n", " SUMMARY TEST RESULTS ");
-  fmt::print("{:<28} {:<20} {:>10} {:>12} {:>18} {:>12}\n",
-             "Problem", "Optimizer", "Dimension", "Iterations", "final f(x)", "Status");
-  fmt::print("{:-<120}\n", "");
-
-  for ( auto const & result : global_test_results ) {
-    std::string status_str = result.converged ? "CONVERGED" : "NOT_CONV";
-    auto const & GREEN { fmt::fg(fmt::color::green) };
-    auto const & RED   { fmt::fg(fmt::color::red)   };
-
-    fmt::print("{:<28} {:<20} {:>10} {:>12} {:>18.6e} ",
-               result.problem_name,
-               result.optimizer_name,
-               result.dimension,
-               result.iterations,
-               static_cast<double>(result.final_value));
-
-    if ( result.converged ) fmt::print( GREEN, "{:<12}\n", status_str );
-    else                    fmt::print( RED,   "{:<12}\n", status_str );
-  }
-
-  fmt::print("{:=^120}\n", "");
-}
-
-// -------------------------------------------------------------------
-// Funzione di test Nelder Mead verbosa
-// -------------------------------------------------------------------
-template <typename Problem>
-void test(Problem & prob, std::string const & problem_name) {
-
-  fmt::print( "\n\nSTART: {}\n", problem_name );
-
-  #if 0
-  // Parametri Nelder Mead
-  Utils::NelderMead_minimizer<Scalar>::Options opts;
-  opts.verbose = true;
-  opts.strategy = Utils::NelderMead_minimizer<Scalar>::Strategy::RANDOM_SUBSPACE;
-  opts.progress_frequency = 10; // print every iteration when verbose
-      
-  opts.max_dimension_standard=5;
-  opts.subspace_min_size=2;
-  opts.subspace_max_size=10;
-
-  Utils::NelderMead_minimizer<Scalar> optimizer(opts);
-  #else
-  // Parametri Nelder Mead
-  NM::Options opts;
-  opts.verbose = true;
-  opts.max_iterations = 10000;
-  opts.max_function_evaluations = 50000;
-  //opts.progress_frequency = 50; // print every iteration when verbose
-  NM optimizer(opts);
-  #endif
-
-  Vector x0 = prob.init();
-
-  // Set bounds only if sizes match
-  try {
-    Vector lower = prob.lower();
-    Vector upper = prob.upper();
-    if ( lower.size() == x0.size() && upper.size() == x0.size() ) {
-      optimizer.set_bounds(lower, upper);
+// --- Init Sicuro ---
+template <typename ProblemFunc>
+Vector get_safe_initial_point(ProblemFunc& problem) {
+    try { return problem.init(); } catch(...) {}
+    Vector L = problem.lower();
+    Vector U = problem.upper();
+    size_t dim = L.size();
+    Vector x0(dim);
+    for (size_t i = 0; i < dim; ++i) {
+        if (std::isfinite(L(i)) && std::isfinite(U(i))) x0(i) = (L(i) + U(i)) / 2.0;
+        else if (std::isfinite(L(i))) x0(i) = L(i) + 1.0;
+        else if (std::isfinite(U(i))) x0(i) = U(i) - 1.0;
+        else x0(i) = 0.5; 
     }
-  } catch(...) {
-    // ignore if problem does not provide bounds in expected form
-  }
-
-  auto callback = [&](Vector const & x)->Scalar { return prob(x); };
-
-  auto iter_data = optimizer.minimize(x0, callback);
-
-  TestResult result;
-  result.problem_name         = problem_name;
-  result.optimizer_name       = "NelderMead";
-  result.iterations           = iter_data.total_iterations;
-  result.converged            = iter_data.status == NM::Status::CONVERGED;
-  result.function_evaluations = iter_data.function_evaluations;
-  result.final_value          = iter_data.final_function_value;
-  result.final_solution       = iter_data.solution;
-  result.dimension            = static_cast<size_t>(x0.size());
-
-  global_test_results.push_back(result);
-  update_optimizer_statistics(result);
-
-  // Print concise final info
-  fmt::print("\n{}: final f = {:.6e}, iterations = {}\n", problem_name,
-             static_cast<double>(iter_data.final_function_value), iter_data.total_iterations);
-  fmt::print("x_final = {}\n", vec_to_string(iter_data.solution));
-  fmt::print("x_initial = {}\n", vec_to_string(x0));
+    return x0;
 }
 
-// -------------------------------------------------------------------
-// MAIN
-// -------------------------------------------------------------------
-int main() {
-  fmt::print("Esecuzione test NelderMead_minimizer...\n");
+template <typename ProblemFunc>
+void test(ProblemFunc& problem, std::string const & name) {
+  
+  Vector L = problem.lower();
+  Vector U = problem.upper();
+  size_t dim = L.size();
+  Vector x0 = get_safe_initial_point(problem);
 
-  // Lista dei test: creare istanze e chiamare test(...)
-  // Nota: ND_func.cxx deve definire le classi usate qui
+  fmt::print("\n");
+  fmt::print("################################################################\n");
+  fmt::print("# TEST FUNZIONE: {:<45} #\n", name);
+  fmt::print("# Dimensione:    {:<45} #\n", dim);
+  fmt::print("################################################################\n");
 
+  fmt::print("-> Punto Iniziale: {}\n", format_vector(x0));
+  fmt::print("-> Valore Iniziale: {:.6e}\n", problem(x0));
+
+  NM_Block::Options opts;
+  opts.block_size = 10; 
+  opts.max_outer_iterations = 100; 
+  opts.max_function_evaluations = 200000; 
+  opts.tolerance = 1e-7;
+  opts.verbose = true;
+  
+  // Opzioni sub-solver (usate come globali se dim < 10)
+  opts.sub_options.tolerance = 1e-7;
+  opts.sub_options.initial_step = 0.1; 
+
+  NM_Block solver(opts);
+  solver.set_bounds(L, U);
+
+  auto result = solver.minimize(x0, [&](Vector const & x) { return problem(x); });
+
+  fmt::print("\n-> STATO FINALE:   {}\n", Utils::status_to_string(result.status));
+  fmt::print("-> Punto Finale:   {}\n", format_vector(result.solution));
+  fmt::print("-> Valore Finale:  {:.8e}\n", result.final_function_value);
+  fmt::print("-> Totale Evals:   {}\n", result.total_evaluations);
+
+  TestResult tr;
+  tr.problem_name = name;
+  tr.dimension = dim;
+  tr.final_value = result.final_function_value;
+  tr.status_str = Utils::status_to_string(result.status);
+  tr.total_evaluations = result.total_evaluations;
+  global_results.push_back(tr);
+}
+
+void print_summary_table() {
+    if (global_results.empty()) return;
+    fmt::print("\n\n");
+    fmt::print("╔═══════════════════════════════════════════════════════════════════════╗\n");
+    fmt::print("║                           R I E P I L O G O                           ║\n");
+    fmt::print("╠════════════════════════╤══════╤══════════╤══════════════╤═════════════╣\n");
+    fmt::print("║ Funzione               │ Dim  │ Tot Evals│ Valore Finale│ Status      ║\n");
+    fmt::print("╠════════════════════════╪══════╪══════════╪══════════════╪═════════════╣\n");
+
+    for (const auto& r : global_results) {
+        fmt::print("║ {:<22} │ {:>4} │ {:>8} │ {:<12.4e} │ {:<11} ║\n", 
+                   r.problem_name.substr(0,22), r.dimension, 
+                   r.total_evaluations, r.final_value, r.status_str);
+    }
+    fmt::print("╚════════════════════════╧══════╧══════════╧══════════════╧═════════════╝\n");
+}
+
+int
+main() {
   try {
     Rosenbrock2D<Scalar> rosen;
     test( rosen, "Rosenbrock2D" );
@@ -254,16 +183,11 @@ int main() {
     RastriginN<Scalar,15> rastrigin;
     test( rastrigin, "RastriginN15D" );
 
-  } catch (std::exception const & e) {
-    fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::red), "Errore durante l'esecuzione dei test: {}\n", e.what());
-    return 1;
-  } catch (...) {
-    fmt::print(fmt::emphasis::bold | fmt::fg(fmt::color::red), "Errore non gestito durante i test.\n");
-    return 2;
-  }
+    print_summary_table();
 
-  print_summary_table();
-  print_optimizer_statistics();
+  } catch (std::exception const & e) {
+    std::cerr << "Exception caught: " << e.what() << std::endl;
+  }
 
   return 0;
 }
