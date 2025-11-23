@@ -15,30 +15,9 @@
 #include <iomanip>
 #include <limits>
 
-using Scalar = double;
+using Scalar   = double;
 using NM_Block = Utils::NelderMead_BlockCoordinate<Scalar>;
-using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-
-// Helper for vector formatting
-std::string format_vector(const Vector& v) {
-    std::stringstream ss;
-    ss << "[";
-    if (v.size() <= 6) {
-        for (int i = 0; i < v.size(); ++i) {
-            ss << fmt::format("{:.4f}", v(i));
-            if (i < v.size() - 1) ss << ", ";
-        }
-    } else {
-        for (int i = 0; i < 3; ++i) ss << fmt::format("{:.4f}, ", v(i));
-        ss << "... ";
-        for (int i = v.size() - 3; i < v.size(); ++i) {
-            ss << fmt::format("{:.4f}", v(i));
-            if (i < v.size() - 1) ss << ", ";
-        }
-    }
-    ss << "]";
-    return ss.str();
-}
+using Vector   = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
 
 struct TestResult {
   std::string problem_name;
@@ -103,8 +82,8 @@ void test(ProblemFunc& problem, std::string const & name) {
   auto result = solver.minimize(x0, [&](Vector const & x) { return problem(x); });
 
   fmt::print("\n");
-  fmt::print("-> Initial Point:  {}\n",     format_vector(x0));
-  fmt::print("-> Final Point:    {}\n",     format_vector(result.solution));
+  fmt::print("-> Initial Point:  {}\n",     Utils::NelderMead::format_vector(x0));
+  fmt::print("-> Final Point:    {}\n",     Utils::NelderMead::format_vector(result.solution));
   fmt::print("-> Initial Value:  {:.6e}\n", init_val);
   fmt::print("-> Final Value:    {:.8e}\n", result.final_function_value);
 
@@ -127,20 +106,44 @@ void test(ProblemFunc& problem, std::string const & name) {
 
 void print_summary_table() {
     if (global_results.empty()) return;
-    fmt::print("\n\n");
-    fmt::print("╔══════════════════════════════════════════════════════════════════════════════════╗\n");
-    fmt::print("║                                       SUMMARY                                    ║\n");
-    fmt::print("╠════════════════════════╤══════╤══════════╤══════════╤══════════════╤═════════════╣\n");
-    fmt::print("║ Function               │ Dim  │ Outer It │ Inner It │ Final Value  │ Status      ║\n");
-    fmt::print("╠════════════════════════╪══════╪══════════╪══════════╪══════════════╪═════════════╣\n");
+    
+    fmt::print(fmt::fg(fmt::color::light_blue),
+        "\n\n"
+        "╔══════════════════════════════════════════════════════════════════════════════════════╗\n"
+        "║                                OPTIMIZATION SUMMARY                                  ║\n"
+        "╠════════════════════════╤════════╤══════════╤══════════╤════════════════╤═════════════╣\n"
+        "║ Function               │ Dim    │ Outer It │ Inner It │ Final Value    │ Status      ║\n"
+        "╠════════════════════════╪════════╪══════════╪══════════╪════════════════╪═════════════╣\n"
+    );
 
     for (const auto& r : global_results) {
-        fmt::print("║ {:<22} │ {:>4} │ {:>8} │ {:>8} │ {:<12.4e} │ {:<11} ║\n", 
+        auto status_color = r.status_str == "CONVERGED" ? 
+            fmt::fg(fmt::color::green) : fmt::fg(fmt::color::yellow);
+        
+        fmt::print("║ {:<22} │ {:>6} │ {:>8} │ {:>8} │ {:<14.4e} │ ", 
                    r.problem_name.substr(0,22), r.dimension, 
-                   r.outer_iters, r.inner_iters,
-                   r.final_value, r.status_str);
+                   r.outer_iters, r.inner_iters, r.final_value);
+        fmt::print(status_color, "{:<11}", r.status_str);
+        fmt::print(" ║\n");
     }
-    fmt::print("╚════════════════════════╧══════╧══════════╧══════════╧══════════════╧═════════════╝\n");
+    
+    fmt::print(fmt::fg(fmt::color::light_blue),
+        "╚════════════════════════╧════════╧══════════╧══════════╧════════════════╧═════════════╝\n"
+    );
+    
+    // Aggiungere statistiche globali
+    size_t total_evals = 0;
+    size_t converged_count = 0;
+    for (const auto& r : global_results) {
+        total_evals += r.total_evaluations;
+        if (r.status_str == "CONVERGED") converged_count++;
+    }
+    
+    fmt::print("\n📊 Global Statistics:\n");
+    fmt::print("   • Total problems: {}\n", global_results.size());
+    fmt::print("   • Converged: {} ({:.1f}%)\n", converged_count, 
+               (100.0 * converged_count / global_results.size()));
+    fmt::print("   • Total evaluations: {}\n", total_evals);
 }
 
 int
