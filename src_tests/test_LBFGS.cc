@@ -281,6 +281,8 @@ test( OptimizationProblem<T,N> const * tp, string const & problem_name ){
       return armijo(f0, Df0, x, d, callback, alpha0);
   });
 
+#if 0
+
   line_searches.emplace_back("WolfeWeak", [&wolfe_weak](
     Scalar f0, Scalar Df0, Vector const& x, Vector const& d,
     std::function<Scalar(Vector const&, Vector*)> callback, Scalar alpha0) {
@@ -310,6 +312,7 @@ test( OptimizationProblem<T,N> const * tp, string const & problem_name ){
     std::function<Scalar(Vector const&, Vector*)> callback, Scalar alpha0) {
       return More(f0, Df0, x, d, callback, alpha0);
   });
+#endif
 
   for (const auto& [ls_name, line_search] : line_searches) {
   
@@ -354,16 +357,19 @@ main(){
     "╚════════════════════════════════════════════════════════════════╝\n\n"
   );
 
+#if 0
   // Test originali
   Rosenbrock2D<Scalar> rosen;
   test( &rosen, "Rosenbrock2D" );
 
   NesterovChebyshevRosenbrock<Scalar,128> nesterov;
   test( &nesterov, "NesterovChebyshevRosenbrock" );
+#endif
 
-  RosenbrockN<Scalar,10> rosenN;
-  test( &rosenN, "Rosenbrock10D" );
+  RosenbrockN<Scalar,30> rosenN;
+  test( &rosenN, "Rosenbrock30D" );
 
+#if 0
   PowellSingularN<Scalar,16> powerllN;
   test( &powerllN, "PowellSingular16D" );
 
@@ -400,6 +406,7 @@ main(){
 
   TrigonometricSumN<Scalar,15> trig;
   test( &trig, "TrigonometricSum15D" );
+#endif
 
   // Stampa tabella riassuntiva
   print_summary_table();

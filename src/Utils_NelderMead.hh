@@ -1567,7 +1567,7 @@ namespace Utils {
             "{}║ Block Size:    {:<47} ║\n"
             "{}╚════════════════════════════════════════════════════════════════╝\n",
             m_indent, m_indent, outer_iter, (outer_iter % total_cycles) + 1, total_cycles,
-            m_indent, m_indent, Utils::format_index_vector<size_t>(block_indices, 15),
+            m_indent, m_indent, Utils::format_index_vector<size_t>(block_indices, 7),
             m_indent, block_size, m_indent
         );
     }
