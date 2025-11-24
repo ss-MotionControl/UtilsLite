@@ -59,6 +59,36 @@ std::map<std::string, LineSearchStats> line_search_statistics;
 #include "ND_func_grad.cxx"
 
 // -------------------------------------------------------------------
+// Funzione per formattare il vettore (simile a NelderMead)
+// -------------------------------------------------------------------
+std::string
+format_vector( Vector const & x, int precision = 6 ) {
+  std::ostringstream os;
+  os << "[";
+  for ( int i = 0; i < x.size(); ++i ) {
+    if ( i > 0 ) os << ", ";
+    os << std::setprecision(precision) << x(i);
+  }
+  os << "]";
+  return os.str();
+}
+
+// -------------------------------------------------------------------
+// Funzione per convertire status in stringa
+// -------------------------------------------------------------------
+std::string
+status_to_string( Status status ) {
+  switch (status) {
+    case Status::CONVERGED:         return "CONVERGED";
+    case Status::MAX_ITERATIONS:    return "MAX_ITER";
+    case Status::LINE_SEARCH_FAILED:return "LINE_SEARCH_FAILED";
+    case Status::GRADIENT_TOO_SMALL:return "GRAD_SMALL";
+    case Status::FAILED:            return "FAILED";
+    default:                        return "UNKNOWN";
+  }
+}
+
+// -------------------------------------------------------------------
 // Funzione per aggiornare le statistiche delle line search
 // -------------------------------------------------------------------
 void
@@ -82,11 +112,15 @@ update_line_search_statistics(const TestResult& result) {
 // -------------------------------------------------------------------
 void
 print_line_search_statistics() {
-  fmt::print("\n\n{:=^80}\n", " LINE SEARCH STATISTICS ");
-  fmt::print("{:<15} {:<8} {:<8} {:<12} {:<10} {:<10}\n",
-             "LineSearch", "Tests", "Success", "Success%", "AvgIter", "AvgFuncEval" );
-  fmt::print("{:-<80}\n", "");
-  
+  fmt::print(fmt::fg(fmt::color::light_blue),
+    "\n\n"
+    "╔══════════════════════════════════════════════════════════════════════════════════════════╗\n"
+    "║                                  LINE SEARCH STATISTICS                                  ║\n"
+    "╠══════════════════╤══════════╤══════════╤════════════╤═════════════╤══════════════════════╣\n"
+    "║    LineSearch    │ Tests    │ Success  │  Success % │   AvgIter   │     AvgFuncEval      ║\n"
+    "╠══════════════════╪══════════╪══════════╪════════════╪═════════════╪══════════════════════╣\n"
+  );
+
   for (const auto& [name, stats] : line_search_statistics) {
     Scalar success_rate = (stats.total_tests > 0) ? 
       (100.0 * stats.successful_tests) / stats.total_tests : 0.0;
@@ -100,12 +134,14 @@ print_line_search_statistics() {
                  (success_rate >= 60.0) ? fmt::fg(fmt::color::yellow) :
                  fmt::fg(fmt::color::red);
     
-    fmt::print("{:<15} {:<8} {:<8} ", 
-               stats.name, stats.total_tests, stats.successful_tests);
-    fmt::print(color, "{:<12} ", fmt::format( "{:.1f}%",success_rate));
-    fmt::print("{:<10.1f} {:<12.1f}\n", avg_iterations, avg_func_evals);
+    fmt::print("║ {:<16} │ {:>8} │ {:>8} │ ",  stats.name, stats.total_tests, stats.successful_tests);
+    fmt::print(color, " {:>8} ", fmt::format( "{:.1f}%", success_rate) );
+    fmt::print(" │ {:>11.1f} │ {:>20.1f} ║\n", avg_iterations, avg_func_evals);
   }
-  fmt::print("{:=^80}\n", "");
+  
+  fmt::print(fmt::fg(fmt::color::light_blue),
+    "╚══════════════════╧══════════╧══════════╧════════════╧═════════════╧══════════════════════╝\n"
+  );
 }
 
 // -------------------------------------------------------------------
@@ -113,63 +149,47 @@ print_line_search_statistics() {
 // -------------------------------------------------------------------
 void
 print_summary_table() {
-  fmt::print(
-    "\n\n{:=^80}\n"
-    "{:<28} {:<12} {:<8} {:<12} {:<15} {:<10}\n"
-    "{:-<80}\n",
-    " SUMMARY TEST RESULTS ",
-    "Problem", "LineSearch", "Dimension", "Iterations", "final f(x)", "Status",
-    ""
+  fmt::print(fmt::fg(fmt::color::light_blue),
+    "\n\n"
+    "╔══════════════════════════════════════════════════════════════════════════════════════════╗\n"
+    "║                                  L-BFGS SUMMARY RESULTS                                  ║\n"
+    "╠════════════════════════╤════════╤══════════════╤══════════╤════════════════╤═════════════╣\n"
+    "║ Function               │ Dim    │ LineSearch   │ Iter     │ Final Value    │ Status      ║\n"
+    "╠════════════════════════╪════════╪══════════════╪══════════╪════════════════╪═════════════╣\n"
   );
     
   for ( auto const & result : global_test_results ) {
-    std::string status_str;
-    bool converged = false;
+    std::string status_str = status_to_string(result.status);
+    bool converged = (result.status == Status::CONVERGED ||
+                      result.status == Status::GRADIENT_TOO_SMALL);
         
-    switch (result.status) {
-    case Status::CONVERGED:
-      status_str = "CONVERGED";
-      converged = true;
-      break;
-    case Status::MAX_ITERATIONS:
-      status_str = "MAX_ITER";
-      converged = false;
-      break;
-    case Status::LINE_SEARCH_FAILED:
-      status_str = "LINE_SEARCH_FAILED";
-      converged = false;
-      break;
-    case Status::GRADIENT_TOO_SMALL:
-      status_str = "GRAD_SMALL";
-      converged = true;
-      break;
-    case Status::FAILED:
-      status_str = "FAILED";
-      converged = false;
-      break;
-    default:
-      status_str = "UNKNOWN";
-      converged = false;
+    // Usa colori: verde per convergenza, giallo per warning, rosso per fallimento
+    auto status_color = converged ? fmt::fg(fmt::color::green) :
+                        (result.status == Status::MAX_ITERATIONS) ? 
+                        fmt::fg(fmt::color::yellow) : fmt::fg(fmt::color::red);
+    
+    // Tronca il nome del problema se troppo lungo
+    std::string problem_name = result.problem_name;
+    if (problem_name.length() > 22) {
+      problem_name = problem_name.substr(0, 19) + "...";
     }
-        
-    // Usa colori: verde per convergenza, rosso altrimenti
-    auto const & GREEN { fmt::fg(fmt::color::green) };
-    auto const & RED   { fmt::fg(fmt::color::red)   };
-        
+    
     fmt::print(
-      "{:<28} {:<12} {:<8} {:<12} {:<15.6e} ",
-      result.problem_name,
-      result.linesearch_name,
+      "║ {:<22} │ {:>6} │ {:<12} │ {:>8} │ {:<14.4e} │ ",
+      problem_name,
       result.dimension,
+      result.linesearch_name,
       result.iteration_data.iterations,
       result.final_value
     );
 
-    if ( converged ) fmt::print( GREEN, "{}\n", status_str );
-    else             fmt::print( RED,   "{}\n", status_str );
+    fmt::print(status_color, "{:<11}", status_str);
+    fmt::print(fmt::fg(fmt::color::light_blue), " ║\n");
   }
 
-  fmt::print("{:=^80}\n", "");
+  fmt::print(fmt::fg(fmt::color::light_blue),
+    "╚════════════════════════╧════════╧══════════════╧══════════╧════════════════╧═════════════╝\n"
+  );
 
   // Statistiche finali
   size_t total_tests     = global_test_results.size();
@@ -178,14 +198,23 @@ print_summary_table() {
        return r.status == Status::CONVERGED ||
               r.status == Status::GRADIENT_TOO_SMALL;
   });
+  
   size_t accumulated_iter{0};
+  size_t accumulated_evals{0};
   for ( auto const & r : global_test_results ) {
      if ( r.status == Status::CONVERGED ||
-          r.status == Status::GRADIENT_TOO_SMALL ) accumulated_iter += r.iteration_data.iterations;
+          r.status == Status::GRADIENT_TOO_SMALL ) {
+       accumulated_iter += r.iteration_data.iterations;
+       accumulated_evals += r.iteration_data.function_evaluations;
+     }
   }
-    
-  fmt::print("\nFinal Stats: {} / {} test converged ({:.1f}%), accumulated iter: {}\n",
-             converged_tests, total_tests, (100.0 * converged_tests / total_tests), accumulated_iter );
+  
+  fmt::print(fmt::fg(fmt::color::light_blue), "\n📊 Global Statistics:\n");
+  fmt::print("   • Total problems: {}\n", total_tests);
+  fmt::print("   • Converged: {} ({:.1f}%)\n", converged_tests, 
+             (100.0 * converged_tests / total_tests));
+  fmt::print("   • Total iterations: {}\n", accumulated_iter);
+  fmt::print("   • Total function evaluations: {}\n", accumulated_evals);
 }
 
 // -------------------------------------------------------------------
@@ -196,7 +225,14 @@ static
 void
 test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
 
-  fmt::print( "\n\n\n\nTEST: {}\n", problem_name );
+  fmt::print(fmt::fg(fmt::color::cyan),
+    "\n"
+    "╔════════════════════════════════════════════════════════════════╗\n"
+    "║ TEST FUNCTION: {:<47} ║\n"
+    "║ Dimension:     {:<47} ║\n"
+    "╚════════════════════════════════════════════════════════════════╝\n",
+    problem_name, N
+  );
 
   using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
   Utils::LBFGS_minimizer<Scalar>::Options opts;
@@ -279,35 +315,15 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
     global_test_results.push_back(result);
     update_line_search_statistics(result);
     
-    // Converti status in stringa
-    std::string status_str;
-    switch (result.status) {
-    case Status::CONVERGED:
-      status_str = "CONVERGED";
-      break;
-    case Status::MAX_ITERATIONS:
-      status_str = "MAX_ITERATIONS";
-      break;
-    case Status::LINE_SEARCH_FAILED:
-      status_str = "LINE_SEARCH_FAILED";
-      break;
-    case Status::GRADIENT_TOO_SMALL:
-      status_str = "GRADIENT_TOO_SMALL";
-      break;
-    case Status::FAILED:
-      status_str = "FAILED";
-      break;
-    default:
-      status_str = "UNKNOWN";
-    }
-      
-    fmt::print("{} - {}: {} after {} iterations, f = {:.6e}\n{}\n",
+    std::string status_str = status_to_string(result.status);
+    
+    fmt::print("{} - {}: {} after {} iterations, f = {:.6e}\n",
                 problem_name, ls_name, status_str,
                 iter_data.iterations,
-                iter_data.final_function_value,
-                result.final_solution.transpose() );
+                iter_data.final_function_value);
+    fmt::print("Solution: {}\n", format_vector(result.final_solution));
   }
-  fmt::print("\n\n");
+  fmt::print("\n");
 }
 
 // -------------------------------------------------------------------
@@ -316,7 +332,11 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
 int
 main(){
 
-  fmt::print( "Esecuzione test di ottimizzazione L-BFGS...\n" );
+  fmt::print(fmt::fg(fmt::color::light_blue),
+    "╔════════════════════════════════════════════════════════════════╗\n"
+    "║                 L-BFGS Optimization Test Suite                 ║\n"
+    "╚════════════════════════════════════════════════════════════════╝\n\n"
+  );
 
   // Test originali
   Rosenbrock2D<Scalar> rosen;

@@ -29,6 +29,7 @@
 #define UTILS_LBFGS_dot_HH
 
 #include "Utils_Linesearch.hh"
+#include "Utils_fmt.hh"
 
 /**
  * @file Utils_LBFGS.hh
@@ -145,6 +146,20 @@ namespace Utils {
   using std::abs;
   using std::min;
   using std::max;
+
+  // ===========================================================================
+  // COLOR DEFINITIONS (consistent with NelderMead)
+  // ===========================================================================
+  
+  namespace LBFGS_PrintColors {
+    constexpr auto HEADER    = fmt::fg(fmt::color::light_blue);
+    constexpr auto SUCCESS   = fmt::fg(fmt::color::green);
+    constexpr auto WARNING   = fmt::fg(fmt::color::yellow);
+    constexpr auto ERROR     = fmt::fg(fmt::color::red);
+    constexpr auto INFO      = fmt::fg(fmt::color::cyan);
+    constexpr auto ITERATION = fmt::fg(fmt::color::white);
+    constexpr auto DETAIL    = fmt::fg(fmt::color::gray);
+  }
 
   // ===========================================================================
   // LBFGS: Core Two-Loop Recursion Implementation
@@ -659,6 +674,7 @@ namespace Utils {
       Scalar final_function_value{0};
       Scalar initial_function_value{0};
       size_t function_evaluations{0};
+      size_t line_search_evaluations{0}; // Aggiunto per tracciare eval line search
     };
 
     struct Options {
@@ -676,6 +692,11 @@ namespace Utils {
 
       bool   use_projection  {false};
       bool   verbose         {false};
+      
+      // Aggiunte per stampa avanzata
+      size_t verbosity_level{1};           // 0: quiet, 1: outer stats, 2: inner progress, 3: detailed
+      size_t progress_frequency{10};       // Frequenza stampa progresso
+      bool   use_unicode_borders{true};    // Usare bordi Unicode come NelderMead
     };
 
   private:
@@ -687,6 +708,8 @@ namespace Utils {
     Vector        m_upper;
     Vector        m_tol_lower;
     Vector        m_tol_upper;
+    
+    string        m_indent{""};  // Per indentazione consistente
 
     // Helper functions for bound checks with tolerances
     bool
@@ -761,10 +784,181 @@ namespace Utils {
       return true;
     }
 
+    // ===========================================================================
+    // PRINTING METHODS (NelderMead style)
+    // ===========================================================================
+
+    void print_optimization_header(size_t n, Scalar f0) const {
+      if (m_options.verbosity_level < 1) return;
+      
+      fmt::print(LBFGS_PrintColors::HEADER,
+        "{}╔════════════════════════════════════════════════════════════════╗\n"
+        "{}║                       L-BFGS Optimization                      ║\n"
+        "{}╠════════════════════════════════════════════════════════════════╣\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}╚════════════════════════════════════════════════════════════════╝\n",
+        m_indent, m_indent, m_indent,
+        m_indent, fmt::format("Dimension: {:d}", n),
+        m_indent, fmt::format("Max Iterations: {:d}", m_options.max_iter),
+        m_indent, fmt::format("Memory (m): {:d}", m_options.m),
+        m_indent, fmt::format("Gradient Tolerance: {:.2e}", m_options.g_tol),
+        m_indent, fmt::format("Bounds: {}", (m_options.use_projection ? "Active" : "None")),
+        m_indent
+      );
+      fmt::print("{}Initial F = {:.6e}\n", m_indent, f0);
+    }
+
+    void print_iteration_header(size_t iter) const {
+      if (m_options.verbosity_level < 2) return;
+      
+      bool show_detailed = (m_options.verbosity_level >= 3) || 
+                          (iter % m_options.progress_frequency == 0);
+      
+      if (!show_detailed) return;
+
+      fmt::print(LBFGS_PrintColors::ITERATION,
+        "{}┌─────────────────────────┬───────────────┬───────────────┬───────────────┐\n"
+        "{}│ {:^23} │ {:^13} │ {:^13} │ {:^13} │\n"
+        "{}└─────────────────────────┴───────────────┴───────────────┴───────────────┘\n",
+        m_indent,
+        m_indent, fmt::format("Iteration {}", iter), "F", "‖pg‖", "Step",
+        m_indent
+      );
+    }
+
+    void print_iteration_summary(
+      size_t iter, 
+      Scalar f, 
+      Scalar gnorm, 
+      Scalar step,
+      Scalar pg,
+      bool improved
+    ) const {
+      if (m_options.verbosity_level < 2) return;
+      
+      bool show_detailed = (m_options.verbosity_level >= 3) || 
+                          (iter % m_options.progress_frequency == 0);
+      
+      if (!show_detailed) return;
+
+      auto color = improved ? LBFGS_PrintColors::SUCCESS : LBFGS_PrintColors::WARNING;
+      string icon = improved ? "↗" : "→";
+      
+      fmt::print(color,
+        "{}[{:4d}] {} F = {:<12.6e} | ‖pg‖ = {:<12.6e} | Step = {:<12.6e} | pg = {:<12.6e}\n",
+        m_indent, iter, icon, f, gnorm, step, pg
+      );
+    }
+
+    void print_line_search_result(
+      size_t iter, 
+      Scalar step, 
+      size_t evals, 
+      bool success
+    ) const {
+      if (m_options.verbosity_level < 3) return;
+      
+      auto color = success ? LBFGS_PrintColors::SUCCESS : LBFGS_PrintColors::ERROR;
+      string status = success ? "success" : "failure";
+      
+      fmt::print(color,
+        "{}      Line search: step = {:<12.6e}, evals = {}, {}\n",
+        m_indent, step, evals, status
+      );
+    }
+
+    void print_lbfgs_update(
+      size_t iter,
+      Scalar sty,
+      bool accepted
+    ) const {
+      if (m_options.verbosity_level < 3) return;
+      
+      auto color = accepted ? LBFGS_PrintColors::SUCCESS : LBFGS_PrintColors::WARNING;
+      string status = accepted ? "accepted" : "rejected";
+      
+      fmt::print(color,
+        "{}      L-BFGS update: sᵀy = {:<12.6e}, {}\n",
+        m_indent, sty, status
+      );
+    }
+
+    void print_convergence_info(
+      Status status, 
+      Scalar gnorm, 
+      Scalar f_change, 
+      Scalar x_change
+    ) const {
+      if (m_options.verbosity_level < 1) return;
+      
+      auto color = LBFGS_PrintColors::INFO;
+      fmt::print(color,
+        "{}Convergence: status = {}, ‖pg‖ = {:.2e}, Δf = {:.2e}, Δx = {:.2e}\n",
+        m_indent, static_cast<int>(status), gnorm, f_change, x_change
+      );
+    }
+
+    void print_optimization_statistics(const IterationData& data) const {
+      if (m_options.verbosity_level < 1) return;
+      
+      string status_str;
+      auto status_color = LBFGS_PrintColors::INFO;
+      
+      switch (data.status) {
+        case Status::CONVERGED:
+          status_str = "CONVERGED";
+          status_color = LBFGS_PrintColors::SUCCESS;
+          break;
+        case Status::GRADIENT_TOO_SMALL:
+          status_str = "GRADIENT_TOO_SMALL";
+          status_color = LBFGS_PrintColors::SUCCESS;
+          break;
+        case Status::MAX_ITERATIONS:
+          status_str = "MAX_ITERATIONS";
+          status_color = LBFGS_PrintColors::WARNING;
+          break;
+        case Status::LINE_SEARCH_FAILED:
+          status_str = "LINE_SEARCH_FAILED";
+          status_color = LBFGS_PrintColors::ERROR;
+          break;
+        default:
+          status_str = "FAILED";
+          status_color = LBFGS_PrintColors::ERROR;
+      }
+      
+      fmt::print(LBFGS_PrintColors::HEADER,
+        "{}╔════════════════════════════════════════════════════════════════╗\n"
+        "{}║                    Optimization Finished                       ║\n"
+        "{}╠════════════════════════════════════════════════════════════════╣\n"
+        "{}║  Final Status       : {:<39}  ║\n"
+        "{}║  Final Value        : {:<39.6e}  ║\n"
+        "{}║  Initial Value      : {:<39.6e}  ║\n"
+        "{}║  Total Iterations   : {:<39}  ║\n"
+        "{}║  Total Evals        : {:<39}  ║\n"
+        "{}║  Final ‖pg‖         : {:<39.6e}  ║\n"
+        "{}║  L-BFGS Memory      : {:<39}  ║\n"
+        "{}╚════════════════════════════════════════════════════════════════╝\n",
+        m_indent, m_indent, m_indent,
+        m_indent, status_str,
+        m_indent, data.final_function_value,
+        m_indent, data.initial_function_value,
+        m_indent, data.iterations,
+        m_indent, data.function_evaluations,
+        m_indent, data.final_gradient_norm,
+        m_indent, m_LBFGS.size(),
+        m_indent
+      );
+    }
+
     // Mutable state variables
     mutable Vector m_x, m_g, m_p, m_x_new, m_g_new, m_s, m_y;
     mutable size_t m_iter_since_reset{0};
     mutable size_t m_function_evaluations{0};
+    mutable size_t m_line_search_evaluations{0}; // Aggiunto per tracciare eval line search
 
   public:
     LBFGS_minimizer(Options opts = Options())
@@ -800,7 +994,7 @@ namespace Utils {
 
     void
     reset_memory() {
-      if (m_options.verbose) fmt::print("[LBFGS] Periodic memory reset\n");
+      if (m_options.verbosity_level >= 2) fmt::print("{}[LBFGS] Periodic memory reset\n", m_indent);
       m_LBFGS.clear();
       m_iter_since_reset = 0;
     }
@@ -816,6 +1010,7 @@ namespace Utils {
 
       // Reset counters
       m_function_evaluations = 0;
+      m_line_search_evaluations = 0;
 
       auto const n{x0.size()};
       m_x.resize(n);
@@ -844,14 +1039,16 @@ namespace Utils {
       Scalar f_initial{f};
       size_t iteration{0};
 
+      print_optimization_header(n, f_initial);
+
       // Main optimization loop
       for (; iteration < m_options.max_iter; ++iteration) {
         ++m_iter_since_reset;
 
         // Check gradient norm
         gnorm = projected_gradient_norm(m_x, m_g);
-        if ( m_options.verbose )
-          fmt::print("[LBFGS] iter={:3d} f={:12.4g} ‖pg‖={:12.4g} mem={}\n", iteration, f, gnorm, m_LBFGS.size());
+        
+        print_iteration_header(iteration);
 
         if ( gnorm <= m_options.g_tol ) {
           status = Status::GRADIENT_TOO_SMALL;
@@ -885,8 +1082,8 @@ namespace Utils {
             m_p = -m_LBFGS.two_loop_recursion(m_g, h0);
             if ( m_options.use_projection ) projected_direction_inplace(m_x, m_p);
             pg = m_p.dot(m_g);
-            if ( m_options.verbose )
-              fmt::print("[LBFGS] Cannot find descent direction, stopping\n");
+            if ( m_options.verbosity_level >= 1 )
+              fmt::print(LBFGS_PrintColors::ERROR, "{}[LBFGS] Cannot find descent direction, stopping\n", m_indent);
             gnorm  = projected_gradient_norm(m_x, m_g);
             status = Status::FAILED;
             goto exit_position;
@@ -897,8 +1094,8 @@ namespace Utils {
         auto step_opt = linesearch(f, pg, m_x, m_p, callback, m_options.step_max);
         
         if (!step_opt.has_value()) {
-          if (m_options.verbose)
-            fmt::print("[LBFGS] line search failed, trying fallback steps\n");
+          if (m_options.verbosity_level >= 1)
+            fmt::print(LBFGS_PrintColors::WARNING, "{}[LBFGS] line search failed, trying fallback steps\n", m_indent);
 
           m_LBFGS.clear();
 
@@ -923,6 +1120,7 @@ namespace Utils {
               m_g.swap(m_g_new);
               f = f_test;
               fallback_success = true;
+              print_line_search_result(iteration, fallback_step, 1, true);
               break;
             }
           }
@@ -935,8 +1133,12 @@ namespace Utils {
           continue;
         }
 
-        auto [step,n_evals] = *step_opt; m_function_evaluations += n_evals;
+        auto [step, n_evals] = *step_opt; 
+        m_function_evaluations += n_evals;
+        m_line_search_evaluations += n_evals;
         
+        print_line_search_result(iteration, step, n_evals, true);
+
         // Evaluate new point
         m_x_new.noalias() = m_x + step * m_p;
         if ( m_options.use_projection ) project_inplace(m_x_new);
@@ -945,10 +1147,10 @@ namespace Utils {
 
         // Check for stagnation in variables
         {
-          Scalar x_change = m_p.norm();
+          Scalar x_change = (m_x_new - m_x).norm();
           if ( x_change < m_options.x_tol ) {
-            if (m_options.verbose)
-              fmt::print("[LBFGS] Converged by x change: {:.2e} < {:.2e}\n", x_change, m_options.x_tol );
+            if (m_options.verbosity_level >= 1)
+              fmt::print(LBFGS_PrintColors::SUCCESS, "{}[LBFGS] Converged by x change: {:.2e} < {:.2e}\n", m_indent, x_change, m_options.x_tol );
             gnorm  = projected_gradient_norm(m_x, m_g);
             status = Status::CONVERGED;
             goto exit_position;
@@ -966,27 +1168,35 @@ namespace Utils {
           m_epsi * m_s.squaredNorm() * m_y.squaredNorm()
         );
 
+        bool update_accepted = false;
         if ( sty > sty_tolerance ) {
-          m_LBFGS.add_correction(m_s, m_y);
-        } else {
-          if ( m_options.verbose && m_LBFGS.size() > 0 )
-            fmt::print("[LBFGS] curvature condition failed (s^T y = {:.2e}), skipping update\n", sty);
+          update_accepted = m_LBFGS.add_correction(m_s, m_y);
+        }
+        
+        print_lbfgs_update(iteration, sty, update_accepted);
+
+        if (!update_accepted && m_options.verbosity_level >= 2 && m_LBFGS.size() > 0 ) {
+          fmt::print(LBFGS_PrintColors::WARNING, "{}[LBFGS] curvature condition failed (s^T y = {:.2e}), skipping update\n", m_indent, sty);
         }
 
         // Move to new point
         m_x.swap(m_x_new);
         m_g.swap(m_g_new);
+        Scalar f_old = f;
         f = f_new;
 
         // Check function value change
-        Scalar f_change = std::abs(f - f_prev);
+        Scalar f_change = std::abs(f - f_old);
         if ( f_change <= m_options.f_tol ) {
-          if ( m_options.verbose )
-            fmt::print("[LBFGS] Converged by function change: {:.2e} < {:.2e}\n", f_change, m_options.f_tol);
+          if ( m_options.verbosity_level >= 1 )
+            fmt::print(LBFGS_PrintColors::SUCCESS, "{}[LBFGS] Converged by function change: {:.2e} < {:.2e}\n", m_indent, f_change, m_options.f_tol);
           gnorm  = projected_gradient_norm(m_x, m_g);
           status = Status::CONVERGED;
           goto exit_position;
         }
+
+        // Print iteration summary
+        print_iteration_summary(iteration, f, gnorm, step, pg, f < f_old);
         f_prev = f;
       }
         
@@ -994,7 +1204,7 @@ namespace Utils {
       gnorm = projected_gradient_norm(m_x, m_g);
 
     exit_position:
-      return IterationData{
+      IterationData result{
         status,
         iteration,
         gnorm,
@@ -1002,6 +1212,13 @@ namespace Utils {
         f_initial,
         m_function_evaluations
       };
+      
+      // Aggiungi informazioni line search al risultato
+      result.line_search_evaluations = m_line_search_evaluations;
+      
+      print_optimization_statistics(result);
+      
+      return result;
     }
   };
 
@@ -1098,10 +1315,12 @@ public:
     bool adaptive_block_size{true};
     Scalar progress_threshold{1e-4};
     
-    // Verbosity
-    bool verbose{true};
-    size_t progress_frequency{5};
-    bool track_coverage{true};               ///< Track coordinate visits
+    // Verbosity (enhanced)
+    size_t verbosity_level{1};           // 0: quiet, 1: outer stats, 2: inner progress, 3: detailed
+    size_t outer_progress_frequency{5};  // Frequency for outer iteration printing
+    size_t inner_progress_frequency{10}; // Frequency for inner iteration printing
+    bool track_coverage{true};
+    bool use_unicode_borders{true};
   };
 
 private:
@@ -1122,21 +1341,116 @@ private:
   // Progress tracking
   Scalar m_previous_best{std::numeric_limits<Scalar>::max()};
   size_t m_stagnation_count{0};
+  
+  string m_indent{""};
 
-public:
-  explicit LBFGS_BlockCoordinate(Options const & opts = Options()) 
-    : m_options(opts), m_gen(m_rd()) {}
+  // ===========================================================================
+  // PRINTING METHODS for Block Coordinate
+  // ===========================================================================
 
-  void set_bounds(Vector const & lower, Vector const & upper) {
-    UTILS_ASSERT(lower.size() == upper.size(), "Bounds size mismatch");
-    m_lower = lower;
-    m_upper = upper;
-    m_use_bounds = true;
+  void print_outer_iteration_header(size_t outer_iter, size_t total_cycles,
+                                  const vector<size_t>& block_indices, size_t block_size) const {
+      if (m_options.verbosity_level < 1) return;
+      
+      fmt::print(LBFGS_PrintColors::HEADER,
+          "\n"
+          "{}╔════════════════════════════════════════════════════════════════╗\n"
+          "{}║ Outer Iteration {:3d} - Block {:2d}/{:2d}                              ║\n"
+          "{}╠════════════════════════════════════════════════════════════════╣\n"
+          "{}║ Block Indices: {:<47} ║\n"
+          "{}║ Block Size:    {:<47} ║\n"
+          "{}╚════════════════════════════════════════════════════════════════╝\n",
+          m_indent, m_indent, outer_iter, (outer_iter % total_cycles) + 1, total_cycles,
+          m_indent, m_indent, Utils::format_index_vector<size_t>(block_indices, 15),
+          m_indent, block_size, m_indent
+      );
   }
 
-  void clear_bounds() {
-    m_use_bounds = false;
+  void print_outer_iteration_result(size_t outer_iter, size_t block_size, Scalar current_f,
+                                  size_t inner_iters, size_t inner_evals, Scalar improvement,
+                                  bool improved) const {
+      if (m_options.verbosity_level < 1) return;
+      
+      auto color = improved ? LBFGS_PrintColors::SUCCESS : LBFGS_PrintColors::WARNING;
+      
+      fmt::print(color,
+          "{}┌──────────────┬───────────┬────────────────┬──────────────────┬──────────────────┐\n"
+          "{}│ out iter:{:<3} │ block:{:<3} │ F:{:<12.6e} │ inner iter:{:<5} │ inner eval:{:<5} │\n"
+          "{}└──────────────┴───────────┴────────────────┴──────────────────┴──────────────────┘\n",
+          m_indent,
+          m_indent, outer_iter, block_size, current_f, inner_iters, inner_evals,
+          m_indent
+      );
+      
+      if (improved) {
+          fmt::print(LBFGS_PrintColors::SUCCESS,
+              "{}✓ Improvement: {:.6e} → {:.6e} (Δ = {:.6e})\n",
+              m_indent, current_f + improvement, current_f, improvement
+          );
+      } else {
+          fmt::print(LBFGS_PrintColors::WARNING,
+              "{}⚠ No significant improvement (Δ = {:.6e})\n",
+              m_indent, improvement
+          );
+      }
   }
+
+  void print_outer_statistics(size_t outer_iter, size_t total_outer_iters,
+                            size_t total_inner_iters, size_t total_evals,
+                            Scalar best_value, bool converged) const {
+      if (m_options.verbosity_level < 1) return;
+      
+      fmt::print(LBFGS_PrintColors::INFO,
+          "\n"
+          "{}╔═══════════════════════════════════════════════════════════════╗\n"
+          "{}║                      Outer Iteration Summary                  ║\n"
+          "{}╠═══════════════════════════════════════════════════════════════╣\n"
+          "{}║ Completed:        {:<43} ║\n"
+          "{}║ Outer Iterations: {:<43} ║\n"
+          "{}║ Inner Iterations: {:<43} ║\n"
+          "{}║ Total Evals:      {:<43} ║\n"
+          "{}║ Best Value:       {:<43.6e} ║\n"
+          "{}║ Status:           {:<43} ║\n"
+          "{}╚═══════════════════════════════════════════════════════════════╝\n",
+          m_indent, m_indent, m_indent,
+          m_indent, fmt::format("{}/{}", outer_iter, total_outer_iters),
+          m_indent, outer_iter,
+          m_indent, total_inner_iters,
+          m_indent, total_evals,
+          m_indent, best_value,
+          m_indent, (converged ? "CONVERGED" : "RUNNING"),
+          m_indent
+      );
+  }
+
+  void print_block_coordinate_header(size_t n, Scalar f0) const {
+      if (m_options.verbosity_level < 1) return;
+      
+      fmt::print(LBFGS_PrintColors::HEADER,
+          "{}╔════════════════════════════════════════════════════════════════╗\n"
+          "{}║                Block Coordinate L-BFGS                        ║\n"
+          "{}╠════════════════════════════════════════════════════════════════╣\n"
+          "{}║ {:62} ║\n"
+          "{}║ {:62} ║\n"
+          "{}║ {:62} ║\n"
+          "{}║ {:62} ║\n"
+          "{}║ {:62} ║\n"
+          "{}║ {:62} ║\n"
+          "{}╚════════════════════════════════════════════════════════════════╝\n",
+          m_indent, m_indent, m_indent,
+          m_indent, fmt::format("Dimension: {:d}", n),
+          m_indent, fmt::format("Block Size: {:d}", m_options.block_size),
+          m_indent, fmt::format("Max Outer Iterations: {:d}", m_options.max_outer_iterations),
+          m_indent, fmt::format("Block Strategy: {}", m_options.block_selection),
+          m_indent, fmt::format("Overlap Ratio: {:.2f}", m_options.overlap_ratio),
+          m_indent
+      );
+      fmt::print("{}Initial F = {:.6e}\n", m_indent, f0);
+  }
+
+  // ===========================================================================
+  // BLOCK COORDINATE METHODS
+  // ===========================================================================
 
   /**
    * @brief Initialize coverage tracking for new problem
@@ -1350,9 +1664,9 @@ public:
         m_outer_iteration_count % m_options.coverage_reset_frequency == 0) {
       std::fill(m_coordinate_visits.begin(), m_coordinate_visits.end(), 0);
       
-      if (m_options.verbose) {
-        fmt::print("[BlockLBFGS] Reset coverage tracking at outer iteration {}\n", 
-                   m_outer_iteration_count);
+      if (m_options.verbosity_level >= 2) {
+        fmt::print("{}[BlockLBFGS] Reset coverage tracking at outer iteration {}\n", 
+                   m_indent, m_outer_iteration_count);
       }
     }
   }
@@ -1401,14 +1715,10 @@ public:
     
     m_previous_best = improvement;
     
-    if (m_options.verbose && outer_iter % m_options.progress_frequency == 0) {
-      fmt::print("[BlockLBFGS] Adjusted block_size to {}\n", m_options.block_size);
+    if (m_options.verbosity_level >= 2 && outer_iter % m_options.outer_progress_frequency == 0) {
+      fmt::print("{}[BlockLBFGS] Adjusted block_size to {}\n", m_indent, m_options.block_size);
     }
   }
-
-  // [Keep all the utility methods from previous version: 
-  // extract_subvector, update_full_vector, extract_subbounds, 
-  // project_point, projected_gradient_norm]
 
   Vector extract_subvector(Vector const & full, std::vector<size_t> const & indices) {
     Vector sub(indices.size());
@@ -1457,6 +1767,21 @@ public:
     return pg.template lpNorm<Eigen::Infinity>();
   }
 
+public:
+  explicit LBFGS_BlockCoordinate(Options const & opts = Options()) 
+    : m_options(opts), m_gen(m_rd()) {}
+
+  void set_bounds(Vector const & lower, Vector const & upper) {
+    UTILS_ASSERT(lower.size() == upper.size(), "Bounds size mismatch");
+    m_lower = lower;
+    m_upper = upper;
+    m_use_bounds = true;
+  }
+
+  void clear_bounds() {
+    m_use_bounds = false;
+  }
+
   /**
    * @brief Enhanced optimization routine with coverage tracking
    */
@@ -1489,11 +1814,13 @@ public:
     size_t blocks_processed = 0;
     Scalar max_block_improvement = 0;
     
-    if (m_options.verbose) {
-      fmt::print("[BlockLBFGS] Starting: n={}, block_strategy={}, overlap_ratio={:.2f}\n",
-                 n, m_options.block_selection, m_options.overlap_ratio);
-      fmt::print("[BlockLBFGS] Initial f = {:.6e}, ‖g‖∞ = {:.6e}\n", 
-                 f, g.template lpNorm<Eigen::Infinity>());
+    print_block_coordinate_header(n, f);
+    
+    if (m_options.verbosity_level >= 1) {
+      fmt::print("{}[BlockLBFGS] Starting: n={}, block_strategy={}, overlap_ratio={:.2f}\n",
+                 m_indent, n, m_options.block_selection, m_options.overlap_ratio);
+      fmt::print("{}[BlockLBFGS] Initial f = {:.6e}, ‖g‖∞ = {:.6e}\n", 
+                 m_indent, f, g.template lpNorm<Eigen::Infinity>());
     }
     
     // Main outer loop
@@ -1507,9 +1834,8 @@ public:
       }
       
       // Determine number of blocks in this cycle
-      // Use more blocks for better coverage in early iterations
       size_t num_blocks = std::max<size_t>(1, (2 * n + m_options.block_size - 1) / m_options.block_size);
-      num_blocks = std::min(num_blocks, static_cast<size_t>(10) ); // Limit to avoid too many small blocks
+      num_blocks = std::min(num_blocks, static_cast<size_t>(10));
       
       // Process each block
       for (size_t block_idx = 0; block_idx < num_blocks; ++block_idx) {
@@ -1522,6 +1848,8 @@ public:
         if (m_options.track_coverage) {
           update_coverage_counts(block_indices);
         }
+        
+        print_outer_iteration_header(outer_iter, num_blocks, block_indices, block_indices.size());
         
         // Extract block subproblem
         Vector x_block = extract_subvector(x, block_indices);
@@ -1552,6 +1880,8 @@ public:
         inner_opts.f_tol = m_options.lbfgs_f_tol;
         inner_opts.m = m_options.lbfgs_m;
         inner_opts.verbose = false;
+        inner_opts.verbosity_level = m_options.verbosity_level >= 3 ? 2 : 0; // Inner verbosity control
+        inner_opts.progress_frequency = m_options.inner_progress_frequency;
         
         LBFGS_minimizer<Scalar> inner_minimizer(inner_opts);
         
@@ -1569,7 +1899,6 @@ public:
         blocks_processed++;
         
         // Update solution
-        //update_full_vector(x, inner_result.solution, block_indices);
         update_full_vector(x, inner_minimizer.solution(), block_indices);
         if (m_use_bounds) project_point(x);
         
@@ -1581,9 +1910,13 @@ public:
         Scalar block_improvement = f_start_cycle - f;
         max_block_improvement = std::max(max_block_improvement, block_improvement);
         
-        if (m_options.verbose && inner_result.iterations > 0) {
-          fmt::print("[BlockLBFGS] Block {}/{}: size={}, inner_iters={}, Δf={:.2e}\n",
-                     block_idx + 1, num_blocks, block_indices.size(), 
+        print_outer_iteration_result(outer_iter, block_indices.size(), f,
+                                   inner_result.iterations, inner_result.function_evaluations,
+                                   block_improvement, block_improvement > 0);
+        
+        if (m_options.verbosity_level >= 2 && inner_result.iterations > 0) {
+          fmt::print("{}[BlockLBFGS] Block {}/{}: size={}, inner_iters={}, Δf={:.2e}\n",
+                     m_indent, block_idx + 1, num_blocks, block_indices.size(), 
                      inner_result.iterations, block_improvement);
         }
       }
@@ -1595,10 +1928,16 @@ public:
       // Convergence checking
       Scalar gnorm = projected_gradient_norm(x, g);
       
-      if (m_options.verbose && (outer_iter % m_options.progress_frequency == 0)) {
+      if (m_options.verbosity_level >= 1 && (outer_iter % m_options.outer_progress_frequency == 0)) {
         double coverage = m_options.track_coverage ? result.coverage_ratio : 0.0;
-        fmt::print("[BlockLBFGS] Outer iter {}: f={:.6e}, ‖pg‖={:.2e}, Δf={:.2e}, coverage={:.1f}%\n",
-                   outer_iter, f, gnorm, f_improvement, coverage * 100);
+        fmt::print("{}[BlockLBFGS] Outer iter {}: f={:.6e}, ‖pg‖={:.2e}, Δf={:.2e}, coverage={:.1f}%\n",
+                   m_indent, outer_iter, f, gnorm, f_improvement, coverage * 100);
+      }
+      
+      // Print outer statistics periodically
+      if (m_options.verbosity_level >= 1 && (outer_iter % m_options.outer_progress_frequency == 0)) {
+        print_outer_statistics(outer_iter, m_options.max_outer_iterations,
+                             total_inner_iters, total_evals, f, false);
       }
       
       // Check convergence
@@ -1619,10 +1958,9 @@ public:
       
       // Check coverage and adjust strategy if needed
       if (m_options.track_coverage && !check_coverage_adequate()) {
-        if (m_options.verbose) {
-          fmt::print("[BlockLBFGS] Poor coverage detected, adjusting block selection\n");
+        if (m_options.verbosity_level >= 1) {
+          fmt::print("{}[BlockLBFGS] Poor coverage detected, adjusting block selection\n", m_indent);
         }
-        // Could switch to coverage-aware strategy here
       }
     }
     
@@ -1648,12 +1986,16 @@ public:
       result.status = Status::MAX_OUTER_ITERATIONS;
     }
     
-    if (m_options.verbose) {
-      fmt::print("[BlockLBFGS] Finished: status={}, f_final={:.6e}, total_evals={}\n",
-                 static_cast<int>(result.status), result.final_function_value, total_evals);
+    // Print final outer statistics
+    if (m_options.verbosity_level >= 1) {
+      print_outer_statistics(result.outer_iterations, m_options.max_outer_iterations,
+                           total_inner_iters, total_evals, f, true);
+      
+      fmt::print("{}[BlockLBFGS] Finished: status={}, f_final={:.6e}, total_evals={}\n",
+                 m_indent, static_cast<int>(result.status), result.final_function_value, total_evals);
       if (m_options.track_coverage) {
-        fmt::print("[BlockLBFGS] Final coverage: {:.1f}% of coordinates visited\n",
-                   result.coverage_ratio * 100);
+        fmt::print("{}[BlockLBFGS] Final coverage: {:.1f}% of coordinates visited\n",
+                   m_indent, result.coverage_ratio * 100);
       }
     }
     
@@ -1669,3 +2011,4 @@ public:
 
 //
 // eof: Utils_LBFGS.hh
+//

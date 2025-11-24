@@ -140,29 +140,6 @@ namespace Utils {
       return tmp;
     }
 
-    // Helper for vector formatting
-    template <typename Scalar>
-    inline
-    string
-    format_index_vector( vector<Scalar> const & v, size_t max_size = 20 ) {
-      string tmp{"["};
-      size_t v_size = v.size();
-      if ( v_size <= max_size ) {
-        for ( size_t i = 0; i < v_size; ++i)
-          tmp += fmt::format("{}, ", v[i]);
-      } else {
-        for ( size_t i{0}; i < max_size-3; ++i)
-          tmp += fmt::format("{}, ", v[i]);
-        tmp.pop_back();
-        tmp += "..., ";
-        for ( size_t i{v_size-3}; i < v_size; ++i )
-          tmp += fmt::format("{}, ", v[i]);
-      }
-      tmp.pop_back();
-      tmp.pop_back();
-      tmp += "]";
-      return tmp;
-    }
   }
 
   // ===========================================================================
@@ -1590,7 +1567,7 @@ namespace Utils {
             "{}║ Block Size:    {:<47} ║\n"
             "{}╚════════════════════════════════════════════════════════════════╝\n",
             m_indent, m_indent, outer_iter, (outer_iter % total_cycles) + 1, total_cycles,
-            m_indent, m_indent, Utils::NelderMead::format_index_vector<size_t>(block_indices, 15),
+            m_indent, m_indent, Utils::format_index_vector<size_t>(block_indices, 15),
             m_indent, block_size, m_indent
         );
     }
