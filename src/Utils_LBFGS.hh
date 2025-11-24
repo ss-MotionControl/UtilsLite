@@ -1187,8 +1187,7 @@ public:
   /**
    * @brief Select block with guaranteed coverage of under-visited coordinates
    */
-  std::vector<size_t> select_coverage_aware_block(size_t n_total, size_t block_size, 
-                                                 Vector const & gradient) {
+  std::vector<size_t> select_coverage_aware_block(size_t n_total, size_t block_size ) {
     std::vector<size_t> indices;
     indices.reserve(block_size);
     
@@ -1269,7 +1268,7 @@ public:
     size_t gradient_count = block_size - coverage_count;
     
     // Coverage-aware selection
-    auto coverage_indices = select_coverage_aware_block(n_total, coverage_count, gradient);
+    auto coverage_indices = select_coverage_aware_block(n_total, coverage_count);
     indices.insert(indices.end(), coverage_indices.begin(), coverage_indices.end());
     
     // Greedy selection for remaining
@@ -1292,8 +1291,7 @@ public:
   /**
    * @brief Main block selection dispatcher
    */
-  std::vector<size_t> select_block(size_t n_total, size_t block_size, 
-                                  Vector const & gradient, size_t outer_iter) {
+  std::vector<size_t> select_block(size_t n_total, size_t block_size, Vector const & gradient) {
     if (m_options.block_selection == "random_consecutive") {
       return select_random_consecutive_block(n_total, block_size, false);
     }
@@ -1304,7 +1302,7 @@ public:
       return select_greedy_block(n_total, block_size, gradient);
     }
     else if (m_options.block_selection == "coverage_aware") {
-      return select_coverage_aware_block(n_total, block_size, gradient);
+      return select_coverage_aware_block(n_total, block_size);
     }
     else if (m_options.block_selection == "hybrid") {
       return select_hybrid_block(n_total, block_size, gradient);
@@ -1502,7 +1500,6 @@ public:
     for (size_t outer_iter = 0; outer_iter < m_options.max_outer_iterations; ++outer_iter) {
       m_outer_iteration_count = outer_iter;
       Scalar f_start_cycle = f;
-      bool significant_progress = false;
       
       // Reset coverage tracking if needed
       if (m_options.track_coverage) {
@@ -1517,7 +1514,7 @@ public:
       // Process each block
       for (size_t block_idx = 0; block_idx < num_blocks; ++block_idx) {
         // Select block with current strategy
-        auto block_indices = select_block(n, m_options.block_size, g, outer_iter);
+        auto block_indices = select_block(n, m_options.block_size, g);
         
         if (block_indices.empty()) continue;
         

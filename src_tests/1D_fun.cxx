@@ -368,18 +368,18 @@ build_1dfun_list( std::vector<std::unique_ptr<fun1D>> & f_list ) {
 
 }
 
-static
-real_type
-fun_penalty( real_type x_in, real_type RHS ) {
-  real_type m_h       = 0.01;
-  real_type m_epsilon = 0.01;
-  real_type m_A       = 1/m_h;
-  real_type m_A1      = (1-m_epsilon)*power2(m_h/(1-m_h));
-  real_type x         = abs(x_in);
-  real_type Xh        = x/m_h;
-  real_type res       = 2*m_epsilon*Xh;
-  if ( Xh > 1 ) res += 2*m_A1 * (Xh-1);
-  res /= m_h;
-  if ( x > 1 ) res += 2*m_A * (x-1);
-  return (x_in < 0 ? -res : res) - RHS;
-}
+// static
+// real_type
+// fun_penalty( real_type x_in, real_type RHS ) {
+//   real_type m_h       = 0.01;
+//   real_type m_epsilon = 0.01;
+//   real_type m_A       = 1/m_h;
+//   real_type m_A1      = (1-m_epsilon)*power2(m_h/(1-m_h));
+//   real_type x         = abs(x_in);
+//   real_type Xh        = x/m_h;
+//   real_type res       = 2*m_epsilon*Xh;
+//   if ( Xh > 1 ) res += 2*m_A1 * (Xh-1);
+//   res /= m_h;
+//   if ( x > 1 ) res += 2*m_A * (x-1);
+//   return (x_in < 0 ? -res : res) - RHS;
+// }

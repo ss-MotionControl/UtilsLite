@@ -333,7 +333,7 @@ namespace Utils {
         bool variance_converged;
     };
 
-    ConvergenceFlags compute_convergence_flags(Scalar best_value, Scalar worst_value, const SimplexStats& stats) const {
+    ConvergenceFlags compute_convergence_flags(Scalar best_value, [[maybe_unused]] Scalar worst_value, const SimplexStats& stats) const {
         ConvergenceFlags flags;
 
         // 1. Convergenza per i valori della funzione
@@ -741,7 +741,7 @@ namespace Utils {
       // EIGEN3: Use QR decomposition with column pivoting for numerical stability
       // This handles rank-deficient cases gracefully
       Eigen::ColPivHouseholderQR<Matrix> qr(basis);
-      if (qr.rank() < m_dim) return 0;
+      if ( static_cast<size_t>(qr.rank()) < m_dim) return 0;
     
       // EIGEN3: Use Eigen's efficient determinant computation
       // logAbsDeterminant() is more stable for large matrices
@@ -804,7 +804,7 @@ namespace Utils {
       auto const & convergence_relaxation = m_options.convergence_relaxation;
     
       auto stats = compute_simplex_stats();
-      auto flags = compute_convergence_flags(best_value, worst_value, stats);
+      [[maybe_unused]] auto flags = compute_convergence_flags(best_value, worst_value, stats);
     
       if (!m_options.use_robust_convergence) {
         // Usa worst_value qui
@@ -1400,14 +1400,15 @@ namespace Utils {
             
         Vector restart_x0;
         Vector scale_vec = Vector::Ones(x0.size());
-            
+        
+        size_t x_size = static_cast<size_t>(x0.size());
         if (m_use_bounds) {
-          for (size_t i{0}; i < x0.size(); ++i) {
+          for (size_t i{0}; i < x_size; ++i) {
             Scalar r = m_upper(i) - m_lower(i);
             scale_vec(i) = std::isfinite(r) ? r : max(Scalar(1.0), abs(best_result.solution(i)));
           }
         } else {
-          for (size_t i{0}; i < x0.size(); ++i) {
+          for (size_t i{0}; i < x_size; ++i) {
             scale_vec(i) = max(Scalar(1.0), abs(best_result.solution(i)));
           }
         }
@@ -1440,7 +1441,7 @@ namespace Utils {
         } else {
           // Calculate normalized relative improvement
           Scalar abs_best = abs(best_result.final_function_value);
-          Scalar abs_current = abs(current_result.final_function_value);
+          //Scalar abs_current = abs(current_result.final_function_value);
             
           // Case 1: Both positive or zero - standard improvement
           if (best_result.final_function_value >= 0 &&

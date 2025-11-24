@@ -560,7 +560,7 @@ public:
       
       for (size_t i=0; i<N; ++i) {
         T xim1 = (i==0) ? 0.0 : x[i-1];
-        T xip1 = (i==N-1) ? 0.0 : x[i+1];
+        //T xip1 = (i==N-1) ? 0.0 : x[i+1];
         T t = (3.0 - 2.0*x[i]) * x[i] - 2.0 * xim1 + 1.0;
         
         // Derivata rispetto a x[i]

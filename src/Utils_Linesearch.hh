@@ -169,7 +169,9 @@ namespace Utils {
     compute_step(
       Scalar a_lo,   Scalar phi_lo,   Scalar der_lo,
       Scalar a_hi,   Scalar phi_hi,   Scalar der_hi,
-      Scalar a_prev, Scalar phi_prev, Scalar der_prev,
+      [[maybe_unused]] Scalar a_prev,
+      [[maybe_unused]] Scalar phi_prev,
+      [[maybe_unused]] Scalar der_prev,
       Scalar alpha_max, Scalar step_max,
       bool is_bracketing
     ) {

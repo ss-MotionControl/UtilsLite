@@ -453,7 +453,7 @@ namespace Utils {
      * @param candidate_f Function value at candidate point
      */
     void
-    update_trust_region_radius( bool improvement, Scalar candidate_f ) {
+    update_trust_region_radius( bool improvement, [[maybe_unused]] Scalar candidate_f ) {
       // Simple trust region update strategy
       if (improvement) {
         // Consider expanding trust region if model is good
