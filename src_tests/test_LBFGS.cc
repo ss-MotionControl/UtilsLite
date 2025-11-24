@@ -29,21 +29,22 @@ using std::vector;
 using std::map;
 using std::pair;
 using Scalar    = double;
-using Vector    = Utils::LBFGS_minimizer<Scalar>::Vector;
-using MINIMIZER = Utils::LBFGS_minimizer<Scalar>;
+//using MINIMIZER = Utils::LBFGS_minimizer<Scalar>;
+using MINIMIZER = Utils::LBFGS_BlockCoordinate<Scalar>;
+using Vector    = typename MINIMIZER::Vector;
 
 // Usa gli Status definiti in Utils_LBFGS.hh
 using Status = MINIMIZER::Status;
 
 // Struttura per raccogliere i risultati dei test
 struct TestResult {
-  string                   problem_name;
-  string                   linesearch_name;
-  MINIMIZER::IterationData iteration_data;
-  Scalar                   final_value;
-  Vector                   final_solution;
-  size_t                   dimension;
-  Status                   status;
+  string            problem_name;
+  string            linesearch_name;
+  MINIMIZER::Result result_data;
+  Scalar            final_value;
+  Vector            final_solution;
+  size_t            dimension;
+  Status            status;
 };
 
 // Struttura per statistiche delle line search
@@ -93,12 +94,13 @@ format_reduced_vector( Vector const & v, size_t max_size = 10 ) {
 string
 status_to_string( Status status ) {
   switch (status) {
-    case Status::CONVERGED:         return "CONVERGED";
-    case Status::MAX_ITERATIONS:    return "MAX_ITER";
-    case Status::LINE_SEARCH_FAILED:return "LINE_SEARCH_FAILED";
-    case Status::GRADIENT_TOO_SMALL:return "GRAD_SMALL";
-    case Status::FAILED:            return "FAILED";
-    default:                        return "UNKNOWN";
+    case Status::CONVERGED:            return "CONVERGED";
+    case Status::MAX_OUTER_ITERATIONS: return "MAX_OUTER_ITER";
+    case Status::MAX_INNER_ITERATIONS: return "MAX_INNER_ITER";
+    case Status::LINE_SEARCH_FAILED:   return "LINE_SEARCH_FAILED";
+    case Status::GRADIENT_TOO_SMALL:   return "GRAD_SMALL";
+    case Status::FAILED:               return "FAILED";
+    default:                           return "UNKNOWN";
   }
 }
 
@@ -116,8 +118,8 @@ update_line_search_statistics(const TestResult& result) {
   
   if (success) {
     stats.successful_tests++;
-    stats.total_iterations     += result.iteration_data.iterations;
-    stats.total_function_evals += result.iteration_data.function_evaluations;
+    stats.total_iterations     += result.result_data.total_iterations;
+    stats.total_function_evals += result.result_data.total_evaluations;
   }
 }
 
@@ -179,7 +181,7 @@ print_summary_table() {
         
     // Usa colori: verde per convergenza, giallo per warning, rosso per fallimento
     auto status_color = converged ? fmt::fg(fmt::color::green) :
-                        (result.status == Status::MAX_ITERATIONS) ? 
+                        (result.status == Status::MAX_OUTER_ITERATIONS) ?
                         fmt::fg(fmt::color::yellow) : fmt::fg(fmt::color::red);
     
     // Tronca il nome del problema se troppo lungo
@@ -193,7 +195,7 @@ print_summary_table() {
       problem_name,
       result.dimension,
       result.linesearch_name,
-      result.iteration_data.iterations,
+      result.result_data.total_iterations,
       result.final_value
     );
 
@@ -218,8 +220,8 @@ print_summary_table() {
   for ( auto const & r : global_test_results ) {
      if ( r.status == Status::CONVERGED ||
           r.status == Status::GRADIENT_TOO_SMALL ) {
-       accumulated_iter += r.iteration_data.iterations;
-       accumulated_evals += r.iteration_data.function_evaluations;
+       accumulated_iter += r.result_data.total_iterations;
+       accumulated_evals += r.result_data.total_evaluations;
      }
   }
   
@@ -250,10 +252,10 @@ test( OptimizationProblem<T,N> const * tp, string const & problem_name ){
 
   using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
   MINIMIZER::Options opts;
-  opts.max_iter        = 20000;
-  opts.m               = 20;
+  //opts.max_iter        = 20000;
+  //opts.m               = 20;
   opts.verbosity_level = 2;  // Verbosity like NelderMead: 0=quiet, 1=outer, 2=inner, 3=detailed
-  opts.use_projection  = true;
+  //opts.use_projection  = true;
 
   Vector x0 = tp->init();
 
@@ -314,17 +316,17 @@ test( OptimizationProblem<T,N> const * tp, string const & problem_name ){
     MINIMIZER minimizer(opts);
     minimizer.set_bounds( tp->lower(), tp->upper() );
     
-    auto iter_data = minimizer.minimize( x0, cb, line_search );
+    auto solution_data = minimizer.minimize( x0, cb, line_search );
     
     // Salva il risultato
     TestResult result;
     result.problem_name    = problem_name;
     result.linesearch_name = ls_name;
-    result.iteration_data  = iter_data;
-    result.final_value     = iter_data.final_function_value;
-    result.final_solution  = minimizer.solution();
+    result.result_data     = solution_data;
+    result.final_value     = solution_data.final_function_value;
+    result.final_solution  = solution_data.solution;
     result.dimension       = N;
-    result.status          = iter_data.status;
+    result.status          = solution_data.status;
     
     global_test_results.push_back(result);
     update_line_search_statistics(result);
@@ -333,8 +335,8 @@ test( OptimizationProblem<T,N> const * tp, string const & problem_name ){
     
     fmt::print("{} - {}: {} after {} iterations, f = {:.6e}\n",
                 problem_name, ls_name, status_str,
-                iter_data.iterations,
-                iter_data.final_function_value);
+                solution_data.total_iterations,
+                solution_data.final_function_value);
     fmt::print("Solution: {}\n\n", format_reduced_vector(result.final_solution,10));
   }
   fmt::print("\n");
