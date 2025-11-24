@@ -120,7 +120,7 @@
  * LBFGS_minimizer<double>::Options opts;
  * opts.max_iter = 1000;
  * opts.g_tol = 1e-6;
- * opts.verbose = true;
+ * opts.verbosity_level = 2;  // Verbosity like NelderMead
  * 
  * LBFGS_minimizer<double> minimizer(opts);
  * 
@@ -691,11 +691,9 @@ namespace Utils {
       Scalar very_small_step {1e-8};
 
       bool   use_projection  {false};
-      bool   verbose         {false};
       
-      // Aggiunte per stampa avanzata
+      // Verbosity system like NelderMead
       size_t verbosity_level{1};           // 0: quiet, 1: outer stats, 2: inner progress, 3: detailed
-      size_t progress_frequency{10};       // Frequenza stampa progresso
       bool   use_unicode_borders{true};    // Usare bordi Unicode come NelderMead
     };
 
@@ -785,7 +783,7 @@ namespace Utils {
     }
 
     // ===========================================================================
-    // PRINTING METHODS (NelderMead style)
+    // PRINTING METHODS (LBFGS style - similar to NelderMead)
     // ===========================================================================
 
     void print_optimization_header(size_t n, Scalar f0) const {
@@ -812,26 +810,8 @@ namespace Utils {
       fmt::print("{}Initial F = {:.6e}\n", m_indent, f0);
     }
 
-    void print_iteration_header(size_t iter) const {
-      if (m_options.verbosity_level < 2) return;
-      
-      bool show_detailed = (m_options.verbosity_level >= 3) || 
-                          (iter % m_options.progress_frequency == 0);
-      
-      if (!show_detailed) return;
-
-      fmt::print(LBFGS_PrintColors::ITERATION,
-        "{}┌─────────────────────────┬───────────────┬───────────────┬───────────────┐\n"
-        "{}│ {:^23} │ {:^13} │ {:^13} │ {:^13} │\n"
-        "{}└─────────────────────────┴───────────────┴───────────────┴───────────────┘\n",
-        m_indent,
-        m_indent, fmt::format("Iteration {}", iter), "F", "‖pg‖", "Step",
-        m_indent
-      );
-    }
-
     void print_iteration_summary(
-      size_t iter, 
+      size_t iter,
       Scalar f, 
       Scalar gnorm, 
       Scalar step,
@@ -840,20 +820,26 @@ namespace Utils {
     ) const {
       if (m_options.verbosity_level < 2) return;
       
-      bool show_detailed = (m_options.verbosity_level >= 3) || 
-                          (iter % m_options.progress_frequency == 0);
+      bool show_detailed = m_options.verbosity_level >= 3;
       
-      if (!show_detailed) return;
-
       auto color = improved ? LBFGS_PrintColors::SUCCESS : LBFGS_PrintColors::WARNING;
       string icon = improved ? "↗" : "→";
       
-      fmt::print(color,
-        "{}[{:4d}] {} F = {:<12.6e} | ‖pg‖ = {:<12.6e} | Step = {:<12.6e} | pg = {:<12.6e}\n",
-        m_indent, iter, icon, f, gnorm, step, pg
-      );
+      if (show_detailed) {
+        // Versione dettagliata per livello 3+
+        fmt::print(color,
+          "{}[{:4d}] {} F = {:<12.6e} | ‖pg‖ = {:<12.6e} | Step = {:<12.6e} | pg = {:<12.6e}\n",
+          m_indent, iter, icon, f, gnorm, step, pg
+        );
+      } else {
+        // Versione compatta per livello 2
+        fmt::print(color,
+          "{}[{:4d}] {} F = {:<12.6e} | ‖pg‖ = {:<12.6e} | Step = {:<12.6e}\n",
+          m_indent, iter, icon, f, gnorm, step
+        );
+      }
     }
-
+    
     void print_line_search_result(
       size_t iter, 
       Scalar step, 
@@ -1047,8 +1033,6 @@ namespace Utils {
 
         // Check gradient norm
         gnorm = projected_gradient_norm(m_x, m_g);
-        
-        print_iteration_header(iteration);
 
         if ( gnorm <= m_options.g_tol ) {
           status = Status::GRADIENT_TOO_SMALL;
@@ -1316,9 +1300,7 @@ public:
     Scalar progress_threshold{1e-4};
     
     // Verbosity (enhanced)
-    size_t verbosity_level{1};           // 0: quiet, 1: outer stats, 2: inner progress, 3: detailed
-    size_t outer_progress_frequency{5};  // Frequency for outer iteration printing
-    size_t inner_progress_frequency{10}; // Frequency for inner iteration printing
+    size_t verbosity_level{1};  // 0: quiet, 1: outer stats, 2: inner progress, 3: detailed
     bool track_coverage{true};
     bool use_unicode_borders{true};
   };
@@ -1715,7 +1697,7 @@ private:
     
     m_previous_best = improvement;
     
-    if (m_options.verbosity_level >= 2 && outer_iter % m_options.outer_progress_frequency == 0) {
+    if (m_options.verbosity_level >= 2) {
       fmt::print("{}[BlockLBFGS] Adjusted block_size to {}\n", m_indent, m_options.block_size);
     }
   }
@@ -1879,9 +1861,7 @@ public:
         inner_opts.g_tol = m_options.lbfgs_g_tol;
         inner_opts.f_tol = m_options.lbfgs_f_tol;
         inner_opts.m = m_options.lbfgs_m;
-        inner_opts.verbose = false;
         inner_opts.verbosity_level = m_options.verbosity_level >= 3 ? 2 : 0; // Inner verbosity control
-        inner_opts.progress_frequency = m_options.inner_progress_frequency;
         
         LBFGS_minimizer<Scalar> inner_minimizer(inner_opts);
         
@@ -1928,14 +1908,14 @@ public:
       // Convergence checking
       Scalar gnorm = projected_gradient_norm(x, g);
       
-      if (m_options.verbosity_level >= 1 && (outer_iter % m_options.outer_progress_frequency == 0)) {
+      if (m_options.verbosity_level >= 1) {
         double coverage = m_options.track_coverage ? result.coverage_ratio : 0.0;
         fmt::print("{}[BlockLBFGS] Outer iter {}: f={:.6e}, ‖pg‖={:.2e}, Δf={:.2e}, coverage={:.1f}%\n",
                    m_indent, outer_iter, f, gnorm, f_improvement, coverage * 100);
       }
       
       // Print outer statistics periodically
-      if (m_options.verbosity_level >= 1 && (outer_iter % m_options.outer_progress_frequency == 0)) {
+      if (m_options.verbosity_level >= 1) {
         print_outer_statistics(outer_iter, m_options.max_outer_iterations,
                              total_inner_iters, total_evals, f, false);
       }

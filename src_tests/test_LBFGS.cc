@@ -24,26 +24,31 @@
 #include <vector>
 #include <map>
 
-using Scalar = double;
-using Vector = Utils::LBFGS_minimizer<Scalar>::Vector;
+using std::string;
+using std::vector;
+using std::map;
+using std::pair;
+using Scalar    = double;
+using Vector    = Utils::LBFGS_minimizer<Scalar>::Vector;
+using MINIMIZER = Utils::LBFGS_minimizer<Scalar>;
 
 // Usa gli Status definiti in Utils_LBFGS.hh
-using Status = Utils::LBFGS_minimizer<Scalar>::Status;
+using Status = MINIMIZER::Status;
 
 // Struttura per raccogliere i risultati dei test
 struct TestResult {
-  std::string                                   problem_name;
-  std::string                                   linesearch_name;
-  Utils::LBFGS_minimizer<Scalar>::IterationData iteration_data;
-  Scalar                                        final_value;
-  Vector                                        final_solution;
-  size_t                                        dimension;
-  Status                                        status;
+  string                   problem_name;
+  string                   linesearch_name;
+  MINIMIZER::IterationData iteration_data;
+  Scalar                   final_value;
+  Vector                   final_solution;
+  size_t                   dimension;
+  Status                   status;
 };
 
 // Struttura per statistiche delle line search
 struct LineSearchStats {
-  std::string name;
+  string name;
   size_t total_tests{0};
   size_t successful_tests{0};
   size_t total_iterations{0};
@@ -53,30 +58,39 @@ struct LineSearchStats {
 };
 
 // Collettore globale dei risultati
-std::vector<TestResult> global_test_results;
-std::map<std::string, LineSearchStats> line_search_statistics;
+vector<TestResult> global_test_results;
+map<string, LineSearchStats> line_search_statistics;
 
 #include "ND_func_grad.cxx"
 
 // -------------------------------------------------------------------
 // Funzione per formattare il vettore (simile a NelderMead)
 // -------------------------------------------------------------------
-std::string
-format_vector( Vector const & x, int precision = 6 ) {
-  std::ostringstream os;
-  os << "[";
-  for ( int i = 0; i < x.size(); ++i ) {
-    if ( i > 0 ) os << ", ";
-    os << std::setprecision(precision) << x(i);
+inline
+string
+format_reduced_vector( Vector const & v, size_t max_size = 10 ) {
+  string tmp{"["};
+  size_t v_size = v.size();
+  if ( v_size <= max_size ) {
+    for ( size_t i = 0; i < v_size; ++i)
+      tmp += fmt::format("{:.4f}, ", v(i));
+  } else {
+    for ( size_t i{0}; i < max_size-3; ++i)
+      tmp += fmt::format("{:.4f}, ", v(i));
+    tmp += "..., ";
+    for ( size_t i{v_size-3}; i < v_size; ++i )
+      tmp += fmt::format("{:.4f}, ", v(i));
   }
-  os << "]";
-  return os.str();
+  tmp.pop_back();
+  tmp.pop_back();
+  tmp += "]";
+  return tmp;
 }
 
 // -------------------------------------------------------------------
 // Funzione per convertire status in stringa
 // -------------------------------------------------------------------
-std::string
+string
 status_to_string( Status status ) {
   switch (status) {
     case Status::CONVERGED:         return "CONVERGED";
@@ -159,7 +173,7 @@ print_summary_table() {
   );
     
   for ( auto const & result : global_test_results ) {
-    std::string status_str = status_to_string(result.status);
+    string status_str = status_to_string(result.status);
     bool converged = (result.status == Status::CONVERGED ||
                       result.status == Status::GRADIENT_TOO_SMALL);
         
@@ -169,7 +183,7 @@ print_summary_table() {
                         fmt::fg(fmt::color::yellow) : fmt::fg(fmt::color::red);
     
     // Tronca il nome del problema se troppo lungo
-    std::string problem_name = result.problem_name;
+    string problem_name = result.problem_name;
     if (problem_name.length() > 22) {
       problem_name = problem_name.substr(0, 19) + "...";
     }
@@ -223,7 +237,7 @@ print_summary_table() {
 template <typename T, size_t N>
 static
 void
-test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
+test( OptimizationProblem<T,N> const * tp, string const & problem_name ){
 
   fmt::print(fmt::fg(fmt::color::cyan),
     "\n"
@@ -235,18 +249,18 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
   );
 
   using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-  Utils::LBFGS_minimizer<Scalar>::Options opts;
-  opts.max_iter       = 20000;
-  opts.m              = 20;
-  opts.verbose        = true;
-  opts.use_projection = true;
+  MINIMIZER::Options opts;
+  opts.max_iter        = 20000;
+  opts.m               = 20;
+  opts.verbosity_level = 2;  // Verbosity like NelderMead: 0=quiet, 1=outer, 2=inner, 3=detailed
+  opts.use_projection  = true;
 
   Vector x0 = tp->init();
 
   auto cb = [&tp]( Vector const & x, Vector * g ) -> Scalar { return (*tp)( x, g ); };
 
   // Lista di line search da testare
-  std::vector<std::pair<std::string, std::function<std::optional<std::tuple<Scalar,size_t>>(
+  vector<pair<string, std::function<std::optional<std::tuple<Scalar,size_t>>(
     Scalar, Scalar, Vector const&, Vector const&, 
     std::function<Scalar(Vector const&, Vector*)>, Scalar)>>> line_searches;
 
@@ -297,7 +311,7 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
 
   for (const auto& [ls_name, line_search] : line_searches) {
   
-    Utils::LBFGS_minimizer<Scalar> minimizer(opts);
+    MINIMIZER minimizer(opts);
     minimizer.set_bounds( tp->lower(), tp->upper() );
     
     auto iter_data = minimizer.minimize( x0, cb, line_search );
@@ -315,13 +329,13 @@ test( OptimizationProblem<T,N> const * tp, const std::string& problem_name ){
     global_test_results.push_back(result);
     update_line_search_statistics(result);
     
-    std::string status_str = status_to_string(result.status);
+    string status_str = status_to_string(result.status);
     
     fmt::print("{} - {}: {} after {} iterations, f = {:.6e}\n",
                 problem_name, ls_name, status_str,
                 iter_data.iterations,
                 iter_data.final_function_value);
-    fmt::print("Solution: {}\n", format_vector(result.final_solution));
+    fmt::print("Solution: {}\n\n", format_reduced_vector(result.final_solution,10));
   }
   fmt::print("\n");
 }
