@@ -29,8 +29,8 @@ using std::vector;
 using std::map;
 using std::pair;
 using Scalar    = double;
-//using MINIMIZER = Utils::LBFGS_minimizer<Scalar>;
-using MINIMIZER = Utils::LBFGS_BlockCoordinate<Scalar>;
+using MINIMIZER = Utils::LBFGS_minimizer<Scalar>;
+//using MINIMIZER = Utils::LBFGS_BlockCoordinate<Scalar>;
 using Vector    = typename MINIMIZER::Vector;
 
 // Usa gli Status definiti in Utils_LBFGS.hh
@@ -41,7 +41,6 @@ struct TestResult {
   string            problem_name;
   string            linesearch_name;
   MINIMIZER::Result result_data;
-  Scalar            final_value;
   Vector            final_solution;
   size_t            dimension;
   Status            status;
@@ -53,7 +52,7 @@ struct LineSearchStats {
   size_t total_tests{0};
   size_t successful_tests{0};
   size_t total_iterations{0};
-  size_t total_function_evals{0};
+  size_t total_evaluations{0};
   Scalar average_iterations{0};
   Scalar success_rate{0};
 };
@@ -89,22 +88,6 @@ format_reduced_vector( Vector const & v, size_t max_size = 10 ) {
 }
 
 // -------------------------------------------------------------------
-// Funzione per convertire status in stringa
-// -------------------------------------------------------------------
-string
-status_to_string( Status status ) {
-  switch (status) {
-    case Status::CONVERGED:            return "CONVERGED";
-    case Status::MAX_OUTER_ITERATIONS: return "MAX_OUTER_ITER";
-    case Status::MAX_INNER_ITERATIONS: return "MAX_INNER_ITER";
-    case Status::LINE_SEARCH_FAILED:   return "LINE_SEARCH_FAILED";
-    case Status::GRADIENT_TOO_SMALL:   return "GRAD_SMALL";
-    case Status::FAILED:               return "FAILED";
-    default:                           return "UNKNOWN";
-  }
-}
-
-// -------------------------------------------------------------------
 // Funzione per aggiornare le statistiche delle line search
 // -------------------------------------------------------------------
 void
@@ -119,7 +102,7 @@ update_line_search_statistics(const TestResult& result) {
   if (success) {
     stats.successful_tests++;
     stats.total_iterations     += result.result_data.total_iterations;
-    stats.total_function_evals += result.result_data.total_evaluations;
+    stats.total_evaluations += result.result_data.total_evaluations;
   }
 }
 
@@ -143,7 +126,7 @@ print_line_search_statistics() {
     Scalar avg_iterations = (stats.successful_tests > 0) ?
       static_cast<Scalar>(stats.total_iterations) / stats.successful_tests : 0.0;
     Scalar avg_func_evals = (stats.successful_tests > 0) ?
-      static_cast<Scalar>(stats.total_function_evals) / stats.successful_tests : 0.0;
+      static_cast<Scalar>(stats.total_evaluations) / stats.successful_tests : 0.0;
     
     // Colore in base al success rate
     auto color = (success_rate >= 80.0) ? fmt::fg(fmt::color::green) :
@@ -175,14 +158,11 @@ print_summary_table() {
   );
     
   for ( auto const & result : global_test_results ) {
-    string status_str = status_to_string(result.status);
-    bool converged = (result.status == Status::CONVERGED ||
-                      result.status == Status::GRADIENT_TOO_SMALL);
+    string status_str = MINIMIZER::to_string(result.status);
+    bool converged = result.status == Status::CONVERGED;
         
-    // Usa colori: verde per convergenza, giallo per warning, rosso per fallimento
-    auto status_color = converged ? fmt::fg(fmt::color::green) :
-                        (result.status == Status::MAX_OUTER_ITERATIONS) ?
-                        fmt::fg(fmt::color::yellow) : fmt::fg(fmt::color::red);
+    // Usa colori: verde per convergenza, rosso per fallimento
+    auto status_color = converged ? fmt::fg(fmt::color::green) : fmt::fg(fmt::color::red);
     
     // Tronca il nome del problema se troppo lungo
     string problem_name = result.problem_name;
@@ -196,7 +176,7 @@ print_summary_table() {
       result.dimension,
       result.linesearch_name,
       result.result_data.total_iterations,
-      result.final_value
+      result.result_data.final_function_value
     );
 
     fmt::print(status_color, "{:<11}", status_str);
@@ -326,15 +306,14 @@ test( OptimizationProblem<T,N> const * tp, string const & problem_name ){
     result.problem_name    = problem_name;
     result.linesearch_name = ls_name;
     result.result_data     = solution_data;
-    result.final_value     = solution_data.final_function_value;
-    result.final_solution  = solution_data.solution;
+    result.final_solution  = minimizer.solution();
     result.dimension       = N;
     result.status          = solution_data.status;
     
     global_test_results.push_back(result);
     update_line_search_statistics(result);
     
-    string status_str = status_to_string(result.status);
+    string status_str = MINIMIZER::to_string(result.status);
     
     fmt::print("{} - {}: {} after {} iterations, f = {:.6e}\n",
                 problem_name, ls_name, status_str,
@@ -357,7 +336,7 @@ main(){
     "╚════════════════════════════════════════════════════════════════╝\n\n"
   );
 
-#if 0
+#if 1
   // Test originali
   Rosenbrock2D<Scalar> rosen;
   test( &rosen, "Rosenbrock2D" );
@@ -369,7 +348,7 @@ main(){
   RosenbrockN<Scalar,30> rosenN;
   test( &rosenN, "Rosenbrock30D" );
 
-#if 0
+#if 1
   PowellSingularN<Scalar,16> powerllN;
   test( &powerllN, "PowellSingular16D" );
 
