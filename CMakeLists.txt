@@ -106,11 +106,12 @@ endforeach(F ${S})
 set( PUBLIC_HEADERS )
 file(
   GLOB_RECURSE S CONFIGURE_DEPENDS
-  ${SOURCE_DIR}/*.h
-  ${SOURCE_DIR}/*.hh
-  ${SOURCE_DIR}/*.hpp
-  ${SOURCE_DIR}/*.hxx
-  ${SOURCE_DIR}/*.h++
+  ${SOURCE_DIR}/*.h*
+  ${SOURCE_DIR}/Utils/*.h*
+  ${SOURCE_DIR}/Utils/3rd/*
+  ${SOURCE_DIR}/Utils/3rd/*/*
+  ${SOURCE_DIR}/Utils/3rd/*/*/*
+  ${SOURCE_DIR}/Utils/3rd/*/*/*/*
 )
 foreach (F ${S})
   file( RELATIVE_PATH RF "${SOURCE_DIR}" "${F}" )

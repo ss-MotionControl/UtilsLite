@@ -1433,7 +1433,7 @@ public:
         if (m_options.verbosity_level >= 3) {
           fmt::print("    [BlockLBFGS] Starting inner L-BFGS on block [{}] "
                      "(size: {}, ‖g‖∞: {:.2e})\n",
-                     format_index_vector_compact<size_t>(block_indices, 10),
+                     LBFGS_utils::format_index_vector_compact<size_t>(block_indices, 10),
                      block_indices.size(),
                      g_block.template lpNorm<Eigen::Infinity>());
         }
