@@ -24,8 +24,12 @@
 \*--------------------------------------------------------------------------*/
 
 #include <Eigen/Dense>
+#include <Eigen/Sparse>
 #include <iostream>
 #include <chrono>
+#include <random>
+#include <set>  // Aggiunto per std::set
+#include <cstddef>  // Aggiunto per size_t
 
 #include "Utils_pseudoinverse.hh"
 #include "Utils_fmt.hh"
@@ -43,6 +47,46 @@ static vector<pair<int,int>> sizes = {
   {50,50}, {100,50}, {200,50},
   {100,100}, {200,100}, {300,100}
 };
+
+// Funzione per generare una matrice sparsa casuale
+template <typename Scalar>
+Eigen::SparseMatrix<Scalar> generate_random_sparse_matrix(int m, int n, double density = 0.3) {
+  using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+  SparseMatrix mat(m, n);
+  
+  // Calcola il numero approssimativo di elementi non nulli
+  size_t nnz = static_cast<size_t>(density * m * n);
+  
+  // Usa un generatore di numeri casuali
+  static std::random_device rd;
+  static std::mt19937 gen(rd());
+  std::uniform_int_distribution<> row_dist(0, m-1);
+  std::uniform_int_distribution<> col_dist(0, n-1);
+  std::uniform_real_distribution<Scalar> val_dist(-1.0, 1.0);
+  
+  // Genera i tripletti (i, j, value)
+  std::vector<Eigen::Triplet<Scalar>> triplets;
+  triplets.reserve(nnz);
+  
+  // Set per evitare duplicati
+  std::set<std::pair<int, int>> positions;
+  
+  for (size_t k = 0; k < nnz; ++k) {
+    int i, j;
+    do {
+      i = row_dist(gen);
+      j = col_dist(gen);
+    } while (positions.count({i, j}) > 0); // Evita duplicati
+    
+    positions.insert({i, j});
+    triplets.emplace_back(i, j, val_dist(gen));
+  }
+  
+  mat.setFromTriplets(triplets.begin(), triplets.end());
+  mat.makeCompressed();
+  
+  return mat;
+}
 
 //==============================================================================
 //  FORMATTER UTILS
@@ -88,7 +132,12 @@ static void run_test(int m, int n, double lambda) {
 
   header(fmt::format("TEST: m={}, n={}, λ={}", m, n, lambda));
 
-  MatrixXd A = MatrixXd::Random(m,n);
+  // Genera matrice sparsa casuale
+  SparseMatrix<double> AS = generate_random_sparse_matrix<double>(m, n, 0.3);
+  
+  // Converti in densa per TikhonovPseudoInverse (che usa SVD su matrici dense)
+  MatrixXd A = MatrixXd(AS);
+  
   VectorXd b = VectorXd::Random(m);
   VectorXd c = VectorXd::Random(n);
 
@@ -96,7 +145,7 @@ static void run_test(int m, int n, double lambda) {
   // Build pseudo-inverse
   //--------------------------------------------------------------------------
   tm.tic();
-  Utils::TikhonovPseudoInverse pinv(A, lambda);
+  Utils::TikhonovPseudoInverse<double> pinv(A, lambda);
   tm.toc();
   double t_build_pinv = tm.elapsed_ms();
 
@@ -104,7 +153,7 @@ static void run_test(int m, int n, double lambda) {
   // Build QR solver
   //--------------------------------------------------------------------------
   tm.tic();
-  Utils::TikhonovSolver solver(A, lambda);
+  Utils::TikhonovSolver<double> solver(AS, lambda);
   tm.toc();
   double t_build_solver = tm.elapsed_ms();
 
@@ -114,7 +163,7 @@ static void run_test(int m, int n, double lambda) {
   VectorXd x1 = pinv.apply(b);
   VectorXd x2 = solver.solve(b);
   double r1 = (A*x1 - b).norm();
-  double r2 = (A*x2 - b).norm();
+  double r2 = (AS*x2 - b).norm();
   double dx = (x1 - x2).norm();
 
   VectorXd y1 = pinv.apply_transpose(c);
@@ -127,12 +176,18 @@ static void run_test(int m, int n, double lambda) {
   const int NTEST = 100;
 
   tm.tic();
-  for (int i=0; i<NTEST; ++i) volatile auto tmp = pinv.apply(b);
+  for (int i=0; i<NTEST; ++i) {
+    volatile VectorXd tmp = pinv.apply(b);
+    (void)tmp;
+  }
   tm.toc();
   double t100_pinv = tm.elapsed_ms();
 
   tm.tic();
-  for (int i=0; i<NTEST; ++i) volatile auto tmp = solver.solve(b);
+  for (int i=0; i<NTEST; ++i) {
+    volatile VectorXd tmp = solver.solve(b);
+    (void)tmp;
+  }
   tm.toc();
   double t100_solver = tm.elapsed_ms();
 
@@ -166,7 +221,9 @@ static void run_test(int m, int n, double lambda) {
   fmt::print("{:<44} {:<35}\n", "    Metric", "    Value");
   fmt::print("{:─<44} {:─<35}\n", "─", "─");
   
-  fmt::print(fg(fmt::color::light_blue), "{:<44} {:<35}\n",  "    ‖A x₁ − b‖ (PseudoInverse)", sci(r1));
+  fmt::print(fg(fmt::color::light_blue), 
+             "{:<44} {:<35}\n",  
+             "    ‖A x₁ − b‖ (PseudoInverse)", sci(r1));
   
   fmt::print(fg(fmt::color::light_blue),
              "{:<44} {:<35}\n",
@@ -213,14 +270,14 @@ int main() {
   fmt::print(fg(fmt::color::lime_green) | fmt::emphasis::bold,
              "\n{:=^80}\n", " BENCHMARK TIKHONOV SOLVERS ");
 
-  int total_tests = sizes.size() * lambda_values.size();
-  int current_test = 0;
+  size_t total_tests = sizes.size() * lambda_values.size();
+  size_t current_test = 0;
 
   for (auto sz : sizes) {
     for (double lambda : lambda_values) {
       ++current_test;
       fmt::print(fg(fmt::color::gray) | fmt::emphasis::faint,
-                 "\n[{:2d}/{:2d}] ", current_test, total_tests);
+                 "\n[{:2d}/{:2d}] ", static_cast<int>(current_test), static_cast<int>(total_tests));
       run_test(sz.first, sz.second, lambda);
     }
   }
@@ -230,3 +287,4 @@ int main() {
 
   return 0;
 }
+

@@ -55,7 +55,7 @@ public:
   jacobian( Vector const & x, SparseMatrix & J ) const override {
     real_type z = x(0);
     J.resize(n,n);
-    J.insert(0,0) =  (3*z-2)*z - Q;
+    J.insert(0,0) = (3*z-2)*z - Q;
     J.makeCompressed();
   }
 

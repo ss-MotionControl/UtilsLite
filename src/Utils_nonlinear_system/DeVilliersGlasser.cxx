@@ -112,8 +112,6 @@ public:
   virtual
   void
   jacobian( Vector const & x, SparseMatrix & J ) const override {
-    J.resize(n,n);
-    J.setZero();
     Vector g(4);
     Matrix h(4,4), J_full(4,4);
     J_full.setZero();
@@ -314,8 +312,6 @@ public:
   virtual
   void
   jacobian( Vector const & x, SparseMatrix & J ) const override {
-    J.resize(n,n);
-    J.setZero();
     Vector g(5);
     Matrix h(5,5), J_full(5,5);
     J_full.setZero();

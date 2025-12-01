@@ -20,7 +20,7 @@ namespace Utils {
 
   void test_jacobian_verification() {
     using NS = NonlinearSystem;
-    const real_type eps = 1e-8;
+    //const real_type eps = 1e-8;
     const real_type fd_eps = 1e-6; // epsilon for finite differences
     const real_type tolerance = 1e-5;
     const integer   max_dimension = 50; // Skip tests with dimension > 10

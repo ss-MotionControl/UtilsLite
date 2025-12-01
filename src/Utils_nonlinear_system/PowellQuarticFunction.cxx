@@ -72,6 +72,9 @@ public:
   virtual
   void
   jacobian( Vector const & x_in, SparseMatrix & J ) const override {
+    J.resize(n,n);
+    J.setZero();
+
     real_type x = x_in[0];
     real_type y = x_in[1];
     real_type z = x_in[2];

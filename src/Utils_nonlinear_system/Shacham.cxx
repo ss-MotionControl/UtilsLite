@@ -141,16 +141,16 @@ public:
     x6.resize(n);
     x7.resize(n);
     // close to solution, but large initial residual
-    x0 << 0.5, 1700.0;
+    x0 << 1700.0, 0.5;
     // hard to converge due to singular points
-    x1 << 0.0, 1600.0;
-    x2 << 0.9, 1600.0;
-    x3 << 0.0, 1650.0;
-    x4 << 0.9, 1700.0;
+    x1 << 1600.0, 0.0;
+    x2 << 1600.0, 0.9;
+    x3 << 1650.0, 0.0;
+    x4 << 1700.0, 0.9;
     // Luus I.V.
-    x5 << 0.0, 1360.0;
-    x6 << 0.0, 200;    // da controllare
-    x7 << 0.0, 1650.0;
+    x5 << 1360.0, 0.0;
+    x6 << 200,    0.0;    // da controllare
+    x7 << 1650.0, 0.0;
   }
 
   virtual
@@ -1020,54 +1020,70 @@ public:
 
   virtual
   void
-  jacobian( Vector const & x, SparseMatrix & J ) const override {
-    real_type x1 = x(0);
-    real_type x2 = x(1);
-    real_type x3 = x(2);
-    real_type x4 = x(3);
-    real_type x5 = x(4);
-    real_type x6 = x(5);
-    real_type x7 = x(6);
+  jacobian(const Vector &x, SparseMatrix &J) const override {
+    // Estrazione variabili
+    const real_type x1 = x(0);
+    const real_type x2 = x(1);
+    const real_type x3 = x(2);
+    const real_type x4 = x(3);
+    const real_type x5 = x(4);
+    const real_type x6 = x(5);
+    const real_type x7 = x(6);
 
-    J.insert(1-1,1-1) = 0.5;
-    J.insert(1-1,2-1) = 1;
-    J.insert(1-1,3-1) = 0.5;
-    J.insert(1-1,6-1) = -1/x7;
-    J.insert(1-1,7-1) = x6/power2(x7);
+    const real_type inv_x7    = 1.0 / x7;
+    const real_type inv_x7_sq = inv_x7 * inv_x7;
 
-    J.insert(2-1,3-1) = 1;
-    J.insert(2-1,4-1) = 1;
-    J.insert(2-1,5-1) = 2;
-    J.insert(2-1,7-1) = 2/power2(x7);
+    J.resize(7,7);
+    J.setZero();
 
-    J.insert(3-1,1-1) = 1;
-    J.insert(3-1,2-1) = 1;
-    J.insert(3-1,5-1) = 1;
-    J.insert(3-1,7-1) = 1/power2(x7);
+    // f1
+    J.insert(0,0) = 0.5;
+    J.insert(0,1) = 1.0;
+    J.insert(0,2) = 0.5;
+    J.insert(0,5) = -x6 * inv_x7;      // J(0,6) in 1-based
+    J.insert(0,6) = x6 * inv_x7_sq;    // J(0,7) in 1-based
 
-    J.insert(4-1,1-1) = -28837;
-    J.insert(4-1,2-1) = -139009;
-    J.insert(4-1,3-1) = -78213;
-    J.insert(4-1,4-1) = 18927;
-    J.insert(4-1,5-1) = 8427;
-    J.insert(4-1,6-1) = -10690/x7;
-    J.insert(4-1,7-1) = (10690*x6-13492)/power2(x7);
+    // f2
+    J.insert(1,2) = 1.0;
+    J.insert(1,3) = 1.0;
+    J.insert(1,4) = 2.0;
+    J.insert(1,6) = 2.0 * inv_x7_sq;
 
-    J.insert(5-1,1-1) = 1;
-    J.insert(5-1,2-1) = 1;
-    J.insert(5-1,3-1) = 1;
-    J.insert(5-1,4-1) = 1;
-    J.insert(5-1,5-1) = 1;
+    // f3
+    J.insert(2,0) = 1.0;
+    J.insert(2,1) = 1.0;
+    J.insert(2,4) = 1.0;
+    J.insert(2,6) = inv_x7_sq;
 
-    J.insert(6-1,1-1) = 400*power3(x4);
-    J.insert(6-1,3-1) = -1.7837e5*x5;
-    J.insert(6-1,4-1) = 1200*x1*power2(x4);
-    J.insert(6-1,5-1) = -1.7837e5*x3;
+    // f4
+    J.insert(3,0) = -28837.0;
+    J.insert(3,1) = -139009.0;
+    J.insert(3,2) = -78213.0;
+    J.insert(3,3) = 18927.0;
+    J.insert(3,4) = 8427.0;
+    J.insert(3,5) = -10690.0 * inv_x7;
+    J.insert(3,6) = (10690.0 * x6 - 13492.0) * inv_x7_sq;
 
-    J.insert(7-1,1-1) = x3;
-    J.insert(7-1,2-1) = -2.6058*x4;
-    J.insert(7-1,3-1) = x1;
-    J.insert(7-1,4-1) = -2.6058*x2;
+    // f5
+    J.insert(4,0) = 1.0;
+    J.insert(4,1) = 1.0;
+    J.insert(4,2) = 1.0;
+    J.insert(4,3) = 1.0;
+    J.insert(4,4) = 1.0;
+
+    // f6
+    J.insert(5,0) = 400.0 * power3(x4);
+    J.insert(5,2) = -1.7837e5 * x5;
+    J.insert(5,3) = 1200.0 * x1 * power2(x4);
+    J.insert(5,4) = -1.7837e5 * x3;
+
+    // f7
+    J.insert(6,0) = x3;
+    J.insert(6,1) = -2.6058 * x4;
+    J.insert(6,2) = x1;
+    J.insert(6,3) = -2.6058 * x2;
+
+    J.makeCompressed();
   }
 
   virtual

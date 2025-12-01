@@ -215,6 +215,8 @@ public:
   virtual
   void
   jacobian( Vector const & x, SparseMatrix & J ) const override {
+    J.resize(n,n);
+    J.setZero();
     real_type x1 = x(0);
     real_type x2 = x(1);
     real_type x3 = x(2);
@@ -377,6 +379,8 @@ public:
     J.insert(29,26) = x28;
     J.insert(29,27) = x27+0.5/sqrt(x28);
     J.insert(29,29) = -1;
+    
+    J.makeCompressed();
   }
 
   virtual

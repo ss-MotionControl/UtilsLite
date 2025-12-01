@@ -129,49 +129,67 @@ namespace Utils {
   template <typename Scalar>
   class TikhonovSolver {
   private:
-    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
-    using SVD    = Eigen::JacobiSVD<Matrix,Eigen::ComputeThinU|Eigen::ComputeThinV>;
+    using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+    using Vector       = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+    using SparseQR     = Eigen::SparseQR<SparseMatrix, Eigen::COLAMDOrdering<int>>;
   
-    Matrix       m_A;
+    SparseMatrix m_A;
     Eigen::Index m_m, m_n;
-    Eigen::ColPivHouseholderQR<Matrix> m_qr;
+    SparseQR     m_qr;
     bool         m_lambda_gt_zero{true};
     
     Vector
     qr_solve_transpose( Vector const & c ) const {
-
-      // estrai R (triangolare superiore n×n)
-      auto R = m_qr.matrixR().topRows(m_n);
-
-      // permutazione
+      // Ottieni la matrice R (sparsa triangolare superiore)
+      auto const & R = m_qr.matrixR();
+      
+      // Ottieni la permutazione delle colonne
       auto const & P = m_qr.colsPermutation();
-
+      
       // rhs = Pᵀ c
       Vector rhs = P.transpose() * c;
-
-      // risolvi Rᵀ y = rhs  (triangolare inferiore)
+      
+      // Risolvi Rᵀ y = rhs (triangolare inferiore)
       Vector y = R.transpose().template triangularView<Eigen::Lower>().solve(rhs);
-
-      // risolvi R z = y     (triangolare superiore)
+      
+      // Risolvi R z = y (triangolare superiore)
       Vector z = R.template triangularView<Eigen::Upper>().solve(y);
-
+      
       // x = P z
       return P * z;
     }
 
   public:
 
-    TikhonovSolver( Matrix const & A, Scalar const lambda )
-    : m_A(A), m_m(A.rows()), m_n(A.cols())
+    TikhonovSolver( SparseMatrix const & A, Scalar const lambda )
+    : m_A(A)
+    , m_m(A.rows())
+    , m_n(A.cols())
     {
       m_lambda_gt_zero = lambda > 0;
       if ( m_lambda_gt_zero ) {
-        // Costruiamo matrice aumentata [A; lambda*I]
-        Matrix A_aug(m_m + m_n, m_n);
-        A_aug.topRows(m_m)    = m_A;
-        A_aug.bottomRows(m_n) = lambda * Matrix::Identity(m_n, m_n);
-        // QR decomposition della matrice aumentata
+        // Costruiamo matrice aumentata [A; lambda*I] sparsa
+        SparseMatrix A_aug(m_m + m_n, m_n);
+        
+        // Prepara i tripletti per la costruzione sparsa
+        std::vector<Eigen::Triplet<Scalar>> triplets;
+        triplets.reserve(A.nonZeros() + m_n);
+        
+        // Aggiungi A nella parte superiore
+        for (int k = 0; k < A.outerSize(); ++k) {
+          for (typename SparseMatrix::InnerIterator it(A, k); it; ++it) {
+            triplets.emplace_back(it.row(), it.col(), it.value());
+          }
+        }
+        
+        // Aggiungi lambda*I nella parte inferiore
+        for (Eigen::Index i = 0; i < m_n; ++i) {
+          triplets.emplace_back(m_m + i, i, lambda);
+        }
+        
+        A_aug.setFromTriplets(triplets.begin(), triplets.end());
+        
+        // QR decomposition della matrice aumentata sparsa
         m_qr.compute(A_aug);
       } else {
         m_qr.compute(m_A);
@@ -182,9 +200,8 @@ namespace Utils {
     Vector
     solve( Vector const & b ) const {
       if ( m_lambda_gt_zero ) {
-        Vector b_aug(m_m + m_n);
+        Vector b_aug = Vector::Zero(m_m + m_n);
         b_aug.head(m_m) = b;
-        b_aug.tail(m_n).setZero();
         return m_qr.solve(b_aug);
       } else {
         return m_qr.solve(b);
@@ -195,7 +212,8 @@ namespace Utils {
     Vector
     solve_transpose( Vector const & c ) const {
       // Risolvi (A^T A + lambda^2 I) x = c usando il sistema aumentato
-      return m_A * qr_solve_transpose(c);
+      Vector x = qr_solve_transpose(c);
+      return m_A * x;
     }
   };
 
