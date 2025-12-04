@@ -18,6 +18,13 @@
 \usepackage{subcaption}
 \usepackage{bm}
 
+% "─│┌┐└┘├┤┬┴┼┍┎┑┒┕┖┙┚";
+% "━┃┏┓┗┛┣┫┳┻╋┍┎┑┒┕┖┙┚";
+% "═║╔╗╚╝╠╣╦╩╬";
+% "╭╮╯╰";
+% "╼╽╾╿┍┎┑┒┕┖┙┚";
+
+
 % Configurazioni
 \geometry{margin=2.5cm}
 \setlength{\parindent}{0pt}
@@ -163,7 +170,7 @@ Il metodo di Levenberg-Marquardt risolve un sistema lineare modificato con un te
 \subsubsection{Equazioni}
 Il passo è calcolato risolvendo:
 \begin{equation}
-(J^T J + \mu I) d = -J^T f
+(\bm{J}^T \bm{J} + \mu \bm{I}) \bm{d} = -\bm{J}^T \bm{f}
 \end{equation}
 dove $\mu$ è il parametro di damping.
 
@@ -204,7 +211,7 @@ Estensione del metodo L2 con regione di fiducia adattiva.
 \subsubsection{Equazioni}
 Il passo è scalato per rispettare il vincolo:
 \begin{equation}
-\norm{d} \leq \Delta
+\norm{\bm{d}} \leq \Delta
 \end{equation}
 dove $\Delta$ è il raggio della regione di fiducia.
 
@@ -212,16 +219,16 @@ dove $\Delta$ è il raggio della regione di fiducia.
 \begin{algorithm}[H]
 \caption{L2-Adattivo con Regione di Fiducia}
 \begin{algorithmic}[1]
-\Require $x_k$, $f_k$, $\norm{f_k}$, $J_k$, $\mu_k$, $\Delta_k$
-\Ensure $x_{k+1}$, $f_{k+1}$, $\norm{f_{k+1}}$, $\mu_{k+1}$, $\Delta_{k+1}$
-\State Calcola $d_k$ risolvendo $(J_k^T J_k + \mu_k I) d = -J_k^T f_k$
-\If{$\norm{d_k} > \Delta_k$}
-    \State $d_k = d_k \cdot (\Delta_k / \norm{d_k})$
+\Require $\bm{x}_k$, $\bm{f}_k$, $\norm{\bm{f}_k}$, $\bm{J}_k$, $\mu_k$, $\Delta_k$
+\Ensure $\bm{x}_{k+1}$, $\bm{f}_{k+1}$, $\norm{\bm{f}_{k+1}}$, $\mu_{k+1}$, $\Delta_{k+1}$
+\State Calcola $\bm{d}_k$ risolvendo $(\bm{J}_k^T \bm{J}_k + \mu_k \bm{I}) \bm{d} = -\bm{J}_k^T \bm{f}_k$
+\If{$\norm{\bm{d}_k} > \Delta_k$}
+    \State $\bm{d}_k = \Delta_k (\bm{d}_k/\norm{\bm{d}_k})$
 \EndIf
-\State $x_{\text{trial}} = x_k + d_k$
-\State Calcola $f_{\text{trial}} = f(x_{\text{trial}})$
-\State $\Delta f = \norm{f_k} - \norm{f_{\text{trial}}}$
-\State $\Delta m = 0.5 \cdot d_k^T (\mu_k d_k - J_k^T f_k)$
+\State $\bm{x}_{\text{trial}} = \bm{x}_k + \bm{d}_k$
+\State Calcola $\bm{f}_{\text{trial}} = \bm{f}(\bm{x}_{\text{trial}})$
+\State $\Delta f = \norm{\bm{f}_k} - \norm{\bm{f}_{\text{trial}}}$
+\State $\Delta m = 0.5 \bm{d}_k \cdot  (\mu_k \bm{d}_k - \bm{J}_k^T \bm{f}_k)$
 \State $\rho = \Delta f / \Delta m$
 \If{$\rho > \eta_{\text{bad}}$}
     \State Accetta passo
@@ -269,7 +276,7 @@ Strategia proposta da Bank e Rose che utilizza un damping con criteri di suffici
 \subsubsection{Equazioni}
 La condizione di accettazione è:
 \begin{equation}
-\norm{f_k} - \norm{f_{\text{trial}}} \geq \beta \theta \norm{f_k}
+\norm{\bm{f}_k} - \norm{\bm{f}_{\text{trial}}} \geq \beta \theta \norm{\bm{f}_k}
 \end{equation}
 dove $\theta$ è il parametro di damping e $\beta$ è la costante di sufficiente decremento.
 
@@ -277,14 +284,14 @@ dove $\theta$ è il parametro di damping e $\beta$ è la costante di sufficiente
 \begin{algorithm}[H]
 \caption{Bank e Rose (1981)}
 \begin{algorithmic}[1]
-\Require $x_k$, $f_k$, $\norm{f_k}$, $J_k$, $\theta_k$
-\Ensure $x_{k+1}$, $f_{k+1}$, $\norm{f_{k+1}}$, $\theta_{k+1}$
-\State Calcola $d_k = -J_k^{-1} f_k$
+\Require $\bm{x}_k$, $\bm{f}_k$, $\norm{\bm{f}_k}$, $\bm{J}_k$, $\theta_k$
+\Ensure $\bm{x}_{k+1}$, $\bm{f}_{k+1}$, $\norm{\bm{f}_{k+1}}$, $\theta_{k+1}$
+\State Calcola $\bm{d}_k = -\bm{J}_k^{-1} \bm{f}_k$
 \State $\theta = \theta_k$
 \For{$j = 1$ to $j_{\max}$}
-    \State $x_{\text{trial}} = x_k + \theta d_k$
-    \State Calcola $f_{\text{trial}} = f(x_{\text{trial}})$
-    \State $\Delta = \norm{f_k} - \norm{f_{\text{trial}}}$
+    \State $\bm{x}_{\text{trial}} = \bm{x}_k + \theta \bm{d}_k$
+    \State Calcola $\bm{f}_{\text{trial}} = \bm{f}(x_{\text{trial}})$
+    \State $\Delta = \norm{\bm{f}_k} - \norm{\bm{f}_{\text{trial}}}$
     \State $\Delta_{\text{atteso}} = \beta \theta \norm{f_k}$
     \If{$\Delta \geq \Delta_{\text{atteso}}$}
         \State Accetta passo
@@ -312,30 +319,30 @@ dove $\theta$ è il parametro di damping e $\beta$ è la costante di sufficiente
 \subsection{Griewank (1980)}
 \label{subsec:griewank}
 
-Strategia adattiva basata sulla riduzione della funzione obiettivo $F = \frac{1}{2}\norm{f}^2$.
+Strategia adattiva basata sulla riduzione della funzione obiettivo $F = \frac{1}{2}\norm{\bm{f}}^2$.
 
 \subsubsection{Equazioni}
 La condizione di accettazione è:
 \begin{equation}
-F_k - F_{\text{trial}} \geq -\eta (g_k^T d_k)
+F_k - F_{\text{trial}} \geq -\eta (\bm{g}_k^T \bm{d}_k)
 \end{equation}
-dove $g_k = J_k^T f_k$ è il gradiente di $F$.
+dove $\bm{g}_k = \bm{J}_k^T \bm{f}_k$ è il gradiente di $F$.
 
 \subsubsection{Algoritmo}
 \begin{algorithm}[H]
 \caption{Griewank (1980)}
 \begin{algorithmic}[1]
-\Require $x_k$, $f_k$, $\norm{f_k}$, $J_k$, $F_k = \frac{1}{2}\norm{f_k}^2$
-\Ensure $x_{k+1}$, $f_{k+1}$, $\norm{f_{k+1}}$, $F_{k+1}$
-\State Calcola $g_k = J_k^T f_k$
-\State Calcola $d_k = -J_k^{-1} f_k$
+\Require $\bm{x}_k$, $\bm{f}_k$, $\norm{\bm{f}_k}$, $\bm{J}_k$, $F_k = \frac{1}{2}\norm{\bm{f}_k}^2$
+\Ensure $\bm{x}_{k+1}$, $\bm{f}_{k+1}$, $\norm{\bm{f}_{k+1}}$, $F_{k+1}$
+\State Calcola $\bm{g}_k = \bm{J}_k^T \bm{f}_k$
+\State Calcola $\bm{d}_k = -\bm{J}_k^{-1} \bm{f}_k$
 \State $\lambda = 1.0$
 \For{$j = 1$ to $j_{\max}$}
-    \State $x_{\text{trial}} = x_k + \lambda d_k$
-    \State Calcola $f_{\text{trial}} = f(x_{\text{trial}})$
-    \State $F_{\text{trial}} = \frac{1}{2}\norm{f_{\text{trial}}}^2$
+    \State $\bm{x}_{\text{trial}} = \bm{x}_k + \lambda \bm{d}_k$
+    \State Calcola $\bm{f}_{\text{trial}} = \bm{f}(\bm{x}_{\text{trial}})$
+    \State $F_{\text{trial}} = \frac{1}{2}\norm{\bm{f}_{\text{trial}}}^2$
     \State $\Delta F = F_k - F_{\text{trial}}$
-    \State $\Delta F_{\text{atteso}} = -\eta (g_k^T d_k)$
+    \State $\Delta F_{\text{atteso}} = -\eta (\bm{g}_k^T \bm{d}_k)$
     \If{$\Delta F \geq \Delta F_{\text{atteso}}$}
         \State Accetta passo
         \If{$\Delta F > 2\Delta F_{\text{atteso}}$}
@@ -364,7 +371,7 @@ dove $g_k = J_k^T f_k$ è il gradiente di $F$.
 \subsection{Metodi Filter}
 \label{subsec:filter}
 
-I metodi filter considerano due criteri: la norma del residuo ($\theta = \norm{f}$) e la funzione obiettivo ($F = \frac{1}{2}\norm{f}^2$).
+I metodi filter considerano due criteri: la norma del residuo ($\theta = \norm{\bm{f}}$) e la funzione obiettivo ($F = \frac{1}{2}\norm{\bm{f}}^2$).
 
 \subsubsection{Definizione del Filter}
 Un punto $(\theta, F)$ è accettabile se non è dominato da nessun punto nel filter:
@@ -377,17 +384,17 @@ per ogni $(\theta_f, F_f)$ nel filter.
 \begin{algorithm}[H]
 \caption{Metodi Filter}
 \begin{algorithmic}[1]
-\Require $x_k$, $f_k$, $\norm{f_k}$, $J_k$, filter
-\Ensure $x_{k+1}$, $f_{k+1}$, $\norm{f_{k+1}}$, filter aggiornato
-\State Calcola $d_k = -J_k^{-1} f_k$
+\Require $\bm{x}_k$, $\bm{f}_k$, $\norm{\bm{f}_k}$, $\bm{J}_k$, filter
+\Ensure $\bm{x}_{k+1}$, $\bm{f}_{k+1}$, $\norm{\bm{f}_{k+1}}$, filter aggiornato
+\State Calcola $\bm{d}_k = -\bm{J}_k^{-1} \bm{f}_k$
 \State $\alpha = 1.0$
 \For{$j = 1$ to $j_{\max}$}
-    \State $x_{\text{trial}} = x_k + \alpha d_k$
-    \State Calcola $f_{\text{trial}} = f(x_{\text{trial}})$
-    \State $\theta_{\text{trial}} = \norm{f_{\text{trial}}}$
+    \State $\bm{x}_{\text{trial}} = \bm{x}_k + \alpha \bm{d}_k$
+    \State Calcola $\bm{f}_{\text{trial}} = \bm{f}(\bm{x}_{\text{trial}})$
+    \State $\theta_{\text{trial}} = \norm{\bm{f}_{\text{trial}}}$
     \State $F_{\text{trial}} = \frac{1}{2}\theta_{\text{trial}}^2$
     \State Verifica accettabilità rispetto al filter
-    \State Verifica condizione di Armijo: $F_{\text{trial}} \leq F_k + \alpha c_1 (g_k^T d_k)$
+    \State Verifica condizione di Armijo: $F_{\text{trial}} \leq F_k + \alpha c_1 (\bm{g}_k^T \bm{d}_k)$
     \If{accettabile e Armijo}
         \State Accetta passo
         \State Aggiungi $(\theta_{\text{trial}}, F_{\text{trial}})$ al filter
@@ -417,20 +424,20 @@ Metodo di regione di fiducia con modelli cubici che penalizzano i passi grandi.
 
 \subsubsection{Problema di Ottimizzazione}
 \begin{equation}
-\min_{s} m(s) = \frac{1}{2}\norm{f + J s}^2 + \frac{\sigma}{3}\norm{s}^3 \quad \text{s.t.} \quad \norm{s} \leq \Delta
+\min_{s} m(s) = \frac{1}{2}\norm{\bm{f} + \bm{J} \bm{s}}^2 + \frac{\sigma}{3}\norm{\bm{s}}^3 \quad \text{s.t.} \quad \norm{\bm{s}} \leq \Delta
 \end{equation}
 
 \subsubsection{Algoritmo}
 \begin{algorithm}[H]
 \caption{Regione di Fiducia Cubica}
 \begin{algorithmic}[1]
-\Require $x_k$, $f_k$, $\norm{f_k}$, $J_k$, $\Delta_k$, $\sigma_k$
-\Ensure $x_{k+1}$, $f_{k+1}$, $\norm{f_{k+1}}$, $\Delta_{k+1}$, $\sigma_{k+1}$
-\State Calcola $g_k = J_k^T f_k$
-\State Risolvi sottoproblema cubico per $s_k$
-\State $x_{\text{trial}} = x_k + s_k$
-\State Calcola $f_{\text{trial}} = f(x_{\text{trial}})$
-\State $\rho = \frac{F_k - F_{\text{trial}}}{m(0) - m(s_k)}$
+\Require $\bm{x}_k$, $\bm{f}_k$, $\norm{\bm{f}_k}$, $\bm{J}_k$, $\Delta_k$, $\sigma_k$
+\Ensure $\bm{x}_{k+1}$, $\bm{f}_{k+1}$, $\norm{\bm{f}_{k+1}}$, $\Delta_{k+1}$, $\sigma_{k+1}$
+\State Calcola $\bm{g}_k = \bm{J}_k^T \bm{f}_k$
+\State Risolvi sottoproblema cubico per $\bm{s}_k$
+\State $\bm{x}_{\text{trial}} = \bm{x}_k + \bm{s}_k$
+\State Calcola $\bm{f}_{\text{trial}} = \bm{f}(\bm{x}_{\text{trial}})$
+\State $\rho = \dfrac{F_k - F_{\text{trial}}}{m(0) - m(\bm{s}_k)}$
 \If{$\rho > \eta_1$}
     \State Accetta passo
     \If{$\rho > \eta_2$}
@@ -459,17 +466,17 @@ Il metodo Dogleg combina la direzione di Cauchy (steepest descent) e la direzion
 
 \subsubsection{Direzioni}
 \begin{itemize}
-    \item Direzione di Cauchy: $d_C = -\alpha g$ dove $\alpha = \frac{\norm{g}^2}{\norm{J g}^2}$
-    \item Direzione di Gauss-Newton: $d_{GN} = -J^{-1} f$
+    \item Direzione di Cauchy: $\bm{d}_C = -\alpha \bm{g}$ dove $\alpha = \frac{\norm{\bm{g}}^2}{\norm{\bm{J} \bm{g}}^2}$
+    \item Direzione di Gauss-Newton: $\bm{d}_{GN} = -\bm{J}^{-1} \bm{f}$
 \end{itemize}
 
 \subsubsection{Percorso Dogleg}
 Il percorso Dogleg è la combinazione lineare:
 \begin{equation}
-d(\tau) = 
+\bm{d}(\tau) = 
 \begin{cases}
-\tau d_C & \text{se } \tau \in [0, 1] \\
-d_C + (\tau-1)(d_{GN} - d_C) & \text{se } \tau \in [1, 2]
+\tau \bm{d}_C & \text{se } \tau \in [0, 1] \\
+\bm{d}_C + (\tau-1)(\bm{d}_{GN} - \bm{d}_C) & \text{se } \tau \in [1, 2]
 \end{cases}
 \end{equation}
 
@@ -477,17 +484,17 @@ d_C + (\tau-1)(d_{GN} - d_C) & \text{se } \tau \in [1, 2]
 \begin{algorithm}[H]
 \caption{Metodo Dogleg}
 \begin{algorithmic}[1]
-\Require $x_k$, $f_k$, $\norm{f_k}$, $J_k$, $\Delta_k$
-\Ensure $x_{k+1}$, $f_{k+1}$, $\norm{f_{k+1}}$, $\Delta_{k+1}$
-\State Calcola $g_k = J_k^T f_k$
-\State Calcola $d_C = -\alpha g_k$
-\State Calcola $d_{GN} = -J_k^{-1} f_k$
-\If{$\norm{d_{GN}} \leq \Delta_k$}
-    \State $d_k = d_{GN}$
-\ElsIf{$\norm{d_C} \geq \Delta_k$}
-    \State $d_k = (\Delta_k / \norm{d_C}) d_C$
+\Require $\bm{x}_k$, $\bm{f}_k$, $\norm{\bm{f}_k}$, $\bm{J}_k$, $\Delta_k$
+\Ensure $\bm{x}_{k+1}$, $\bm{f}_{k+1}$, $\norm{\bm{f}_{k+1}}$, $\Delta_{k+1}$
+\State Calcola $\bm{g}_k = \bm{J}_k^T \bm{f}_k$
+\State Calcola $\bm{d}_C = -\alpha \bm{g}_k$
+\State Calcola $\bm{d}_{GN} = -\bm{J}_k^{-1} \bm{f}_k$
+\If{$\norm{\bm{d}_{GN}} \leq \Delta_k$}
+    \State $\bm{d}_k = \bm{d}_{GN}$
+\ElsIf{$\norm{\bm{d}_C} \geq \Delta_k$}
+    \State $\bm{d}_k = (\Delta_k / \norm{\bm{d}_C}) \bm{d}_C$
 \Else
-    \State Calcola punto su Dogleg tra $d_C$ e $d_{GN}$ con $\norm{d} = \Delta_k$
+    \State Calcola punto su Dogleg tra $\bm{d}_C$ e $\bm{d}_{GN}$ con $\norm{\bm{d}} = \Delta_k$
 \EndIf
 \State Valuta passo e aggiorna $\Delta_k$ in base al rapporto di riduzione
 \end{algorithmic}
@@ -502,12 +509,12 @@ La ricerca lineare con condizioni di Wolfe garantisce un sufficiente decremento 
 \begin{enumerate}
     \item Condizione di Armijo (sufficiente decremento):
     \begin{equation}
-    F(x + \alpha d) \leq F(x) + c_1 \alpha g^T d
+    F(\bm{x} + \alpha \bm{d}) \leq F(\bm{x}) + c_1 \alpha \bm{g}^T \bm{d}
     \end{equation}
     
     \item Condizione di curvatura:
     \begin{equation}
-    \abs{g_{\text{new}}^T d} \leq c_2 \abs{g^T d}
+    \abs{\bm{g}_{\text{new}}^T \bm{d}} \leq c_2 \abs{\bm{g}^T \bm{d}}
     \end{equation}
 \end{enumerate}
 

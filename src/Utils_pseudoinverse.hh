@@ -20,10 +20,16 @@
 //
 // file: Utils_pseudoinverse.hh
 //
+// Implementation of Tikhonov solvers for regularized least squares problems:
+// \f[
+//   \min_{x} \|Ax - b\|^2 + \lambda \|x\|^2
+// \f]
+//
+// Includes implementations for both dense and sparse matrices,
+// with QR and KKT approaches.
+//
 
 #pragma once
-
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 #ifndef UTILS_PSEUDOINVERSE_dot_HH
 #define UTILS_PSEUDOINVERSE_dot_HH
@@ -55,8 +61,6 @@
 #include "Utils_fmt.hh"
 #include "Utils_eigen.hh"
 
-#include <random>
-
 namespace Utils {
 
   using std::abs;
@@ -64,142 +68,402 @@ namespace Utils {
   using std::max;
   using std::sqrt;
   using std::pow;
-  
-  template <typename Scalar>
-  class TikhonovPseudoInverse {
-  private:
-    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
-    using SVD    = Eigen::JacobiSVD<Matrix,Eigen::ComputeThinU|Eigen::ComputeThinV>;
-  
-    mutable SVD    m_svd;
-    mutable Vector m_inv_singular;
 
-  public:
-    // Costruttore con parametro di regolarizzazione (default 0.01)
-    explicit
-    TikhonovPseudoInverse(
-      Matrix const & A,
-      Scalar const   lambda,
-      Scalar const   epsilon = 1e-12
-    ) {
-      compute( A, lambda, epsilon );
-    }
+  //====================================================================
+  // TikhonovSolver: Dense matrices
+  //====================================================================
 
-    // Metodo per calcolare la pseudo-inversa regolarizzata
-    void
-    compute(
-      Matrix const & A,
-      Scalar const   lambda,
-      Scalar const   epsilon = 1e-12
-    ) const {
-      new (&m_svd) SVD( A );
-
-      auto const & singular_values = m_svd.singularValues();
-
-      Eigen::Index ns{ singular_values.size() };
-      m_inv_singular.resize( ns );
-      for ( Eigen::Index i{0}; i < ns; ++i ) {
-        Scalar s = singular_values.coeff(i);
-        m_inv_singular.coeffRef(i) = s / (s * s + lambda * lambda + epsilon);
-      }
-    }
-
-    // Applica la pseudo-inversa a un vettore o matrice
-    template<typename Derived>
-    Derived apply( Eigen::MatrixBase<Derived> const & b ) const {
-      auto const & U = m_svd.matrixU();
-      auto const & V = m_svd.matrixV();
-
-      // Applica: x = V * Σ⁺ * Uᵀ * b
-      return V * m_inv_singular.asDiagonal() * U.transpose() * b;
-    }
-
-    // Applica la trasposta della pseudo-inversa a un vettore o matrice
-    template<typename Derived>
-    Derived apply_transpose( Eigen::MatrixBase<Derived> const & b ) const {
-      auto const & U = m_svd.matrixU();
-      auto const & V = m_svd.matrixV();
-
-      // Applica la trasposta: x = U * Σ⁺ * Vᵀ * b
-      return U * m_inv_singular.asDiagonal() * V.transpose() * b;
-    }
-  };
-
+  /**
+   * @brief Tikhonov solver for dense matrices using augmented QR approach
+   *
+   * Solves the regularized least squares problem:
+   * \f[
+   *   \min_{x} \|Ax - b\|^2 + \lambda^2 \|x\|^2
+   * \f]
+   *
+   * Uses a QR factorization on the augmented matrix:
+   * \f[
+   *   \begin{bmatrix} A \\ \lambda I \end{bmatrix}
+   * \f]
+   *
+   * Complexity: \f$O((m+n)n^2)\f$ for factorization, \f$O(n^2)\f$ for solve.
+   *
+   * @tparam Scalar Scalar type (double, float)
+   */
   template <typename Scalar>
   class TikhonovSolver {
   private:
-    using SparseMatrix = Eigen::SparseMatrix<Scalar>;
-    using Vector       = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-    using SparseQR     = Eigen::SparseQR<SparseMatrix, Eigen::COLAMDOrdering<int>>;
-  
-    SparseMatrix m_A;
-    Eigen::Index m_m, m_n;
-    SparseQR     m_qr;
-    bool         m_lambda_gt_zero{true};
-    
-    Vector
-    qr_solve_transpose( Vector const & c ) const {
-      // Ottieni la matrice R (sparsa triangolare superiore)
-      auto const & R = m_qr.matrixR();
-      
-      // Ottieni la permutazione delle colonne
+    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
+
+    Matrix                             m_A;      ///< Original m×n matrix
+    Eigen::Index                       m_m, m_n; ///< Dimensions m (rows), n (cols)
+    Eigen::ColPivHouseholderQR<Matrix> m_qr;     ///< Column-pivoting QR factorization
+    bool   m_lambda_gt_zero{false};              ///< Flag for λ > 0
+    Scalar m_lambda;                             ///< Regularization parameter √|λ|
+
+    /**
+     * @brief Solve \f$(A^T A + \lambda^2 I) x = c\f$ without forming \f$A^T A\f$
+     *
+     * Uses the QR factorization: if \f$A = QR\f$, then:
+     * \f[
+     *   (A^T A + \lambda^2 I) = R^T R + \lambda^2 I
+     * \f]
+     * Solution is obtained by solving two triangular systems.
+     *
+     * @param c Right-hand side vector
+     * @return Solution x
+     */
+    Vector qr_solve_transpose(Vector const & c) const {
+      auto R = m_qr.matrixR().topRows(m_n);
       auto const & P = m_qr.colsPermutation();
-      
-      // rhs = Pᵀ c
       Vector rhs = P.transpose() * c;
-      
-      // Risolvi Rᵀ y = rhs (triangolare inferiore)
       Vector y = R.transpose().template triangularView<Eigen::Lower>().solve(rhs);
-      
-      // Risolvi R z = y (triangolare superiore)
       Vector z = R.template triangularView<Eigen::Upper>().solve(y);
-      
-      // x = P z
       return P * z;
     }
 
   public:
-
-    TikhonovSolver( SparseMatrix const & A, Scalar const lambda )
+    /**
+     * @brief Constructor
+     *
+     * @param A Dense m×n matrix
+     * @param lambda Regularization parameter (≥ 0)
+     */
+    TikhonovSolver(Matrix const & A, Scalar lambda)
     : m_A(A)
     , m_m(A.rows())
     , m_n(A.cols())
     {
-      m_lambda_gt_zero = lambda > 0;
-      if ( m_lambda_gt_zero ) {
-        // Costruiamo matrice aumentata [A; lambda*I] sparsa
+      UTILS_ASSERT( lambda >= 0, "TikhonovSolver( λ={} ) λ must be >= 0", lambda );
+      m_lambda         = std::sqrt(lambda);
+      m_lambda_gt_zero = m_lambda > Scalar(0);
+      if (m_lambda_gt_zero) {
+        // Build augmented matrix [A; λI] of size (m+n)×n
+        Matrix A_aug(m_m + m_n, m_n);
+        A_aug.topRows(m_m)    = m_A;
+        A_aug.bottomRows(m_n) = m_lambda * Matrix::Identity(m_n, m_n);
+        m_qr.compute(A_aug);
+      } else {
+        m_qr.compute(m_A);  // No regularization, use standard QR
+      }
+    }
+
+    /**
+     * @brief Solve the Tikhonov system
+     *
+     * @param b Right-hand side vector of size m
+     * @return Solution x minimizing \f$\|Ax - b\|^2 + \lambda^2 \|x\|^2\f$
+     */
+    Vector solve(Vector const & b) const {
+      if (m_lambda_gt_zero) {
+        Vector b_aug(m_m + m_n);
+        b_aug.head(m_m) = b;
+        b_aug.tail(m_n).setZero();
+        return m_qr.solve(b_aug);
+      } else {
+        return m_qr.solve(b);
+      }
+    }
+
+    /**
+     * @brief Compute \f$y = A (A^T A + \lambda^2 I)^{-1} c\f$
+     *
+     * Useful for dual problems or for computing matrix-vector products
+     * with the regularized pseudoinverse.
+     *
+     * @param c Input vector of size n
+     * @return \f$y = A (A^T A + \lambda^2 I)^{-1} c\f$ of size m
+     */
+    Vector solve_transpose(Vector const & c) const { return m_A * qr_solve_transpose(c); }
+
+    /// @brief Return the regularization parameter λ
+    Scalar lambda() const { return m_lambda; }
+    
+    /// @brief Return number of rows of matrix A
+    Eigen::Index rows() const { return m_m; }
+    
+    /// @brief Return number of columns of matrix A
+    Eigen::Index cols() const { return m_n; }
+  };
+
+  //====================================================================
+  // TikhonovSolver2: Dense matrices with KKT formulation
+  //====================================================================
+
+  /**
+   * @brief Tikhonov solver for dense matrices using KKT formulation
+   *
+   * Solves the regularized least squares problem:
+   * \f[
+   *   \min_{x} \|Ax - b\|^2 + \lambda \|x\|^2
+   * \f]
+   *
+   * Via the Karush-Kuhn-Tucker (KKT) system:
+   * \f[
+   *   \begin{bmatrix}
+   *     I_m & A \\
+   *     A^T & -\lambda I_n
+   *   \end{bmatrix}
+   *   \begin{bmatrix}
+   *     y \\
+   *     x
+   *   \end{bmatrix}
+   *   =
+   *   \begin{bmatrix}
+   *     b \\
+   *     0
+   *   \end{bmatrix}
+   * \f]
+   *
+   * where y is an auxiliary variable. After factorizing the KKT matrix,
+   * the linear system is solved and the solution x is extracted.
+   *
+   * Complexity: \f$O((m+n)^3)\f$ for LU factorization, \f$O((m+n)^2)\f$ for solve.
+   *
+   * @tparam Scalar Scalar type (double, float)
+   */
+  template <typename Scalar>
+  class TikhonovSolver2 {
+  private:
+    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
+    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+  
+    Matrix                      m_A;      ///< Original m×n matrix
+    Eigen::Index                m_m, m_n; ///< Dimensions m (rows), n (cols)
+    Matrix                      m_KKT;    ///< KKT matrix of size (m+n)×(m+n)
+    Eigen::PartialPivLU<Matrix> m_lu;     ///< Partial pivoting LU factorization
+    Scalar                      m_lambda; ///< Regularization parameter (≥ 0)
+    bool                        m_reg;    ///< Flag for λ > 0
+  
+    /**
+     * @brief Build and factorize the KKT matrix
+     *
+     * Block structure:
+     * \f[
+     *   K = \begin{bmatrix}
+     *         I_m   & A     \\
+     *         A^T   & -\lambda I_n
+     *       \end{bmatrix}
+     * \f]
+     *
+     * For λ = 0, the bottom-right block is zero.
+     */
+    void build_and_factorize() {
+      const Eigen::Index M = m_m;
+      const Eigen::Index N = m_n;
+      const Eigen::Index K = M + N; // Size of KKT matrix
+
+      m_KKT.resize(K, K);
+
+      // Top-left block: I_m
+      m_KKT.topLeftCorner(M, M).setIdentity();
+
+      // Top-right block: A (rows 0..M-1, cols M..M+N-1)
+      m_KKT.topRightCorner(M, N) = m_A;
+
+      // Bottom-left block: A^T (rows M..M+N-1, cols 0..M-1)
+      m_KKT.bottomLeftCorner(N, M) = m_A.transpose();
+
+      // Bottom-right block: -λ I_n (if λ > 0)
+      if (m_reg && m_lambda != Scalar(0)) {
+        m_KKT.bottomRightCorner(N, N) = -m_lambda * Matrix::Identity(N, N);
+      } else {
+        m_KKT.bottomRightCorner(N, N).setZero();
+      }
+
+      // Factorize with LU (PartialPivLU is efficient for dense matrices)
+      m_lu.compute(m_KKT);
+
+      UTILS_ASSERT(m_lu.info() == Eigen::Success,
+                   "TikhonovSolver2: KKT factorization failed");
+    }
+  
+  public:
+    /**
+     * @brief Construct dense Tikhonov solver via KKT factorization
+     *
+     * @param A Dense m×n matrix
+     * @param lambda Regularization parameter (≥ 0)
+     */
+    TikhonovSolver2(Matrix const & A, Scalar lambda)
+    : m_A(A)
+    , m_m(A.rows())
+    , m_n(A.cols())
+    , m_reg(lambda > Scalar(0))
+    {
+      UTILS_ASSERT( lambda >= 0, "TikhonovSolver2( λ={} ) λ must be >= 0", lambda );
+      m_lambda = lambda;
+      build_and_factorize();
+    }
+  
+    /**
+     * @brief Solve regularized least squares
+     *
+     * Solves \f$ \min_{x} \|Ax - b\|^2 + \lambda \|x\|^2 \f$
+     *
+     * @param b Right-hand side vector of length m
+     * @return Solution x of length n
+     */
+    Vector solve(Vector const & b) const {
+      UTILS_ASSERT(b.size() == m_m, "TikhonovSolver2::solve: b size mismatch");
+
+      // RHS for KKT: [b; 0]
+      Vector rhsKKT = Vector::Zero(m_m + m_n);
+      rhsKKT.head(m_m) = b;
+
+      Vector sol = m_lu.solve(rhsKKT);
+      UTILS_ASSERT(m_lu.info() == Eigen::Success, "TikhonovSolver2::solve: solve failed");
+
+      // Extract x (tail of the solution)
+      return sol.segment(m_m, m_n);
+    }
+  
+    /**
+     * @brief Compute \f$ y = A (A^T A + \lambda I)^{-1} c \f$
+     *
+     * Solves KKT * [y; x] = [0; -c], which yields
+     * \f$ x = (A^T A + \lambda I)^{-1} c \f$ and returns A*x.
+     *
+     * @param c Input vector of length n
+     * @return \f$ y = A (A^T A + \lambda I)^{-1} c \f$ of length m
+     */
+    Vector solve_transpose(Vector const & c) const {
+      UTILS_ASSERT(c.size() == m_n, "TikhonovSolver2::solve_transpose: c size mismatch");
+
+      Vector rhsKKT = Vector::Zero(m_m + m_n);
+      // RHS = [0; -c] so that the resulting x satisfies (A^T A + λI) x = c
+      rhsKKT.segment(m_m, m_n) = -c;
+
+      Vector sol = m_lu.solve(rhsKKT);
+      UTILS_ASSERT(m_lu.info() == Eigen::Success, "TikhonovSolver2::solve_transpose: solve failed");
+
+      Vector x = sol.segment(m_m, m_n);
+      return m_A * x;
+    }
+  
+    /// @brief Return regularization parameter λ
+    Scalar       lambda() const { return m_lambda; }
+    
+    /// @brief Return number of rows of matrix A
+    Eigen::Index rows()   const { return m_m; }
+    
+    /// @brief Return number of columns of matrix A
+    Eigen::Index cols()   const { return m_n; }
+  
+    /**
+     * @brief Get the KKT matrix (mainly for debugging/testing)
+     * @return Constant reference to the KKT matrix
+     */
+    Matrix const & get_KKT() const { return m_KKT; }
+  
+    /**
+     * @brief Get the LU factorization object (mainly for debugging/testing)
+     * @return Constant reference to the LU factorization
+     */
+    Eigen::PartialPivLU<Matrix> const & get_lu() const { return m_lu; }
+  };
+
+  //====================================================================
+  // SP_TikhonovSolver: Sparse matrices
+  //====================================================================
+
+  /**
+   * @brief Tikhonov solver for sparse matrices using augmented QR approach
+   *
+   * Solves the regularized least squares problem:
+   * \f[
+   *   \min_{x} \|Ax - b\|^2 + \lambda^2 \|x\|^2
+   * \f]
+   *
+   * Uses a sparse QR factorization on the augmented matrix:
+   * \f[
+   *   \begin{bmatrix} A \\ \lambda I \end{bmatrix}
+   * \f]
+   *
+   * Complexity depends on sparsity pattern. Suitable for large sparse problems.
+   *
+   * @tparam Scalar Scalar type (double, float)
+   */
+  template <typename Scalar>
+  class SP_TikhonovSolver {
+  private:
+    using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+    using Vector       = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+    using SparseQR     = Eigen::SparseQR<SparseMatrix, Eigen::COLAMDOrdering<int>>;
+
+    SparseMatrix m_A;                     ///< Original sparse m×n matrix
+    Eigen::Index m_m, m_n;                ///< Dimensions m (rows), n (cols)
+    SparseQR     m_qr;                    ///< Sparse QR factorization with column ordering
+    Scalar       m_lambda;                ///< Regularization parameter √|λ|
+    bool         m_lambda_gt_zero{false}; ///< Flag for λ > 0
+
+    /**
+     * @brief Solve \f$(A^T A + \lambda^2 I) x = c\f$ using sparse QR factors
+     *
+     * @param c Right-hand side vector
+     * @return Solution x
+     */
+    Vector qr_solve_transpose(Vector const & c) const {
+      auto const & R = m_qr.matrixR();
+      auto const & P = m_qr.colsPermutation();
+      Eigen::Index n = m_n;
+
+      SparseMatrix R_top = R.topRows(n);
+      Vector rhs = P.transpose() * c;
+      Vector y = R_top.transpose().template triangularView<Eigen::Lower>().solve(rhs);
+      Vector x = R_top.template triangularView<Eigen::Upper>().solve(y);
+      return P * x;
+    }
+
+  public:
+    /**
+     * @brief Constructor for sparse Tikhonov solver
+     *
+     * @param A Sparse m×n matrix
+     * @param lambda Regularization parameter (≥ 0)
+     */
+    SP_TikhonovSolver(SparseMatrix const & A, Scalar lambda)
+    : m_A(A)
+    , m_m(A.rows())
+    , m_n(A.cols())
+    {
+      UTILS_ASSERT( lambda >= 0, "SP_TikhonovSolver( λ={} ) λ must be >= 0", lambda );
+      m_lambda         = std::sqrt(lambda);
+      m_lambda_gt_zero = lambda > Scalar(0);
+
+      if (m_lambda_gt_zero) {
+        // Build augmented sparse matrix [A; λI] using triplets
         SparseMatrix A_aug(m_m + m_n, m_n);
-        
-        // Prepara i tripletti per la costruzione sparsa
         std::vector<Eigen::Triplet<Scalar>> triplets;
         triplets.reserve(A.nonZeros() + m_n);
-        
-        // Aggiungi A nella parte superiore
-        for (int k = 0; k < A.outerSize(); ++k) {
-          for (typename SparseMatrix::InnerIterator it(A, k); it; ++it) {
+
+        // Copy original matrix entries
+        for (int k = 0; k < A.outerSize(); ++k)
+          for (typename SparseMatrix::InnerIterator it(A, k); it; ++it)
             triplets.emplace_back(it.row(), it.col(), it.value());
-          }
-        }
-        
-        // Aggiungi lambda*I nella parte inferiore
-        for (Eigen::Index i = 0; i < m_n; ++i) {
-          triplets.emplace_back(m_m + i, i, lambda);
-        }
-        
+
+        // Add λI entries on the bottom
+        for (Eigen::Index i = 0; i < m_n; ++i)
+          triplets.emplace_back(m_m + i, i, m_lambda);
+
         A_aug.setFromTriplets(triplets.begin(), triplets.end());
-        
-        // QR decomposition della matrice aumentata sparsa
         m_qr.compute(A_aug);
       } else {
         m_qr.compute(m_A);
       }
+
+      UTILS_ASSERT(m_qr.info() == Eigen::Success, "QR decomposition failed");
     }
 
-    // Risolve x = argmin ||A x - b||^2 + lambda^2 ||x||^2
-    Vector
-    solve( Vector const & b ) const {
-      if ( m_lambda_gt_zero ) {
+    /**
+     * @brief Solve the Tikhonov system for sparse matrices
+     *
+     * @param b Right-hand side vector of size m
+     * @return Solution x minimizing \f$\|Ax - b\|^2 + \lambda^2 \|x\|^2\f$
+     */
+    Vector solve(Vector const & b) const {
+      if (m_lambda_gt_zero) {
         Vector b_aug = Vector::Zero(m_m + m_n);
         b_aug.head(m_m) = b;
         return m_qr.solve(b_aug);
@@ -208,16 +472,227 @@ namespace Utils {
       }
     }
 
-    // Risolve y = A * (A^T A + lambda^2 I)^-1 * c
-    Vector
-    solve_transpose( Vector const & c ) const {
-      // Risolvi (A^T A + lambda^2 I) x = c usando il sistema aumentato
-      Vector x = qr_solve_transpose(c);
-      return m_A * x;
-    }
+    /**
+     * @brief Compute \f$y = A (A^T A + \lambda^2 I)^{-1} c\f$ for sparse matrices
+     *
+     * @param c Input vector of size n
+     * @return \f$y = A (A^T A + \lambda^2 I)^{-1} c\f$ of size m
+     */
+    Vector solve_transpose(Vector const & c) const { return m_A * qr_solve_transpose(c); }
+
+    /// @brief Return regularization parameter λ
+    Scalar lambda() const { return m_lambda; }
+    
+    /// @brief Return number of rows of matrix A
+    Eigen::Index rows() const { return m_m; }
+    
+    /// @brief Return number of columns of matrix A
+    Eigen::Index cols() const { return m_n; }
   };
 
-}
+  //====================================================================
+  // SP_TikhonovSolver2: Sparse matrices with KKT formulation
+  //====================================================================
+
+  /**
+   * @brief Tikhonov solver for sparse matrices using KKT formulation
+   *
+   * Solves the regularized least squares problem:
+   * \f[
+   *   \min_{x} \|Ax - b\|^2 + \lambda \|x\|^2
+   * \f]
+   *
+   * Via the Karush-Kuhn-Tucker (KKT) system:
+   * \f[
+   *   \begin{bmatrix}
+   *     I_m & A \\
+   *     A^T & -\lambda I_n
+   *   \end{bmatrix}
+   *   \begin{bmatrix}
+   *     y \\
+   *     x
+   *   \end{bmatrix}
+   *   =
+   *   \begin{bmatrix}
+   *     b \\
+   *     0
+   *   \end{bmatrix}
+   * \f]
+   *
+   * This implementation uses a hybrid factorization approach:
+   * 1. First attempts symmetric LDLT factorization (faster for symmetric matrices)
+   * 2. Falls back to general LU factorization if LDLT fails due to numerical issues
+   *
+   * Complexity depends on sparsity pattern. Suitable for large sparse
+   * symmetric indefinite systems.
+   *
+   * @tparam Scalar Scalar type (double, float)
+   */
+  template <typename Scalar>
+  class SP_TikhonovSolver2 {
+  private:
+    using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+    using Vector       = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+    using Triplet      = Eigen::Triplet<Scalar>;
+
+    SparseMatrix m_A;      ///< Original sparse m×n matrix
+    Eigen::Index m_m, m_n; ///< Dimensions m (rows), n (cols)
+    SparseMatrix m_KKT;    ///< Sparse KKT matrix of size (m+n)×(m+n)
+
+    // Sparse symmetric LDLT factorization with AMD ordering or LU
+    Eigen::SimplicialLDLT<SparseMatrix, Eigen::Lower, Eigen::AMDOrdering<int>> m_ldlt;
+    Eigen::SparseLU<SparseMatrix, Eigen::COLAMDOrdering<int>> m_lu;
+
+    bool   m_use_lflt;          ///< use symmetric LDLT factorization or back to LU
+    Scalar m_lambda;            ///< Regularization parameter (≥ 0)
+    bool   m_reg;               ///< Flag for λ > 0
+
+    /**
+     * @brief Build and factorize the sparse KKT matrix
+     *
+     * Constructs the symmetric indefinite KKT matrix using triplets
+     * and performs sparse LDLT factorization with AMD ordering.
+     */
+    void build_and_factorize() {
+      const Eigen::Index M = m_m;
+      const Eigen::Index N = m_n;
+      const Eigen::Index K = M + N;
+
+      std::vector<Triplet> trips;
+      // Reserve space: 2*A.nonZeros() + max(M,N) for diagonal
+      trips.reserve(m_A.nonZeros() * 2 + std::max(M, N));
+
+      // I_m block (top-left)
+      for (Eigen::Index i = 0; i < M; ++i)
+        trips.emplace_back(i, i, Scalar(1));
+
+      // A block (top-right)
+      // A^T block (bottom-left) - maintaining symmetry
+      for (int k = 0; k < m_A.outerSize(); ++k) {
+        for (typename SparseMatrix::InnerIterator it(m_A, k); it; ++it) {
+          trips.emplace_back(it.row(), M + it.col(), it.value());
+          trips.emplace_back(M + it.col(), it.row(), it.value());
+        }
+      }
+
+      // -λ I_n block (bottom-right, if λ > 0)
+      if (m_reg) {
+        for (Eigen::Index j = 0; j < N; ++j)
+          trips.emplace_back(M + j, M + j, -m_lambda);
+      }
+
+      m_KKT.resize(K, K);
+      m_KKT.setFromTriplets(trips.begin(), trips.end());
+      m_KKT.makeCompressed();
+
+      // Try LDLT factorization first (faster for symmetric matrices)
+      m_ldlt.analyzePattern(m_KKT);
+      m_use_lflt = m_ldlt.info() == Eigen::Success;
+      if (m_use_lflt) {
+        m_ldlt.factorize(m_KKT);
+        m_use_lflt = m_ldlt.info() == Eigen::Success;
+      }
+
+      // If LDLT failed, try LU factorization
+      if (!m_use_lflt) {
+        m_lu.analyzePattern(m_KKT);
+        m_lu.factorize(m_KKT);
+        UTILS_ASSERT(
+          m_lu.info() == Eigen::Success,
+          "SP_TikhonovSolver2: LU factorization failed"
+        );
+      }
+    }
+
+  public:
+    /**
+     * @brief Constructor for sparse KKT Tikhonov solver
+     *
+     * @param A Sparse m×n matrix
+     * @param lambda Regularization parameter (≥ 0)
+     */
+    SP_TikhonovSolver2(SparseMatrix const & A, Scalar lambda)
+    : m_A(A)
+    , m_m(A.rows())
+    , m_n(A.cols())
+    {
+      UTILS_ASSERT( lambda >= 0, "SP_TikhonovSolver2( λ={} ) λ must be >= 0", lambda );
+      m_lambda = lambda;
+      m_reg    = lambda > Scalar(0);
+      build_and_factorize();
+    }
+
+    /**
+     * @brief Solve regularized least squares for sparse matrices
+     *
+     * @param b Right-hand side vector of length m
+     * @return Solution x of length n
+     */
+    Vector solve(Vector const & b) const {
+      Vector rhs = Vector::Zero(m_m + m_n);
+      rhs.head(m_m) = b;
+      
+      if ( m_use_lflt ) {
+        Vector sol = m_ldlt.solve(rhs);
+        UTILS_ASSERT(
+          m_ldlt.info() == Eigen::Success,
+          "SP_TikhonovSolver2::solve (LDLT): solve failed"
+        );
+        return sol.segment(m_m, m_n);
+      } else {
+        Vector sol = m_lu.solve(rhs);
+        UTILS_ASSERT(
+          m_lu.info() == Eigen::Success,
+          "SP_TikhonovSolver2::solve (LU): solve failed"
+        );
+        return sol.segment(m_m, m_n);
+      }
+    }
+
+    /**
+     * @brief Compute \f$ y = A (A^T A + \lambda I)^{-1} c \f$ for sparse matrices
+     *
+     * @param c Input vector of length n
+     * @return \f$ y = A (A^T A + \lambda I)^{-1} c \f$ of length m
+     */
+    Vector solve_transpose(Vector const & c) const {
+      Vector rhs = Vector::Zero(m_m + m_n);
+      rhs.segment(m_m, m_n) = -c;
+
+      if ( m_use_lflt ) {
+        Vector sol = m_ldlt.solve(rhs);
+        UTILS_ASSERT(
+          m_ldlt.info() == Eigen::Success,
+          "SP_TikhonovSolver2::solve_transpose (LDLT): solve failed"
+        );
+        return m_A * sol.segment(m_m, m_n);
+      } else {
+        Vector sol = m_lu.solve(rhs);
+        UTILS_ASSERT(
+          m_lu.info() == Eigen::Success,
+          "SP_TikhonovSolver2::solve_transpose (LU): solve failed"
+        );
+        return m_A * sol.segment(m_m, m_n);
+      }
+    }
+
+    /**
+     * @brief Get the KKT matrix (mainly for debugging/testing)
+     * @return Constant reference to the KKT matrix
+     */
+    SparseMatrix const & get_KKT() const { return m_KKT; }
+    
+    /// @brief Return regularization parameter λ
+    Scalar lambda() const { return m_lambda; }
+    
+    /// @brief Return number of rows of matrix A
+    Eigen::Index rows() const { return m_m; }
+    
+    /// @brief Return number of columns of matrix A
+    Eigen::Index cols() const { return m_n; }
+  };
+
+} // namespace Utils
 
 #ifdef __clang__
 #pragma clang diagnostic pop
@@ -225,7 +700,6 @@ namespace Utils {
 
 #endif
 
-#endif
-
 //
 // eof: Utils_pseudoinverse.hh
+//

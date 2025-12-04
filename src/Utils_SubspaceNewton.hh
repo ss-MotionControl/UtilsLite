@@ -293,9 +293,8 @@ private:
         Scalar &alpha_out
     ){
         Scalar alpha = 1.0;
-        Scalar c = 1e-4;
+        Scalar c     = 1e-4;
         Scalar fnorm = f.norm();
-        Scalar fnorm_sq = fnorm * fnorm;
         
         if(!std::isfinite(fnorm) || fnorm > 1e10){
             // Punto iniziale già problematico

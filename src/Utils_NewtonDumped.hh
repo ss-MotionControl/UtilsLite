@@ -41,263 +41,763 @@
 
 namespace Utils {
 
-  // =============================================================================
-  // NewtonDumped
-  //  - Newton's method with various damping strategies
-  //  - Available strategies:
-  //      * DEUFLHARD: Multiplicative damping (original implementation)
-  //      * L2_CLASSIC: Classical L2 norm damping (Levenberg-Marquardt style)
-  //      * L2_ADAPTIVE: Adaptive L2 norm damping with trust region
-  //      * L2_HYBRID: Hybrid Deuflhard-L2 strategy
-  //  - This class implements an incremental/stationary Newton solver that:
-  //      * computes Jacobian J and residual f at current x
-  //      * solves damped linear system for dx
-  //      * tries step x + dx and adjusts damping parameters
-  //      * supports an optional verbose mode
-  // =============================================================================
-
+  /**
+   * @brief Newton's method with multiple damping strategies for solving nonlinear systems
+   *
+   * This class implements various damping strategies for Newton's method to solve
+   * nonlinear systems of equations F(x) = 0. The available strategies include:
+   *
+   * - **DEUFLHARD**: Multiplicative damping with Armijo-type condition
+   * - **L2_CLASSIC**: Classical Levenberg-Marquardt style L2 regularization
+   * - **L2_ADAPTIVE**: Adaptive L2 regularization with trust region management
+   * - **L2_HYBRID**: Hybrid strategy switching between L2 and Deuflhard
+   * - **DOGLEG**: Trust region dogleg method combining steepest descent and Gauss-Newton
+   * - **WOLFE_LINE_SEARCH**: Line search satisfying strong Wolfe conditions
+   * - **CUBIC_REGULARIZATION**: Adaptive Regularization by Cubics (ARC) method
+   * - **BACKTRACKING_QUADRATIC**: Quadratic interpolation backtracking line search
+   * - **BANK_ROSE**: Bank and Rose (1981) affine-invariant damping strategy
+   * - **GRIEWANK**: Griewank (1980) adaptive damping with directional derivative
+   * - **FILTER_METHODS**: Filter-based acceptance mechanism for constrained problems
+   * - **CUBIC_TRUST_REGION**: Trust region with cubic models
+   *
+   * @section usage_sec Usage Example
+   * @code{.cpp}
+   * NewtonDumped solver;
+   * solver.set_tolerance(1e-8);
+   * solver.set_max_iterations(100);
+   * solver.set_damping_strategy_wolfe();
+   * solver.set_verbose(true);
+   *
+   * Vector x_initial(n);
+   * // ... initialize x_initial ...
+   * 
+   * if (solver.solve(my_system, x_initial)) {
+   *   std::cout << "Converged in " << solver.get_num_iterations() << " iterations\n";
+   * }
+   * @endcode
+   *
+   * @see NonlinearSystem for the system interface requirements
+   */
   class NewtonDumped {
   public:
+    /**
+     * @brief Enumeration of available damping strategies
+     */
     enum DampingStrategy {
-      DEUFLHARD,              // Original multiplicative Deuflhard damping
-      L2_CLASSIC,             // Classical L2 norm damping (Levenberg-Marquardt)
-      L2_ADAPTIVE,            // Adaptive L2 with trust region
-      L2_HYBRID,              // Hybrid Deuflhard-L2 strategy
-      DOGLEG,                 // Trust region dogleg method
-      WOLFE_LINE_SEARCH,      // Line search with Wolfe conditions
-      CUBIC_REGULARIZATION,   // Adaptive cubic regularization
-      BACKTRACKING_QUADRATIC, // Quadratic/cubic backtracking
-      BANK_ROSE,              // Bank and Rose (1981) strategy
-      GRIEWANK,               // Griewank (1980) strategy
-      FILTER_METHODS,         // Filter methods for nonlinear equations
-      CUBIC_TRUST_REGION      // Trust region with cubic models
+      DEUFLHARD,              ///< Multiplicative Deuflhard damping
+      L2_CLASSIC,             ///< Classical L2 norm damping (Levenberg-Marquardt)
+      L2_ADAPTIVE,            ///< Adaptive L2 with trust region
+      L2_HYBRID,              ///< Hybrid Deuflhard-L2 strategy
+      DOGLEG,                 ///< Trust region dogleg method
+      WOLFE_LINE_SEARCH,      ///< Line search with Wolfe conditions
+      CUBIC_REGULARIZATION,   ///< Adaptive cubic regularization (ARC)
+      BACKTRACKING_QUADRATIC, ///< Quadratic/cubic backtracking
+      BANK_ROSE,              ///< Bank and Rose (1981) strategy
+      GRIEWANK,               ///< Griewank (1980) strategy
+      FILTER_METHODS,         ///< Filter methods for nonlinear equations
+      CUBIC_TRUST_REGION      ///< Trust region with cubic models
     };
 
-    using integer      = Eigen::Index;
-    using real_type    = double;
-    using Vector       = Eigen::Matrix<real_type, Eigen::Dynamic, 1>;
-    using SparseMatrix = Eigen::SparseMatrix<real_type>;
+    using integer      = Eigen::Index;      ///< Integer type for indexing
+    using real_type    = double;            ///< Real number type
+    using Vector       = Eigen::Matrix<real_type, Eigen::Dynamic, 1>;  ///< Vector type
+    using SparseMatrix = Eigen::SparseMatrix<real_type>;               ///< Sparse matrix type
 
   private:
-    // Damping strategy
-    DampingStrategy m_damping_strategy = DEUFLHARD;
-
-    // Solver parameters common to all strategies
-    real_type m_tolerance              = 1e-8; // stopping tolerance on ‖f‖
-    integer   m_max_iterations         = 100;  // maximum Newton iterations
-    integer   m_max_damping_iterations = 20;   // maximum damping tries per iteration
-
-    // Deuflhard damping parameters
-    real_type m_min_lambda          = 1e-8; // minimum allowed damping
-    real_type m_lambda_factor       = 0.5;
-    real_type m_sufficient_decrease = 0.01; // Armijo-like constant
-
-    // L2 damping parameters
-    real_type m_mu_init               = 0.01;  // initial damping parameter for L2
-    real_type m_mu_min                = 1e-8;  // minimum mu
-    real_type m_mu_max                = 1e4;   // maximum mu
-    real_type m_mu_increase_factor    = 10.0;  // factor to increase mu when step fails
-    real_type m_mu_decrease_factor    = 0.1;   // factor to decrease mu when step succeeds
-    real_type m_trust_region_radius   = 1.0;   // initial trust region radius for L2_ADAPTIVE
-    real_type m_trust_region_min      = 1e-6;  // minimum trust region radius
-    real_type m_trust_region_max      = 100.0; // maximum trust region radius
-    real_type m_acceptance_ratio_good = 0.75;  // good acceptance ratio for trust region
-    real_type m_acceptance_ratio_bad  = 0.25;  // bad acceptance ratio for trust region
-
-    // Aggiungi variabili membro private
-    // Bank & Rose parameters
-    real_type m_bank_rose_alpha       = 0.5;    // damping reduction factor
-    real_type m_bank_rose_beta        = 0.1;    // sufficient decrease constant
-    real_type m_bank_rose_gamma       = 0.9;    // contraction factor
-    real_type m_bank_rose_theta_min   = 1e-4;   // minimum damping factor
-    real_type m_bank_rose_theta_max   = 1.0;    // maximum damping factor
+    // =========================================================================
+    // SOLVER CONFIGURATION
+    // =========================================================================
     
-    // Griewank parameters
-    real_type m_griewank_eta          = 0.1;    // acceptance threshold
-    real_type m_griewank_omega        = 0.5;    // reduction factor
-    real_type m_griewank_tau          = 1e-4;   // minimum step size
-    real_type m_griewank_zeta         = 0.9;    // contraction factor
-    
-    // Filter method parameters
-    real_type m_filter_theta_min      = 1e-6;   // minimum constraint violation
-    real_type m_filter_gamma_theta    = 0.01;   // filter parameter for theta
-    real_type m_filter_gamma_f        = 0.01;   // filter parameter for f
-    real_type m_filter_alpha          = 0.5;    // backtracking factor
-    real_type m_filter_beta           = 0.8;    // margin for filter acceptance
-    
-    // Cubic trust region parameters (diverso da ARC)
-    real_type m_ctr_delta             = 1.0;    // trust region radius
-    real_type m_ctr_delta_min         = 1e-6;
-    real_type m_ctr_delta_max         = 100.0;
-    real_type m_ctr_eta1              = 0.1;    // unsuccessful step threshold
-    real_type m_ctr_eta2              = 0.75;   // very successful step threshold
-    real_type m_ctr_gamma1            = 0.5;    // shrink factor
-    real_type m_ctr_gamma2            = 2.0;    // expand factor
-    real_type m_ctr_sigma             = 0.1;    // cubic regularization parameter
+    DampingStrategy m_damping_strategy = DEUFLHARD;  ///< Selected damping strategy
 
-    // Dogleg parameters
-    real_type m_dogleg_delta      = 1.0;      // trust region radius
-    real_type m_dogleg_delta_min  = 1e-6;
-    real_type m_dogleg_delta_max  = 100.0;
-    real_type m_dogleg_eta1       = 0.1;      // unsuccessful step threshold
-    real_type m_dogleg_eta2       = 0.75;     // very successful step threshold
-    real_type m_dogleg_gamma1     = 0.5;      // shrink factor
-    real_type m_dogleg_gamma2     = 2.0;      // expand factor
-    
-    // Wolfe line search parameters
-    real_type m_wolfe_c1          = 1e-4;     // Armijo condition constant
-    real_type m_wolfe_c2          = 0.9;      // curvature condition constant
-    real_type m_wolfe_alpha_init  = 1.0;      // initial step size
-    real_type m_wolfe_alpha_min   = 1e-8;     // minimum step size
-    real_type m_wolfe_alpha_max   = 10.0;     // maximum step size
-    real_type m_wolfe_rho         = 0.5;      // backtracking factor
-    
-    // Cubic regularization parameters (ARC)
-    real_type m_cubic_sigma          = 0.1;    // cubic regularization parameter
-    real_type m_cubic_sigma_min      = 1e-8;
-    real_type m_cubic_sigma_max      = 1e8;
-    real_type m_cubic_gamma_decrease = 0.5;    // decrease factor for sigma
-    real_type m_cubic_gamma_increase = 2.0;    // increase factor for sigma
-    real_type m_cubic_eta1           = 0.1;    // unsuccessful step threshold
-    real_type m_cubic_eta2           = 0.75;   // very successful step threshold
-    
-    // Quadratic backtracking parameters
-    real_type m_quad_alpha_init  = 1.0;       // initial step size
-    real_type m_quad_alpha_min   = 1e-8;      // minimum step size
-    real_type m_quad_rho         = 0.5;       // reduction factor
-    real_type m_quad_c1          = 1e-4;      // sufficient decrease constant
-    real_type m_quad_c2          = 0.9;       // curvature condition constant (per compatibilità)
-    integer   m_quad_max_interp  = 10;        // maximum interpolation attempts
+    real_type m_tolerance              = 1e-8;  ///< Stopping tolerance on ||f||
+    integer   m_max_iterations         = 100;   ///< Maximum Newton iterations
+    integer   m_max_damping_iterations = 20;    ///< Maximum damping tries per iteration
 
-    // Statistics
-    integer   m_num_iterations     = 0;
-    integer   m_num_function_evals = 0;
-    integer   m_num_jacobian_evals = 0;
-    bool      m_converged          = false;
-    real_type m_final_residual     = 0;
+    // =========================================================================
+    // DEUFLHARD PARAMETERS
+    // =========================================================================
+    
+    real_type m_min_lambda          = 1e-8; ///< Minimum allowed damping factor
+    real_type m_lambda_factor       = 0.5;  ///< Reduction factor for lambda
+    real_type m_sufficient_decrease = 0.01; ///< Armijo-like constant for sufficient decrease
 
-    // Verbose flag
-    bool m_verbose = false;
+    // =========================================================================
+    // L2 DAMPING PARAMETERS
+    // =========================================================================
+    
+    real_type m_mu_init               = 0.01;  ///< Initial L2 damping parameter
+    real_type m_mu_min                = 1e-8;  ///< Minimum mu
+    real_type m_mu_max                = 1e4;   ///< Maximum mu
+    real_type m_mu_increase_factor    = 4.0;   ///< Factor to increase mu on failure
+    real_type m_mu_decrease_factor    = 0.1;   ///< Factor to decrease mu on success
+    real_type m_trust_region_radius   = 1.0;   ///< Initial trust region radius
+    real_type m_trust_region_min      = 1e-6;  ///< Minimum trust region radius
+    real_type m_trust_region_max      = 100.0; ///< Maximum trust region radius
+    real_type m_acceptance_ratio_good = 0.8;   ///< Threshold for good steps
+    real_type m_acceptance_ratio_bad  = 0.2;   ///< Threshold for rejecting steps
+
+    // =========================================================================
+    // BANK & ROSE PARAMETERS
+    // =========================================================================
+    
+    real_type m_bank_rose_alpha     = 0.5;  ///< Damping reduction factor
+    real_type m_bank_rose_beta      = 0.1;  ///< Sufficient decrease constant
+    real_type m_bank_rose_gamma     = 0.9;  ///< Contraction factor
+    real_type m_bank_rose_theta_min = 1e-4; ///< Minimum damping factor
+    real_type m_bank_rose_theta_max = 1.0;  ///< Maximum damping factor
+    
+    // =========================================================================
+    // GRIEWANK PARAMETERS
+    // =========================================================================
+    
+    real_type m_griewank_eta   = 0.1;  ///< Acceptance threshold
+    real_type m_griewank_omega = 0.5;  ///< Reduction factor
+    real_type m_griewank_tau   = 1e-4; ///< Minimum step size
+    real_type m_griewank_zeta  = 0.9;  ///< Contraction factor
+    
+    // =========================================================================
+    // FILTER METHOD PARAMETERS
+    // =========================================================================
+    
+    real_type m_filter_theta_min   = 1e-6; ///< Minimum constraint violation
+    real_type m_filter_gamma_theta = 0.01; ///< Filter parameter for theta
+    real_type m_filter_gamma_f     = 0.01; ///< Filter parameter for f
+    real_type m_filter_alpha       = 0.5;  ///< Backtracking factor
+    real_type m_filter_beta        = 0.8;  ///< Margin for filter acceptance
+    
+    // =========================================================================
+    // CUBIC TRUST REGION PARAMETERS
+    // =========================================================================
+    
+    real_type m_ctr_delta     = 1.0;  ///< Trust region radius
+    real_type m_ctr_delta_min = 1e-6; ///< Minimum trust region radius
+    real_type m_ctr_delta_max = 100.0;///< Maximum trust region radius
+    real_type m_ctr_eta1      = 0.1;  ///< Unsuccessful step threshold
+    real_type m_ctr_eta2      = 0.75; ///< Very successful step threshold
+    real_type m_ctr_gamma1    = 0.5;  ///< Shrink factor
+    real_type m_ctr_gamma2    = 2.0;  ///< Expand factor
+    real_type m_ctr_sigma     = 0.1;  ///< Cubic regularization parameter
+
+    // =========================================================================
+    // DOGLEG PARAMETERS
+    // =========================================================================
+    
+    real_type m_dogleg_delta     = 1.0;  ///< Trust region radius
+    real_type m_dogleg_delta_min = 1e-6; ///< Minimum trust region radius
+    real_type m_dogleg_delta_max = 100.0;///< Maximum trust region radius
+    real_type m_dogleg_eta1      = 0.1;  ///< Unsuccessful step threshold
+    real_type m_dogleg_eta2      = 0.75; ///< Very successful step threshold
+    real_type m_dogleg_gamma1    = 0.5;  ///< Shrink factor
+    real_type m_dogleg_gamma2    = 2.0;  ///< Expand factor
+    
+    // =========================================================================
+    // WOLFE LINE SEARCH PARAMETERS
+    // =========================================================================
+    
+    real_type m_wolfe_c1         = 1e-4; ///< Armijo condition constant (sufficient decrease)
+    real_type m_wolfe_c2         = 0.9;  ///< Curvature condition constant
+    real_type m_wolfe_alpha_init = 1.0;  ///< Initial step size
+    real_type m_wolfe_alpha_min  = 1e-8; ///< Minimum step size
+    real_type m_wolfe_alpha_max  = 10.0; ///< Maximum step size
+    real_type m_wolfe_rho        = 0.5;  ///< Backtracking factor
+    
+    // =========================================================================
+    // CUBIC REGULARIZATION (ARC) PARAMETERS
+    // =========================================================================
+    
+    real_type m_cubic_sigma          = 0.1;  ///< Cubic regularization parameter
+    real_type m_cubic_sigma_min      = 1e-8; ///< Minimum sigma
+    real_type m_cubic_sigma_max      = 1e8;  ///< Maximum sigma
+    real_type m_cubic_gamma_decrease = 0.5;  ///< Decrease factor for sigma
+    real_type m_cubic_gamma_increase = 2.0;  ///< Increase factor for sigma
+    real_type m_cubic_eta1           = 0.1;  ///< Unsuccessful step threshold
+    real_type m_cubic_eta2           = 0.75; ///< Very successful step threshold
+    
+    // =========================================================================
+    // QUADRATIC BACKTRACKING PARAMETERS
+    // =========================================================================
+    
+    real_type m_quad_alpha_init = 1.0;  ///< Initial step size
+    real_type m_quad_alpha_min  = 1e-8; ///< Minimum step size
+    real_type m_quad_rho        = 0.5;  ///< Reduction factor
+    real_type m_quad_c1         = 1e-4; ///< Sufficient decrease constant
+    real_type m_quad_c2         = 0.9;  ///< Curvature condition constant (compatibility)
+    integer   m_quad_max_interp = 10;   ///< Maximum interpolation attempts
+
+    // =========================================================================
+    // STATISTICS
+    // =========================================================================
+    
+    integer   m_num_iterations     = 0;     ///< Number of Newton iterations performed
+    integer   m_num_function_evals = 0;     ///< Number of function evaluations
+    integer   m_num_jacobian_evals = 0;     ///< Number of Jacobian evaluations
+    bool      m_converged          = false; ///< Convergence flag
+    real_type m_final_residual     = 0;     ///< Final residual norm
+
+    bool m_verbose = false;  ///< Verbose output flag
 
   public:
+    // =========================================================================
+    // CONSTRUCTOR
+    // =========================================================================
+    
+    /**
+     * @brief Default constructor
+     */
+    NewtonDumped() = default;
 
-    NewtonDumped() {}
+    // =========================================================================
+    // GENERAL PARAMETER SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set the convergence tolerance
+     * @param tol Tolerance on ||f|| for convergence
+     */
+    void set_tolerance(real_type tol) { m_tolerance = tol; }
+    
+    /**
+     * @brief Set maximum number of Newton iterations
+     * @param max_iter Maximum iterations
+     */
+    void set_max_iterations(integer max_iter) { m_max_iterations = max_iter; }
+    
+    /**
+     * @brief Set maximum damping iterations per Newton step
+     * @param max_damp Maximum damping iterations
+     */
+    void set_max_damping_iterations(integer max_damp) { m_max_damping_iterations = max_damp; }
+    
+    /**
+     * @brief Enable or disable verbose output
+     * @param val True to enable verbose output
+     */
+    void set_verbose(bool val) { m_verbose = val; }
 
-    // Setters for parameters
-    void set_tolerance      ( real_type tol      ) { m_tolerance      = tol; }
-    void set_max_iterations ( integer   max_iter ) { m_max_iterations = max_iter; }
-    void set_max_damping_iterations( integer max_damp ) { m_max_damping_iterations = max_damp; }
-    void set_verbose        ( bool      val      ) { m_verbose        = val; }
-
+    // =========================================================================
+    // BANK & ROSE PARAMETER SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set Bank-Rose alpha parameter
+     * @param alpha Damping reduction factor
+     */
     void set_bank_rose_alpha(real_type alpha) { m_bank_rose_alpha = alpha; }
+    
+    /**
+     * @brief Set Bank-Rose beta parameter
+     * @param beta Sufficient decrease constant
+     */
     void set_bank_rose_beta(real_type beta) { m_bank_rose_beta = beta; }
+    
+    /**
+     * @brief Set Bank-Rose gamma parameter
+     * @param gamma Contraction factor
+     */
     void set_bank_rose_gamma(real_type gamma) { m_bank_rose_gamma = gamma; }
+    
+    /**
+     * @brief Set Bank-Rose minimum theta
+     * @param theta Minimum damping factor
+     */
     void set_bank_rose_theta_min(real_type theta) { m_bank_rose_theta_min = theta; }
+    
+    /**
+     * @brief Set Bank-Rose maximum theta
+     * @param theta Maximum damping factor
+     */
     void set_bank_rose_theta_max(real_type theta) { m_bank_rose_theta_max = theta; }
     
+    // =========================================================================
+    // GRIEWANK PARAMETER SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set Griewank eta parameter
+     * @param eta Acceptance threshold
+     */
     void set_griewank_eta(real_type eta) { m_griewank_eta = eta; }
+    
+    /**
+     * @brief Set Griewank omega parameter
+     * @param omega Reduction factor
+     */
     void set_griewank_omega(real_type omega) { m_griewank_omega = omega; }
+    
+    /**
+     * @brief Set Griewank tau parameter
+     * @param tau Minimum step size
+     */
     void set_griewank_tau(real_type tau) { m_griewank_tau = tau; }
+    
+    /**
+     * @brief Set Griewank zeta parameter
+     * @param zeta Contraction factor
+     */
     void set_griewank_zeta(real_type zeta) { m_griewank_zeta = zeta; }
     
+    // =========================================================================
+    // FILTER METHOD PARAMETER SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set filter minimum theta
+     * @param theta Minimum constraint violation
+     */
     void set_filter_theta_min(real_type theta) { m_filter_theta_min = theta; }
+    
+    /**
+     * @brief Set filter gamma_theta parameter
+     * @param gamma Filter parameter for theta
+     */
     void set_filter_gamma_theta(real_type gamma) { m_filter_gamma_theta = gamma; }
+    
+    /**
+     * @brief Set filter gamma_f parameter
+     * @param gamma Filter parameter for f
+     */
     void set_filter_gamma_f(real_type gamma) { m_filter_gamma_f = gamma; }
+    
+    /**
+     * @brief Set filter alpha parameter
+     * @param alpha Backtracking factor
+     */
     void set_filter_alpha(real_type alpha) { m_filter_alpha = alpha; }
+    
+    /**
+     * @brief Set filter beta parameter
+     * @param beta Margin for filter acceptance
+     */
     void set_filter_beta(real_type beta) { m_filter_beta = beta; }
     
+    // =========================================================================
+    // CUBIC TRUST REGION PARAMETER SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set cubic trust region delta
+     * @param delta Trust region radius
+     */
     void set_ctr_delta(real_type delta) { m_ctr_delta = delta; }
+    
+    /**
+     * @brief Set cubic trust region minimum delta
+     * @param delta Minimum trust region radius
+     */
     void set_ctr_delta_min(real_type delta) { m_ctr_delta_min = delta; }
+    
+    /**
+     * @brief Set cubic trust region maximum delta
+     * @param delta Maximum trust region radius
+     */
     void set_ctr_delta_max(real_type delta) { m_ctr_delta_max = delta; }
+    
+    /**
+     * @brief Set cubic trust region eta1
+     * @param eta Unsuccessful step threshold
+     */
     void set_ctr_eta1(real_type eta) { m_ctr_eta1 = eta; }
+    
+    /**
+     * @brief Set cubic trust region eta2
+     * @param eta Very successful step threshold
+     */
     void set_ctr_eta2(real_type eta) { m_ctr_eta2 = eta; }
+    
+    /**
+     * @brief Set cubic trust region gamma1
+     * @param gamma Shrink factor
+     */
     void set_ctr_gamma1(real_type gamma) { m_ctr_gamma1 = gamma; }
+    
+    /**
+     * @brief Set cubic trust region gamma2
+     * @param gamma Expand factor
+     */
     void set_ctr_gamma2(real_type gamma) { m_ctr_gamma2 = gamma; }
+    
+    /**
+     * @brief Set cubic trust region sigma
+     * @param sigma Cubic regularization parameter
+     */
     void set_ctr_sigma(real_type sigma) { m_ctr_sigma = sigma; }
 
-    // Setters for Dogleg parameters
+    // =========================================================================
+    // DOGLEG PARAMETER SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set dogleg delta
+     * @param delta Trust region radius
+     */
     void set_dogleg_delta(real_type delta) { m_dogleg_delta = delta; }
+    
+    /**
+     * @brief Set dogleg minimum delta
+     * @param delta Minimum trust region radius
+     */
     void set_dogleg_delta_min(real_type delta) { m_dogleg_delta_min = delta; }
+    
+    /**
+     * @brief Set dogleg maximum delta
+     * @param delta Maximum trust region radius
+     */
     void set_dogleg_delta_max(real_type delta) { m_dogleg_delta_max = delta; }
+    
+    /**
+     * @brief Set dogleg eta1
+     * @param eta Unsuccessful step threshold
+     */
     void set_dogleg_eta1(real_type eta) { m_dogleg_eta1 = eta; }
+    
+    /**
+     * @brief Set dogleg eta2
+     * @param eta Very successful step threshold
+     */
     void set_dogleg_eta2(real_type eta) { m_dogleg_eta2 = eta; }
+    
+    /**
+     * @brief Set dogleg gamma1
+     * @param gamma Shrink factor
+     */
     void set_dogleg_gamma1(real_type gamma) { m_dogleg_gamma1 = gamma; }
+    
+    /**
+     * @brief Set dogleg gamma2
+     * @param gamma Expand factor
+     */
     void set_dogleg_gamma2(real_type gamma) { m_dogleg_gamma2 = gamma; }
     
-    // Setters for Wolfe parameters
+    // =========================================================================
+    // WOLFE LINE SEARCH PARAMETER SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set Wolfe c1 parameter
+     * @param c1 Armijo condition constant
+     */
     void set_wolfe_c1(real_type c1) { m_wolfe_c1 = c1; }
+    
+    /**
+     * @brief Set Wolfe c2 parameter
+     * @param c2 Curvature condition constant
+     */
     void set_wolfe_c2(real_type c2) { m_wolfe_c2 = c2; }
+    
+    /**
+     * @brief Set Wolfe initial alpha
+     * @param alpha Initial step size
+     */
     void set_wolfe_alpha_init(real_type alpha) { m_wolfe_alpha_init = alpha; }
+    
+    /**
+     * @brief Set Wolfe minimum alpha
+     * @param alpha Minimum step size
+     */
     void set_wolfe_alpha_min(real_type alpha) { m_wolfe_alpha_min = alpha; }
+    
+    /**
+     * @brief Set Wolfe maximum alpha
+     * @param alpha Maximum step size
+     */
     void set_wolfe_alpha_max(real_type alpha) { m_wolfe_alpha_max = alpha; }
+    
+    /**
+     * @brief Set Wolfe rho parameter
+     * @param rho Backtracking factor
+     */
     void set_wolfe_rho(real_type rho) { m_wolfe_rho = rho; }
     
-    // Setters for Cubic regularization parameters
+    // =========================================================================
+    // CUBIC REGULARIZATION (ARC) PARAMETER SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set cubic sigma
+     * @param sigma Cubic regularization parameter
+     */
     void set_cubic_sigma(real_type sigma) { m_cubic_sigma = sigma; }
+    
+    /**
+     * @brief Set cubic minimum sigma
+     * @param sigma Minimum sigma
+     */
     void set_cubic_sigma_min(real_type sigma) { m_cubic_sigma_min = sigma; }
+    
+    /**
+     * @brief Set cubic maximum sigma
+     * @param sigma Maximum sigma
+     */
     void set_cubic_sigma_max(real_type sigma) { m_cubic_sigma_max = sigma; }
+    
+    /**
+     * @brief Set cubic gamma decrease
+     * @param gamma Decrease factor for sigma
+     */
     void set_cubic_gamma_decrease(real_type gamma) { m_cubic_gamma_decrease = gamma; }
+    
+    /**
+     * @brief Set cubic gamma increase
+     * @param gamma Increase factor for sigma
+     */
     void set_cubic_gamma_increase(real_type gamma) { m_cubic_gamma_increase = gamma; }
+    
+    /**
+     * @brief Set cubic eta1
+     * @param eta Unsuccessful step threshold
+     */
     void set_cubic_eta1(real_type eta) { m_cubic_eta1 = eta; }
+    
+    /**
+     * @brief Set cubic eta2
+     * @param eta Very successful step threshold
+     */
     void set_cubic_eta2(real_type eta) { m_cubic_eta2 = eta; }
 
-    // Setters for Quadratic backtracking parameters
+    // =========================================================================
+    // QUADRATIC BACKTRACKING PARAMETER SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set quadratic backtracking initial alpha
+     * @param alpha Initial step size
+     */
     void set_quadratic_backtracking_alpha_init(real_type alpha) { m_quad_alpha_init = alpha; }
+    
+    /**
+     * @brief Set quadratic backtracking minimum alpha
+     * @param alpha Minimum step size
+     */
     void set_quadratic_backtracking_alpha_min(real_type alpha) { m_quad_alpha_min = alpha; }
+    
+    /**
+     * @brief Set quadratic backtracking rho
+     * @param rho Reduction factor
+     */
     void set_quadratic_backtracking_rho(real_type rho) { m_quad_rho = rho; }
+    
+    /**
+     * @brief Set quadratic backtracking c1
+     * @param c1 Sufficient decrease constant
+     */
     void set_quadratic_backtracking_c1(real_type c1) { m_quad_c1 = c1; }
-    void set_quadratic_c1(real_type c1) { m_quad_c1 = c1; } // Alias per compatibilità
+    
+    /**
+     * @brief Set quadratic c1 parameter
+     * @param c1 Sufficient decrease constant
+     */
+    void set_quadratic_c1(real_type c1) { m_quad_c1 = c1; }
+    
+    /**
+     * @brief Set quadratic c2 parameter
+     * @param c2 Curvature condition constant
+     */
     void set_quadratic_c2(real_type c2) { m_quad_c2 = c2; }
+    
+    /**
+     * @brief Set quadratic maximum interpolation attempts
+     * @param max_interp Maximum interpolation attempts
+     */
     void set_quadratic_max_interp(integer max_interp) { m_quad_max_interp = max_interp; }
 
-    // Setters for damping strategy
-    void set_damping_strategy( DampingStrategy strategy ) { m_damping_strategy = strategy; }
+    // =========================================================================
+    // DAMPING STRATEGY SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set damping strategy by enum
+     * @param strategy The damping strategy to use
+     */
+    void set_damping_strategy(DampingStrategy strategy) { m_damping_strategy = strategy; }
+    
+    /**
+     * @brief Set strategy to DEUFLHARD
+     */
     void set_damping_strategy_deuflhard() { m_damping_strategy = DEUFLHARD; }
+    
+    /**
+     * @brief Set strategy to L2_CLASSIC
+     */
     void set_damping_strategy_l2_classic() { m_damping_strategy = L2_CLASSIC; }
+    
+    /**
+     * @brief Set strategy to L2_ADAPTIVE
+     */
     void set_damping_strategy_l2_adaptive() { m_damping_strategy = L2_ADAPTIVE; }
+    
+    /**
+     * @brief Set strategy to L2_HYBRID
+     */
     void set_damping_strategy_l2_hybrid() { m_damping_strategy = L2_HYBRID; }
+    
+    /**
+     * @brief Set strategy to DOGLEG
+     */
     void set_damping_strategy_dogleg() { m_damping_strategy = DOGLEG; }
+    
+    /**
+     * @brief Set strategy to WOLFE_LINE_SEARCH
+     */
     void set_damping_strategy_wolfe() { m_damping_strategy = WOLFE_LINE_SEARCH; }
+    
+    /**
+     * @brief Set strategy to CUBIC_REGULARIZATION
+     */
     void set_damping_strategy_cubic() { m_damping_strategy = CUBIC_REGULARIZATION; }
+    
+    /**
+     * @brief Set strategy to BACKTRACKING_QUADRATIC
+     */
     void set_damping_strategy_quadratic_backtracking() { m_damping_strategy = BACKTRACKING_QUADRATIC; }
+    
+    /**
+     * @brief Set strategy to BANK_ROSE
+     */
     void set_damping_strategy_bank_rose() { m_damping_strategy = BANK_ROSE; }
+    
+    /**
+     * @brief Set strategy to GRIEWANK
+     */
     void set_damping_strategy_griewank() { m_damping_strategy = GRIEWANK; }
+    
+    /**
+     * @brief Set strategy to FILTER_METHODS
+     */
     void set_damping_strategy_filter() { m_damping_strategy = FILTER_METHODS; }
+    
+    /**
+     * @brief Set strategy to CUBIC_TRUST_REGION
+     */
     void set_damping_strategy_cubic_trust_region() { m_damping_strategy = CUBIC_TRUST_REGION; }
 
-    // Setters for Deuflhard parameters
-    void set_min_lambda( real_type lambda ) { m_min_lambda = lambda; }
+    // =========================================================================
+    // DEUFLHARD PARAMETER SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set minimum lambda for Deuflhard damping
+     * @param lambda Minimum damping factor
+     */
+    void set_min_lambda(real_type lambda) { m_min_lambda = lambda; }
 
-    // Setters for L2 parameters
-    void set_mu_init( real_type mu ) { m_mu_init = mu; }
-    void set_mu_min( real_type mu ) { m_mu_min = mu; }
-    void set_mu_max( real_type mu ) { m_mu_max = mu; }
-    void set_mu_increase_factor( real_type factor ) { m_mu_increase_factor = factor; }
-    void set_mu_decrease_factor( real_type factor ) { m_mu_decrease_factor = factor; }
-    void set_trust_region_radius( real_type radius ) { m_trust_region_radius = radius; }
-    void set_trust_region_min( real_type radius ) { m_trust_region_min = radius; }
-    void set_trust_region_max( real_type radius ) { m_trust_region_max = radius; }
+    // =========================================================================
+    // L2 PARAMETER SETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Set initial mu for L2 damping
+     * @param mu Initial damping parameter
+     */
+    void set_mu_init(real_type mu) { m_mu_init = mu; }
+    
+    /**
+     * @brief Set minimum mu for L2 damping
+     * @param mu Minimum mu
+     */
+    void set_mu_min(real_type mu) { m_mu_min = mu; }
+    
+    /**
+     * @brief Set maximum mu for L2 damping
+     * @param mu Maximum mu
+     */
+    void set_mu_max(real_type mu) { m_mu_max = mu; }
+    
+    /**
+     * @brief Set mu increase factor for L2 damping
+     * @param factor Increase factor
+     */
+    void set_mu_increase_factor(real_type factor) { m_mu_increase_factor = factor; }
+    
+    /**
+     * @brief Set mu decrease factor for L2 damping
+     * @param factor Decrease factor
+     */
+    void set_mu_decrease_factor(real_type factor) { m_mu_decrease_factor = factor; }
+    
+    /**
+     * @brief Set trust region radius for L2 adaptive
+     * @param radius Initial trust region radius
+     */
+    void set_trust_region_radius(real_type radius) { m_trust_region_radius = radius; }
+    
+    /**
+     * @brief Set minimum trust region radius
+     * @param radius Minimum trust region radius
+     */
+    void set_trust_region_min(real_type radius) { m_trust_region_min = radius; }
+    
+    /**
+     * @brief Set maximum trust region radius
+     * @param radius Maximum trust region radius
+     */
+    void set_trust_region_max(real_type radius) { m_trust_region_max = radius; }
 
-    // Getters for statistics
-    integer   get_num_iterations()     const { return m_num_iterations; }
-    integer   get_num_function_evals() const { return m_num_function_evals; }
-    integer   get_num_jacobian_evals() const { return m_num_jacobian_evals; }
-    bool      has_converged()          const { return m_converged; }
-    real_type get_final_residual()     const { return m_final_residual; }
+    // =========================================================================
+    // STATISTICS GETTERS
+    // =========================================================================
+    
+    /**
+     * @brief Get number of iterations performed
+     * @return Number of Newton iterations
+     */
+    integer get_num_iterations() const { return m_num_iterations; }
+    
+    /**
+     * @brief Get number of function evaluations
+     * @return Total function evaluations
+     */
+    integer get_num_function_evals() const { return m_num_function_evals; }
+    
+    /**
+     * @brief Get number of Jacobian evaluations
+     * @return Total Jacobian evaluations
+     */
+    integer get_num_jacobian_evals() const { return m_num_jacobian_evals; }
+    
+    /**
+     * @brief Check if solver converged
+     * @return True if converged within tolerance
+     */
+    bool has_converged() const { return m_converged; }
+    
+    /**
+     * @brief Get final residual norm
+     * @return Final ||f|| value
+     */
+    real_type get_final_residual() const { return m_final_residual; }
+    
+    /**
+     * @brief Get current damping strategy
+     * @return The active damping strategy
+     */
     DampingStrategy get_damping_strategy() const { return m_damping_strategy; }
 
   private:
     // -------------------------------------------------------------------------
     // Deuflhard damping strategy (original implementation)
     // -------------------------------------------------------------------------
+
+    /**
+     * @brief Deuflhard damping strategy implementation
+     * 
+     * Uses multiplicative damping λ with Armijo-type sufficient decrease condition:
+     * ||f(x + λdx)|| ≤ ||f(x)|| - c₁ λ ||f(x)||
+     * 
+     * @param[in] system The nonlinear system to solve
+     * @param[in,out] x Current solution (updated in-place)
+     * @param[in,out] f Current residual (updated in-place)
+     * @param[in,out] norm_f Current residual norm (updated in-place)
+     * @return True if converged or acceptable step found
+     */
     bool
     solve_deuflhard(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
       integer n = system.num_equations();
       Vector dx(n), x_new(n), f_new(n);
       SparseMatrix J(n, n);
 
-      for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-        if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, "Deuflhard");
+      for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+        if (m_verbose) print_iteration_info(m_num_iterations, norm_f, "Deuflhard");
 
         // Convergence test
         m_converged = norm_f < m_tolerance;
@@ -395,6 +895,19 @@ namespace Utils {
     // -------------------------------------------------------------------------
     // Classical L2 norm damping (Levenberg-Marquardt style)
     // -------------------------------------------------------------------------
+    
+    /**
+     * @brief Classical L2 norm damping (Levenberg-Marquardt style)
+     * 
+     * Solves (J^T J + μI) dx = -J^T f with adaptive μ adjustment.
+     * Increases μ on failure, decreases on success.
+     * 
+     * @param[in] system The nonlinear system to solve
+     * @param[in,out] x Current solution (updated in-place)
+     * @param[in,out] f Current residual (updated in-place)
+     * @param[in,out] norm_f Current residual norm (updated in-place)
+     * @return True if converged
+     */
     bool
     solve_l2_classic(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
       integer n = system.num_equations();
@@ -403,78 +916,50 @@ namespace Utils {
 
       real_type mu = m_mu_init;
 
-      for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-        if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, "L2-Classic");
+      for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+        if (m_verbose) print_iteration_info(m_num_iterations, norm_f, "L2-Classic");
 
         // Convergence test
-        if (norm_f < m_tolerance) {
-          m_converged = true;
+        m_converged = norm_f < m_tolerance;
+        if (m_converged) {
           m_final_residual = norm_f;
           if (m_verbose) print_convergence_success();
           return true;
         }
 
         // Compute Jacobian
-        system.jacobian(x, J);
-        m_num_jacobian_evals++;
-        
-        TikhonovSolver TS( J, mu );
-        dx = TS.solve( f );
+        system.jacobian(x, J); ++m_num_jacobian_evals;
 
-        // Solve damped linear system (J^T J + mu I) dx = -J^T f
-        //SparseMatrix J_transpose = J.transpose();
-        //SparseMatrix A = J_transpose * J;
-        
-        // Add mu to diagonal
-        //for (integer i = 0; i < n; ++i) {
-        //  A.coeffRef(i, i) += mu;
-        //}
-
-        //Vector b = -J_transpose * f;
-
-        //Eigen::SparseLU<SparseMatrix> solver;
-        //solver.compute(A);
-
-        //if (solver.info() != Eigen::Success) {
-        //  if (m_verbose) print_jacobian_failure();
-        //  m_final_residual = norm_f;
-        //  return false;
-        //}
-
-        //dx = solver.solve(b);
-
-        //if (solver.info() != Eigen::Success) {
-        //  if (m_verbose) print_linear_solve_failure();
-        //  m_final_residual = norm_f;
-        //  return false;
-        //}
+        SP_TikhonovSolver2 TS( J, mu );
+        dx.noalias() = -TS.solve( f );
 
         if (m_verbose) print_jacobian_ok();
 
         // Try the step
-        x_new = x + dx;
+        x_new.noalias() = x + dx;
 
         try {
           system.check_if_admissible(x_new);
           
-          system.evaluate(x_new, f_new);
-          m_num_function_evals++;
+          system.evaluate(x_new, f_new); ++m_num_function_evals;
           
           real_type norm_f_new = f_new.norm();
           
-          if (m_verbose) print_l2_damping_info(mu, norm_f_new, norm_f_new < norm_f);
+          bool accept = norm_f_new < norm_f;
           
-          if (norm_f_new < norm_f) {
+          if (m_verbose) print_l2_damping_info(mu, norm_f_new, accept );
+          
+          if ( accept ) {
             // Step accepted - decrease mu
-            x = x_new;
-            f = f_new;
-            norm_f = norm_f_new;
-            mu = std::max(m_mu_min, mu * m_mu_decrease_factor);
+            x.noalias() = x_new;
+            f.noalias() = f_new;
+            norm_f      = norm_f_new;
+            mu         *= m_mu_decrease_factor;
+            if ( mu < m_mu_min ) mu = m_mu_min;
           } else {
             // Step rejected - increase mu
-            mu = std::min(m_mu_max, mu * m_mu_increase_factor);
-            
-            if (mu >= m_mu_max) {
+            mu *= m_mu_increase_factor;
+            if ( mu >= m_mu_max ) {
               if (m_verbose) print_l2_damping_failure(mu);
               m_final_residual = norm_f;
               return false;
@@ -482,11 +967,11 @@ namespace Utils {
           }
         } catch (...) {
           // Invalid step - increase mu
-          mu = std::min(m_mu_max, mu * m_mu_increase_factor);
+          mu *= m_mu_increase_factor;
           
           if (m_verbose) print_invalid_step_l2(mu);
           
-          if (mu >= m_mu_max) {
+          if ( mu >= m_mu_max ) {
             m_final_residual = norm_f;
             return false;
           }
@@ -499,6 +984,19 @@ namespace Utils {
     // -------------------------------------------------------------------------
     // Adaptive L2 damping with trust region
     // -------------------------------------------------------------------------
+    
+    /**
+     * @brief Adaptive L2 damping with trust region management
+     * 
+     * Combines L2 regularization with trust region approach for better robustness.
+     * Adjusts both μ parameter and trust region radius based on step quality.
+     * 
+     * @param[in] system The nonlinear system to solve
+     * @param[in,out] x Current solution (updated in-place)
+     * @param[in,out] f Current residual (updated in-place)
+     * @param[in,out] norm_f Current residual norm (updated in-place)
+     * @return True if converged
+     */
     bool
     solve_l2_adaptive(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
       integer n = system.num_equations();
@@ -508,8 +1006,8 @@ namespace Utils {
       real_type mu           = m_mu_init;
       real_type trust_radius = m_trust_region_radius;
 
-      for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-        if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, "L2-Adaptive");
+      for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+        if (m_verbose) print_iteration_info(m_num_iterations, norm_f, "L2-Adaptive");
 
         // Convergence test
         m_converged = norm_f < m_tolerance;
@@ -520,35 +1018,10 @@ namespace Utils {
         }
 
         // Compute Jacobian
-        system.jacobian(x, J);
-        m_num_jacobian_evals++;
+        system.jacobian(x, J); ++m_num_jacobian_evals;
 
-        // Solve with current mu
-        SparseMatrix J_transpose = J.transpose();
-        SparseMatrix A           = J_transpose * J;
-        
-        for (integer i = 0; i < n; ++i) {
-          A.coeffRef(i, i) += mu;
-        }
-
-        Vector b = -J_transpose * f;
-
-        Eigen::SparseLU<SparseMatrix> solver;
-        solver.compute(A);
-
-        if (solver.info() != Eigen::Success) {
-          if (m_verbose) print_jacobian_failure();
-          m_final_residual = norm_f;
-          return false;
-        }
-
-        dx = solver.solve(b);
-
-        if (solver.info() != Eigen::Success) {
-          if (m_verbose) print_linear_solve_failure();
-          m_final_residual = norm_f;
-          return false;
-        }
+        SP_TikhonovSolver2 TS( J, mu );
+        dx.noalias() = -TS.solve( f );
 
         // Check if step is within trust region
         real_type step_norm = dx.norm();
@@ -561,7 +1034,7 @@ namespace Utils {
         if (m_verbose) print_jacobian_ok();
 
         // Try the step
-        x_new = x + dx;
+        x_new.noalias() = x + dx;
 
         try {
           system.check_if_admissible(x_new);
@@ -569,33 +1042,36 @@ namespace Utils {
           system.evaluate(x_new, f_new);
           m_num_function_evals++;
           
-          real_type norm_f_new = f_new.norm();
-          real_type reduction_ratio = (norm_f - norm_f_new) / (0.5 * dx.dot(mu * dx - J_transpose * f));
+          real_type norm_f_new      = f_new.norm();
+          real_type reduction_ratio = (norm_f - norm_f_new) / (0.5 * dx.dot(mu * dx - J.transpose() * f));
           
           if (m_verbose) print_trust_region_info(mu, trust_radius, step_norm, norm_f_new, reduction_ratio);
           
           if (reduction_ratio > m_acceptance_ratio_bad) {
             // Step accepted
-            x = x_new;
-            f = f_new;
-            norm_f = norm_f_new;
+            x.noalias() = x_new;
+            f           = f_new;
+            norm_f      = norm_f_new;
             
             // Adjust trust region
             if (reduction_ratio > m_acceptance_ratio_good) {
-              trust_radius = std::min(2.0 * trust_radius, m_trust_region_max);
+              trust_radius *= 2;
+              if ( trust_radius > m_trust_region_max ) trust_radius = m_trust_region_max;
             }
             
             // Adjust mu
-            if (reduction_ratio > 0.75) {
-              mu = std::max(m_mu_min, mu * m_mu_decrease_factor);
-            } else if (reduction_ratio < 0.25) {
-              mu = std::min(m_mu_max, mu * m_mu_increase_factor);
+            if (reduction_ratio > m_acceptance_ratio_good ) {
+              mu *= m_mu_decrease_factor;
+              if ( mu < m_mu_min ) mu = m_mu_min;
+            } else if (reduction_ratio < m_acceptance_ratio_bad ) {
+              mu *= m_mu_increase_factor;
+              if ( mu > m_mu_max ) mu = m_mu_max;
             }
           } else {
             // Step rejected - reduce trust region
-            trust_radius = std::max(0.5 * trust_radius, m_trust_region_min);
-            mu = std::min(m_mu_max, mu * m_mu_increase_factor);
-            
+            trust_radius *= 0.5;
+            if ( trust_radius < m_trust_region_min ) trust_radius = m_trust_region_min;
+           
             if (trust_radius <= m_trust_region_min && mu >= m_mu_max) {
               if (m_verbose) print_trust_region_failure();
               m_final_residual = norm_f;
@@ -604,8 +1080,11 @@ namespace Utils {
           }
         } catch (...) {
           // Invalid step
-          trust_radius = std::max(0.5 * trust_radius, m_trust_region_min);
-          mu = std::min(m_mu_max, mu * m_mu_increase_factor);
+          trust_radius *= 0.5;
+          if ( trust_radius < m_trust_region_min ) trust_radius = m_trust_region_min;
+          
+          mu *= m_mu_increase_factor;
+          if ( mu > m_mu_max ) mu = m_mu_max;
           
           if (m_verbose) print_invalid_step_trust(mu, trust_radius);
           
@@ -622,6 +1101,20 @@ namespace Utils {
     // -------------------------------------------------------------------------
     // Hybrid Deuflhard-L2 strategy
     // -------------------------------------------------------------------------
+    
+    /**
+     * @brief Hybrid Deuflhard-L2 strategy
+     * 
+     * Dynamically switches between Deuflhard damping and L2 regularization
+     * based on performance. Uses L2 when far from solution, switches to
+     * Deuflhard when close to convergence.
+     * 
+     * @param[in] system The nonlinear system to solve
+     * @param[in,out] x Current solution (updated in-place)
+     * @param[in,out] f Current residual (updated in-place)
+     * @param[in,out] norm_f Current residual norm (updated in-place)
+     * @return True if converged
+     */
     bool
     solve_l2_hybrid(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
       integer n = system.num_equations();
@@ -632,49 +1125,26 @@ namespace Utils {
       real_type lambda = 1.0;
       bool use_l2 = true;
 
-      for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-        if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, 
+      for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+        if (m_verbose) print_iteration_info(m_num_iterations, norm_f,
             use_l2 ? "Hybrid-L2" : "Hybrid-Deuflhard");
 
         // Convergence test
-        if (norm_f < m_tolerance) {
-          m_converged = true;
+        m_converged = norm_f < m_tolerance;
+        if (m_converged) {
           m_final_residual = norm_f;
           if (m_verbose) print_convergence_success();
           return true;
         }
 
         // Compute Jacobian
-        system.jacobian(x, J);
-        m_num_jacobian_evals++;
+        system.jacobian(x, J); ++m_num_jacobian_evals;
 
         if (use_l2) {
           // L2 step
-          SparseMatrix J_transpose = J.transpose();
-          SparseMatrix A = J_transpose * J;
-          
-          for (integer i = 0; i < n; ++i) {
-            A.coeffRef(i, i) += mu;
-          }
+          SP_TikhonovSolver2 TS( J, mu );
+          dx.noalias() = -TS.solve( f );
 
-          Vector b = -J_transpose * f;
-
-          Eigen::SparseLU<SparseMatrix> solver;
-          solver.compute(A);
-
-          if (solver.info() != Eigen::Success) {
-            if (m_verbose) print_jacobian_failure();
-            m_final_residual = norm_f;
-            return false;
-          }
-
-          dx = solver.solve(b);
-
-          if (solver.info() != Eigen::Success) {
-            if (m_verbose) print_linear_solve_failure();
-            m_final_residual = norm_f;
-            return false;
-          }
         } else {
           // Deuflhard step (plain Newton)
           Eigen::SparseLU<SparseMatrix> solver;
@@ -686,7 +1156,7 @@ namespace Utils {
             return false;
           }
 
-          dx = solver.solve(-f);
+          dx = -solver.solve(f);
 
           if (solver.info() != Eigen::Success) {
             if (m_verbose) print_linear_solve_failure();
@@ -779,6 +1249,19 @@ namespace Utils {
     // -------------------------------------------------------------------------
     // Bank & Rose (1981) strategy
     // -------------------------------------------------------------------------
+    
+    /**
+     * @brief Bank and Rose (1981) affine-invariant damping strategy
+     * 
+     * Implements the affine-invariant damping strategy from Bank and Rose (1981).
+     * Uses a damping parameter θ that is adjusted based on step quality.
+     * 
+     * @param[in] system The nonlinear system to solve
+     * @param[in,out] x Current solution (updated in-place)
+     * @param[in,out] f Current residual (updated in-place)
+     * @param[in,out] norm_f Current residual norm (updated in-place)
+     * @return True if converged
+     */
     bool
     solve_bank_rose(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
         integer n = system.num_equations();
@@ -787,8 +1270,8 @@ namespace Utils {
     
         real_type theta = 1.0; // damping parameter
     
-        for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-            if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, "Bank-Rose");
+        for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+            if (m_verbose) print_iteration_info(m_num_iterations, norm_f, "Bank-Rose");
     
             // Convergence test
             if (norm_f < m_tolerance) {
@@ -898,6 +1381,19 @@ namespace Utils {
     // -------------------------------------------------------------------------
     // Griewank (1980) strategy
     // -------------------------------------------------------------------------
+    
+    /**
+     * @brief Griewank (1980) adaptive damping strategy
+     * 
+     * Implements the adaptive damping strategy from Griewank (1980).
+     * Uses directional derivative information for step acceptance.
+     * 
+     * @param[in] system The nonlinear system to solve
+     * @param[in,out] x Current solution (updated in-place)
+     * @param[in,out] f Current residual (updated in-place)
+     * @param[in,out] norm_f Current residual norm (updated in-place)
+     * @return True if converged
+     */
     bool
     solve_griewank(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
         integer n = system.num_equations();
@@ -907,23 +1403,21 @@ namespace Utils {
         // Precompute F(x) = 0.5 * ||f||^2
         real_type F = 0.5 * norm_f * norm_f;
     
-        for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-            if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, "Griewank");
+        for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+            if (m_verbose) print_iteration_info(m_num_iterations, norm_f, "Griewank");
     
             // Convergence test
-            if (norm_f < m_tolerance) {
-                m_converged = true;
+            m_converged = norm_f < m_tolerance;
+            if (m_converged) {
                 m_final_residual = norm_f;
                 if (m_verbose) print_convergence_success();
                 return true;
             }
     
             // Compute Jacobian and gradient
-            system.jacobian(x, J);
-            m_num_jacobian_evals++;
+            system.jacobian(x, J); ++m_num_jacobian_evals;
     
             Vector g = J.transpose() * f;  // Gradient of F
-            real_type g_norm = g.norm();
     
             // Solve for Newton direction
             Eigen::SparseLU<SparseMatrix> solver;
@@ -935,7 +1429,7 @@ namespace Utils {
                 return false;
             }
     
-            dx = solver.solve(-f);
+            dx = -solver.solve(f);
     
             if (solver.info() != Eigen::Success) {
                 if (m_verbose) print_linear_solve_failure();
@@ -951,21 +1445,20 @@ namespace Utils {
             integer damping_iter = 0;
     
             while (!step_accepted && damping_iter < m_max_damping_iterations) {
-                x_new = x + lambda * dx;
+                x_new.noalias() = x + lambda * dx;
     
                 try {
                     system.check_if_admissible(x_new);
     
-                    system.evaluate(x_new, f_new);
-                    m_num_function_evals++;
+                    system.evaluate(x_new, f_new); ++m_num_function_evals;
     
                     real_type norm_f_new = f_new.norm();
-                    real_type F_new = 0.5 * norm_f_new * norm_f_new;
+                    real_type F_new      = 0.5 * norm_f_new * norm_f_new;
     
                     // Griewank condition: check relative improvement
-                    real_type actual_reduction = F - F_new;
+                    real_type actual_reduction       = F - F_new;
                     real_type directional_derivative = g.dot(dx);
-                    real_type expected_reduction = -m_griewank_eta * directional_derivative;
+                    real_type expected_reduction     = -m_griewank_eta * directional_derivative;
     
                     if (m_verbose) {
                         fmt::color col = (actual_reduction >= expected_reduction) ?
@@ -977,10 +1470,10 @@ namespace Utils {
     
                     if (actual_reduction >= expected_reduction) {
                         // Accept step
-                        x = x_new;
-                        f = f_new;
+                        x      = x_new;
+                        f      = f_new;
                         norm_f = norm_f_new;
-                        F = F_new;
+                        F      = F_new;
                         step_accepted = true;
     
                         // Adjust lambda for next iteration
@@ -990,7 +1483,7 @@ namespace Utils {
                     } else {
                         // Reduce lambda
                         lambda *= m_griewank_omega;
-                        damping_iter++;
+                        ++damping_iter;
     
                         if (lambda < m_griewank_tau) {
                             if (m_verbose) print_damping_failure();
@@ -1025,6 +1518,20 @@ namespace Utils {
     // -------------------------------------------------------------------------
     // Filter Methods for nonlinear equations
     // -------------------------------------------------------------------------
+    
+    /**
+     * @brief Filter methods for nonlinear equations
+     * 
+     * Implements a filter-based acceptance mechanism that maintains
+     * a Pareto front of (θ, F) pairs, where θ measures constraint
+     * violation and F = 0.5||f||² is the objective.
+     * 
+     * @param[in] system The nonlinear system to solve
+     * @param[in,out] x Current solution (updated in-place)
+     * @param[in,out] f Current residual (updated in-place)
+     * @param[in,out] norm_f Current residual norm (updated in-place)
+     * @return True if converged
+     */
     bool
     solve_filter(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
         integer n = system.num_equations();
@@ -1035,11 +1542,11 @@ namespace Utils {
         std::vector<std::pair<real_type, real_type>> filter;
         // Add initial point to filter
         real_type theta = norm_f; // constraint violation measure
-        real_type F = 0.5 * norm_f * norm_f; // objective function
+        real_type F     = 0.5 * norm_f * norm_f; // objective function
         filter.emplace_back(theta, F);
     
-        for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-            if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, "Filter");
+        for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+            if (m_verbose) print_iteration_info(m_num_iterations, norm_f, "Filter");
     
             // Convergence test
             if (norm_f < m_tolerance) {
@@ -1168,6 +1675,19 @@ namespace Utils {
     // -------------------------------------------------------------------------
     // Cubic Trust Region (CTR) method
     // -------------------------------------------------------------------------
+    
+    /**
+     * @brief Cubic Trust Region method
+     * 
+     * Implements a trust region method with cubic regularization.
+     * Solves a cubic subproblem within a trust region to compute steps.
+     * 
+     * @param[in] system The nonlinear system to solve
+     * @param[in,out] x Current solution (updated in-place)
+     * @param[in,out] f Current residual (updated in-place)
+     * @param[in,out] norm_f Current residual norm (updated in-place)
+     * @return True if converged
+     */
     bool
     solve_cubic_trust_region(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
         integer n = system.num_equations();
@@ -1177,8 +1697,8 @@ namespace Utils {
         real_type delta = m_ctr_delta;
         real_type sigma = m_ctr_sigma;
     
-        for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-            if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, "Cubic-TR");
+        for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+            if (m_verbose) print_iteration_info(m_num_iterations, norm_f, "Cubic-TR");
     
             // Convergence test
             if (norm_f < m_tolerance) {
@@ -1326,6 +1846,19 @@ namespace Utils {
      // -------------------------------------------------------------------------
      // Dogleg method
      // -------------------------------------------------------------------------
+     
+     /**
+      * @brief Dogleg trust region method
+      * 
+      * Implements the dogleg method that combines steepest descent
+      * and Gauss-Newton directions within a trust region.
+      * 
+      * @param[in] system The nonlinear system to solve
+      * @param[in,out] x Current solution (updated in-place)
+      * @param[in,out] f Current residual (updated in-place)
+      * @param[in,out] norm_f Current residual norm (updated in-place)
+      * @return True if converged
+      */
      bool
      solve_dogleg(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
          integer n = system.num_equations();
@@ -1334,8 +1867,8 @@ namespace Utils {
      
          real_type delta = m_dogleg_delta;
      
-         for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-             if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, "Dogleg");
+         for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+             if (m_verbose) print_iteration_info(m_num_iterations, norm_f, "Dogleg");
      
              // Convergence test
              if (norm_f < m_tolerance) {
@@ -1463,6 +1996,20 @@ namespace Utils {
      // -------------------------------------------------------------------------
      // Wolfe line search
      // -------------------------------------------------------------------------
+     
+     /**
+      * @brief Wolfe line search method
+      * 
+      * Implements line search with strong Wolfe conditions:
+      * 1. Armijo condition (sufficient decrease)
+      * 2. Curvature condition
+      * 
+      * @param[in] system The nonlinear system to solve
+      * @param[in,out] x Current solution (updated in-place)
+      * @param[in,out] f Current residual (updated in-place)
+      * @param[in,out] norm_f Current residual norm (updated in-place)
+      * @return True if converged
+      */
      bool
      solve_wolfe(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
          integer n = system.num_equations();
@@ -1472,20 +2019,19 @@ namespace Utils {
          // Compute initial objective value
          real_type F = 0.5 * norm_f * norm_f;
      
-         for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-             if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, "Wolfe");
+         for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+             if (m_verbose) print_iteration_info(m_num_iterations, norm_f, "Wolfe");
      
              // Convergence test
-             if (norm_f < m_tolerance) {
-                 m_converged = true;
+             m_converged = norm_f < m_tolerance;
+             if ( m_converged ) {
                  m_final_residual = norm_f;
                  if (m_verbose) print_convergence_success();
                  return true;
              }
      
              // Compute Jacobian and gradient
-             system.jacobian(x, J);
-             m_num_jacobian_evals++;
+             system.jacobian(x, J); ++m_num_jacobian_evals;
      
              g = J.transpose() * f;
      
@@ -1598,6 +2144,19 @@ namespace Utils {
      // -------------------------------------------------------------------------
      // Cubic regularization (ARC)
      // -------------------------------------------------------------------------
+     
+     /**
+      * @brief Adaptive Regularization by Cubics (ARC) method
+      * 
+      * Implements cubic regularization of the objective function
+      * to ensure global convergence while maintaining fast local rate.
+      * 
+      * @param[in] system The nonlinear system to solve
+      * @param[in,out] x Current solution (updated in-place)
+      * @param[in,out] f Current residual (updated in-place)
+      * @param[in,out] norm_f Current residual norm (updated in-place)
+      * @return True if converged
+      */
      bool
      solve_cubic(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
          integer n = system.num_equations();
@@ -1606,8 +2165,8 @@ namespace Utils {
      
          real_type sigma = m_cubic_sigma;
      
-         for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-             if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, "Cubic-ARC");
+         for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+             if (m_verbose) print_iteration_info(m_num_iterations, norm_f, "Cubic-ARC");
      
              // Convergence test
              if (norm_f < m_tolerance) {
@@ -1622,7 +2181,6 @@ namespace Utils {
              m_num_jacobian_evals++;
      
              Vector g = J.transpose() * f;
-             // real_type g_norm = g.norm(); // Non usata
      
              // Solve cubic subproblem: min m(s) = f + g^T s + 0.5 s^T J^T J s + (sigma/3) ||s||^3
              // We use an iterative solver for the cubic subproblem
@@ -1742,14 +2300,27 @@ namespace Utils {
      // -------------------------------------------------------------------------
      // Quadratic backtracking
      // -------------------------------------------------------------------------
+     
+     /**
+      * @brief Quadratic backtracking line search
+      * 
+      * Implements backtracking line search with quadratic interpolation
+      * for step size selection.
+      * 
+      * @param[in] system The nonlinear system to solve
+      * @param[in,out] x Current solution (updated in-place)
+      * @param[in,out] f Current residual (updated in-place)
+      * @param[in,out] norm_f Current residual norm (updated in-place)
+      * @return True if converged
+      */
      bool
      solve_quadratic_backtracking(NonlinearSystem & system, Vector & x, Vector & f, real_type & norm_f) {
          integer n = system.num_equations();
          Vector dx(n), x_new(n), f_new(n);
          SparseMatrix J(n, n);
      
-         for (m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations) {
-             if (m_verbose) print_iteration_info(m_num_iterations + 1, norm_f, "Quad-Back");
+         for (m_num_iterations = 1; m_num_iterations <= m_max_iterations; ++m_num_iterations) {
+             if (m_verbose) print_iteration_info(m_num_iterations, norm_f, "Quad-Back");
      
              // Convergence test
              if (norm_f < m_tolerance) {
@@ -1863,28 +2434,53 @@ namespace Utils {
     // -------------------------------------------------------------------------
     // Helper methods for verbose output
     // -------------------------------------------------------------------------
+    
+    /**
+     * @brief Print iteration information
+     * @param iter Current iteration number
+     * @param norm_f Current residual norm
+     * @param strategy Current strategy name
+     */
     void print_iteration_info(integer iter, real_type norm_f, const std::string& strategy) {
       fmt::print(fmt::fg(fmt::color::light_blue), 
                 "[{:3}][{}] ‖f‖ = {:.2e}", iter, strategy, norm_f);
     }
 
+    /**
+     * @brief Print convergence success message
+     */
     void print_convergence_success() {
       fmt::print(fmt::fg(fmt::color::green), 
                 "  ✓ Converged below tolerance ({:.2e})\n", m_tolerance);
     }
 
+    /**
+     * @brief Print Jacobian factorization failure
+     */
     void print_jacobian_failure() {
       fmt::print(fmt::fg(fmt::color::red), "  ✗ Jacobian factorization failed\n");
     }
 
+    /**
+     * @brief Print linear solve failure
+     */
     void print_linear_solve_failure() {
       fmt::print(fmt::fg(fmt::color::red), "  ✗ Linear solve failed\n");
     }
 
+    /**
+     * @brief Print Jacobian OK message
+     */
     void print_jacobian_ok() {
       fmt::print(fmt::fg(fmt::color::green), "  J ");
     }
 
+    /**
+     * @brief Print damping information
+     * @param lambda Current damping factor
+     * @param norm_f_new New residual norm
+     * @param accepted Whether step was accepted
+     */
     void print_damping_info(real_type lambda, real_type norm_f_new, bool accepted) {
       fmt::color col = accepted ? fmt::color::green : 
                       (lambda < 1.0 ? fmt::color::yellow : fmt::color::red);
@@ -1892,12 +2488,26 @@ namespace Utils {
       fmt::print(fg(col), "  λ={:.2e} → {:.2e} {}\n", lambda, norm_f_new, mark);
     }
 
+    /**
+     * @brief Print L2 damping information
+     * @param mu Current L2 damping parameter
+     * @param norm_f_new New residual norm
+     * @param accepted Whether step was accepted
+     */
     void print_l2_damping_info(real_type mu, real_type norm_f_new, bool accepted) {
       fmt::color col = accepted ? fmt::color::green : fmt::color::red;
       std::string mark = accepted ? "✓" : "✗";
       fmt::print(fg(col), "  μ={:.2e} → {:.2e} {}\n", mu, norm_f_new, mark);
     }
 
+    /**
+     * @brief Print trust region information
+     * @param mu Current L2 damping parameter
+     * @param radius Trust region radius
+     * @param step_norm Step norm
+     * @param norm_f_new New residual norm
+     * @param ratio Reduction ratio
+     */
     void print_trust_region_info(real_type mu, real_type radius, real_type step_norm, 
                                  real_type norm_f_new, real_type ratio) {
       fmt::color col = (ratio > m_acceptance_ratio_bad) ? fmt::color::green : fmt::color::yellow;
@@ -1906,86 +2516,158 @@ namespace Utils {
                 mu, radius, step_norm, norm_f_new, ratio, mark);
     }
 
+    /**
+     * @brief Print damping failure message
+     */
     void print_damping_failure() {
       fmt::print(fmt::fg(fmt::color::red), "    ✗ Damping failed (lambda too small)\n");
     }
 
+    /**
+     * @brief Print L2 damping failure message
+     * @param mu Current mu value
+     */
     void print_l2_damping_failure(real_type mu) {
       fmt::print(fmt::fg(fmt::color::red), "    ✗ L2 damping failed (mu={:.2e} too large)\n", mu);
     }
 
+    /**
+     * @brief Print trust region failure message
+     */
     void print_trust_region_failure() {
       fmt::print(fmt::fg(fmt::color::red), "    ✗ Trust region failed (radius too small, mu too large)\n");
     }
 
+    /**
+     * @brief Print no acceptable step message
+     */
     void print_no_acceptable_step() {
       fmt::print(fmt::fg(fmt::color::red), "  ✗ No acceptable damping step\n");
     }
 
+    /**
+     * @brief Print invalid step message for lambda
+     * @param lambda Current lambda value
+     */
     void print_invalid_step(real_type lambda) {
       fmt::print(fmt::fg(fmt::color::yellow), "  λ invalid → reduce to {:.2e}\n", lambda);
     }
 
+    /**
+     * @brief Print invalid step message for L2
+     * @param mu Current mu value
+     */
     void print_invalid_step_l2(real_type mu) {
       fmt::print(fmt::fg(fmt::color::yellow), "  step invalid → increase μ to {:.2e}\n", mu);
     }
 
+    /**
+     * @brief Print invalid step message for trust region
+     * @param mu Current mu value
+     * @param radius Current trust region radius
+     */
     void print_invalid_step_trust(real_type mu, real_type radius) {
       fmt::print(fmt::fg(fmt::color::yellow), 
                 "  step invalid → μ={:.2e}, Δ={:.2e}\n", mu, radius);
     }
 
+    /**
+     * @brief Print strategy switch message
+     * @param message Switch message
+     */
     void print_strategy_switch(const std::string& message) {
       fmt::print(fmt::fg(fmt::color::cyan), "  ↳ {} \n", message);
     }
 
+    /**
+     * @brief Print filter method failure
+     */
     void print_filter_failure() {
         fmt::print(fmt::fg(fmt::color::red), "    ✗ Filter method failed (no acceptable step)\n");
     }
     
+    /**
+     * @brief Print invalid step message for filter
+     * @param alpha Current step size
+     */
     void print_invalid_step_filter(real_type alpha) {
         fmt::print(fmt::fg(fmt::color::yellow), "  step invalid → reduce α to {:.2e}\n", alpha);
     }
     
+    /**
+     * @brief Print cubic trust region failure
+     */
     void print_ctr_failure() {
         fmt::print(fmt::fg(fmt::color::red),
                   "    ✗ Cubic trust region failed (trust region too small, sigma too large)\n");
     }
     
+    /**
+     * @brief Print invalid step message for cubic trust region
+     * @param delta Current trust region radius
+     * @param sigma Current sigma value
+     */
     void print_invalid_step_ctr(real_type delta, real_type sigma) {
         fmt::print(fmt::fg(fmt::color::yellow),
                   "  step invalid → Δ={:.2e}, σ={:.2e}\n", delta, sigma);
     }
 
-    // Aggiungi i metodi di output helper mancanti
+    /**
+     * @brief Print dogleg failure message
+     */
     void print_dogleg_failure() {
         fmt::print(fmt::fg(fmt::color::red), "    ✗ Dogleg method failed (trust region too small)\n");
     }
 
+    /**
+     * @brief Print invalid step message for dogleg
+     * @param delta Current trust region radius
+     */
     void print_invalid_step_dogleg(real_type delta) {
         fmt::print(fmt::fg(fmt::color::yellow), "  step invalid → reduce Δ to {:.2e}\n", delta);
     }
 
+    /**
+     * @brief Print Wolfe line search failure
+     */
     void print_wolfe_failure() {
         fmt::print(fmt::fg(fmt::color::red), "    ✗ Wolfe line search failed (step size too small)\n");
     }
 
+    /**
+     * @brief Print invalid step message for Wolfe
+     * @param alpha Current step size
+     */
     void print_invalid_step_wolfe(real_type alpha) {
         fmt::print(fmt::fg(fmt::color::yellow), "  step invalid → reduce α to {:.2e}\n", alpha);
     }
 
+    /**
+     * @brief Print cubic regularization failure
+     */
     void print_cubic_failure() {
         fmt::print(fmt::fg(fmt::color::red), "    ✗ Cubic regularization failed (sigma too large)\n");
     }
 
+    /**
+     * @brief Print invalid step message for cubic
+     * @param sigma Current sigma value
+     */
     void print_invalid_step_cubic(real_type sigma) {
         fmt::print(fmt::fg(fmt::color::yellow), "  step invalid → increase σ to {:.2e}\n", sigma);
     }
 
+    /**
+     * @brief Print quadratic backtracking failure
+     */
     void print_quadratic_backtracking_failure() {
         fmt::print(fmt::fg(fmt::color::red), "    ✗ Quadratic backtracking failed (step size too small)\n");
     }
 
+    /**
+     * @brief Print invalid step message for quadratic backtracking
+     * @param alpha Current step size
+     */
     void print_invalid_step_quad(real_type alpha) {
         fmt::print(fmt::fg(fmt::color::yellow), "  step invalid → reduce α to {:.2e}\n", alpha);
     }
@@ -1994,6 +2676,18 @@ namespace Utils {
     // -------------------------------------------------------------------------
     // Main solve method - dispatches to appropriate strategy
     // -------------------------------------------------------------------------
+    
+    /**
+     * @brief Main solve method
+     * 
+     * Solves the nonlinear system F(x) = 0 using the selected damping strategy.
+     * Resets statistics, evaluates initial residual, and dispatches to the
+     * appropriate solver implementation.
+     * 
+     * @param[in] system The nonlinear system to solve
+     * @param[in,out] x Initial guess (input), solution (output)
+     * @return True if solver converged successfully
+     */
     bool
     solve(NonlinearSystem & system, Vector & x) {
       // Reset statistics
@@ -2013,7 +2707,6 @@ namespace Utils {
       if (m_verbose) {
         fmt::print(fmt::fg(fmt::color::light_blue), 
                   "[START] ‖f‖ = {:.2e}, Strategy: ", norm_f);
-        // Cerca questo switch nel file e aggiungi i casi mancanti
         switch (m_damping_strategy) {
             case DEUFLHARD: fmt::print("Deuflhard\n"); break;
             case L2_CLASSIC: fmt::print("L2-Classic\n"); break;
@@ -2070,7 +2763,6 @@ namespace Utils {
               success = solve_cubic_trust_region(system, x, f, norm_f);
               break;
       }
-
 
       // Final output
       if (!success && !m_converged && m_verbose) {

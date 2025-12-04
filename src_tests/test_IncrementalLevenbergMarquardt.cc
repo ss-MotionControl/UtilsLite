@@ -94,7 +94,7 @@ void print_progress(int current, int total) {
   fmt::print(fg(fmt::color::cyan), "[");
   
   int bar_width = 50;
-  int pos = bar_width * progress;
+  int pos = static_cast<int>(bar_width * progress);
   
   for (int i = 0; i < bar_width; ++i) {
     if (i < pos) fmt::print(fg(fmt::color::green), "█");
