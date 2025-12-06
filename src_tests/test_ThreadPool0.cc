@@ -22,21 +22,25 @@
 
 using std::cout;
 
-static void do_test( int, int ) {}
+static void
+do_test( int, int )
+{
+}
 
 template <class TP>
 void
-test_TP( int const NN, int nt, int sz ) {
+test_TP( int const NN, int nt, int sz )
+{
   Utils::TicToc tm;
 
   double t_launch, t_wait;
   {
-    TP pool(nt);
+    TP pool( nt );
 
     tm.tic();
-    for ( int i{0}; i < NN; ++i ) pool.run( do_test, i, sz );
+    for ( int i{ 0 }; i < NN; ++i ) pool.run( do_test, i, sz );
     tm.toc();
-    t_launch = tm.elapsed_mus()/NN;
+    t_launch = tm.elapsed_mus() / NN;
 
     tm.tic();
     pool.wait();
@@ -49,13 +53,14 @@ test_TP( int const NN, int nt, int sz ) {
   double t_delete{ tm.elapsed_mus() };
 
   fmt::print(
-    "[{:30}] [LAUNCH: {:12.8}mus, WAIT {:12.8}mus, DELETE {:12.8}mus] {:.8}mus\n",
-    TP::Name(), t_launch, t_wait, t_delete, t_launch+t_wait
-  );
+      "[{:30}] [LAUNCH: {:12.8}mus, WAIT {:12.8}mus, DELETE {:12.8}mus] "
+      "{:.8}mus\n",
+      TP::Name(), t_launch, t_wait, t_delete, t_launch + t_wait );
 }
 
 int
-main( int const argc, char *argv[] ) {
+main( int const argc, char * argv[] )
+{
   Utils::TicToc tm;
 
   int nt = 16;
@@ -66,8 +71,9 @@ main( int const argc, char *argv[] ) {
 
   fmt::print( "NT = {}\n", nt );
 
-  for ( int NN : { 16, 100, 1000, 10000 } ) {
-    fmt::print("\n\nNN = {}\n\n", NN );
+  for ( int NN : { 16, 100, 1000, 10000 } )
+  {
+    fmt::print( "\n\nNN = {}\n\n", NN );
     test_TP<Utils::ThreadPool0>( NN, nt, sz );
     test_TP<Utils::ThreadPool1>( NN, nt, sz );
     test_TP<Utils::ThreadPool2>( NN, nt, sz );
@@ -75,9 +81,9 @@ main( int const argc, char *argv[] ) {
     test_TP<Utils::ThreadPool4>( NN, nt, sz );
     test_TP<Utils::ThreadPool5>( NN, nt, sz );
   }
-  fmt::print("All done folks!\n\n");
+  fmt::print( "All done folks!\n\n" );
 
-  #if 0
+#if 0
 
   fmt::print("ThreadPool1\n");
   Utils::ThreadPool1 TP1(16); // 0%
@@ -98,7 +104,7 @@ main( int const argc, char *argv[] ) {
   fmt::print("ThreadPool5\n");
   Utils::ThreadPool5 TP5(16); // 0%
   Utils::sleep_for_seconds(4);
-  #endif
+#endif
 
   cout << "All done folks!\n\n";
 

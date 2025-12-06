@@ -22,51 +22,48 @@
 
 using std::cout;
 
-static
-void
-mem_info( char const msg[] ) {
-  fmt::print(
-    "{}: mem actual {} max {}\n",
-    msg,
-    Utils::out_bytes( Utils::AllocatedBytes ),
-    Utils::out_bytes( Utils::MaximumAllocatedBytes )
-  );
+static void
+mem_info( char const msg[] )
+{
+  fmt::print( "{}: mem actual {} max {}\n", msg, Utils::out_bytes( Utils::AllocatedBytes ),
+              Utils::out_bytes( Utils::MaximumAllocatedBytes ) );
 }
 
-static
-void
-do_test1() {
-  mem_info("do_test1 IN");
-  Utils::Malloc<double> mem("test1");
-  mem.allocate(100);
-  double * ptr = mem(100);
-  fmt::print( "ptr = {}\n", static_cast<void*>(ptr) );
+static void
+do_test1()
+{
+  mem_info( "do_test1 IN" );
+  Utils::Malloc<double> mem( "test1" );
+  mem.allocate( 100 );
+  double * ptr = mem( 100 );
+  fmt::print( "ptr = {}\n", static_cast<void *>( ptr ) );
   mem.free();
-  mem_info("do_test1 OUT");
+  mem_info( "do_test1 OUT" );
 }
 
-static
-void
-do_test2() {
-  mem_info("do_test2 IN");
-  Utils::Malloc<double> mem("test1");
-  mem.allocate(100);
-  double * ptr = mem(100);
-  fmt::print( "ptr = {}\n", static_cast<void*>(ptr) );
-  mem_info("do_test2 OUT");
+static void
+do_test2()
+{
+  mem_info( "do_test2 IN" );
+  Utils::Malloc<double> mem( "test1" );
+  mem.allocate( 100 );
+  double * ptr = mem( 100 );
+  fmt::print( "ptr = {}\n", static_cast<void *>( ptr ) );
+  mem_info( "do_test2 OUT" );
 }
 
 int
-main() {
-  mem_info("main IN");
+main()
+{
+  mem_info( "main IN" );
   do_test1();
-  mem_info("A");
+  mem_info( "A" );
   do_test2();
-  mem_info("B");
+  mem_info( "B" );
   do_test1();
-  mem_info("C");
+  mem_info( "C" );
   do_test2();
-  mem_info("main OUT");
+  mem_info( "main OUT" );
   cout << "All done folks!\n\n";
   return 0;
 }

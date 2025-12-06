@@ -23,12 +23,12 @@
 using std::cout;
 
 int
-main() {
-
+main()
+{
   Utils::Quaternion<double> Q1, Q2;
 
-  Q1.setup(3,1,0,0);
-  Q2.setup(0,5,1,-2);
+  Q1.setup( 3, 1, 0, 0 );
+  Q2.setup( 0, 5, 1, -2 );
 
   cout << "Q1 = " << Q1 << '\n';
   cout << "Q2 = " << Q2 << '\n';
@@ -36,13 +36,13 @@ main() {
   Utils::Quaternion<double> Q3{ Q1 * Q2 };
   cout << "Q3 = Q1*Q2 = " << Q3 << '\n';
 
-  Q3 = Q2*Q1;
+  Q3 = Q2 * Q1;
   cout << "Q3 = Q2*Q1 = " << Q3 << '\n';
 
-  Q3 = Q1*Q1;
+  Q3 = Q1 * Q1;
   cout << "Q3 = Q1*Q1 = " << Q3 << '\n';
 
-  Q3 = Q2*Q2;
+  Q3 = Q2 * Q2;
   cout << "Q3 = Q2*Q2 = " << Q3 << '\n';
 
   Q3 = Q1;

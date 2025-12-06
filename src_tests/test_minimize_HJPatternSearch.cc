@@ -17,10 +17,10 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-#include "Utils_HJPatternSearch.hh"
-#include "Utils_fmt.hh"
-
 #include <cmath>
+
+#include "Utils_fmt.hh"
+#include "Utils_minimize_HJPatternSearch.hh"
 
 using namespace std;
 
@@ -32,10 +32,14 @@ using std::pow;
 
 using real_type = double;
 
-static inline real_type power2( real_type const x ) { return x*x; }
-//static inline real_type power3( real_type x ) { return x*x*x; }
-//static inline real_type power4( real_type x ) { return power2(power2(x)); }
-//static inline real_type power5( real_type x ) { return power4(x)*x; }
+static inline real_type
+power2( real_type const x )
+{
+  return x * x;
+}
+// static inline real_type power3( real_type x ) { return x*x*x; }
+// static inline real_type power4( real_type x ) { return power2(power2(x)); }
+// static inline real_type power5( real_type x ) { return power4(x)*x; }
 
 #if 0
 static
@@ -85,23 +89,24 @@ fun2( real_type const X[] ) {
 }
 #endif
 
-static
-real_type
-fun3( real_type const X[] ) {
-  real_type const x   { X[0] };
-  real_type const y   { X[1] };
-  real_type const res { 100*power2(y-x*x) + power2(1-x) };
-  //fmt::print( "{} {} -> {}\n", x, y, res );
+static real_type
+fun3( real_type const X[] )
+{
+  real_type const x{ X[0] };
+  real_type const y{ X[1] };
+  real_type const res{ 100 * power2( y - x * x ) + power2( 1 - x ) };
+  // fmt::print( "{} {} -> {}\n", x, y, res );
   return res;
 }
 
 template <typename FUN>
 void
-do_solve( FUN f, real_type const X0[], real_type const delta ) {
-  Utils::Console console(&cout,4);
-  HJPatternSearch<real_type> solver("HJPatternSearch");
+do_solve( FUN f, real_type const X0[], real_type const delta )
+{
+  Utils::Console             console( &cout, 4 );
+  HJPatternSearch<real_type> solver( "HJPatternSearch" );
   solver.setup( 2, f, &console );
-  solver.set_tolerance( 1e-20);
+  solver.set_tolerance( 1e-20 );
   solver.run( X0, delta );
   real_type X[2];
   solver.get_last_solution( X );
@@ -109,25 +114,26 @@ do_solve( FUN f, real_type const X0[], real_type const delta ) {
 }
 
 int
-main() {
-  #if 0
+main()
+{
+#if 0
     real_type X0[2]{-1.1,-27.0};
     real_type delta = 1;
     std::function<real_type(real_type const[])> F(fun1);
     do_solve( F, X0, delta );
-  #endif
-  #if 0
+#endif
+#if 0
     real_type X0[2]{1,1};
     real_type delta{1};
     std::function<real_type(real_type const[])> F(fun2);
     do_solve( F, X0, delta );
-  #endif
-  #if 1
-    real_type X0[2]{-1,1};
-    real_type delta{0.1};
-    std::function<real_type(real_type const[])> F(fun3);
-    do_solve( F, X0, delta );
-  #endif
+#endif
+#if 1
+  real_type                                     X0[2]{ -1, 1 };
+  real_type                                     delta{ 0.1 };
+  std::function<real_type( real_type const[] )> F( fun3 );
+  do_solve( F, X0, delta );
+#endif
 
   cout << "\nAll Done Folks!\n";
 
