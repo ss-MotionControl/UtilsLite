@@ -190,15 +190,22 @@ namespace Utils
     integer m_neq;
     integer m_npt;
     integer m_dim;
-    integer m_print_level{ 1 };
-    integer m_maxfun{ 10000 };
+    integer m_print_level = 1;
+    integer m_maxfun      = 10000;
 
     integer m_kopt;
     integer m_knew;
     integer m_nf;
 
-    Scalar m_rhobeg = 0.1;
-    Scalar m_rhoend = 0.001;
+    // ========================================================================
+    // COSTANTI NUMERICHE
+    // ========================================================================
+
+    Scalar m_tol_convergence = Scalar( 1e-8 );  ///< Tolleranza per convergenza
+    Scalar m_tol_step        = Scalar( 1e-6 );  ///< Tolleranza passo minimo
+
+    Scalar m_rhobeg = Scalar(0.1);
+    Scalar m_rhoend = Scalar(0.001);
     Scalar m_crvmin;
     Scalar m_dsq;
     Scalar m_alpha;

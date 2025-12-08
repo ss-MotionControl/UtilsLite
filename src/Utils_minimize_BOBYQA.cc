@@ -137,7 +137,7 @@ namespace Utils
     m_gnew.resize( m_neq );
 
     m_xpt.resize( m_neq, m_npt );   // Matrix: N rows, NPT columns
-    m_bmat.resize( m_dim, m_neq );  // Matrix: (NPT+N) rows, N columns
+    m_bmat.resize( m_neq, m_dim );  // Matrix: N rows, (NPT+N) columns
 
     // ZMAT matrix: NPT rows, (NPT-N-1) columns (minimum 1 column)
     const integer zmat_cols = std::max<integer>( m_npt - m_neq - 1, 1 );
@@ -420,7 +420,7 @@ namespace Utils
           // Calcola vettori temporanei per l'aggiornamento
           for ( integer i = 0; i < m_neq; ++i )
           {
-            W( i )      = m_bmat( k, i );
+            W( i )      = m_bmat( i, k );
             m_vlag( i ) = sum * m_xpt( i, k ) + temp * m_xopt( i );
           }
 
@@ -428,7 +428,7 @@ namespace Utils
           for ( integer i = 0; i < m_neq; ++i )
           {
             integer ip = m_npt + i;
-            for ( integer j = 0; j <= i; ++j ) { m_bmat( ip, j ) += W( i ) * m_vlag( j ) + m_vlag( i ) * W( j ); }
+            for ( integer j = 0; j <= i; ++j ) { m_bmat( j, ip ) += W( i ) * m_vlag( j ) + m_vlag( i ) * W( j ); }
           }
         }
 
@@ -450,14 +450,14 @@ namespace Utils
             for ( integer k = 0; k < m_npt; ++k ) sum += m_vlag( k ) * m_xpt( j, k );
             W( j ) = sum;
 
-            for ( integer k = 0; k < m_npt; ++k ) { m_bmat( k, j ) += sum * m_zmat( k, jj ); }
+            for ( integer k = 0; k < m_npt; ++k ) { m_bmat( j, k ) += sum * m_zmat( k, jj ); }
           }
 
           for ( integer i = 0; i < m_neq; ++i )
           {
             integer ip   = i + m_npt;
             Scalar  temp = W( i );
-            for ( integer j = 0; j <= i; ++j ) { m_bmat( ip, j ) += temp * W( j ); }
+            for ( integer j = 0; j <= i; ++j ) { m_bmat( j, ip ) += temp * W( j ); }
           }
         }
 
@@ -476,7 +476,7 @@ namespace Utils
           {
             m_hq( ih ) += W( i ) * m_xopt( j ) + m_xopt( i ) * W( j );
             // Rende simmetrica la parte di BMAT
-            m_bmat( m_npt + i, j ) = m_bmat( m_npt + j, i );
+            m_bmat( j, m_npt + i ) = m_bmat( i, m_npt + j );
             ++ih;
           }
         }
@@ -582,7 +582,7 @@ namespace Utils
       {
         Scalar suma    = m_xpt.col( k ).dot( m_d );                 // Proiezione sulla direzione d
         Scalar sumb    = m_xpt.col( k ).dot( m_xopt );              // Proiezione sul punto ottimo
-        Scalar sum     = m_bmat.row( k ).head( m_neq ).dot( m_d );  // Contributo di BMAT
+        Scalar sum     = m_bmat.col( k ).head( m_neq ).dot( m_d );  // Contributo di BMAT
         W( k )         = suma * ( Scalar( 0.5 ) * suma + sumb );    // Termine quadratico
         m_vlag( k )    = sum;                                       // Coefficiente di Lagrange
         W( m_npt + k ) = suma;                                      // Salva per uso successivo
@@ -609,11 +609,11 @@ namespace Utils
         m_dsq += m_d( j ) * m_d( j );  // Norma al quadrato della direzione
 
         Scalar sum = 0;
-        for ( integer k = 0; k < m_npt; ++k ) sum += W( k ) * m_bmat( k, j );
+        for ( integer k = 0; k < m_npt; ++k ) sum += W( k ) * m_bmat( j, k );
         bsum += sum * m_d( j );  // Contributo di BMAT
 
         integer jp = m_npt + j;
-        for ( integer i = 0; i < m_neq; ++i ) sum += m_bmat( jp, i ) * m_d( i );
+        for ( integer i = 0; i < m_neq; ++i ) sum += m_bmat( i, jp ) * m_d( i );
         m_vlag( jp ) = sum;            // Estende coefficienti di Lagrange
         bsum += sum * m_d( j );        // Completa bsum
         dx += m_d( j ) * m_xopt( j );  // Prodotto scalare con punto ottimo
@@ -875,7 +875,7 @@ namespace Utils
       for ( integer i = 0; i < m_neq; ++i )
       {
         m_xpt( i, m_knew - 1 ) = m_xnew( i );
-        W( i )                 = m_bmat( m_knew - 1, i );
+        W( i )                 = m_bmat( i, m_knew - 1 );
       }
 
       // Aggiorna gradiente con nuovo punto
@@ -948,7 +948,7 @@ namespace Utils
         for ( integer i = 0; i < m_neq; ++i )
         {
           Scalar sum = 0;
-          for ( integer k = 0; k < m_npt; ++k ) { sum += m_bmat( k, i ) * m_vlag( k ) + m_xpt( i, k ) * W( k ); }
+          for ( integer k = 0; k < m_npt; ++k ) { sum += m_bmat( i, k ) * m_vlag( k ) + m_xpt( i, k ) * W( k ); }
 
           // Gestione vincoli attivi
           if ( m_xopt( i ) == m_sl( i ) )
@@ -1250,23 +1250,24 @@ namespace Utils
     // Compute H column for knew
     std::fill( m_hcol.begin(), m_hcol.end(), 0 );
     integer i1 = m_npt - m_neq - 1;
-    for ( integer j = 1; j <= i1; ++j )
+    for ( integer j = 0; j < i1; ++j )
     {
-      Scalar temp = m_zmat( m_knew - 1, j - 1 );
-      for ( integer k = 1; k <= m_npt; ++k ) m_hcol[k - 1] += temp * m_zmat( k - 1, j - 1 );
+      Scalar temp = m_zmat( m_knew - 1, j );
+      m_hcol.noalias() += temp * m_zmat.col(j);
     }
     m_alpha   = m_hcol[m_knew - 1];
     Scalar ha = Scalar( 0.5 ) * m_alpha;
 
     // Compute gradient glag
-    for ( integer i = 1; i <= m_neq; ++i ) m_glag[i - 1] = m_bmat( m_knew - 1, i - 1 );
+    m_glag.noalias() = m_bmat.col(m_knew - 1);
 
-    for ( integer k = 1; k <= m_npt; ++k )
+    for ( integer k = 0; k < m_npt; ++k )
     {
-      Scalar temp = 0;
-      for ( integer j = 1; j <= m_neq; ++j ) temp += m_xpt( j - 1, k - 1 ) * m_xopt[j - 1];
-      temp *= m_hcol[k - 1];
-      for ( integer i = 1; i <= m_neq; ++i ) m_glag[i - 1] += temp * m_xpt( i - 1, k - 1 );
+      auto const & xptk = m_xpt.col( k );
+      Scalar temp = xptk.dot(m_xopt);
+      temp *= m_hcol(k);
+      //m_glag += temp * xptk; // @@@@@@@@@@@@
+      for ( integer i = 0; i < m_neq; ++i ) m_glag[i] += temp * xptk( i );
     }
 
     // Search best line
@@ -1292,31 +1293,35 @@ namespace Utils
       // bound projection - CORRETTA come originale
       for ( integer i = 1; i <= m_neq; ++i )
       {
-        Scalar temp = m_xpt( i - 1, k - 1 ) - m_xopt[i - 1];
+        auto const & xo = m_xopt[i - 1];
+        auto const & su = m_su[i - 1];
+        auto const & sl = m_sl[i - 1];
+
+        Scalar temp = m_xpt( i - 1, k - 1 ) - xo;
 
         if ( temp > 0 )
         {
-          if ( slbd * temp < m_sl[i - 1] - m_xopt[i - 1] )
+          if ( slbd * temp < sl - xo )
           {
-            slbd = ( m_sl[i - 1] - m_xopt[i - 1] ) / temp;
+            slbd = ( sl - xo ) / temp;
             ilbd = -i;
           }
-          if ( subd * temp > m_su[i - 1] - m_xopt[i - 1] )
+          if ( subd * temp > su - xo )
           {
-            subd = std::max( ( m_su[i - 1] - m_xopt[i - 1] ) / temp, sumin );
+            subd = std::max( ( su - xo ) / temp, sumin );
             iubd = i;
           }
         }
         else if ( temp < 0 )
         {
-          if ( slbd * temp > m_su[i - 1] - m_xopt[i - 1] )
+          if ( slbd * temp > su - xo )
           {
-            slbd = ( m_su[i - 1] - m_xopt[i - 1] ) / temp;
+            slbd = ( su - xo ) / temp;
             ilbd = i;
           }
-          if ( subd * temp < m_sl[i - 1] - m_xopt[i - 1] )
+          if ( subd * temp < sl - xo )
           {
-            subd = std::max( ( m_sl[i - 1] - m_xopt[i - 1] ) / temp, sumin );
+            subd = std::max( ( sl - xo ) / temp, sumin );
             iubd = -i;
           }
         }
@@ -1704,9 +1709,9 @@ namespace Utils
           m_gopt( nfm - 1 ) = ( f - fbeg ) / stepa;
           if ( m_npt < m_nf + m_neq )
           {
-            m_bmat( 0, nfm - 1 )               = -1 / stepa;
-            m_bmat( m_nf - 1, nfm - 1 )        = 1 / stepa;
-            m_bmat( m_npt + nfm - 1, nfm - 1 ) = -Scalar( 0.5 ) * rhosq;
+            m_bmat( nfm - 1, 0 )               = -1 / stepa;
+            m_bmat( nfm - 1, m_nf - 1 )        = 1 / stepa;
+            m_bmat( nfm - 1, m_npt + nfm - 1 ) = -Scalar( 0.5 ) * rhosq;
           }
         }
         else if ( m_nf >= m_neq + 2 )
@@ -1727,9 +1732,9 @@ namespace Utils
               m_xpt( nfx - 1, m_nf - 1         ) = stepa;
             }
           }
-          m_bmat( 0, nfx - 1 )                = -( stepa + stepb ) / ( stepa * stepb );
-          m_bmat( m_nf - 1, nfx - 1 )         = -Scalar( 0.5 ) / m_xpt( nfx - 1, m_nf - m_neq - 1 );
-          m_bmat( m_nf - m_neq - 1, nfx - 1 ) = -m_bmat( 0, nfx - 1 ) - m_bmat( m_nf - 1, nfx - 1 );
+          m_bmat( nfx - 1, 0 )                = -( stepa + stepb ) / ( stepa * stepb );
+          m_bmat( nfx - 1, m_nf - 1 )         = -Scalar( 0.5 ) / m_xpt( nfx - 1, m_nf - m_neq - 1 );
+          m_bmat( nfx - 1, m_nf - m_neq - 1 ) = -m_bmat( nfx - 1, 0 ) - m_bmat( nfx - 1, m_nf - 1 );
           m_zmat( 0, nfx - 1 )                = sqrt( Scalar( 2 ) ) / ( stepa * stepb );
           m_zmat( m_nf - 1, nfx - 1 )         = sqrt( Scalar( 0.5 ) ) / rhosq;
           m_zmat( m_nf - m_neq - 1, nfx - 1 ) = -m_zmat( 0, nfx - 1 ) - m_zmat( m_nf - 1, nfx - 1 );
@@ -1870,7 +1875,7 @@ namespace Utils
     m_xopt.setZero();
 
     // Azzeriamo le prime n righe di BMAT (che corrispondono ai termini lineari puri)
-    m_bmat.topRows( n ).setZero();
+    m_bmat.leftCols( n ).setZero();
 
     // ==============================================================================
     // STEP 4: Costruzione iniziale PTSAUX / BMAT / ZMAT
@@ -1899,9 +1904,9 @@ namespace Utils
         m_ptsid( jpn ) = Scalar( j + 1 ) / Scalar( np ) + sfrac;
 
         // Aggiornamento BMAT
-        m_bmat( jp, j )  = -diff_inv + inv_d0;
-        m_bmat( jpn, j ) = diff_inv + Scalar( 1 ) / d1;
-        m_bmat( 0, j )   = -m_bmat( jp, j ) - m_bmat( jpn, j );
+        m_bmat( j, jp  ) = -diff_inv + inv_d0;
+        m_bmat( j, jpn ) = diff_inv + Scalar( 1 ) / d1;
+        m_bmat( j, 0   ) = -m_bmat( j, jp ) - m_bmat( j, jpn );
 
         // Aggiornamento ZMAT (curvatura)
         Scalar z_base    = std::sqrt( Scalar( 2.0 ) ) / std::abs( d0 * d1 );
@@ -1912,11 +1917,10 @@ namespace Utils
       else
       {
         // Caso in cui abbiamo meno punti del necessario per il doppio stencil
-        m_bmat( 0, j )  = -inv_d0;
-        m_bmat( jp, j ) = inv_d0;
+        m_bmat( j, 0  )  = -inv_d0;
+        m_bmat( j, jp )  = inv_d0;
         // BMAT per termine quadratico nel caso degenere
-        m_bmat( j + npt, j ) = -Scalar( 0.5 ) * d0 *
-                               d0;  // Nota: indice fuori range standard, verifica dimensione m_bmat
+        m_bmat( j, j + npt ) = -Scalar( 0.5 ) * d0 * d0;  // Nota: indice fuori range standard, verifica dimensione m_bmat
       }
     }
 
@@ -1961,7 +1965,7 @@ namespace Utils
     {
       if ( k1 == k2 ) return;
 
-      m_bmat.row( k1 ).swap( m_bmat.row( k2 ) );
+      m_bmat.col( k1 ).swap( m_bmat.col( k2 ) );
       if ( nptm > 0 ) { m_zmat.row( k1 ).head( nptm ).swap( m_zmat.row( k2 ).head( nptm ) ); }
       std::swap( m_ptsid( k1 ), m_ptsid( k2 ) );
       std::swap( m_work( m_dim + k1 ), m_work( m_dim + k2 ) );
@@ -2040,7 +2044,7 @@ namespace Utils
 
       // PHASE 4: Calcola VLAG e BETA
       // Parte BMAT
-      m_vlag.head( npt ) = m_bmat.topRows( npt ) * w_vec.tail( n );
+      m_vlag.head( npt ) = m_bmat.leftCols( npt ).transpose() * w_vec.tail( n );
 
       // Parte ZMAT
       m_beta = 0;
@@ -2066,11 +2070,11 @@ namespace Utils
       {
         Scalar sum = 0;
         // Somma sulle prime npt righe di BMAT
-        for ( integer k = 0; k < npt; ++k ) { sum += m_bmat( k, j ) * w_vec( k ); }
+        for ( integer k = 0; k < npt; ++k ) { sum += m_bmat( j, k ) * w_vec( k ); }
         bsum += sum * w_vec( npt + j );
 
         // Somma sulle righe da npt in poi di BMAT
-        for ( integer ip = npt; ip < npt + n; ++ip ) { sum += m_bmat( ip, j ) * w_vec( ip ); }
+        for ( integer ip = npt; ip < npt + n; ++ip ) { sum += m_bmat( j, ip ) * w_vec( ip ); }
         bsum += sum * w_vec( npt + j );
         m_vlag( npt + j ) = sum;
       }
@@ -2222,12 +2226,6 @@ namespace Utils
   void
   BOBYQA_minimizer<Scalar>::trsbox()
   {
-    // ========================================================================
-    // COSTANTI NUMERICHE
-    // ========================================================================
-
-    constexpr Scalar tol_convergence = Scalar( 1e-4 );  ///< Tolleranza per convergenza
-    constexpr Scalar tol_step        = Scalar( 0.01 );  ///< Tolleranza passo minimo
 
     // ========================================================================
     // VARIABILI LOCALI
@@ -2457,7 +2455,7 @@ namespace Utils
        * Questo garantisce che ulteriori iterazioni non migliorerebbero
        * significativamente la soluzione.
        */
-      if ( gredsq * delsq <= tol_convergence * qred * qred )
+      if ( gredsq * delsq <= m_tol_convergence * qred * qred )
       {
         converged = true;
         break;
@@ -2612,7 +2610,7 @@ namespace Utils
       if ( stplen < blen )
       {
         // Non abbiamo raggiunto il bordo
-        if ( iterc == itermax || sdec <= tol_step * qred )
+        if ( iterc == itermax || sdec <= m_tol_step * qred )
         {
           converged = true;
           break;
@@ -2684,7 +2682,7 @@ namespace Utils
          * direzione ortogonale significativa.
          */
         const Scalar temp = gredsq * dredsq - dredg * dredg;
-        if ( temp <= tol_convergence * qred * qred ) { break; }
+        if ( temp <= m_tol_convergence * qred * qred ) { break; }
 
         /**
          * Calcola la direzione ortogonale a d usando Gram-Schmidt:
@@ -2955,7 +2953,7 @@ namespace Utils
         }
 
         // Test di convergenza
-        if ( sdec <= tol_step * qred ) { alternative_converged = true; }
+        if ( sdec <= m_tol_step * qred ) { alternative_converged = true; }
       }
     }
 
@@ -3189,7 +3187,7 @@ namespace Utils
     const Scalar scale_tau  = tau / sqrt_denom;                      // Fattore di scala per ZMAT
 
     // Aggiornamento vettoriale della prima colonna di ZMAT
-    m_zmat.col( 0 ).head( m_npt ) = scale_tau * m_zmat.col( 0 ).head( m_npt ) - scale_z * m_vlag.head( m_npt );
+    m_zmat.col( 0 ) = scale_tau * m_zmat.col( 0 ) - scale_z * m_vlag.head( m_npt );
 
     // ========================================================================
     // FASE 4: Aggiornamento della matrice BMAT (simmetrica)
@@ -3209,7 +3207,7 @@ namespace Utils
       const integer jp = m_npt + j;  // Indice esteso (0-based)
 
       // Salva il valore corrente di BMAT(m_knew-1, j) nel vettore di lavoro
-      work( jp ) = m_bmat( m_knew - 1, j );
+      work( jp ) = m_bmat( j, m_knew - 1 );
 
       /**
        * Calcola i coefficienti per l'aggiornamento della colonna j.
@@ -3226,19 +3224,19 @@ namespace Utils
        */
 
       // Parte 1: Aggiorna le prime m_npt righe (vettoriale)
-      m_bmat.col( j ).head( m_npt ) += tempa * m_vlag.head( m_npt ) + tempb * work.head( m_npt );
+      m_bmat.row( j ).head( m_npt ) += tempa * m_vlag.head( m_npt ) + tempb * work.head( m_npt );
 
       // Parte 2: Aggiorna le righe da m_npt a jp
       for ( integer i = m_npt; i <= jp; ++i )
       {
-        m_bmat( i, j ) += tempa * m_vlag( i ) + tempb * work( i );
+        m_bmat( j, i ) += tempa * m_vlag( i ) + tempb * work( i );
 
         /**
          * Mantieni la simmetria: BMAT(i,j) = BMAT(j,i-m_npt)
          * Questo è necessario perché BMAT memorizza una matrice concettualmente
          * simmetrica in una rappresentazione rettangolare.
          */
-        m_bmat( jp, i - m_npt ) = m_bmat( i, j );
+        m_bmat( i - m_npt, jp ) = m_bmat( j, i );
       }
     }
   }
