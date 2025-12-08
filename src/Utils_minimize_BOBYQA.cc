@@ -136,7 +136,7 @@ namespace Utils
     m_hcol.resize( m_npt );
     m_gnew.resize( m_neq );
 
-    m_xpt.resize( m_npt, m_neq );   // Matrix: NPT rows, N columns
+    m_xpt.resize( m_neq, m_npt );   // Matrix: N rows, NPT columns
     m_bmat.resize( m_dim, m_neq );  // Matrix: (NPT+N) rows, N columns
 
     // ZMAT matrix: NPT rows, (NPT-N-1) columns (minimum 1 column)
@@ -245,8 +245,7 @@ namespace Utils
     Scalar xoptsq = 0;
     for ( integer i = 0; i < m_neq; ++i )
     {
-      m_xopt( i ) = m_xpt( m_kopt - 1,
-                           i );  // kopt from prelim is 1-based in original; we used kopt as returned, keep -1
+      m_xopt( i ) = m_xpt( i, m_kopt - 1 );  // kopt from prelim is 1-based in original; we used kopt as returned, keep -1
       xoptsq += m_xopt( i ) * m_xopt( i );
     }
     Scalar  fsave  = m_fval( 0 );
@@ -320,9 +319,9 @@ namespace Utils
         {
           for ( integer k = 0; k < m_npt; ++k )
           {
-            Scalar temp = m_xpt.row( k ).dot( m_xopt );   // Prodotto scalare punto interpolazione con ottimo
+            Scalar temp = m_xpt.col( k ).dot( m_xopt );   // Prodotto scalare punto interpolazione con ottimo
             temp *= m_pq( k );                            // Moltiplica per coefficiente polinomiale
-            m_gopt += temp * m_xpt.row( k ).transpose();  // Aggiunge al gradiente
+            m_gopt += temp * m_xpt.col( k );  // Aggiunge al gradiente
           }
         }
       }
@@ -376,7 +375,7 @@ namespace Utils
             curv = m_hq[( j + ( j + 1 ) * j / 2 )];  // Elemento diagonale della Hessiana
             for ( integer k = 0; k < m_npt; ++k )
             {
-              Scalar t = m_xpt( k, j );
+              Scalar t = m_xpt( j, k );
               curv += m_pq( k ) * t * t;  // Contributo dei punti di interpolazione
             }
             bdtest += Scalar( 0.5 ) * curv * rho;
@@ -414,7 +413,7 @@ namespace Utils
         for ( integer k = 0; k < m_npt; ++k )
         {
           sumpq += m_pq( k );
-          Scalar sum     = -Scalar( 0.5 ) * xoptsq + m_xpt.row( k ).dot( m_xopt );
+          Scalar sum     = -Scalar( 0.5 ) * xoptsq + m_xpt.col( k ).dot( m_xopt );
           W( m_npt + k ) = sum;
           Scalar temp    = fracsq - Scalar( 0.5 ) * sum;
 
@@ -422,7 +421,7 @@ namespace Utils
           for ( integer i = 0; i < m_neq; ++i )
           {
             W( i )      = m_bmat( k, i );
-            m_vlag( i ) = sum * m_xpt( k, i ) + temp * m_xopt( i );
+            m_vlag( i ) = sum * m_xpt( i, k ) + temp * m_xopt( i );
           }
 
           // Aggiorna la parte inferiore di BMAT
@@ -448,7 +447,7 @@ namespace Utils
           for ( integer j = 0; j < m_neq; ++j )
           {
             Scalar sum = ( fracsq * sumz - Scalar( 0.5 ) * sumw ) * m_xopt( j );
-            for ( integer k = 0; k < m_npt; ++k ) sum += m_vlag( k ) * m_xpt( k, j );
+            for ( integer k = 0; k < m_npt; ++k ) sum += m_vlag( k ) * m_xpt( j, k );
             W( j ) = sum;
 
             for ( integer k = 0; k < m_npt; ++k ) { m_bmat( k, j ) += sum * m_zmat( k, jj ); }
@@ -469,8 +468,8 @@ namespace Utils
           W( j ) = -Scalar( 0.5 ) * sumpq * m_xopt( j );
           for ( integer k = 0; k < m_npt; ++k )
           {
-            W( j ) += m_pq( k ) * m_xpt( k, j );
-            m_xpt( k, j ) -= m_xopt( j );  // Shift del punto di interpolazione
+            W( j ) += m_pq( k ) * m_xpt( j, k );
+            m_xpt( j, k ) -= m_xopt( j );  // Shift del punto di interpolazione
           }
 
           for ( integer i = 0; i <= j; ++i )
@@ -519,7 +518,7 @@ namespace Utils
       {
         for ( integer i = 0; i < m_neq; ++i )
         {
-          m_xopt( i ) = m_xpt( m_kopt - 1, i );
+          m_xopt( i ) = m_xpt( i, m_kopt - 1 );
           xoptsq += m_xopt( i ) * m_xopt( i );
         }
       }
@@ -581,8 +580,8 @@ namespace Utils
       // Fase 1: Calcola contributi base dai punti di interpolazione
       for ( integer k = 0; k < m_npt; ++k )
       {
-        Scalar suma    = m_xpt.row( k ).dot( m_d );                 // Proiezione sulla direzione d
-        Scalar sumb    = m_xpt.row( k ).dot( m_xopt );              // Proiezione sul punto ottimo
+        Scalar suma    = m_xpt.col( k ).dot( m_d );                 // Proiezione sulla direzione d
+        Scalar sumb    = m_xpt.col( k ).dot( m_xopt );              // Proiezione sul punto ottimo
         Scalar sum     = m_bmat.row( k ).head( m_neq ).dot( m_d );  // Contributo di BMAT
         W( k )         = suma * ( Scalar( 0.5 ) * suma + sumb );    // Termine quadratico
         m_vlag( k )    = sum;                                       // Coefficiente di Lagrange
@@ -677,7 +676,7 @@ namespace Utils
           Scalar den = m_beta * hdiag + m_vlag( k ) * m_vlag( k );
 
           // Calcola distanza normalizzata dal punto ottimo
-          distsq      = ( m_xpt.row( k ) - m_xopt.transpose() ).squaredNorm();
+          distsq      = ( m_xpt.col( k ) - m_xopt ).squaredNorm();
           Scalar temp = distsq / delsq;
           temp        = temp * temp;
           if ( temp < 1 ) temp = 1;  // Evita valori troppo piccoli
@@ -825,7 +824,7 @@ namespace Utils
             for ( integer jj = 0; jj < nptm; ++jj ) { hdiag += m_zmat( k, jj ) * m_zmat( k, jj ); }
             Scalar den = m_beta * hdiag + m_vlag( k ) * m_vlag( k );
 
-            distsq      = ( m_xpt.row( k ) - m_xnew.transpose() ).squaredNorm();
+            distsq      = ( m_xpt.col( k ) - m_xnew ).squaredNorm();
             Scalar temp = distsq / delsq;
             temp        = temp * temp;
             if ( temp < 1 ) temp = 1;
@@ -856,10 +855,10 @@ namespace Utils
       m_pq( m_knew - 1 ) = 0;
       for ( integer i = 0; i < m_neq; ++i )
       {
-        Scalar temp = pqold * m_xpt( m_knew - 1, i );
+        Scalar temp = pqold * m_xpt( i, m_knew - 1 );
         for ( integer j = 0; j <= i; ++j )
         {
-          m_hq[ih] += temp * m_xpt( m_knew - 1, j );
+          m_hq[ih] += temp * m_xpt( j, m_knew - 1 );
           ++ih;
         }
       }
@@ -875,7 +874,7 @@ namespace Utils
       m_fval( m_knew - 1 ) = f;
       for ( integer i = 0; i < m_neq; ++i )
       {
-        m_xpt( m_knew - 1, i ) = m_xnew( i );
+        m_xpt( i, m_knew - 1 ) = m_xnew( i );
         W( i )                 = m_bmat( m_knew - 1, i );
       }
 
@@ -884,9 +883,9 @@ namespace Utils
       {
         Scalar suma = 0;
         for ( integer jj = 0; jj < nptm; ++jj ) { suma += m_zmat( m_knew - 1, jj ) * m_zmat( k, jj ); }
-        Scalar sumb = m_xpt.row( k ).dot( m_xopt );
+        Scalar sumb = m_xpt.col( k ).dot( m_xopt );
         Scalar temp = suma * sumb;
-        for ( integer i = 0; i < m_neq; ++i ) { W( i ) += temp * m_xpt( k, i ); }
+        for ( integer i = 0; i < m_neq; ++i ) { W( i ) += temp * m_xpt( i, k ); }
       }
 
       for ( integer i = 0; i < m_neq; ++i ) { m_gopt( i ) += diff * W( i ); }
@@ -913,9 +912,9 @@ namespace Utils
 
         for ( integer k = 0; k < m_npt; ++k )
         {
-          Scalar temp = m_xpt.row( k ).dot( m_d );
+          Scalar temp = m_xpt.col( k ).dot( m_d );
           temp *= m_pq( k );
-          for ( integer i = 0; i < m_neq; ++i ) { m_gopt( i ) += temp * m_xpt( k, i ); }
+          for ( integer i = 0; i < m_neq; ++i ) { m_gopt( i ) += temp * m_xpt( i, k ); }
         }
       }
 
@@ -937,7 +936,7 @@ namespace Utils
 
         for ( integer k = 0; k < m_npt; ++k )
         {
-          Scalar sum     = m_xpt.row( k ).dot( m_xopt );
+          Scalar sum     = m_xpt.col( k ).dot( m_xopt );
           W( m_npt + k ) = W( k );
           W( k ) *= sum;
         }
@@ -949,7 +948,7 @@ namespace Utils
         for ( integer i = 0; i < m_neq; ++i )
         {
           Scalar sum = 0;
-          for ( integer k = 0; k < m_npt; ++k ) { sum += m_bmat( k, i ) * m_vlag( k ) + m_xpt( k, i ) * W( k ); }
+          for ( integer k = 0; k < m_npt; ++k ) { sum += m_bmat( k, i ) * m_vlag( k ) + m_xpt( i, k ) * W( k ); }
 
           // Gestione vincoli attivi
           if ( m_xopt( i ) == m_sl( i ) )
@@ -1020,7 +1019,7 @@ namespace Utils
       // Trova il punto più lontano dal punto ottimo
       for ( integer k = 0; k < m_npt; ++k )
       {
-        Scalar sum = ( m_xpt.row( k ) - m_xopt.transpose() ).squaredNorm();
+        Scalar sum = ( m_xpt.col( k ) - m_xopt ).squaredNorm();
         if ( sum > max_dist )
         {
           max_dist = sum;
@@ -1229,7 +1228,8 @@ namespace Utils
           m_nf, f, print_vec( X, 6 ) );
     }
 
-    if ( status == Status::BOBYQA_SUCCESS ) m_xbase( 0 ) = f;
+    // non ha senso lo rimuovo
+    //if ( status == Status::BOBYQA_SUCCESS ) m_xbase( 0 ) = f;
     return status;
   }
 
@@ -1264,9 +1264,9 @@ namespace Utils
     for ( integer k = 1; k <= m_npt; ++k )
     {
       Scalar temp = 0;
-      for ( integer j = 1; j <= m_neq; ++j ) temp += m_xpt( k - 1, j - 1 ) * m_xopt[j - 1];
+      for ( integer j = 1; j <= m_neq; ++j ) temp += m_xpt( j - 1, k - 1 ) * m_xopt[j - 1];
       temp *= m_hcol[k - 1];
-      for ( integer i = 1; i <= m_neq; ++i ) m_glag[i - 1] += temp * m_xpt( k - 1, i - 1 );
+      for ( integer i = 1; i <= m_neq; ++i ) m_glag[i - 1] += temp * m_xpt( i - 1, k - 1 );
     }
 
     // Search best line
@@ -1278,7 +1278,7 @@ namespace Utils
       Scalar dderiv = 0, distsq = 0;
       for ( integer i = 1; i <= m_neq; ++i )
       {
-        Scalar temp = m_xpt( k - 1, i - 1 ) - m_xopt[i - 1];
+        Scalar temp = m_xpt( i - 1, k - 1 ) - m_xopt[i - 1];
         dderiv += m_glag[i - 1] * temp;
         distsq += temp * temp;
       }
@@ -1292,7 +1292,7 @@ namespace Utils
       // bound projection - CORRETTA come originale
       for ( integer i = 1; i <= m_neq; ++i )
       {
-        Scalar temp = m_xpt( k - 1, i - 1 ) - m_xopt[i - 1];
+        Scalar temp = m_xpt( i - 1, k - 1 ) - m_xopt[i - 1];
 
         if ( temp > 0 )
         {
@@ -1402,7 +1402,7 @@ namespace Utils
       Scalar distsq = 0;
       for ( integer i = 1; i <= m_neq; ++i )
       {
-        Scalar temp = m_xpt( ksav - 1, i - 1 ) - m_xopt[i - 1];
+        Scalar temp = m_xpt( i - 1, ksav - 1 ) - m_xopt[i - 1];
         distsq += temp * temp;
       }
       stpsav = m_adelt / sqrt( distsq );
@@ -1411,7 +1411,7 @@ namespace Utils
 
     for ( integer i = 1; i <= m_neq; ++i )
     {
-      Scalar v      = m_xopt[i - 1] + stpsav * ( m_xpt( ksav - 1, i - 1 ) - m_xopt[i - 1] );
+      Scalar v      = m_xopt[i - 1] + stpsav * ( m_xpt( i - 1, ksav - 1 ) - m_xopt[i - 1] );
       v             = std::min( v, m_su[i - 1] );
       v             = std::max( v, m_sl[i - 1] );
       m_xnew[i - 1] = v;
@@ -1516,7 +1516,7 @@ namespace Utils
       for ( integer k = 1; k <= m_npt; ++k )
       {
         Scalar temp = 0;
-        for ( integer j = 1; j <= m_neq; ++j ) { temp += m_xpt( k - 1, j - 1 ) * W[j - 1]; }
+        for ( integer j = 1; j <= m_neq; ++j ) { temp += m_xpt( j - 1, k - 1 ) * W[j - 1]; }
         curv += m_hcol[k - 1] * temp * temp;
       }
 
@@ -1601,12 +1601,9 @@ namespace Utils
 
     /* Set XBASE to the initial vector of variables, and set the initial elements
        of XPT, BMAT, HQ, PQ and ZMAT to zero. */
-    for ( integer j = 1; j <= m_neq; ++j )
-    {
-      m_xbase( j - 1 ) = X( j - 1 );
-      for ( integer k = 1; k <= m_npt; ++k ) m_xpt( k - 1, j - 1 ) = 0;
-      for ( integer i = 1; i <= m_dim; ++i ) m_bmat( i - 1, j - 1 ) = 0;
-    }
+    m_xbase.noalias() = X;
+    m_xpt.setZero();
+    m_bmat.setZero();
 
     integer i1 = m_neq * np / 2;
     for ( integer ih = 1; ih <= i1; ++ih ) m_hq( ih - 1 ) = 0;
@@ -1633,11 +1630,11 @@ namespace Utils
         {
           stepa = m_rhobeg;
           if ( m_su( nfm - 1 ) == 0 ) { stepa = -stepa; }
-          m_xpt( m_nf - 1, nfm - 1 ) = stepa;
+          m_xpt( nfm - 1, m_nf - 1 ) = stepa;
         }
         else if ( nfm > m_neq )
         {
-          stepa = m_xpt( m_nf - m_neq - 1, nfx - 1 );
+          stepa = m_xpt( nfx - 1, m_nf - m_neq - 1 );
           stepb = -m_rhobeg;
           if ( m_sl( nfx - 1 ) == 0 )
           {
@@ -1649,7 +1646,7 @@ namespace Utils
             stepb = -2 * m_rhobeg;
             stepb = std::max( stepb, m_sl( nfx - 1 ) );
           }
-          m_xpt( m_nf - 1, nfx - 1 ) = stepb;
+          m_xpt( nfx - 1, m_nf - 1 ) = stepb;
         }
       }
       else
@@ -1663,19 +1660,19 @@ namespace Utils
           jpt   = ipt - m_neq;
           ipt   = itemp;
         }
-        m_xpt( m_nf - 1, ipt - 1 ) = m_xpt( ipt, ipt - 1 );
-        m_xpt( m_nf - 1, jpt - 1 ) = m_xpt( jpt, jpt - 1 );
+        m_xpt( ipt - 1, m_nf - 1 ) = m_xpt( ipt - 1, ipt );
+        m_xpt( jpt - 1, m_nf - 1 ) = m_xpt( jpt - 1, jpt );
       }
 
       /* Calculate the next value of F.  The least function value so far and its
          index are required. */
       for ( integer j = 1; j <= m_neq; ++j )
       {
-        Scalar temp = m_xbase( j - 1 ) + m_xpt( m_nf - 1, j - 1 );
+        Scalar temp = m_xbase( j - 1 ) + m_xpt( j - 1, m_nf - 1 );
         temp        = std::max( temp, m_xlower( j - 1 ) );
         X( j - 1 )  = std::min( temp, m_xupper( j - 1 ) );
-        if ( m_xpt( m_nf - 1, j - 1 ) == m_sl( j - 1 ) ) X( j - 1 ) = m_xlower( j - 1 );
-        if ( m_xpt( m_nf - 1, j - 1 ) == m_su( j - 1 ) ) X( j - 1 ) = m_xupper( j - 1 );
+        if ( m_xpt( j - 1, m_nf - 1 ) == m_sl( j - 1 ) ) X( j - 1 ) = m_xlower( j - 1 );
+        if ( m_xpt( j - 1, m_nf - 1 ) == m_su( j - 1 ) ) X( j - 1 ) = m_xupper( j - 1 );
       }
 
       Scalar f = objfun( X );
@@ -1726,12 +1723,12 @@ namespace Utils
               m_fval( m_nf - 1 )         = m_fval( m_nf - m_neq - 1 );
               m_fval( m_nf - m_neq - 1 ) = f;
               if ( m_kopt == m_nf ) m_kopt = m_nf - m_neq;
-              m_xpt( m_nf - m_neq - 1, nfx - 1 ) = stepb;
-              m_xpt( m_nf - 1, nfx - 1 )         = stepa;
+              m_xpt( nfx - 1, m_nf - m_neq - 1 ) = stepb;
+              m_xpt( nfx - 1, m_nf - 1         ) = stepa;
             }
           }
           m_bmat( 0, nfx - 1 )                = -( stepa + stepb ) / ( stepa * stepb );
-          m_bmat( m_nf - 1, nfx - 1 )         = -Scalar( 0.5 ) / m_xpt( m_nf - m_neq - 1, nfx - 1 );
+          m_bmat( m_nf - 1, nfx - 1 )         = -Scalar( 0.5 ) / m_xpt( nfx - 1, m_nf - m_neq - 1 );
           m_bmat( m_nf - m_neq - 1, nfx - 1 ) = -m_bmat( 0, nfx - 1 ) - m_bmat( m_nf - 1, nfx - 1 );
           m_zmat( 0, nfx - 1 )                = sqrt( Scalar( 2 ) ) / ( stepa * stepb );
           m_zmat( m_nf - 1, nfx - 1 )         = sqrt( Scalar( 0.5 ) ) / rhosq;
@@ -1747,7 +1744,7 @@ namespace Utils
         m_zmat( m_nf - 1, nfx - 1 ) = recip;
         m_zmat( ipt, nfx - 1 )      = -recip;
         m_zmat( jpt, nfx - 1 )      = -recip;
-        Scalar temp                 = m_xpt( m_nf - 1, ipt - 1 ) * m_xpt( m_nf - 1, jpt - 1 );
+        Scalar temp                 = m_xpt( ipt - 1, m_nf - 1 ) * m_xpt( jpt - 1, m_nf - 1 );
         m_hq( ih - 1 )              = ( fbeg - m_fval( ipt ) - m_fval( jpt ) + f ) / temp;
       }
     } while ( m_nf < m_npt && m_nf < m_maxfun );
@@ -1792,7 +1789,7 @@ namespace Utils
     // ==============================================================================
     // Spostiamo tutti i punti XPT in modo che XOPT diventi l'origine (0,0...).
     // XPT è (npt x n). Sottraiamo XOPT (n x 1) da ogni riga.
-    m_xpt.rowwise() -= m_xopt.transpose();
+    m_xpt.transpose().rowwise() -= m_xopt.transpose();
 
     // Calcoliamo la somma dei pesi PQ
     sumpq = m_pq.sum();
@@ -1800,7 +1797,7 @@ namespace Utils
     // Calcoliamo le norme quadrate di ogni punto dopo lo shift
     // m_work[m_dim ... m_dim+npt-1] conterrà le distanze.
     // Usiamo segment() per accedere alla parte del vettore m_work dedicata ai punti.
-    m_work.tail( npt ) = m_xpt.rowwise().squaredNorm();
+    m_work.tail( npt ) = m_xpt.transpose().rowwise().squaredNorm();
 
     // Troviamo la distanza massima per il calcolo di winc
     winc = m_work.tail( npt ).maxCoeff();
@@ -1817,13 +1814,13 @@ namespace Utils
     // Tuttavia, XPT è già shiftato. La formula originale usa XPT shiftato.
 
     // Per ottimizzare, calcoliamo prima il vettore ausiliario nelle prime 'n' posizioni di work.
-    // m_work.head(n) = 0.5 * sumpq * m_xopt + m_xpt.transpose() * m_pq;
+    // m_work.head(n) = 0.5 * sumpq * m_xopt + m_xpt * m_pq;
 
     // Attenzione: m_xopt nel codice originale viene usato nel loop HQ *prima* di essere azzerato nello step 3.
     // XPT è stato modificato in place.
     // Ricostruiamo la logica vettoriale:
     Vector vec_correction = ( Scalar( 0.5 ) * sumpq ) * m_xopt;
-    vec_correction += m_xpt.transpose() * m_pq;
+    vec_correction += m_xpt * m_pq;
 
     // Aggiornamento packed upper-triangular di HQ
     // HQ += vec_correction * xopt^T + xopt * vec_correction^T
@@ -2007,7 +2004,7 @@ namespace Utils
 
       // PHASE 3: Calcola w_vec (come nel codice originale)
       Vector w_vec( npt + n );
-      w_vec.tail( n ) = m_xpt.row( m_knew - 1 );
+      w_vec.tail( n ) = m_xpt.col( m_knew - 1 );
 
       // Calcola w_vec.head(npt)
       for ( integer k = 0; k < npt; ++k )
@@ -2022,7 +2019,7 @@ namespace Utils
         if ( m_ptsid( k ) == 0 )
         {
           // Punto originale: prodotto scalare
-          sum = m_xpt.row( k ).dot( m_xpt.row( m_knew ) );
+          sum = m_xpt.col( k ).dot( m_xpt.col( m_knew ) );
         }
         else
         {
@@ -2063,7 +2060,7 @@ namespace Utils
 
       // Calcola bsum e distsq
       Scalar bsum   = 0;
-      Scalar distsq = m_xpt.row( m_knew - 1 ).squaredNorm();
+      Scalar distsq = m_xpt.col( m_knew - 1 ).squaredNorm();
 
       for ( integer j = 0; j < n; ++j )
       {
@@ -2378,10 +2375,10 @@ namespace Utils
         if ( m_pq( k ) != 0 )
         {
           // temp = XPT_k^T * s (prodotto scalare)
-          const Scalar temp = m_xpt.row( k ).head( m_neq ).dot( s_in );
+          const Scalar temp = m_xpt.col( k ).head( m_neq ).dot( s_in );
 
           // hs += PQ_k * temp * XPT_k (rank-1 update)
-          hs_out.head( m_neq ) += ( m_pq( k ) * temp ) * m_xpt.row( k ).head( m_neq ).transpose();
+          hs_out.head( m_neq ) += ( m_pq( k ) * temp ) * m_xpt.col( k ).head( m_neq ).transpose();
         }
       }
     };

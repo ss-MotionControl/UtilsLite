@@ -260,21 +260,6 @@ namespace Utils
       fmt::print( "\n    Return from BOBYQA because {}.\n", reason );
     }
 
-    void
-    print_x( FILE * output, Scalar const x[], Scalar const dx[] )
-    {
-      integer i, k;
-
-      if ( output == NULL ) { output = stdout; }
-      for ( i = 0; i < m_neq; ++i )
-      {
-        k = i % 5;
-        if ( k == 0 ) fprintf( output, "  " );
-        fprintf( output, "%15.6E", ( dx == NULL ? x[i] : x[i] + dx[i] ) );
-        if ( i == m_neq - 1 || k == 4 ) { fprintf( output, "\n" ); }
-      }
-    }
-
     void altmov();
     void prelim( bobyqa_objfun const & objfun, Vector & x );
     void trsbox();
