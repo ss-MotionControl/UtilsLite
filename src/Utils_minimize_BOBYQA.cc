@@ -811,7 +811,7 @@ namespace Utils
         // Se il passo migliora la funzione, rivaluta scelta punto da rimuovere
         if ( f < fopt )
         {
-          integer ksav   = m_knew+1;
+          integer ksav   = m_knew;
           Scalar  densav = m_denom;
           Scalar  delsq  = m_delta * m_delta;
           Scalar  scaden = 0;
@@ -840,7 +840,7 @@ namespace Utils
 
           if ( scaden <= Scalar( 0.5 ) * biglsq || m_knew == -1 )
           {
-            m_knew  = ksav-1;
+            m_knew  = ksav;
             m_denom = densav;
           }
         }
@@ -1244,7 +1244,7 @@ namespace Utils
     Scalar  csave  = 0;
     Scalar  stpsav = 0;
     Scalar  step   = 0;
-    integer ksav   = 0;
+    integer ksav   = -1;
     integer ibdsav = 0;
 
     // Compute H column for knew
@@ -1272,15 +1272,15 @@ namespace Utils
 
     // Search best line
     Scalar presav = 0;
-    for ( integer k = 1; k <= m_npt; ++k )
+    for ( integer k = 0; k < m_npt; ++k )
     {
-      if ( k == m_kopt+1 ) continue;
+      if ( k == m_kopt ) continue;
 
       Scalar dderiv = 0, distsq = 0;
-      for ( integer i = 1; i <= m_neq; ++i )
+      for ( integer i = 0; i < m_neq; ++i )
       {
-        Scalar temp = m_xpt( i - 1, k - 1 ) - m_xopt[i - 1];
-        dderiv += m_glag[i - 1] * temp;
+        Scalar temp = m_xpt( i, k ) - m_xopt(i);
+        dderiv += m_glag(i) * temp;
         distsq += temp * temp;
       }
 
@@ -1291,25 +1291,25 @@ namespace Utils
       Scalar sumin = std::min( Scalar( 1 ), subd );
 
       // bound projection - CORRETTA come originale
-      for ( integer i = 1; i <= m_neq; ++i )
+      for ( integer i = 0; i < m_neq; ++i )
       {
-        auto const & xo = m_xopt[i - 1];
-        auto const & su = m_su[i - 1];
-        auto const & sl = m_sl[i - 1];
+        auto const & xo = m_xopt(i);
+        auto const & su = m_su(i);
+        auto const & sl = m_sl(i);
 
-        Scalar temp = m_xpt( i - 1, k - 1 ) - xo;
+        Scalar temp = m_xpt( i, k ) - xo;
 
         if ( temp > 0 )
         {
           if ( slbd * temp < sl - xo )
           {
             slbd = ( sl - xo ) / temp;
-            ilbd = -i;
+            ilbd = -i-1;
           }
           if ( subd * temp > su - xo )
           {
             subd = std::max( ( su - xo ) / temp, sumin );
-            iubd = i;
+            iubd = i+1;
           }
         }
         else if ( temp < 0 )
@@ -1317,12 +1317,12 @@ namespace Utils
           if ( slbd * temp > su - xo )
           {
             slbd = ( su - xo ) / temp;
-            ilbd = i;
+            ilbd = i+1;
           }
           if ( subd * temp < sl - xo )
           {
             subd = std::max( ( sl - xo ) / temp, sumin );
-            iubd = -i;
+            iubd = -i-1;
           }
         }
       }
@@ -1330,7 +1330,7 @@ namespace Utils
       Scalar  vlag;
       integer isbd;
 
-      if ( k-1 == m_knew )
+      if ( k == m_knew )
       {
         Scalar diff = dderiv - 1;
         step        = slbd;
@@ -1399,22 +1399,17 @@ namespace Utils
     }
 
     // construct xnew - Se ksav è ancora 0, c'è un problema
-    if ( ksav == 0 )
+    if ( ksav == -1 )
     {
       // Fallback: usa knew come ksav
-      ksav = m_knew+1;
+      ksav = m_knew;
       // Calcola un step di default
-      Scalar distsq = 0;
-      for ( integer i = 1; i <= m_neq; ++i )
-      {
-        Scalar temp = m_xpt( i - 1, ksav - 1 ) - m_xopt[i - 1];
-        distsq += temp * temp;
-      }
-      stpsav = m_adelt / sqrt( distsq );
+      Scalar dist = (m_xpt.col(ksav)-m_xopt).norm();
+      stpsav = m_adelt / dist;
       ibdsav = 0;
     }
     
-    m_xnew = ((m_xopt + stpsav * ( m_xpt.col(ksav - 1) - m_xopt ) ).cwiseMin(m_su)).cwiseMax(m_sl);
+    m_xnew = ((m_xopt + stpsav * ( m_xpt.col(ksav) - m_xopt ) ).cwiseMin(m_su)).cwiseMax(m_sl);
 
     // Applica i bound specifici
     if ( ibdsav < 0 )
@@ -1465,24 +1460,24 @@ namespace Utils
         step_local    = sqrt( temp / ggfree );
         ggfree        = 0;
 
-        for ( integer i = 1; i <= m_neq; ++i )
+        for ( integer i = 0; i < m_neq; ++i )
         {
-          if ( W[i - 1] == bigstp )
+          if ( W(i) == bigstp )
           {
-            Scalar cand = m_xopt[i - 1] - step_local * m_glag[i - 1];
-            if ( cand <= m_sl[i - 1] )
+            Scalar cand = m_xopt(i) - step_local * m_glag(i);
+            if ( cand <= m_sl(i) )
             {
-              W[i - 1] = m_sl[i - 1] - m_xopt[i - 1];
-              wfixsq += W[i - 1] * W[i - 1];
+              W(i) = m_sl(i) - m_xopt(i);
+              wfixsq += W(i) * W(i);
             }
-            else if ( cand >= m_su[i - 1] )
+            else if ( cand >= m_su(i) )
             {
-              W[i - 1] = m_su[i - 1] - m_xopt[i - 1];
-              wfixsq += W[i - 1] * W[i - 1];
+              W(i) = m_su(i) - m_xopt(i);
+              wfixsq += W(i) * W(i);
             }
             else
             {
-              ggfree += m_glag[i - 1] * m_glag[i - 1];
+              ggfree += m_glag(i) * m_glag(i);
             }
           }
         }
@@ -1490,30 +1485,26 @@ namespace Utils
       }
 
       Scalar gw = 0;
-      for ( integer i = 1; i <= m_neq; ++i )
+      for ( integer i = 0; i < m_neq; ++i )
       {
-        if ( W[i - 1] == bigstp )
+        if ( W(i) == bigstp )
         {
-          W[i - 1]      = -step_local * m_glag[i - 1];
-          Scalar v      = std::min( m_xopt[i - 1] + W[i - 1], m_su[i - 1] );
-          m_xalt[i - 1] = std::max( v, m_sl[i - 1] );
+          W(i)      = -step_local * m_glag(i);
+          Scalar v  = std::min( m_xopt(i) + W(i), m_su(i) );
+          m_xalt(i) = std::max( v, m_sl(i) );
         }
-        else if ( W[i - 1] == 0 ) { m_xalt[i - 1] = m_xopt[i - 1]; }
-        else if ( m_glag[i - 1] > 0 ) { m_xalt[i - 1] = m_sl[i - 1]; }
-        else
-        {
-          m_xalt[i - 1] = m_su[i - 1];
-        }
+        else if ( W(i)     == 0 ) m_xalt(i) = m_xopt(i);
+        else if ( m_glag(i) > 0 ) m_xalt(i) = m_sl(i);
+        else                      m_xalt(i) = m_su(i);
 
-        gw += m_glag[i - 1] * W[i - 1];
+        gw += m_glag(i) * W(i);
       }
 
       Scalar curv = 0;
-      for ( integer k = 1; k <= m_npt; ++k )
+      for ( integer k = 0; k < m_npt; ++k )
       {
-        Scalar temp = 0;
-        for ( integer j = 1; j <= m_neq; ++j ) { temp += m_xpt( j - 1, k - 1 ) * W[j - 1]; }
-        curv += m_hcol[k - 1] * temp * temp;
+        Scalar temp = W.head(m_neq).dot(m_xpt.col(k));
+        curv += m_hcol(k) * temp * temp;
       }
 
       if ( flip_grad ) curv = -curv;
@@ -1522,10 +1513,10 @@ namespace Utils
       if ( curv > -gw && curv < -one_plus_sqrt2 * gw )
       {
         Scalar scale = -gw / curv;
-        for ( integer i = 1; i <= m_neq; ++i )
+        for ( integer i = 0; i < m_neq; ++i )
         {
-          Scalar v      = std::min( m_xopt[i - 1] + scale * W[i - 1], m_su[i - 1] );
-          m_xalt[i - 1] = std::max( v, m_sl[i - 1] );
+          Scalar v  = std::min( m_xopt(i) + scale * W(i), m_su(i) );
+          m_xalt(i) = std::max( v, m_sl(i) );
         }
         Scalar temp = Scalar( 0.5 ) * gw * scale;
         result      = temp * temp;
@@ -1541,14 +1532,14 @@ namespace Utils
 
     // Evaluate downhill and uphill version
     Scalar c1 = compute_cauchy_step( false );
-    for ( integer i = 1; i <= m_neq; ++i ) { W[m_neq + i - 1] = m_xalt[i - 1]; }
+    for ( integer i = 0; i < m_neq; ++i ) W[m_neq + i] = m_xalt(i);
     csave = c1;
 
     Scalar c2 = compute_cauchy_step( true );
 
     if ( csave > c2 )
     {
-      for ( integer i = 1; i <= m_neq; ++i ) { m_xalt[i - 1] = W[m_neq + i - 1]; }
+      for ( integer i = 0; i < m_neq; ++i ) m_xalt(i) = W[m_neq + i];
       m_cauchy = csave;
     }
     else
@@ -2889,9 +2880,9 @@ namespace Utils
         redsav = 0;
         iu     = static_cast<integer>( angbd * Scalar( 17 ) + Scalar( 3.1 ) );
 
-        for ( integer i = 1; i <= iu; ++i )
+        for ( integer i = 0; i < iu; ++i )
         {
-          angt                   = angbd * Scalar( i ) / Scalar( iu );
+          angt                   = angbd * Scalar( i+1 ) / Scalar( iu );
           sth                    = ( angt + angt ) / ( 1 + angt * angt );
           const Scalar temp_curv = shs + angt * ( angt * dhd - dhs - dhs );
           rednew                 = sth * ( angt * dredg - sredg - Scalar( 0.5 ) * sth * temp_curv );
@@ -2899,10 +2890,10 @@ namespace Utils
           if ( rednew > redmax )
           {
             redmax = rednew;
-            isav   = i;
+            isav   = i+1;
             rdprev = redsav;
           }
-          else if ( i == isav + 1 ) { rdnext = rednew; }
+          else if ( i == isav ) { rdnext = rednew; }
           redsav = rednew;
         }
 
@@ -3095,202 +3086,201 @@ namespace Utils
     }
   }
 
-
   /**
-   * @brief Aggiorna le matrici BMAT e ZMAT dopo lo spostamento di un punto di interpolazione
+   * @brief Updates the BMAT and ZMAT matrices after shifting an interpolation point.
    *
-   * Questa funzione aggiorna le strutture dati necessarie per il modello quadratico
-   * quando un punto di interpolazione (indicizzato da m_knew) viene spostato in una
-   * nuova posizione. L'aggiornamento mantiene le proprietà di interpolazione del modello.
+   * This function updates the data structures required for the quadratic model
+   * when an interpolation point (indexed by m_knew) is moved to a new position.
+   * The update preserves the interpolation properties of the model.
    *
    * @details
-   * L'algoritmo esegue le seguenti operazioni:
-   * 1. Applica rotazioni di Givens per azzerare la riga m_knew di ZMAT (eccetto la prima colonna)
-   * 2. Calcola i parametri della formula di aggiornamento (alpha, tau)
-   * 3. Aggiorna la matrice ZMAT utilizzando una formula di rango-1
-   * 4. Aggiorna la matrice BMAT mantenendo la simmetria
+   * The algorithm performs the following operations:
+   * 1. Applies Givens rotations to zero out the m_knew-th row of ZMAT (except the first column).
+   * 2. Calculates the parameters for the update formula (alpha, tau).
+   * 3. Updates the ZMAT matrix using a rank-1 formula.
+   * 4. Updates the BMAT matrix while maintaining symmetry.
    *
-   * Le matrici BMAT e ZMAT sono rappresentazioni compatte della matrice Hessiana
-   * approssimata utilizzata nel modello quadratico dell'algoritmo BOBYQA.
+   * BMAT and ZMAT are compact representations of the approximate Hessian matrix
+   * used in the quadratic model of the BOBYQA algorithm.
    *
-   * @note Questa implementazione sfrutta le operazioni vettoriali di Eigen3 per
-   *       migliorare le prestazioni rispetto all'implementazione originale con loop espliciti.
+   * @note This implementation leverages Eigen3 vector operations to improve performance
+   * compared to the original implementation with explicit loops.
    *
-   * @pre m_knew deve essere un indice valido (1-based) di un punto di interpolazione
-   * @pre m_denom deve essere positivo per evitare divisioni per zero
-   * @pre Le dimensioni delle matrici devono essere coerenti con m_npt e m_neq
+   * @pre m_knew must be a valid index (1-based relative to logic, converted internally) of an interpolation point.
+   * @pre m_denom must be positive to avoid division by zero.
+   * @pre Matrix dimensions must be consistent with m_npt and m_neq.
    *
-   * @post La matrice ZMAT avrà zeri nella riga m_knew (eccetto eventualmente la colonna 0)
-   * @post La matrice BMAT sarà aggiornata e manterrà la simmetria
+   * @post ZMAT will have zeros in the m_knew-th row (except potentially column 0).
+   * @post BMAT will be updated and will maintain symmetry.
    *
-   * @tparam Scalar Tipo numerico (float, double, long double)
+   * @tparam Scalar Numeric type (float, double, long double).
    */
   template <typename Scalar>
   void
   BOBYQA_minimizer<Scalar>::update()
   {
-    // Costanti numeriche
+    // Numerical constants
     constexpr Scalar one          = Scalar( 1 );
     constexpr Scalar zero         = Scalar( 0 );
     constexpr Scalar ztest_factor = Scalar( 1e-20 );
 
-    // Dimensioni delle strutture dati
-    const integer nptm = m_npt - m_neq - 1;  // Numero di colonne di ZMAT
+    // Data structure dimensions
+    const integer nptm = m_npt - m_neq - 1;  // Number of columns in ZMAT part to be rotated
 
-    // Vettore di lavoro temporaneo per calcoli intermedi
-    // Dimensione: m_npt elementi per HLAG + m_neq elementi per coefficienti BMAT
+    // Temporary working vector for intermediate calculations
+    // Size: m_npt elements for HLAG + m_neq elements for BMAT coefficients
     Vector work( m_npt + m_neq );
 
     // ========================================================================
-    // FASE 1: Azzeramento riga KNEW di ZMAT mediante rotazioni di Givens
+    // PHASE 1: Zeroing out the KNEW-th row of ZMAT using Givens rotations
     // ========================================================================
 
     /**
-     * Calcola la soglia di tolleranza per determinare quali elementi di ZMAT
-     * sono sufficientemente grandi da richiedere una rotazione di Givens.
-     * Basato sul massimo valore assoluto presente in ZMAT.
+     * Calculate the tolerance threshold to determine which elements of ZMAT
+     * are large enough to require a Givens rotation.
+     * Based on the maximum absolute value present in the relevant part of ZMAT.
      */
     const Scalar ztest = m_zmat.topLeftCorner( m_npt, nptm ).cwiseAbs().maxCoeff() * ztest_factor;
 
     /**
-     * Applica rotazioni di Givens per azzerare la riga m_knew di ZMAT.
-     * Ogni rotazione opera sulle colonne 0 e j, azzerando l'elemento (m_knew-1, j).
+     * Apply Givens rotations to zero out the m_knew-th row of ZMAT.
+     * Each rotation operates on columns 0 and j, zeroing the element (m_knew-1, j).
      *
-     * La rotazione di Givens è definita da:
-     *   [c  s] [a]   [r]
-     *   [-s c] [b] = [0]
-     * dove r = sqrt(a² + b²), c = a/r, s = b/r
+     * The Givens rotation is defined by:
+     * [c  s] [a]   [r]
+     * [-s c] [b] = [0]
+     * where r = sqrt(a^2 + b^2), c = a/r, s = b/r
      */
     for ( integer j = 1; j < nptm; ++j )
     {
       const Scalar zij = m_zmat( m_knew, j );
 
-      // Verifica se l'elemento è sufficientemente grande da richiedere una rotazione
+      // Check if the element is large enough to require a rotation
       if ( std::abs( zij ) > ztest )
       {
         const Scalar zi0 = m_zmat( m_knew, 0 );
 
-        // Calcola i parametri della rotazione di Givens usando std::hypot per stabilità
-        const Scalar r = std::hypot( zi0, zij );  // r = sqrt(zi0² + zij²)
-        const Scalar c = zi0 / r;                 // coseno della rotazione
-        const Scalar s = zij / r;                 // seno della rotazione
+        // Calculate Givens rotation parameters using std::hypot for numerical stability
+        const Scalar r = std::hypot( zi0, zij );  // r = sqrt(zi0^2 + zij^2)
+        const Scalar c = zi0 / r;                 // cosine of the rotation
+        const Scalar s = zij / r;                 // sine of the rotation
 
         /**
-         * Applica la rotazione alle colonne 0 e j di ZMAT.
-         * Utilizziamo operazioni vettoriali Eigen per processare tutte le righe
-         * contemporaneamente, evitando loop espliciti.
+         * Apply the rotation to columns 0 and j of ZMAT.
+         * We use Eigen vector operations to process all rows simultaneously,
+         * avoiding explicit loops for efficiency.
          *
-         * Formula di rotazione:
-         *   ZMAT_new(:,0) =  c * ZMAT(:,0) + s * ZMAT(:,j)
-         *   ZMAT_new(:,j) = -s * ZMAT(:,0) + c * ZMAT(:,j)
+         * Rotation formula:
+         * ZMAT_new(:,0) =  c * ZMAT(:,0) + s * ZMAT(:,j)
+         * ZMAT_new(:,j) = -s * ZMAT(:,0) + c * ZMAT(:,j)
          */
         auto col0 = m_zmat.col( 0 ).head( m_npt );
         auto colj = m_zmat.col( j ).head( m_npt );
 
-        // Calcola le nuove colonne ruotate
+        // Calculate the new rotated columns
         const Vector temp0 = c * col0 + s * colj;
         const Vector tempj = c * colj - s * col0;
 
-        // Assegna i risultati
+        // Assign results back to the matrix
         col0 = temp0;
         colj = tempj;
 
-        // Forza a zero l'elemento target per eliminare errori di arrotondamento
+        // Force the target element to zero to eliminate round-off errors
         m_zmat( m_knew, j ) = zero;
       }
     }
 
     // ========================================================================
-    // FASE 2: Calcolo dei parametri di aggiornamento
+    // PHASE 2: Calculation of update parameters
     // ========================================================================
 
     /**
-     * Calcola il vettore work = ZMAT(m_knew, 0) * ZMAT(:, 0)
-     * Questo rappresenta la prima NPT componenti della colonna m_knew di HLAG.
+     * Calculate vector work = ZMAT(m_knew, 0) * ZMAT(:, 0)
+     * This represents the first NPT components of the m_knew-th column of HLAG.
      *
-     * HLAG è la matrice Lagrangiana delle funzioni di base dell'interpolazione.
+     * HLAG is the Lagrangian matrix of the interpolation basis functions.
      */
     work.head( m_npt ) = m_zmat( m_knew, 0 ) * m_zmat.col( 0 ).head( m_npt );
 
-    // Parametri chiave della formula di aggiornamento
-    const Scalar alpha = work( m_knew );    // Coefficiente per la direzione di ricerca
-    const Scalar tau   = m_vlag( m_knew );  // Moltiplicatore di Lagrange
+    // Key parameters for the update formula
+    const Scalar alpha = work( m_knew );    // Coefficient for the search direction
+    const Scalar tau   = m_vlag( m_knew );  // Lagrange multiplier
 
     /**
-     * Modifica temporanea di VLAG per il calcolo dell'aggiornamento.
-     * Questo verrà utilizzato nella formula di aggiornamento e poi ripristinato implicitamente.
+     * Temporary modification of VLAG for the update calculation.
+     * This will be used in the update formula and implicitly restored/handled later.
      */
     m_vlag( m_knew ) -= one;
 
     // ========================================================================
-    // FASE 3: Aggiornamento della matrice ZMAT
+    // PHASE 3: Update of the ZMAT matrix
     // ========================================================================
 
     /**
-     * Aggiorna ZMAT con una formula di rango-1:
-     *   ZMAT_new(:,0) = (tau/sqrt(denom)) * ZMAT(:,0) - (z_k0/sqrt(denom)) * VLAG
+     * Update ZMAT using a rank-1 formula:
+     * ZMAT_new(:,0) = (tau/sqrt(denom)) * ZMAT(:,0) - (z_k0/sqrt(denom)) * VLAG
      *
-     * Questa formula mantiene le proprietà di ortogonalità richieste da BOBYQA.
+     * This formula preserves the orthogonality properties required by BOBYQA.
      */
     const Scalar sqrt_denom = std::sqrt( m_denom );
-    const Scalar scale_z    = m_zmat( m_knew, 0 ) / sqrt_denom;  // Fattore di scala per VLAG
-    const Scalar scale_tau  = tau / sqrt_denom;                      // Fattore di scala per ZMAT
+    const Scalar scale_z    = m_zmat( m_knew, 0 ) / sqrt_denom;  // Scaling factor for VLAG
+    const Scalar scale_tau  = tau / sqrt_denom;                  // Scaling factor for ZMAT
 
-    // Aggiornamento vettoriale della prima colonna di ZMAT
+    // Vectorized update of the first column of ZMAT
     m_zmat.col( 0 ) = scale_tau * m_zmat.col( 0 ) - scale_z * m_vlag.head( m_npt );
 
     // ========================================================================
-    // FASE 4: Aggiornamento della matrice BMAT (simmetrica)
+    // PHASE 4: Update of the BMAT matrix (symmetric)
     // ========================================================================
 
     /**
-     * Aggiorna la matrice BMAT che rappresenta la parte lineare del modello.
-     * BMAT è simmetrica, quindi aggiorniamo solo la parte triangolare superiore
-     * e poi copiamo per mantenere la simmetria.
+     * Update the BMAT matrix which represents the linear part/Hessian approximation.
+     * Since BMAT is symmetric, we update the upper triangular part and then copy
+     * to maintain symmetry.
      *
-     * Formula di aggiornamento per ogni colonna j:
-     *   BMAT(:,j) += tempa * VLAG + tempb * work
-     * dove tempa e tempb dipendono da alpha, beta, tau, e m_denom.
+     * Update formula for each column j:
+     * BMAT(:,j) += tempa * VLAG + tempb * work
+     * where tempa and tempb depend on alpha, beta, tau, and m_denom.
      */
     for ( integer j = 0; j < m_neq; ++j )
     {
-      const integer jp = m_npt + j;  // Indice esteso (0-based)
+      const integer jp = m_npt + j;  // Extended index (0-based)
 
-      // Salva il valore corrente di BMAT(m_knew, j) nel vettore di lavoro
+      // Save the current value of BMAT(m_knew, j) into the work vector
       work( jp ) = m_bmat( j, m_knew );
 
       /**
-       * Calcola i coefficienti per l'aggiornamento della colonna j.
-       * Questi coefficienti bilanciano i contributi di VLAG e work.
+       * Calculate coefficients for updating column j.
+       * These coefficients balance the contributions of VLAG and work vector.
        */
       const Scalar tempa = ( alpha * m_vlag( jp ) - tau * work( jp ) ) / m_denom;
       const Scalar tempb = ( -m_beta * work( jp ) - tau * m_vlag( jp ) ) / m_denom;
 
       /**
-       * Aggiorna la colonna j di BMAT usando operazioni vettoriali.
-       * Dividiamo l'aggiornamento in due parti per gestire la simmetria:
-       * 1. Righe 0 to m_npt-1: aggiornamento diretto
-       * 2. Righe m_npt to jp: aggiornamento + copia simmetrica
+       * Update column j of BMAT using vector operations.
+       * The update is split into two parts to handle symmetry:
+       * 1. Rows 0 to m_npt-1: direct vector update
+       * 2. Rows m_npt to jp: scalar update + symmetric copy
        */
 
-      // Parte 1: Aggiorna le prime m_npt righe (vettoriale)
+      // Part 1: Update the first m_npt rows (vectorized)
       m_bmat.row( j ).head( m_npt ) += tempa * m_vlag.head( m_npt ) + tempb * work.head( m_npt );
 
-      // Parte 2: Aggiorna le righe da m_npt a jp
+      // Part 2: Update rows from m_npt to jp
       for ( integer i = m_npt; i <= jp; ++i )
       {
         m_bmat( j, i ) += tempa * m_vlag( i ) + tempb * work( i );
 
         /**
-         * Mantieni la simmetria: BMAT(i,j) = BMAT(j,i-m_npt)
-         * Questo è necessario perché BMAT memorizza una matrice concettualmente
-         * simmetrica in una rappresentazione rettangolare.
+         * Maintain symmetry: BMAT(i,j) = BMAT(j,i-m_npt)
+         * This is necessary because BMAT stores a conceptually symmetric matrix
+         * in a rectangular representation or specific storage layout.
          */
         m_bmat( i - m_npt, jp ) = m_bmat( j, i );
       }
     }
   }
-
+  
   template class BOBYQA_minimizer<double>;
   template class BOBYQA_minimizer<float>;
 
