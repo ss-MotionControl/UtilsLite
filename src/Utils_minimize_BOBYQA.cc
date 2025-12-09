@@ -1413,14 +1413,8 @@ namespace Utils
       stpsav = m_adelt / sqrt( distsq );
       ibdsav = 0;
     }
-
-    for ( integer i = 1; i <= m_neq; ++i )
-    {
-      Scalar v      = m_xopt[i - 1] + stpsav * ( m_xpt( i - 1, ksav - 1 ) - m_xopt[i - 1] );
-      v             = std::min( v, m_su[i - 1] );
-      v             = std::max( v, m_sl[i - 1] );
-      m_xnew[i - 1] = v;
-    }
+    
+    m_xnew = ((m_xopt + stpsav * ( m_xpt.col(ksav - 1) - m_xopt ) ).cwiseMin(m_su)).cwiseMax(m_sl);
 
     // Applica i bound specifici
     if ( ibdsav < 0 )
@@ -1434,10 +1428,7 @@ namespace Utils
     // ====== Cauchy step evaluation ======
     auto compute_cauchy_step = [&]( bool flip_grad )
     {
-      if ( flip_grad )
-      {
-        for ( integer i = 1; i <= m_neq; ++i ) m_glag[i - 1] = -m_glag[i - 1];
-      }
+      if ( flip_grad ) m_glag.noalias() = -m_glag;
 
       Scalar bigstp = m_adelt + m_adelt;
       Scalar wfixsq = 0;
@@ -1445,15 +1436,15 @@ namespace Utils
 
       std::fill( W.begin(), W.end(), 0 );
 
-      for ( integer i = 1; i <= m_neq; ++i )
+      for ( integer i = 0; i < m_neq; ++i )
       {
-        Scalar tempa = std::min( m_xopt[i - 1] - m_sl[i - 1], m_glag[i - 1] );
-        Scalar tempb = std::max( m_xopt[i - 1] - m_su[i - 1], m_glag[i - 1] );
+        Scalar tempa = std::min( m_xopt(i) - m_sl(i), m_glag(i) );
+        Scalar tempb = std::max( m_xopt(i) - m_su(i), m_glag(i) );
 
         if ( tempa > 0 || tempb < 0 )
         {
-          W[i - 1] = bigstp;
-          ggfree += m_glag[i - 1] * m_glag[i - 1];
+          W(i) = bigstp;
+          ggfree += m_glag(i) * m_glag(i);
         }
       }
 
@@ -1592,92 +1583,179 @@ namespace Utils
        BMAT and ZMAT for the first iteration, and it maintains the values of NF
        and KOPT.  The vector X is also changed by PRELIM. */
 
-    /* FIXME: Set uninitialized variables. */
-    Scalar  stepa = 0;
-    Scalar  stepb = 0;
-    Scalar  fbeg  = 0;
-    integer ipt   = 0;
-    integer jpt   = 0;
-
     /* Set some constants. */
     Scalar  rhosq = m_rhobeg * m_rhobeg;
     Scalar  recip = 1 / rhosq;
     integer np    = m_neq + 1;
+    Scalar  fbeg  = 0;
 
     /* Set XBASE to the initial vector of variables, and set the initial elements
        of XPT, BMAT, HQ, PQ and ZMAT to zero. */
-    m_xbase.noalias() = X;
     m_xpt.setZero();
     m_bmat.setZero();
+    m_hq.setZero();
+    m_pq.setZero();
+    m_zmat.setZero();
+    
+    m_xbase.noalias() = X.cwiseMin(m_xupper).cwiseMax(m_xlower);
+    
+    auto OBJ = [&]( integer ipos ) -> Scalar {
+      for ( integer j = 0; j < m_neq; ++j )
+      {
+        Scalar temp = m_xbase( j ) + m_xpt( j, ipos );
+        temp        = std::max( temp, m_xlower( j ) );
+        X( j )      = std::min( temp, m_xupper( j ) );
+        if ( m_xpt( j, ipos ) == m_sl( j ) ) X( j ) = m_xlower( j );
+        if ( m_xpt( j, ipos ) == m_su( j ) ) X( j ) = m_xupper( j );
+      }
 
-    integer i1 = m_neq * np / 2;
-    for ( integer ih = 1; ih <= i1; ++ih ) m_hq( ih - 1 ) = 0;
+      Scalar f = objfun( X );
+      m_fval( ipos ) = f;
+      if ( f < m_fval(m_kopt - 1) ) m_kopt = ipos+1;
 
-    for ( integer k = 1; k <= m_npt; ++k )
+      if ( m_print_level == 3 )
+        fmt::print(
+            "    Function n.{} F = {:.9}\n"
+            "    The corresponding X is: {}\n",
+            ipos+1, f, print_vec( X, 6 ) );
+      return f;
+    };
+
+    // ----------------------------------------------------------------------------
+    // PARTE 1: I = 1 - Punto base (nessuno spostamento)
+    // ----------------------------------------------------------------------------
     {
-      m_pq( k - 1 ) = 0;
-      i1            = m_npt - np;
-      for ( integer j = 1; j <= i1; ++j ) { m_zmat( k - 1, j - 1 ) = 0; }
+      m_nf      = 1;
+      fbeg      = objfun(m_xbase);
+      m_fval(0) = fbeg;
+      m_kopt    = 1;
     }
 
-    /* Begin the initialization procedure.  NF becomes one more than the number
-       of function values so far.  The coordinates of the displacement of the
-       next initial interpolation point from XBASE are set in XPT(NF+1,.). */
-    m_nf = 0;
-    do
+    // ----------------------------------------------------------------------------
+    // PARTE 2: I = 2..m_neq - Punti lungo direzioni positive degli assi
+    // ----------------------------------------------------------------------------
+    for (integer I = 2; I <= m_neq; ++I) {
+      m_nf = I;
+    
+      // CORRETTO: nfm è tra 1 e m_neq, quindi questo blocco viene eseguito
+      Scalar stepa = m_rhobeg;
+      if (m_su(I-2) == 0) stepa = -stepa;
+      m_xpt(I-2,I-1) = stepa;
+      
+      Scalar f = OBJ( I - 1 );
+
+      /* Aggiorna gradiente e BMAT */
+      // m_nf è tra 2 e m_neq, quindi m_nf >= 2 && m_nf <= m_neq+1 è VERO
+      m_gopt(I-2) = (f - fbeg) / stepa;
+    
+      if (m_npt < m_nf + m_neq) {
+        m_bmat( I-2, 0           ) = Scalar(-1.0) / stepa;
+        m_bmat( I-2, I-1         ) = Scalar(1.0)  / stepa;
+        m_bmat( I-2, m_npt + I-2 ) = -Scalar(0.5) * rhosq;
+      }
+    }
+
+    // ----------------------------------------------------------------------------
+    // PARTE 3: I = m_neq+1 - Ultimo punto lungo asse positivo
+    // ----------------------------------------------------------------------------
     {
-      integer nfm = m_nf;
-      integer nfx = m_nf - m_neq;
-      ++m_nf;
-      if ( nfm <= 2 * m_neq )
-      {
-        if ( nfm >= 1 && nfm <= m_neq )
-        {
-          stepa = m_rhobeg;
-          if ( m_su( nfm - 1 ) == 0 ) { stepa = -stepa; }
-          m_xpt( nfm - 1, m_nf - 1 ) = stepa;
-        }
-        else if ( nfm > m_neq )
-        {
-          stepa = m_xpt( nfx - 1, m_nf - m_neq - 1 );
-          stepb = -m_rhobeg;
-          if ( m_sl( nfx - 1 ) == 0 )
-          {
-            stepb = 2 * m_rhobeg;
-            stepb = std::min( stepb, m_su( nfx - 1 ) );
-          }
-          if ( m_su( nfx - 1 ) == 0 )
-          {
-            stepb = -2 * m_rhobeg;
-            stepb = std::max( stepb, m_sl( nfx - 1 ) );
-          }
-          m_xpt( nfx - 1, m_nf - 1 ) = stepb;
+      integer I = m_neq + 1;
+      m_nf = I;
+    
+      // nfm = m_neq, quindi nfm >= 1 && nfm <= m_neq è VERO
+      Scalar stepa = m_rhobeg;
+      if (m_su(I-2) == 0) stepa = -stepa;
+      m_xpt(I-2,I-1) = stepa;
+      
+      Scalar f = OBJ( I - 1 );
+    
+      m_gopt(I-2) = (f - fbeg) / stepa;
+    
+      if (m_npt < m_nf + m_neq) {
+          m_bmat(I-2, 0           ) = Scalar(-1.0) / stepa;
+          m_bmat(I-2, I-1         ) = Scalar(1.0)  / stepa;
+          m_bmat(I-2, m_npt + I-2 ) = -Scalar(0.5) * rhosq;
+      }
+    }
+
+    // ----------------------------------------------------------------------------
+    // PARTE 4: I = m_neq+2..2*m_neq - Punti lungo direzioni negative
+    // ----------------------------------------------------------------------------
+    for (integer I = m_neq + 2; I <= 2 * m_neq; ++I) {
+      integer nfx  = I - 1 - m_neq;   // 1..m_neq-1 (1-based)
+      integer nfx0 = nfx - 1;
+      m_nf = I;
+      
+      // nfm > m_neq, quindi usiamo il ramo else if (nfm > m_neq)
+      Scalar stepa = m_xpt(nfx0, nfx);
+      Scalar stepb = -m_rhobeg;
+      
+      if (m_sl(nfx0) == 0) stepb = std::min( 2 * m_rhobeg, m_su(nfx0));
+      if (m_su(nfx0) == 0) stepb = std::max(-2 * m_rhobeg, m_sl(nfx0));
+      
+      m_xpt(nfx0,I-1) = stepb;
+      
+      Scalar f = OBJ( I - 1 );
+  
+      /* Aggiorna modello quadratico */
+      // m_nf >= m_neq+2, quindi usiamo il ramo else if (m_nf >= m_neq+2)
+      integer ih = nfx * (nfx + 1) / 2;
+      Scalar temp = (f - fbeg) / stepb;
+      Scalar diff = stepb - stepa;
+      
+      m_hq(ih - 1) = 2 * (temp - m_gopt(nfx0)) / diff;
+      m_gopt(nfx0) = (m_gopt(nfx0) * stepb - temp * stepa) / diff;
+      
+      if (stepa * stepb < 0) {
+        if (f < m_fval(nfx)) {
+          m_fval(I-1) = m_fval(nfx);
+          m_fval(nfx) = f;
+          if (m_kopt == I) m_kopt = m_nf - m_neq;
+          m_xpt(nfx0, nfx ) = stepb;
+          m_xpt(nfx0, I-1 ) = stepa;
         }
       }
-      else
+      
+      m_bmat( nfx0, 0   ) = -(stepa + stepb) / (stepa * stepb);
+      m_bmat( nfx0, I-1 ) = -Scalar(0.5) / m_xpt(nfx0, nfx);
+      m_bmat( nfx0, nfx ) = -m_bmat(nfx0, 0) - m_bmat(nfx0, I-1);
+      
+      m_zmat( 0,   nfx0 ) = sqrt(Scalar(2)) / (stepa * stepb);
+      m_zmat( I-1, nfx0 ) = sqrt(Scalar(0.5)) / rhosq;
+      m_zmat( nfx, nfx0 ) = -m_zmat(0, nfx0) - m_zmat(I-1, nfx0);
+    }
+
+
+    //  integer nfm = m_nf - 1;
+    //  integer nfx = m_nf - 1 - m_neq;
+    {
+      integer I = 2*m_neq+1;
+      integer nfx = I-1 - m_neq;
+      m_nf = I;
+      
+      Scalar stepa = m_xpt( nfx - 1, m_nf - m_neq - 1 );
+      Scalar stepb = -m_rhobeg;
+      if ( m_sl( nfx - 1 ) == 0 )
       {
-        integer itemp = ( nfm - np ) / m_neq;
-        jpt           = nfm - itemp * m_neq - m_neq;
-        ipt           = jpt + itemp;
-        if ( ipt > m_neq )
-        {
-          itemp = jpt;
-          jpt   = ipt - m_neq;
-          ipt   = itemp;
-        }
-        m_xpt( ipt - 1, m_nf - 1 ) = m_xpt( ipt - 1, ipt );
-        m_xpt( jpt - 1, m_nf - 1 ) = m_xpt( jpt - 1, jpt );
+        stepb = 2 * m_rhobeg;
+        stepb = std::min( stepb, m_su( nfx - 1 ) );
       }
+      if ( m_su( nfx - 1 ) == 0 )
+      {
+        stepb = -2 * m_rhobeg;
+        stepb = std::max( stepb, m_sl( nfx - 1 ) );
+      }
+      m_xpt( nfx - 1, m_nf - 1 ) = stepb;
 
       /* Calculate the next value of F.  The least function value so far and its
          index are required. */
-      for ( integer j = 1; j <= m_neq; ++j )
+      for ( integer j = 0; j < m_neq; ++j )
       {
-        Scalar temp = m_xbase( j - 1 ) + m_xpt( j - 1, m_nf - 1 );
-        temp        = std::max( temp, m_xlower( j - 1 ) );
-        X( j - 1 )  = std::min( temp, m_xupper( j - 1 ) );
-        if ( m_xpt( j - 1, m_nf - 1 ) == m_sl( j - 1 ) ) X( j - 1 ) = m_xlower( j - 1 );
-        if ( m_xpt( j - 1, m_nf - 1 ) == m_su( j - 1 ) ) X( j - 1 ) = m_xupper( j - 1 );
+        Scalar temp = m_xbase( j ) + m_xpt( j, m_nf - 1 );
+        temp        = std::max( temp, m_xlower( j ) );
+        X( j )      = std::min( temp, m_xupper( j ) );
+        if ( m_xpt( j, m_nf - 1 ) == m_sl( j ) ) X( j ) = m_xlower( j );
+        if ( m_xpt( j, m_nf - 1 ) == m_su( j ) ) X( j ) = m_xupper( j );
       }
 
       Scalar f = objfun( X );
@@ -1702,57 +1780,107 @@ namespace Utils
          of the NF-th and (NF-N)-th interpolation points may be switched, in
          order that the function value at the first of them contributes to the
          off-diagonal second derivative terms of the initial quadratic model. */
-      if ( m_nf <= 2 * m_neq + 1 )
+      integer ih        = nfx * ( nfx + 1 ) / 2;
+      Scalar  temp      = ( f - fbeg ) / stepb;
+      Scalar  diff      = stepb - stepa;
+      m_hq( ih - 1 )    = 2 * ( temp - m_gopt( nfx - 1 ) ) / diff;
+      m_gopt( nfx - 1 ) = ( m_gopt( nfx - 1 ) * stepb - temp * stepa ) / diff;
+      if ( stepa * stepb < 0 )
       {
-        if ( m_nf >= 2 && m_nf <= m_neq + 1 )
+        if ( f < m_fval( m_nf - m_neq - 1 ) )
         {
-          m_gopt( nfm - 1 ) = ( f - fbeg ) / stepa;
-          if ( m_npt < m_nf + m_neq )
-          {
-            m_bmat( nfm - 1, 0 )               = -1 / stepa;
-            m_bmat( nfm - 1, m_nf - 1 )        = 1 / stepa;
-            m_bmat( nfm - 1, m_npt + nfm - 1 ) = -Scalar( 0.5 ) * rhosq;
-          }
-        }
-        else if ( m_nf >= m_neq + 2 )
-        {
-          integer ih        = nfx * ( nfx + 1 ) / 2;
-          Scalar  temp      = ( f - fbeg ) / stepb;
-          Scalar  diff      = stepb - stepa;
-          m_hq( ih - 1 )    = 2 * ( temp - m_gopt( nfx - 1 ) ) / diff;
-          m_gopt( nfx - 1 ) = ( m_gopt( nfx - 1 ) * stepb - temp * stepa ) / diff;
-          if ( stepa * stepb < 0 )
-          {
-            if ( f < m_fval( m_nf - m_neq - 1 ) )
-            {
-              m_fval( m_nf - 1 )         = m_fval( m_nf - m_neq - 1 );
-              m_fval( m_nf - m_neq - 1 ) = f;
-              if ( m_kopt == m_nf ) m_kopt = m_nf - m_neq;
-              m_xpt( nfx - 1, m_nf - m_neq - 1 ) = stepb;
-              m_xpt( nfx - 1, m_nf - 1         ) = stepa;
-            }
-          }
-          m_bmat( nfx - 1, 0 )                = -( stepa + stepb ) / ( stepa * stepb );
-          m_bmat( nfx - 1, m_nf - 1 )         = -Scalar( 0.5 ) / m_xpt( nfx - 1, m_nf - m_neq - 1 );
-          m_bmat( nfx - 1, m_nf - m_neq - 1 ) = -m_bmat( nfx - 1, 0 ) - m_bmat( nfx - 1, m_nf - 1 );
-          m_zmat( 0, nfx - 1 )                = sqrt( Scalar( 2 ) ) / ( stepa * stepb );
-          m_zmat( m_nf - 1, nfx - 1 )         = sqrt( Scalar( 0.5 ) ) / rhosq;
-          m_zmat( m_nf - m_neq - 1, nfx - 1 ) = -m_zmat( 0, nfx - 1 ) - m_zmat( m_nf - 1, nfx - 1 );
+          m_fval( m_nf - 1 )         = m_fval( m_nf - m_neq - 1 );
+          m_fval( m_nf - m_neq - 1 ) = f;
+          if ( m_kopt == m_nf ) m_kopt = m_nf - m_neq;
+          m_xpt( nfx - 1, m_nf - m_neq - 1 ) = stepb;
+          m_xpt( nfx - 1, m_nf - 1         ) = stepa;
         }
       }
-      else
+      m_bmat( nfx - 1, 0 )                = -( stepa + stepb ) / ( stepa * stepb );
+      m_bmat( nfx - 1, m_nf - 1 )         = -Scalar( 0.5 ) / m_xpt( nfx - 1, m_nf - m_neq - 1 );
+      m_bmat( nfx - 1, m_nf - m_neq - 1 ) = -m_bmat( nfx - 1, 0 ) - m_bmat( nfx - 1, m_nf - 1 );
+      m_zmat( 0, nfx - 1 )                = sqrt( Scalar( 2 ) ) / ( stepa * stepb );
+      m_zmat( m_nf - 1, nfx - 1 )         = sqrt( Scalar( 0.5 ) ) / rhosq;
+      m_zmat( m_nf - m_neq - 1, nfx - 1 ) = -m_zmat( 0, nfx - 1 ) - m_zmat( m_nf - 1, nfx - 1 );
+    }
+
+
+    //  integer nfm = m_nf - 1;
+    //  integer nfx = m_nf - 1 - m_neq;
+    for ( integer I = 2*m_neq+2; I <= m_npt; ++I ) {
+      integer nfm = I - 1;           // ≥ 2*m_neq
+      integer nfx = I-1 - m_neq;
+      m_nf = I;
+
+      // 1. CALCOLA COPPIA DI DIREZIONI (ipt, jpt)
+      integer itemp = (nfm - np) / m_neq;  // np è costante esterna
+      integer jpt = nfm - itemp * m_neq - m_neq;
+      integer ipt = jpt + itemp;
+      
+      // Assicura che ipt ≤ m_neq (riduzione modulo m_neq)
+      if (ipt > m_neq) {
+          itemp = jpt;
+          jpt = ipt - m_neq;
+          ipt = itemp;
+      }
+
+      Scalar stepa = m_xpt( nfx - 1, m_nf - m_neq - 1 );
+      Scalar stepb = -m_rhobeg;
+      if ( m_sl( nfx - 1 ) == 0 )
       {
+        stepb = 2 * m_rhobeg;
+        stepb = std::min( stepb, m_su( nfx - 1 ) );
+      }
+      if ( m_su( nfx - 1 ) == 0 )
+      {
+        stepb = -2 * m_rhobeg;
+        stepb = std::max( stepb, m_sl( nfx - 1 ) );
+      }
+      m_xpt( nfx - 1, m_nf - 1 ) = stepb;
+
+      /* Calculate the next value of F.  The least function value so far and its
+         index are required. */
+      for ( integer j = 0; j < m_neq; ++j )
+      {
+        Scalar temp = m_xbase( j ) + m_xpt( j, m_nf - 1 );
+        temp        = std::max( temp, m_xlower( j ) );
+        X( j )      = std::min( temp, m_xupper( j ) );
+        if ( m_xpt( j, m_nf - 1 ) == m_sl( j ) ) X( j ) = m_xlower( j );
+        if ( m_xpt( j, m_nf - 1 ) == m_su( j ) ) X( j ) = m_xupper( j );
+      }
+
+      Scalar f = objfun( X );
+      if ( m_print_level == 3 )
+      {
+        fmt::print(
+            "    Function number{} F = {:.9}\n"
+            "    The corresponding X is: {}\n",
+            m_nf, f, print_vec( X, 6 ) );
+      }
+
+      m_fval( m_nf - 1 ) = f;
+      if ( m_nf == 1 )
+      {
+        fbeg   = f;
+        m_kopt = 1;
+      }
+      else if ( f < m_fval( m_kopt - 1 ) ) { m_kopt = m_nf; }
+
+      /* Set the nonzero initial elements of BMAT and the quadratic model in the
+         cases when NF is at most 2*N+1.  If NF exceeds N+1, then the positions
+         of the NF-th and (NF-N)-th interpolation points may be switched, in
+         order that the function value at the first of them contributes to the
+         off-diagonal second derivative terms of the initial quadratic model. */
         /* Set the off-diagonal second derivatives of the Lagrange functions and
            the initial quadratic model. */
-        integer ih                  = ipt * ( ipt - 1 ) / 2 + jpt;
-        m_zmat( 0, nfx - 1 )        = recip;
-        m_zmat( m_nf - 1, nfx - 1 ) = recip;
-        m_zmat( ipt, nfx - 1 )      = -recip;
-        m_zmat( jpt, nfx - 1 )      = -recip;
-        Scalar temp                 = m_xpt( ipt - 1, m_nf - 1 ) * m_xpt( jpt - 1, m_nf - 1 );
-        m_hq( ih - 1 )              = ( fbeg - m_fval( ipt ) - m_fval( jpt ) + f ) / temp;
-      }
-    } while ( m_nf < m_npt && m_nf < m_maxfun );
+      integer ih                  = ipt * ( ipt - 1 ) / 2 + jpt;
+      m_zmat( 0, nfx - 1 )        = recip;
+      m_zmat( m_nf - 1, nfx - 1 ) = recip;
+      m_zmat( ipt, nfx - 1 )      = -recip;
+      m_zmat( jpt, nfx - 1 )      = -recip;
+      Scalar temp                 = m_xpt( ipt - 1, m_nf - 1 ) * m_xpt( jpt - 1, m_nf - 1 );
+      m_hq( ih - 1 )              = ( fbeg - m_fval( ipt ) - m_fval( jpt ) + f ) / temp;
+    }
 
   } /* prelim */
 

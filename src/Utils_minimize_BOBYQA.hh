@@ -192,10 +192,10 @@ namespace Utils
     integer m_dim;
     integer m_print_level = 1;
     integer m_maxfun      = 10000;
+    integer m_nf          = 0;
 
     integer m_kopt;
     integer m_knew;
-    integer m_nf;
 
     // ========================================================================
     // COSTANTI NUMERICHE
