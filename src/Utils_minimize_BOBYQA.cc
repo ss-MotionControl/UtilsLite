@@ -270,7 +270,7 @@ namespace Utils
     m_cauchy = 0;
     m_denom  = 0;
     m_adelt  = 0;
-    m_knew   = 0;
+    m_knew   = -1;
 
     // Main state-machine loop variables: we'll use an enum and switch
     enum class Phase
@@ -627,7 +627,7 @@ namespace Utils
       if ( ntrits == 0 )
       {
         // Prima iterazione nella regione di fiducia
-        m_denom = m_vlag( m_knew - 1 ) * m_vlag( m_knew - 1 ) + m_alpha * m_beta;
+        m_denom = m_vlag( m_knew ) * m_vlag( m_knew ) + m_alpha * m_beta;
 
         // Controlla se il denominatore è peggiore del passo di Cauchy
         if ( m_denom < m_cauchy && m_cauchy > 0 )
@@ -643,7 +643,7 @@ namespace Utils
         }
 
         // Controlla cancellazione numerica nel denominatore
-        if ( m_denom <= Scalar( 0.5 ) * m_vlag( m_knew - 1 ) * m_vlag( m_knew - 1 ) )
+        if ( m_denom <= Scalar( 0.5 ) * m_vlag( m_knew ) * m_vlag( m_knew ) )
         {
           if ( m_nf > nresc )
           {
@@ -685,7 +685,7 @@ namespace Utils
           if ( temp * den > scaden )
           {
             scaden  = temp * den;
-            m_knew  = k + 1;  // 1-based index
+            m_knew  = k;  // 0-based index
             m_denom = den;
           }
           temp *= ( m_vlag( k ) * m_vlag( k ) );
@@ -811,12 +811,12 @@ namespace Utils
         // Se il passo migliora la funzione, rivaluta scelta punto da rimuovere
         if ( f < fopt )
         {
-          integer ksav   = m_knew;
+          integer ksav   = m_knew+1;
           Scalar  densav = m_denom;
           Scalar  delsq  = m_delta * m_delta;
           Scalar  scaden = 0;
           Scalar  biglsq = 0;
-          m_knew         = 0;
+          m_knew         = -1;
 
           for ( integer k = 0; k < m_npt; ++k )
           {
@@ -832,15 +832,15 @@ namespace Utils
             if ( scaden < temp * den )
             {
               scaden  = temp * den;
-              m_knew  = k + 1;
+              m_knew  = k;
               m_denom = den;
             }
             biglsq = max( biglsq, temp * m_vlag( k ) * m_vlag( k ) );
           }
 
-          if ( scaden <= Scalar( 0.5 ) * biglsq || m_knew == 0 )
+          if ( scaden <= Scalar( 0.5 ) * biglsq || m_knew == -1 )
           {
-            m_knew  = ksav;
+            m_knew  = ksav-1;
             m_denom = densav;
           }
         }
@@ -850,15 +850,15 @@ namespace Utils
       update();  // Aggiorna BMAT, ZMAT
 
       // Aggiorna HQ con contributo del punto rimosso
-      ih                 = 0;
-      Scalar pqold       = m_pq( m_knew - 1 );
-      m_pq( m_knew - 1 ) = 0;
+      ih             = 0;
+      Scalar pqold   = m_pq( m_knew );
+      m_pq( m_knew ) = 0;
       for ( integer i = 0; i < m_neq; ++i )
       {
-        Scalar temp = pqold * m_xpt( i, m_knew - 1 );
+        Scalar temp = pqold * m_xpt( i, m_knew );
         for ( integer j = 0; j <= i; ++j )
         {
-          m_hq[ih] += temp * m_xpt( j, m_knew - 1 );
+          m_hq[ih] += temp * m_xpt( j, m_knew );
           ++ih;
         }
       }
@@ -866,23 +866,23 @@ namespace Utils
       // Aggiorna PQ con differenza funzione
       for ( integer jj = 0; jj < nptm; ++jj )
       {
-        Scalar temp = diff * m_zmat( m_knew - 1, jj );
+        Scalar temp = diff * m_zmat( m_knew, jj );
         for ( integer k = 0; k < m_npt; ++k ) { m_pq( k ) += temp * m_zmat( k, jj ); }
       }
 
       // Incorpora nuovo punto di interpolazione
-      m_fval( m_knew - 1 ) = f;
+      m_fval( m_knew ) = f;
       for ( integer i = 0; i < m_neq; ++i )
       {
-        m_xpt( i, m_knew - 1 ) = m_xnew( i );
-        W( i )                 = m_bmat( i, m_knew - 1 );
+        m_xpt( i, m_knew ) = m_xnew( i );
+        W( i )             = m_bmat( i, m_knew );
       }
 
       // Aggiorna gradiente con nuovo punto
       for ( integer k = 0; k < m_npt; ++k )
       {
         Scalar suma = 0;
-        for ( integer jj = 0; jj < nptm; ++jj ) { suma += m_zmat( m_knew - 1, jj ) * m_zmat( k, jj ); }
+        for ( integer jj = 0; jj < nptm; ++jj ) { suma += m_zmat( m_knew, jj ) * m_zmat( k, jj ); }
         Scalar sumb = m_xpt.col( k ).dot( m_xopt );
         Scalar temp = suma * sumb;
         for ( integer i = 0; i < m_neq; ++i ) { W( i ) += temp * m_xpt( i, k ); }
@@ -893,7 +893,7 @@ namespace Utils
       // Fase 6: Aggiorna punto ottimo se migliorato
       if ( f < fopt )
       {
-        m_kopt = m_knew-1;
+        m_kopt = m_knew;
         xoptsq = 0;
         ih     = 0;
 
@@ -1013,7 +1013,7 @@ namespace Utils
      */
     auto phase_find_far = [&]() -> Phase
     {
-      m_knew          = 0;
+      m_knew          = -1;
       Scalar max_dist = 0;
 
       // Trova il punto più lontano dal punto ottimo
@@ -1023,11 +1023,11 @@ namespace Utils
         if ( sum > max_dist )
         {
           max_dist = sum;
-          m_knew   = k + 1;  // 1-based index
+          m_knew   = k;  // 0-based index
         }
       }
 
-      if ( m_knew > 0 )
+      if ( m_knew >= 0 )
       {
         // Calcola distanza e adatta parametri
         Scalar dist = std::sqrt( max_dist );
@@ -1252,14 +1252,14 @@ namespace Utils
     integer i1 = m_npt - m_neq - 1;
     for ( integer j = 0; j < i1; ++j )
     {
-      Scalar temp = m_zmat( m_knew - 1, j );
+      Scalar temp = m_zmat( m_knew, j );
       m_hcol.noalias() += temp * m_zmat.col(j);
     }
-    m_alpha   = m_hcol[m_knew - 1];
+    m_alpha   = m_hcol(m_knew);
     Scalar ha = Scalar( 0.5 ) * m_alpha;
 
     // Compute gradient glag
-    m_glag.noalias() = m_bmat.col(m_knew - 1);
+    m_glag.noalias() = m_bmat.col(m_knew);
 
     for ( integer k = 0; k < m_npt; ++k )
     {
@@ -1330,7 +1330,7 @@ namespace Utils
       Scalar  vlag;
       integer isbd;
 
-      if ( k == m_knew )
+      if ( k-1 == m_knew )
       {
         Scalar diff = dderiv - 1;
         step        = slbd;
@@ -1402,7 +1402,7 @@ namespace Utils
     if ( ksav == 0 )
     {
       // Fallback: usa knew come ksav
-      ksav = m_knew;
+      ksav = m_knew+1;
       // Calcola un step di default
       Scalar distsq = 0;
       for ( integer i = 1; i <= m_neq; ++i )
@@ -2008,7 +2008,7 @@ namespace Utils
     // ==============================================================================
     integer nrem = npt;
     integer kold = 0;  // 0-based
-    m_knew       = m_kopt+1;
+    m_knew       = m_kopt;
 
     // Funzione helper per lo swap
     auto swap_points = [&]( integer k1, integer k2 )
@@ -2025,10 +2025,10 @@ namespace Utils
     while ( nrem > 0 )
     {
       // PHASE 1: Scambia kold e knew
-      if ( m_knew != m_kopt+1 )
+      if ( m_knew != m_kopt )
       {
-        swap_points( kold, m_knew - 1 );
-        m_work( m_dim + m_knew - 1 ) = 0;
+        swap_points( kold, m_knew );
+        m_work( m_dim + m_knew ) = 0;
         nrem--;
 
         // Aggiorna BMAT e ZMAT
@@ -2049,7 +2049,7 @@ namespace Utils
         if ( d > 0 && ( dsqmin == 0 || d < dsqmin ) )
         {
           dsqmin    = d;
-          best_knew = k + 1;
+          best_knew = k;
         }
       }
 
@@ -2058,7 +2058,7 @@ namespace Utils
 
       // PHASE 3: Calcola w_vec (come nel codice originale)
       Vector w_vec( npt + n );
-      w_vec.tail( n ) = m_xpt.col( m_knew - 1 );
+      w_vec.tail( n ) = m_xpt.col( m_knew );
 
       // Calcola w_vec.head(npt)
       for ( integer k = 0; k < npt; ++k )
@@ -2114,7 +2114,7 @@ namespace Utils
 
       // Calcola bsum e distsq
       Scalar bsum   = 0;
-      Scalar distsq = m_xpt.col( m_knew - 1 ).squaredNorm();
+      Scalar distsq = m_xpt.col( m_knew ).squaredNorm();
 
       for ( integer j = 0; j < n; ++j )
       {
@@ -2172,7 +2172,7 @@ namespace Utils
       }
 
       // PHASE 7: Gestione caso speciale (knew == kopt)
-      if ( m_knew == m_kopt+1 )
+      if ( m_knew == m_kopt )
       {
         m_work( m_dim + m_knew ) = 0;
         nrem--;
@@ -3163,12 +3163,12 @@ namespace Utils
      */
     for ( integer j = 1; j < nptm; ++j )
     {
-      const Scalar zij = m_zmat( m_knew - 1, j );
+      const Scalar zij = m_zmat( m_knew, j );
 
       // Verifica se l'elemento è sufficientemente grande da richiedere una rotazione
       if ( std::abs( zij ) > ztest )
       {
-        const Scalar zi0 = m_zmat( m_knew - 1, 0 );
+        const Scalar zi0 = m_zmat( m_knew, 0 );
 
         // Calcola i parametri della rotazione di Givens usando std::hypot per stabilità
         const Scalar r = std::hypot( zi0, zij );  // r = sqrt(zi0² + zij²)
@@ -3196,7 +3196,7 @@ namespace Utils
         colj = tempj;
 
         // Forza a zero l'elemento target per eliminare errori di arrotondamento
-        m_zmat( m_knew - 1, j ) = zero;
+        m_zmat( m_knew, j ) = zero;
       }
     }
 
@@ -3205,22 +3205,22 @@ namespace Utils
     // ========================================================================
 
     /**
-     * Calcola il vettore work = ZMAT(m_knew-1, 0) * ZMAT(:, 0)
+     * Calcola il vettore work = ZMAT(m_knew, 0) * ZMAT(:, 0)
      * Questo rappresenta la prima NPT componenti della colonna m_knew di HLAG.
      *
      * HLAG è la matrice Lagrangiana delle funzioni di base dell'interpolazione.
      */
-    work.head( m_npt ) = m_zmat( m_knew - 1, 0 ) * m_zmat.col( 0 ).head( m_npt );
+    work.head( m_npt ) = m_zmat( m_knew, 0 ) * m_zmat.col( 0 ).head( m_npt );
 
     // Parametri chiave della formula di aggiornamento
-    const Scalar alpha = work( m_knew - 1 );    // Coefficiente per la direzione di ricerca
-    const Scalar tau   = m_vlag( m_knew - 1 );  // Moltiplicatore di Lagrange
+    const Scalar alpha = work( m_knew );    // Coefficiente per la direzione di ricerca
+    const Scalar tau   = m_vlag( m_knew );  // Moltiplicatore di Lagrange
 
     /**
      * Modifica temporanea di VLAG per il calcolo dell'aggiornamento.
      * Questo verrà utilizzato nella formula di aggiornamento e poi ripristinato implicitamente.
      */
-    m_vlag( m_knew - 1 ) -= one;
+    m_vlag( m_knew ) -= one;
 
     // ========================================================================
     // FASE 3: Aggiornamento della matrice ZMAT
@@ -3233,7 +3233,7 @@ namespace Utils
      * Questa formula mantiene le proprietà di ortogonalità richieste da BOBYQA.
      */
     const Scalar sqrt_denom = std::sqrt( m_denom );
-    const Scalar scale_z    = m_zmat( m_knew - 1, 0 ) / sqrt_denom;  // Fattore di scala per VLAG
+    const Scalar scale_z    = m_zmat( m_knew, 0 ) / sqrt_denom;  // Fattore di scala per VLAG
     const Scalar scale_tau  = tau / sqrt_denom;                      // Fattore di scala per ZMAT
 
     // Aggiornamento vettoriale della prima colonna di ZMAT
@@ -3256,8 +3256,8 @@ namespace Utils
     {
       const integer jp = m_npt + j;  // Indice esteso (0-based)
 
-      // Salva il valore corrente di BMAT(m_knew-1, j) nel vettore di lavoro
-      work( jp ) = m_bmat( j, m_knew - 1 );
+      // Salva il valore corrente di BMAT(m_knew, j) nel vettore di lavoro
+      work( jp ) = m_bmat( j, m_knew );
 
       /**
        * Calcola i coefficienti per l'aggiornamento della colonna j.
