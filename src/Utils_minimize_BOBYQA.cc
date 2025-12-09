@@ -245,7 +245,7 @@ namespace Utils
     Scalar xoptsq = 0;
     for ( integer i = 0; i < m_neq; ++i )
     {
-      m_xopt( i ) = m_xpt( i, m_kopt - 1 );  // kopt from prelim is 1-based in original; we used kopt as returned, keep -1
+      m_xopt( i ) = m_xpt( i, m_kopt );  // kopt from prelim is 1-based in original; we used kopt as returned, keep -1
       xoptsq += m_xopt( i ) * m_xopt( i );
     }
     Scalar  fsave  = m_fval( 0 );
@@ -298,7 +298,7 @@ namespace Utils
      */
     auto phase_update_gradient = [&]() -> Phase
     {
-      if ( m_kopt != kbase )
+      if ( m_kopt+1 != kbase )
       {
         integer ih = 0;
         for ( integer j = 0; j < m_neq; ++j )
@@ -507,18 +507,18 @@ namespace Utils
     auto phase_rescue = [&]() -> Phase
     {
       nfsav = m_nf;    // Salva il numero corrente di valutazioni
-      kbase = m_kopt;  // Salva il punto ottimo corrente come base
+      kbase = m_kopt+1;  // Salva il punto ottimo corrente come base
 
       // Esegue la procedura di rescue
       rescue();
       xoptsq = 0;
 
       // Se il punto ottimo è cambiato, aggiorna m_xopt e xoptsq
-      if ( m_kopt != kbase )
+      if ( m_kopt+1 != kbase )
       {
         for ( integer i = 0; i < m_neq; ++i )
         {
-          m_xopt( i ) = m_xpt( i, m_kopt - 1 );
+          m_xopt( i ) = m_xpt( i, m_kopt );
           xoptsq += m_xopt( i ) * m_xopt( i );
         }
       }
@@ -621,7 +621,7 @@ namespace Utils
 
       // Calcola beta finale (distanza quadratica normalizzata)
       m_beta = dx * dx + m_dsq * ( xoptsq + dx + dx + Scalar( 0.5 ) * m_dsq ) + m_beta - bsum;
-      m_vlag( m_kopt - 1 ) += 1;  // Condizione di interpolazione nel punto ottimo
+      m_vlag( m_kopt ) += 1;  // Condizione di interpolazione nel punto ottimo
 
       // Fase 4: Scelta del denominatore e controllo di validità
       if ( ntrits == 0 )
@@ -666,7 +666,7 @@ namespace Utils
 
         for ( integer k = 0; k < m_npt; ++k )
         {
-          if ( k == m_kopt - 1 ) continue;  // Salta il punto ottimo
+          if ( k == m_kopt ) continue;  // Salta il punto ottimo
 
           // Calcola hdiag (contributo ortogonale)
           Scalar hdiag = 0;
@@ -759,7 +759,7 @@ namespace Utils
       }
 
       // Fase 2: Calcolo riduzione predetta dal modello quadratico
-      Scalar fopt  = m_fval( m_kopt - 1 );
+      Scalar fopt  = m_fval( m_kopt );
       Scalar vquad = 0;  // Riduzione predetta
 
       integer ih = 0;
@@ -893,7 +893,7 @@ namespace Utils
       // Fase 6: Aggiorna punto ottimo se migliorato
       if ( f < fopt )
       {
-        m_kopt = m_knew;
+        m_kopt = m_knew-1;
         xoptsq = 0;
         ih     = 0;
 
@@ -924,7 +924,7 @@ namespace Utils
         // Calcola interpolante di Frobenius minimo
         for ( integer k = 0; k < m_npt; ++k )
         {
-          m_vlag( k ) = m_fval( k ) - m_fval( m_kopt - 1 );
+          m_vlag( k ) = m_fval( k ) - m_fval( m_kopt );
           W( k )      = 0;
         }
 
@@ -1097,7 +1097,7 @@ namespace Utils
               "    Number of function values = {}\n"
               "    Least value of F          = {}\n"
               "    The corresponding X is: {}\n",
-              rho, m_nf, m_fval( m_kopt - 1 ), print_vec( m_xopt, 6 ) );
+              rho, m_nf, m_fval( m_kopt ), print_vec( m_xopt, 6 ) );
         }
 
         // Reset parametri per nuova fase
@@ -1204,7 +1204,7 @@ namespace Utils
 
   FINALIZE:
     // finalize result: set X to best point if smaller than starting fsave
-    if ( m_fval( m_kopt - 1 ) <= fsave )
+    if ( m_fval( m_kopt ) <= fsave )
     {
       for ( integer i = 0; i < m_neq; ++i )
       {
@@ -1214,7 +1214,7 @@ namespace Utils
         if ( m_xopt( i ) == m_sl( i ) ) X( i ) = m_xlower( i );
         if ( m_xopt( i ) == m_su( i ) ) X( i ) = m_xupper( i );
       }
-      f = m_fval( m_kopt - 1 );
+      f = m_fval( m_kopt );
     }
 
     if ( m_print_level >= 1 )
@@ -1274,7 +1274,7 @@ namespace Utils
     Scalar presav = 0;
     for ( integer k = 1; k <= m_npt; ++k )
     {
-      if ( k == m_kopt ) continue;
+      if ( k == m_kopt+1 ) continue;
 
       Scalar dderiv = 0, distsq = 0;
       for ( integer i = 1; i <= m_neq; ++i )
@@ -1611,7 +1611,7 @@ namespace Utils
 
       Scalar f = objfun( X );
       m_fval( ipos ) = f;
-      if ( f < m_fval(m_kopt - 1) ) m_kopt = ipos+1;
+      if ( f < m_fval(m_kopt) ) m_kopt = ipos;
 
       if ( m_print_level == 3 )
         fmt::print(
@@ -1628,7 +1628,7 @@ namespace Utils
       m_nf      = 1;
       fbeg      = objfun(m_xbase);
       m_fval(0) = fbeg;
-      m_kopt    = 1;
+      m_kopt    = 0;
     }
 
     // ----------------------------------------------------------------------------
@@ -1710,7 +1710,7 @@ namespace Utils
         if (f < m_fval(nfx)) {
           m_fval(I-1) = m_fval(nfx);
           m_fval(nfx) = f;
-          if (m_kopt == I) m_kopt = m_nf - m_neq;
+          if (m_kopt+1 == I) m_kopt = nfx;
           m_xpt(nfx0, nfx ) = stepb;
           m_xpt(nfx0, I-1 ) = stepa;
         }
@@ -1725,91 +1725,55 @@ namespace Utils
       m_zmat( nfx, nfx0 ) = -m_zmat(0, nfx0) - m_zmat(I-1, nfx0);
     }
 
-
     //  integer nfm = m_nf - 1;
     //  integer nfx = m_nf - 1 - m_neq;
     {
-      integer I = 2*m_neq+1;
-      integer nfx = I-1 - m_neq;
+      integer I    = 2*m_neq+1;
+      integer nfx  = I-1 - m_neq;
+      integer nfx0 = nfx - 1;
       m_nf = I;
       
-      Scalar stepa = m_xpt( nfx - 1, m_nf - m_neq - 1 );
+      Scalar stepa = m_xpt( nfx0, nfx );
       Scalar stepb = -m_rhobeg;
-      if ( m_sl( nfx - 1 ) == 0 )
-      {
-        stepb = 2 * m_rhobeg;
-        stepb = std::min( stepb, m_su( nfx - 1 ) );
-      }
-      if ( m_su( nfx - 1 ) == 0 )
-      {
-        stepb = -2 * m_rhobeg;
-        stepb = std::max( stepb, m_sl( nfx - 1 ) );
-      }
-      m_xpt( nfx - 1, m_nf - 1 ) = stepb;
-
-      /* Calculate the next value of F.  The least function value so far and its
-         index are required. */
-      for ( integer j = 0; j < m_neq; ++j )
-      {
-        Scalar temp = m_xbase( j ) + m_xpt( j, m_nf - 1 );
-        temp        = std::max( temp, m_xlower( j ) );
-        X( j )      = std::min( temp, m_xupper( j ) );
-        if ( m_xpt( j, m_nf - 1 ) == m_sl( j ) ) X( j ) = m_xlower( j );
-        if ( m_xpt( j, m_nf - 1 ) == m_su( j ) ) X( j ) = m_xupper( j );
-      }
-
-      Scalar f = objfun( X );
-      if ( m_print_level == 3 )
-      {
-        fmt::print(
-            "    Function number{} F = {:.9}\n"
-            "    The corresponding X is: {}\n",
-            m_nf, f, print_vec( X, 6 ) );
-      }
-
-      m_fval( m_nf - 1 ) = f;
-      if ( m_nf == 1 )
-      {
-        fbeg   = f;
-        m_kopt = 1;
-      }
-      else if ( f < m_fval( m_kopt - 1 ) ) { m_kopt = m_nf; }
+      if ( m_sl( nfx0 ) == 0 ) stepb = std::min( 2 * m_rhobeg, m_su( nfx0 ) );
+      if ( m_su( nfx0 ) == 0 ) stepb = std::max( -2 * m_rhobeg, m_sl( nfx0 ) );
+      m_xpt( nfx0, I-1 ) = stepb;
+      
+      Scalar f = OBJ( I-1 );
 
       /* Set the nonzero initial elements of BMAT and the quadratic model in the
          cases when NF is at most 2*N+1.  If NF exceeds N+1, then the positions
          of the NF-th and (NF-N)-th interpolation points may be switched, in
          order that the function value at the first of them contributes to the
          off-diagonal second derivative terms of the initial quadratic model. */
-      integer ih        = nfx * ( nfx + 1 ) / 2;
-      Scalar  temp      = ( f - fbeg ) / stepb;
-      Scalar  diff      = stepb - stepa;
-      m_hq( ih - 1 )    = 2 * ( temp - m_gopt( nfx - 1 ) ) / diff;
-      m_gopt( nfx - 1 ) = ( m_gopt( nfx - 1 ) * stepb - temp * stepa ) / diff;
-      if ( stepa * stepb < 0 )
-      {
-        if ( f < m_fval( m_nf - m_neq - 1 ) )
-        {
-          m_fval( m_nf - 1 )         = m_fval( m_nf - m_neq - 1 );
-          m_fval( m_nf - m_neq - 1 ) = f;
-          if ( m_kopt == m_nf ) m_kopt = m_nf - m_neq;
-          m_xpt( nfx - 1, m_nf - m_neq - 1 ) = stepb;
-          m_xpt( nfx - 1, m_nf - 1         ) = stepa;
+      integer ih     = nfx * ( nfx + 1 ) / 2;
+      Scalar  temp   = ( f - fbeg ) / stepb;
+      Scalar  diff   = stepb - stepa;
+      m_hq( ih - 1 ) = 2 * ( temp - m_gopt( nfx0 ) ) / diff;
+      m_gopt( nfx0 ) = ( m_gopt( nfx0 ) * stepb - temp * stepa ) / diff;
+      if ( stepa * stepb < 0 ) {
+        if ( f < m_fval( nfx ) ) {
+          m_fval( I-1 ) = m_fval( nfx );
+          m_fval( nfx ) = f;
+          if ( m_kopt+1 == I ) m_kopt = nfx;
+          m_xpt( nfx0, nfx ) = stepb;
+          m_xpt( nfx0, I-1 ) = stepa;
         }
       }
-      m_bmat( nfx - 1, 0 )                = -( stepa + stepb ) / ( stepa * stepb );
-      m_bmat( nfx - 1, m_nf - 1 )         = -Scalar( 0.5 ) / m_xpt( nfx - 1, m_nf - m_neq - 1 );
-      m_bmat( nfx - 1, m_nf - m_neq - 1 ) = -m_bmat( nfx - 1, 0 ) - m_bmat( nfx - 1, m_nf - 1 );
-      m_zmat( 0, nfx - 1 )                = sqrt( Scalar( 2 ) ) / ( stepa * stepb );
-      m_zmat( m_nf - 1, nfx - 1 )         = sqrt( Scalar( 0.5 ) ) / rhosq;
-      m_zmat( m_nf - m_neq - 1, nfx - 1 ) = -m_zmat( 0, nfx - 1 ) - m_zmat( m_nf - 1, nfx - 1 );
+      m_bmat( nfx0, 0   ) = -( stepa + stepb ) / ( stepa * stepb );
+      m_bmat( nfx0, I-1 ) = -Scalar( 0.5 ) / m_xpt( nfx0, nfx );
+      m_bmat( nfx0, nfx ) = -m_bmat( nfx0, 0 ) - m_bmat( nfx0, I-1 );
+      m_zmat( 0,   nfx0 ) = sqrt( Scalar( 2 ) ) / ( stepa * stepb );
+      m_zmat( I-1, nfx0 ) = sqrt( Scalar( 0.5 ) ) / rhosq;
+      m_zmat( nfx, nfx0 ) = -m_zmat( 0, nfx0 ) - m_zmat( I-1, nfx0 );
     }
-
 
     //  integer nfm = m_nf - 1;
     //  integer nfx = m_nf - 1 - m_neq;
     for ( integer I = 2*m_neq+2; I <= m_npt; ++I ) {
-      integer nfm = I - 1;           // ≥ 2*m_neq
-      integer nfx = I-1 - m_neq;
+      integer nfm  = I - 1;           // ≥ 2*m_neq
+      integer nfx  = I-1 - m_neq;
+      integer nfx0 = nfx-1;
       m_nf = I;
 
       // 1. CALCOLA COPPIA DI DIREZIONI (ipt, jpt)
@@ -1819,67 +1783,25 @@ namespace Utils
       
       // Assicura che ipt ≤ m_neq (riduzione modulo m_neq)
       if (ipt > m_neq) {
-          itemp = jpt;
-          jpt = ipt - m_neq;
-          ipt = itemp;
+        itemp = jpt;
+        jpt = ipt - m_neq;
+        ipt = itemp;
       }
 
-      Scalar stepa = m_xpt( nfx - 1, m_nf - m_neq - 1 );
       Scalar stepb = -m_rhobeg;
-      if ( m_sl( nfx - 1 ) == 0 )
-      {
-        stepb = 2 * m_rhobeg;
-        stepb = std::min( stepb, m_su( nfx - 1 ) );
-      }
-      if ( m_su( nfx - 1 ) == 0 )
-      {
-        stepb = -2 * m_rhobeg;
-        stepb = std::max( stepb, m_sl( nfx - 1 ) );
-      }
-      m_xpt( nfx - 1, m_nf - 1 ) = stepb;
+      if ( m_sl( nfx0 ) == 0 ) stepb = std::min(  2 * m_rhobeg, m_su( nfx0 ) );
+      if ( m_su( nfx0 ) == 0 ) stepb = std::max( -2 * m_rhobeg, m_sl( nfx0 ) );
+      m_xpt( nfx0, I-1 ) = stepb;
 
-      /* Calculate the next value of F.  The least function value so far and its
-         index are required. */
-      for ( integer j = 0; j < m_neq; ++j )
-      {
-        Scalar temp = m_xbase( j ) + m_xpt( j, m_nf - 1 );
-        temp        = std::max( temp, m_xlower( j ) );
-        X( j )      = std::min( temp, m_xupper( j ) );
-        if ( m_xpt( j, m_nf - 1 ) == m_sl( j ) ) X( j ) = m_xlower( j );
-        if ( m_xpt( j, m_nf - 1 ) == m_su( j ) ) X( j ) = m_xupper( j );
-      }
+      Scalar f = OBJ( I-1 );
 
-      Scalar f = objfun( X );
-      if ( m_print_level == 3 )
-      {
-        fmt::print(
-            "    Function number{} F = {:.9}\n"
-            "    The corresponding X is: {}\n",
-            m_nf, f, print_vec( X, 6 ) );
-      }
-
-      m_fval( m_nf - 1 ) = f;
-      if ( m_nf == 1 )
-      {
-        fbeg   = f;
-        m_kopt = 1;
-      }
-      else if ( f < m_fval( m_kopt - 1 ) ) { m_kopt = m_nf; }
-
-      /* Set the nonzero initial elements of BMAT and the quadratic model in the
-         cases when NF is at most 2*N+1.  If NF exceeds N+1, then the positions
-         of the NF-th and (NF-N)-th interpolation points may be switched, in
-         order that the function value at the first of them contributes to the
-         off-diagonal second derivative terms of the initial quadratic model. */
-        /* Set the off-diagonal second derivatives of the Lagrange functions and
-           the initial quadratic model. */
-      integer ih                  = ipt * ( ipt - 1 ) / 2 + jpt;
-      m_zmat( 0, nfx - 1 )        = recip;
-      m_zmat( m_nf - 1, nfx - 1 ) = recip;
-      m_zmat( ipt, nfx - 1 )      = -recip;
-      m_zmat( jpt, nfx - 1 )      = -recip;
-      Scalar temp                 = m_xpt( ipt - 1, m_nf - 1 ) * m_xpt( jpt - 1, m_nf - 1 );
-      m_hq( ih - 1 )              = ( fbeg - m_fval( ipt ) - m_fval( jpt ) + f ) / temp;
+      integer ih          = ipt * ( ipt - 1 ) / 2 + jpt;
+      m_zmat( 0,     nfx0 ) = recip;
+      m_zmat( I-1,   nfx0 ) = recip;
+      m_zmat( ipt-1, nfx0 ) = -recip;
+      m_zmat( jpt-1, nfx0 ) = -recip;
+      Scalar temp         = m_xpt( ipt - 1, I-1 ) * m_xpt( jpt - 1, I-1 );
+      m_hq( ih - 1 )      = ( fbeg - m_fval( ipt-1 ) - m_fval( jpt-1 ) + f ) / temp;
     }
 
   } /* prelim */
@@ -2086,7 +2008,7 @@ namespace Utils
     // ==============================================================================
     integer nrem = npt;
     integer kold = 0;  // 0-based
-    m_knew       = m_kopt;
+    m_knew       = m_kopt+1;
 
     // Funzione helper per lo swap
     auto swap_points = [&]( integer k1, integer k2 )
@@ -2103,7 +2025,7 @@ namespace Utils
     while ( nrem > 0 )
     {
       // PHASE 1: Scambia kold e knew
-      if ( m_knew != m_kopt )
+      if ( m_knew != m_kopt+1 )
       {
         swap_points( kold, m_knew - 1 );
         m_work( m_dim + m_knew - 1 ) = 0;
@@ -2250,7 +2172,7 @@ namespace Utils
       }
 
       // PHASE 7: Gestione caso speciale (knew == kopt)
-      if ( m_knew == m_kopt )
+      if ( m_knew == m_kopt+1 )
       {
         m_work( m_dim + m_knew ) = 0;
         nrem--;
