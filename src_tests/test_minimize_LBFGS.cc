@@ -29,6 +29,7 @@ using std::map;
 using std::pair;
 using std::string;
 using std::vector;
+
 using Scalar    = double;
 using MINIMIZER = Utils::LBFGS_minimizer<Scalar>;
 // using MINIMIZER = Utils::LBFGS_BlockCoordinate<Scalar>;

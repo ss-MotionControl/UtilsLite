@@ -187,12 +187,22 @@ namespace Utils
     }
 
   private:
-    integer m_neq;
+    bobyqa_objfun m_fun;
+    integer       m_num_f_eval   = 0;
+    integer       m_max_f_eval   = 10000;
+    integer       n_num_f_saved  = 0;
+    integer       n_num_f_rescue = 0;
+    
+    Status        m_status;
+    string        m_reason;
+
+    Scalar eval( Vector const & x );
+
+    integer m_nv;
     integer m_npt;
     integer m_dim;
-    integer m_print_level = 1;
-    integer m_maxfun      = 10000;
-    integer m_nf          = 0;
+    integer m_nptm;
+    integer m_print_level = 3;
 
     integer m_kopt;
     integer m_knew;
@@ -201,11 +211,13 @@ namespace Utils
     // COSTANTI NUMERICHE
     // ========================================================================
 
-    Scalar m_tol_convergence = Scalar( 1e-8 );  ///< Tolleranza per convergenza
-    Scalar m_tol_step        = Scalar( 1e-6 );  ///< Tolleranza passo minimo
+    Scalar m_tol_convergence = Scalar( 1e-4 );  ///< Tolleranza per convergenza
+    Scalar m_tol_step        = Scalar( 1e-2 );  ///< Tolleranza passo minimo
+    Scalar m_eps             = Scalar( 1e-20 );
 
-    Scalar m_rhobeg = Scalar(0.1);
-    Scalar m_rhoend = Scalar(0.001);
+    Scalar m_rho;
+    Scalar m_rhobeg = Scalar( 0.1 );
+    Scalar m_rhoend = Scalar( 1e-6 );
     Scalar m_crvmin;
     Scalar m_dsq;
     Scalar m_alpha;
@@ -214,31 +226,57 @@ namespace Utils
     Scalar m_adelt;
     Scalar m_cauchy;
     Scalar m_denom;
+    Scalar m_x_opt_square;
+    Scalar m_distsq;
 
-    Vector m_xlower;
-    Vector m_xupper;
+    VectorI m_xbdi;
 
-    Vector m_xbase;
-    Vector m_xnew;
-    Vector m_xalt;
-    Vector m_fval;
-    Vector m_xopt;
-    Vector m_gopt;
-    Vector m_hq;
+    Vector m_x_lower;
+    Vector m_x_upper;
+
+    Vector m_x_base;
+    Vector m_x_new;
+    Vector m_g_new;
+    Vector m_x_opt;
+    Vector m_g_opt;
+
+    Vector m_x_alt;
+    Vector m_f_val;
     Vector m_pq;
-    Vector m_sl;
-    Vector m_su;
+    Vector m_s_lower;
+    Vector m_s_upper;
     Vector m_d;
-    Vector m_vlag;
-    Vector m_glag;
+    Vector m_v_lag;
+    Vector m_g_lag;
     Vector m_hcol;
-    Vector m_gnew;
+    Vector m_curv;
 
     Matrix m_xpt;
-    Matrix m_bmat;
-    Matrix m_zmat;
+    Matrix m_B;
+    Matrix m_Z;
     Matrix m_ptsaux;
     Vector m_ptsid;
+    Matrix m_HQ;
+
+    Vector m_s;
+    Vector m_hs;
+    Vector m_hred;
+
+    Vector m_WNPT;
+
+    Vector m_VN0;
+    Vector m_VN1;
+
+    static Scalar
+    power2( Scalar const x )
+    {
+      return x * x;
+    }
+    static bool
+    is_zero( Scalar const x )
+    {
+      return std::abs( x ) < 1e-20;
+    }
 
   public:
     void
@@ -255,7 +293,7 @@ namespace Utils
     void
     set_maxfun( integer m )
     {
-      m_maxfun = m;
+      m_max_f_eval = m;
     }
 
   private:
@@ -267,13 +305,98 @@ namespace Utils
       fmt::print( "\n    Return from BOBYQA because {}.\n", reason );
     }
 
+    void compute_hessian_product( Vector const & s, Vector & hs ) const;
+    void add_hessian_product( Vector const & s, Vector & hs ) const;
+
     void altmov();
-    void prelim( bobyqa_objfun const & objfun, Vector & x );
+    void prelim( Vector & x );
     void trsbox();
     void rescue();
     void update();
 
   public:
+    // Debug accessor to validate BMAT symmetry post-update (used by tests)
+    bool debug_check_bmat_symmetry( Scalar tol = Scalar( 1e-12 ) ) const;
+
+    // Test and debug helpers (initialize internal sizes and set/get internals)
+    void debug_init( integer n, integer npt );
+    void
+    debug_set_B( Matrix const & B )
+    {
+      m_B = B;
+    }
+    void
+    debug_set_Z( Matrix const & Z )
+    {
+      m_Z = Z;
+    }
+    void
+    debug_set_vlag( Vector const & vlag )
+    {
+      m_v_lag = vlag;
+    }
+    void
+    debug_set_pq( Vector const & pq )
+    {
+      m_pq = pq;
+    }
+    void
+    debug_set_knew( integer knew )
+    {
+      m_knew = knew;
+    }
+    void
+    debug_set_denom( Scalar denom )
+    {
+      m_denom = denom;
+    }
+    void
+    debug_set_beta( Scalar beta )
+    {
+      m_beta = beta;
+    }
+    Matrix
+    debug_B() const
+    {
+      return m_B;
+    }
+    Matrix
+    debug_Z() const
+    {
+      return m_Z;
+    }
+    Vector
+    debug_vlag() const
+    {
+      return m_v_lag;
+    }
+    Vector
+    debug_pq() const
+    {
+      return m_pq;
+    }
+    integer
+    debug_knew() const
+    {
+      return m_knew;
+    }
+    Scalar
+    debug_denom() const
+    {
+      return m_denom;
+    }
+    Scalar
+    debug_beta() const
+    {
+      return m_beta;
+    }
+    // Execute the private update() method for testing
+    void
+    debug_update()
+    {
+      update();
+    }
+
     Status minimize( integer const n,
                      integer const npt,
                      bobyqa_objfun const &,

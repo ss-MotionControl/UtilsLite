@@ -13,9 +13,12 @@
 
 #include "Utils_minimize_BOBYQA.hh"
 
-using Scalar = double;
-using Vector = Utils::BOBYQA_minimizer<Scalar>::Vector;
-using Status = Utils::BOBYQA_minimizer<Scalar>::Status;
+using std::string;
+
+using Scalar  = double;
+using Vector  = Utils::BOBYQA_minimizer<Scalar>::Vector;
+using Status  = Utils::BOBYQA_minimizer<Scalar>::Status;
+using integer = Utils::BOBYQA_minimizer<Scalar>::integer;
 
 // Risultato dell'ottimizzazione per il test
 struct Result
@@ -29,12 +32,12 @@ struct Result
 // Struttura per raccogliere i risultati dei test
 struct TestResult
 {
-  std::string problem_name;
-  std::string linesearch_name;
-  Result      iteration_data;
-  Scalar      final_value;
-  Vector      final_solution;
-  size_t      dimension;
+  string  problem_name;
+  string  linesearch_name;
+  Result  iteration_data;
+  Scalar  final_value;
+  Vector  final_solution;
+  integer dimension;
 };
 
 // Statistiche line search
@@ -135,8 +138,8 @@ test( Problem & prob, std::string const & problem_name )
   fmt::print( "\n\nSTART: {}\n", problem_name );
 
   // Dimensione del problema e punto iniziale
-  Vector                                         x0 = prob.init();
-  const Utils::BOBYQA_minimizer<Scalar>::integer n  = x0.size();
+  Vector        x0 = prob.init();
+  integer const n  = x0.size();
 
   // Bound del problema
   Vector lower = prob.lower();
@@ -144,9 +147,9 @@ test( Problem & prob, std::string const & problem_name )
 
   // Calcolo NPT (numero di punti di interpolazione)
   // Raccomandato: 2*n+1, ma deve essere tra n+2 e (n+1)(n+2)/2
-  Utils::BOBYQA_minimizer<Scalar>::integer npt     = 2 * n + 1;
-  Utils::BOBYQA_minimizer<Scalar>::integer npt_min = n + 2;
-  Utils::BOBYQA_minimizer<Scalar>::integer npt_max = ( n + 1 ) * ( n + 2 ) / 2;
+  integer npt     = 2 * n + 1;
+  integer npt_min = n + 2;
+  integer npt_max = ( n + 1 ) * ( n + 2 ) / 2;
 
   if ( npt < npt_min ) npt = npt_min;
   if ( npt > npt_max ) npt = npt_max;
