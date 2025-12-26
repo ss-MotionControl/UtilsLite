@@ -28,8 +28,7 @@ namespace Utils
   using integer   = int;
   using real_type = double;
 
-  void
-  test_jacobian_verification()
+  void test_jacobian_verification()
   {
     using NS = NonlinearSystem;
     // const real_type eps = 1e-8;
@@ -247,8 +246,7 @@ namespace Utils
 
 }  // namespace Utils
 
-int
-main()
+int main()
 {
   Utils::init_nonlinear_system_tests();
   Utils::test_jacobian_verification();

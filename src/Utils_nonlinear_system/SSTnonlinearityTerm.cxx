@@ -12,8 +12,7 @@
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-static inline string
-ini_msg_SSTnonlinearityTerm( int item )
+static inline string ini_msg_SSTnonlinearityTerm( int item )
 {
   return fmt::format( "SST nonlinearity term, N.{}", item );
 }
@@ -46,17 +45,12 @@ public:
     UTILS_ASSERT( idx == 0 || idx == 1, "SSTnonlinearityTerm, idx = {} must be 0 or 1", idx_in );
     switch ( idx )
     {
-      case 0:
-        sst1 = 360;
-        break;
-      case 1:
-        sst1 = 3250;
-        break;
+      case 0: sst1 = 360; break;
+      case 1: sst1 = 3250; break;
     }
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = 4E5 - 272.443800016 * x( 0 ) + 0.1e-3 * x( 1 ) + 0.7e-2 * x( 3 ) - 3.67E-16 * x( 0 ) * x( 1 ) -
              4.13E-12 * x( 0 ) * x( 3 );
@@ -67,8 +61,7 @@ public:
     for ( integer i = 0; i < n; ++i ) f( i ) /= SCALE;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -98,8 +91,7 @@ public:
     J /= SCALE;
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 2 );
     auto & x0{ x_vec[0] };
@@ -112,8 +104,7 @@ public:
       2.621168343680655428727664834155029399049e11, 4.100816563193445712723351658449706009508e10;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -121,14 +112,12 @@ public:
     x0 << 1E9, 1E9, 1E13, 1E7;
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     for ( integer i = 0; i < n; ++i ) UTILS_ASSERT( x( i ) > 0, "Bad range" );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( real_max );
     L.setZero();

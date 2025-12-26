@@ -34,8 +34,7 @@ public:
     *pdata      = 0;
   }
 
-  void
-  inc() const
+  void inc() const
   {
     bool  ok;
     int * pdata{ bs.search( std::this_thread::get_id(), ok ) };
@@ -43,8 +42,7 @@ public:
     ++( *pdata );
   }
 
-  void
-  print() const
+  void print() const
   {
     bool  ok;
     int * pdata{ bs.search( std::this_thread::get_id(), ok ) };
@@ -53,8 +51,7 @@ public:
   }
 };
 
-static void
-do_test()
+static void do_test()
 {
   Counter c;
   for ( int i = 0; i < 10000000; ++i )
@@ -65,14 +62,12 @@ do_test()
   c.print();
 }
 
-static void
-do_passa( int const ii )
+static void do_passa( int const ii )
 {
   cout << "passa ii=" << ii << '\n';
 }
 
-int
-main()
+int main()
 {
   std::vector<std::thread> threads_tab;
   for ( int i = 0; i < 100; ++i )

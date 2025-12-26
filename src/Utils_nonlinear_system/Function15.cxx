@@ -57,8 +57,7 @@ public:
     }
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type bf = 3 * x( n - 5 ) - x( n - 4 ) - x( n - 3 ) + 0.5 * x( n - 2 ) - x( n - 1 ) + 1;
     f( 0 )       = -2 * x( 0 ) * x( 0 ) + 3 * x( 0 ) + bf;
@@ -66,8 +65,7 @@ public:
     for ( integer i = 1; i < n - 1; ++i ) f( i ) = -2 * x( i ) * x( i ) + 3 * x( i ) - x( i - 1 ) - 2 * x( i + 1 ) + bf;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     Matrix J_full( n, n );
     J_full.setZero();
@@ -113,8 +111,7 @@ public:
     J = J_full.sparseView();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

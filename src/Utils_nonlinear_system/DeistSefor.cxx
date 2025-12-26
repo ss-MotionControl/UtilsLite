@@ -42,19 +42,10 @@ public:
     beta[5] = 0.01835;
   }
 
-  real_type
-  cot( real_type x ) const
-  {
-    return 1 / tan( x );
-  }
-  real_type
-  csc2( real_type x ) const
-  {
-    return 1 / power2( sin( x ) );
-  }
+  real_type cot( real_type x ) const { return 1 / tan( x ); }
+  real_type csc2( real_type x ) const { return 1 / power2( sin( x ) ); }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     for ( integer i = 0; i < n; ++i )
     {
@@ -64,8 +55,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -77,8 +67,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

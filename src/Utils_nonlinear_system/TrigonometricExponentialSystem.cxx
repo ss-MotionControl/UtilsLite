@@ -38,16 +38,14 @@ public:
     check_even( n, 2 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     for ( integer i = 0; i < n; i += 2 )
       f( i ) = 3 * power3( x( i ) ) + 2 * x( i + 1 ) - 5 + sin( x( i ) - x( i + 1 ) ) * sin( x( i ) + x( i + 1 ) );
     for ( integer i = 1; i < n; i += 2 ) f( i ) = -x( i - 1 ) * exp( x( i - 1 ) - x( i ) ) + 4 * x( i ) - 3;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -64,8 +62,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -73,14 +70,12 @@ public:
     x0.setZero();
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     for ( integer i = 0; i < n; ++i ) UTILS_ASSERT( std::abs( x( i ) ) < 100, "Bad range" );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( 100 );
     L.fill( -100 );
@@ -100,8 +95,7 @@ public:
     check_odd( n, 6 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = 3 * power3( x( 0 ) - x( 2 ) ) + 2 * x( 1 ) - 5 +
              sin( x( 0 ) - x( 1 ) - x( 2 ) ) * sin( x( 0 ) + x( 1 ) - x( 2 ) );
@@ -118,8 +112,7 @@ public:
                  2 * sin( x( n - 3 ) - x( n - 2 ) - x( n - 1 ) ) * sin( x( n - 3 ) + x( n - 2 ) - x( n - 1 ) );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -153,8 +146,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -162,14 +154,12 @@ public:
     x0.fill( 1 );
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     for ( integer i = 0; i < n; ++i ) UTILS_ASSERT( std::abs( x( i ) ) < 100, "Bad range" );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( 100 );
     L.fill( -100 );
@@ -204,8 +194,7 @@ public:
     check_min_equations( n, 3 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 )     = 3 * x( 0 ) * x( 0 ) + 2 * x( 1 ) - 5 + sin( x( 0 ) - x( 1 ) ) * sin( x( 0 ) + x( 1 ) );
     f( n - 1 ) = -x( n - 2 ) * exp( x( n - 1 ) - x( n - 2 ) ) + 4 * x( n - 1 ) - 3;
@@ -214,8 +203,7 @@ public:
                sin( x( i ) - x( i + 1 ) ) * sin( x( i ) + x( i + 1 ) );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -238,8 +226,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 3 );
     auto & x0{ x_vec[0] };
@@ -253,14 +240,12 @@ public:
     x2.fill( 0.3 );
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     for ( integer i = 0; i < n; ++i ) UTILS_ASSERT( std::abs( x( i ) ) < 1000, "Bad range" );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( 1000 );
     L.fill( -1000 );

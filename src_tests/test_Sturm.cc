@@ -23,8 +23,7 @@
 using namespace std;
 using Utils::Poly;
 
-static void
-test1()
+static void test1()
 {
   Poly<double> P( 4 );
   P << 1, 2, -2, -4;
@@ -47,8 +46,7 @@ test1()
   for ( auto & x : S.roots() ) { fmt::print( "P({}) = {}\n", x, P.eval( x ) ); }
 }
 
-static void
-test2()
+static void test2()
 {
   Poly<double> P( 9 );
   P << 0, 0, 1.311999999999999e+15, -9.599999999999992e+16, 2.719999999999998e+18, -4.479999999999996e+19,
@@ -72,8 +70,7 @@ test2()
   for ( auto & x : S.roots() ) { fmt::print( "P({}) = {}\n", x, P.eval( x ) ); }
 }
 
-static void
-test3()
+static void test3()
 {
   Poly<double> P( 9 );
   P << 0, 0, 88740968089804.640625, -4915676989941691.0, 127526512469551888.0, -1920443367344816640.0,
@@ -97,8 +94,7 @@ test3()
   for ( auto & x : S.roots() ) { fmt::print( "P({}) = {}\n", x, P.eval( x ) ); }
 }
 
-static void
-test4()
+static void test4()
 {
   Poly<double> P0( 9 ), P1( 9 ), P( 9 ), DP( 8 );
 
@@ -135,8 +131,7 @@ test4()
   for ( auto & x : S.roots() ) { fmt::print( "P({}) = {}\n", x, P.eval( x ) ); }
 }
 
-static void
-test5()
+static void test5()
 {
   Poly<double> P( 9 );
 
@@ -160,8 +155,7 @@ test5()
   for ( auto & x : S.roots() ) { fmt::print( "P({}) = {}\n", x, P.eval( x ) ); }
 }
 
-static void
-test6()
+static void test6()
 {
   Poly<double> P( 4 );
 
@@ -185,8 +179,7 @@ test6()
   for ( auto & x : S.roots() ) { fmt::print( "P({}) = {}\n", x, P.eval( x ) ); }
 }
 
-static void
-test7()
+static void test7()
 {
   Poly<double> P( 6 );
 
@@ -210,8 +203,7 @@ test7()
   for ( auto & x : S.roots() ) { fmt::print( "P({}) = {}\n", x, P.eval( x ) ); }
 }
 
-static void
-test8()
+static void test8()
 {
   Poly<double> P( 9 ), P1( 8 );
 
@@ -246,8 +238,7 @@ test8()
   for ( auto & x : S.roots() ) { fmt::print( "P'({}) = {} P -> {}\n", x, P1.eval( x ), P.eval( x ) ); }
 }
 
-static void
-test9()
+static void test9()
 {
   Poly<double> P( 9 );
 
@@ -268,8 +259,7 @@ test9()
   for ( auto & x : S.roots() ) { fmt::print( "P({}) = {}\n", x, P.eval( x ) ); }
 }
 
-int
-main()
+int main()
 {
   test1();
   cout << "\n\n\n\n\n\n\n";

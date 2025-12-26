@@ -31,7 +31,7 @@
 #include <set>
 
 #include "Utils_fmt.hh"
-#include "Utils_nonlinear_linesearch.hh"
+#include "Utils_Linesearch.hh"
 
 namespace Utils
 {
@@ -119,8 +119,7 @@ namespace Utils
    * @see Nocedal and Wright (2006), Chapter 7, for detailed theory
    */
 
-  template <typename Scalar = double>
-  class LBFGS
+  template <typename Scalar = double> class LBFGS
   {
   public:
     using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
@@ -185,8 +184,7 @@ namespace Utils
      *
      * @post size() == 0 and all internal storage is zeroed
      */
-    void
-    clear()
+    void clear()
     {
       m_current_size = 0;
       m_oldest_index = 0;
@@ -203,31 +201,19 @@ namespace Utils
      * @brief Return current number of stored correction pairs
      * @return Number of pairs currently in memory (0 ≤ size() ≤ capacity())
      */
-    size_t
-    size() const
-    {
-      return m_current_size;
-    }
+    size_t size() const { return m_current_size; }
 
     /**
      * @brief Return maximum capacity for correction pairs
      * @return Maximum number of pairs (m parameter)
      */
-    size_t
-    capacity() const
-    {
-      return m_capacity;
-    }
+    size_t capacity() const { return m_capacity; }
 
     /**
      * @brief Return problem dimension
      * @return Dimension of vectors in optimization problem (n)
      */
-    size_t
-    dimension() const
-    {
-      return m_dimension;
-    }
+    size_t dimension() const { return m_dimension; }
 
     /**
      * @brief Resize for new problem dimension
@@ -239,8 +225,7 @@ namespace Utils
      *
      * @post size() == 0 and dimension() == new_dimension
      */
-    void
-    resize( size_t const new_dimension )
+    void resize( size_t const new_dimension )
     {
       m_dimension = new_dimension;
       m_S.resize( new_dimension, m_capacity );
@@ -288,8 +273,7 @@ namespace Utils
      *
      * @see Nocedal & Wright (2006), Section 7.2 for curvature condition theory
      */
-    bool
-    add_correction( Vector const & s, Vector const & y, Scalar const min_curvature_ratio = 1e-8 )
+    bool add_correction( Vector const & s, Vector const & y, Scalar const min_curvature_ratio = 1e-8 )
     {
       assert( s.size() == y.size() );
       if ( static_cast<size_t>( s.size() ) != m_dimension ) resize( s.size() );
@@ -380,8 +364,7 @@ namespace Utils
      * @see Nocedal (1980) for original two-loop recursion algorithm
      * @see Liu & Nocedal (1989) for practical implementation details
      */
-    Vector
-    two_loop_recursion( Vector const & g, Scalar h0 ) const
+    Vector two_loop_recursion( Vector const & g, Scalar h0 ) const
     {
       if ( m_current_size == 0 ) return h0 * g;
 
@@ -425,6 +408,52 @@ namespace Utils
     }
 
     /**
+     * @brief Compute adaptive initial Hessian scaling based on gradient norm
+     *
+     * Computes h0 based on gradient norm and problem characteristics
+     * for improved robustness in ill-conditioned problems.
+     *
+     * @param g Current gradient vector
+     * @param default_value Value to return if no pairs are stored
+     *
+     * @return Recommended h0 value, or default_value if size() == 0
+     */
+    Scalar compute_adaptive_h0( Vector const & g, Scalar default_value = Scalar( 1.0 ) ) const
+    {
+      if ( m_current_size == 0 ) return default_value;
+
+      Scalar g_norm = g.norm();
+      if ( g_norm < 1e-12 ) return default_value;
+
+      // Get the newest pair
+      size_t       latest_idx = ( m_newest_index == 0 ) ? m_capacity - 1 : m_newest_index - 1;
+      auto const & s          = m_S.col( latest_idx );
+      auto const & y          = m_Y.col( latest_idx );
+
+      Scalar sty{ s.dot( y ) };
+      Scalar yty{ y.dot( y ) };
+      Scalar h0 = default_value;
+
+      if ( yty > 0 )
+      {
+        h0 = sty / yty;
+
+        // Additional scaling based on gradient norm
+        Scalar snrm = s.norm();
+        if ( snrm > 0 )
+        {
+          Scalar curvature = sty / ( snrm * snrm );
+          // Avoid extreme values
+          if ( curvature > 1e-12 && curvature < 1e12 ) { h0 = 1.0 / curvature; }
+        }
+      }
+
+      // Clamp to safe range
+      h0 = max( m_h0_min, min( m_h0_max, h0 ) );
+      return h0;
+    }
+
+    /**
      * @brief Compute recommended initial Hessian scaling from latest pair
      *
      * Computes the scalar h0 for the initial Hessian approximation H0 = h0*I
@@ -453,9 +482,9 @@ namespace Utils
      *
      * @see Nocedal & Wright (2006), Section 7.2 for scaling strategies
      */
-    Scalar
-    compute_initial_h0( Scalar default_value = Scalar( 1.0 ) ) const
+    Scalar compute_initial_h0( Scalar default_value = Scalar( 1.0 ) ) const
     {
+#if 0
       if ( m_current_size == 0 ) return default_value;
 
       // Get the newest pair (just before newest_index in circular buffer)
@@ -471,6 +500,21 @@ namespace Utils
       // Clamp to safe range
       h0 = max( m_h0_min, min( m_h0_max, h0 ) );
       return h0;
+#else
+      if ( m_current_size == 0 ) return default_value > 0 ? default_value : 1.0;
+
+      auto const & s_last = m_S.col( m_current_size - 1 );
+      auto const & y_last = m_Y.col( m_current_size - 1 );
+
+      // Multiple scaling strategies
+      Scalar sy     = s_last.dot( y_last );
+      Scalar h0_bb1 = sy / y_last.squaredNorm();
+      Scalar h0_bb2 = s_last.squaredNorm() / sy;
+
+      // Safeguarded geometric mean
+      Scalar h0 = std::sqrt( h0_bb1 * h0_bb2 );
+      return std::clamp( h0, 1e-4, 1e4 );
+#endif
     }
 
     /**
@@ -513,8 +557,7 @@ namespace Utils
      *      Mathematics, Springer.
      * @see Nocedal & Wright (2006), Section 18.3 for modified BFGS
      */
-    bool
-    add_correction_with_damping(
+    bool add_correction_with_damping(
       LBFGS<Scalar> & lb,
       Vector const &  s,
       Vector const &  y,

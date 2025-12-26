@@ -34,52 +34,32 @@ public:
     check_min_equations( n, 2 );
   }
 
-  real_type
-  phi1( real_type s, real_type t ) const
-  {
-    return 3 * s * s + 2 * t - 5 + sin( s - t ) * sin( s + t );
-  }
+  real_type phi1( real_type s, real_type t ) const { return 3 * s * s + 2 * t - 5 + sin( s - t ) * sin( s + t ); }
 
-  real_type
-  phi2( real_type s, real_type t ) const
-  {
-    return 4 * t - 3 + s * exp( s - t );
-  }
+  real_type phi2( real_type s, real_type t ) const { return 4 * t - 3 + s * exp( s - t ); }
 
-  real_type
-  phi1_1( real_type s, real_type t ) const
+  real_type phi1_1( real_type s, real_type t ) const
   {
     return 6 * s + cos( s - t ) * sin( s + t ) + sin( s - t ) * cos( s + t );
   }
 
-  real_type
-  phi1_2( real_type s, real_type t ) const
+  real_type phi1_2( real_type s, real_type t ) const
   {
     return 2 - cos( s - t ) * sin( s + t ) + sin( s - t ) * cos( s + t );
   }
 
-  real_type
-  phi2_1( real_type s, real_type t ) const
-  {
-    return ( 1 + s ) * exp( s - t );
-  }
+  real_type phi2_1( real_type s, real_type t ) const { return ( 1 + s ) * exp( s - t ); }
 
-  real_type
-  phi2_2( real_type s, real_type t ) const
-  {
-    return 4 - s * exp( s - t );
-  }
+  real_type phi2_2( real_type s, real_type t ) const { return 4 - s * exp( s - t ); }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = phi1( x( 0 ), x( 1 ) );
     for ( integer k = 1; k < n - 1; ++k ) f( k ) = phi1( x( k ), x( k + 1 ) ) + phi2( x( k - 1 ), x( k ) );
     f( n - 1 ) = phi2( x( n - 2 ), x( n - 1 ) );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -96,8 +76,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

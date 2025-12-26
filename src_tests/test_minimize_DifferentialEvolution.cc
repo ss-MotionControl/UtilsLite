@@ -26,19 +26,11 @@
  |  on all nonlinear system test problems.                                  |
 \*--------------------------------------------------------------------------*/
 
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <limits>
-#include <string>
-#include <vector>
-
 #include "Utils_fmt.hh"
 #include "Utils_minimize_DifferentialEvolution.hh"
 #include "Utils_nonlinear_system.hh"
+#include "Utils_TicToc.hh"
+#include "Utils_progress_bar.hh"
 
 using namespace Utils;
 using namespace std;
@@ -106,24 +98,21 @@ struct DEStatistics
 };
 
 // Funzione per troncare una stringa se troppo lunga
-string
-truncate_string( string const & str, size_t max_length )
+string truncate_string( string const & str, size_t max_length )
 {
   if ( str.length() <= max_length ) return str;
   return str.substr( 0, max_length - 3 ) + "...";
 }
 
 // Funzione per stampare una barra di progresso
-void
-print_progress( integer current, integer total )
+void print_progress( integer current, integer total )
 {
   real_type progress = static_cast<real_type>( current ) / static_cast<real_type>( total );
   Utils::progress_bar( std::cout, progress, 50, "Progress:" );
 }
 
 // Funzione per stampare la tabella riassuntiva
-void
-print_summary_table( const vector<DETestResult> & results )
+void print_summary_table( const vector<DETestResult> & results )
 {
   // Dimensioni delle colonne
   constexpr integer col_idx      = 5;   // # (indice)
@@ -234,8 +223,7 @@ print_summary_table( const vector<DETestResult> & results )
 }
 
 // Funzione per calcolare e stampare le statistiche
-void
-print_statistics( const vector<DETestResult> & results )
+void print_statistics( const vector<DETestResult> & results )
 {
   DEStatistics stats;
   stats.total_tests = results.size();
@@ -362,8 +350,7 @@ print_statistics( const vector<DETestResult> & results )
 }
 
 // Funzione per determinare i bound basati sui punti iniziali
-void
-determine_bounds( NonlinearSystem * system, Vector & lower, Vector & upper )
+void determine_bounds( NonlinearSystem * system, Vector & lower, Vector & upper )
 {
   integer n = system->num_equations();
   lower.resize( n );
@@ -416,8 +403,7 @@ determine_bounds( NonlinearSystem * system, Vector & lower, Vector & upper )
 }
 
 // Helper: print usage
-void
-print_usage( const char * prog_name )
+void print_usage( const char * prog_name )
 {
   fmt::print( "Usage: {} [options]\n", prog_name );
   fmt::print( "Options:\n" );
@@ -441,8 +427,7 @@ print_usage( const char * prog_name )
   fmt::print( "  {} --strategy=2 --weight=0.5 --cr=0.7 --norm=2\n", prog_name );
 }
 
-int
-main( int argc, char * argv[] )
+int main( int argc, char * argv[] )
 {
   Utils::TicToc tm;
 
@@ -594,18 +579,10 @@ main( int argc, char * argv[] )
   string norm_name;
   switch ( norm_type )
   {
-    case 1:
-      norm_name = "norm1";
-      break;
-    case 2:
-      norm_name = "norm2";
-      break;
-    case 3:
-      norm_name = "norm_inf";
-      break;
-    default:
-      norm_name = "norm1";
-      break;
+    case 1: norm_name = "norm1"; break;
+    case 2: norm_name = "norm2"; break;
+    case 3: norm_name = "norm_inf"; break;
+    default: norm_name = "norm1"; break;
   }
   fmt::print( fg( fmt::color::white ), "  Norm type:       {}\n", norm_name );
   fmt::print( fg( fmt::color::white ), "  Verbose mode:    {}\n", verbose_mode ? "ON" : "OFF" );
@@ -648,14 +625,10 @@ main( int argc, char * argv[] )
 
       switch ( norm_type )
       {
-        case 1:
-          return f.lpNorm<1>();
-        case 2:
-          return f.norm();
-        case 3:
-          return f.lpNorm<Eigen::Infinity>();
-        default:
-          return f.lpNorm<1>();
+        case 1: return f.lpNorm<1>();
+        case 2: return f.norm();
+        case 3: return f.lpNorm<Eigen::Infinity>();
+        default: return f.lpNorm<1>();
       }
     };
 
@@ -696,18 +669,10 @@ main( int argc, char * argv[] )
     real_type final_norm;
     switch ( norm_type )
     {
-      case 1:
-        final_norm = final_residual.lpNorm<1>();
-        break;
-      case 2:
-        final_norm = final_residual.norm();
-        break;
-      case 3:
-        final_norm = final_residual.lpNorm<Eigen::Infinity>();
-        break;
-      default:
-        final_norm = final_residual.lpNorm<1>();
-        break;
+      case 1: final_norm = final_residual.lpNorm<1>(); break;
+      case 2: final_norm = final_residual.norm(); break;
+      case 3: final_norm = final_residual.lpNorm<Eigen::Infinity>(); break;
+      default: final_norm = final_residual.lpNorm<1>(); break;
     }
 
     // Salva risultati

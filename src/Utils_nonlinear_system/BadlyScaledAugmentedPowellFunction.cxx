@@ -13,8 +13,7 @@
 
 class BadlyScaledAugmentedPowellFunction : public NonlinearSystem
 {
-  real_type
-  phi( real_type t ) const
+  real_type phi( real_type t ) const
   {
     if ( t <= -1 )
       return t / 2 - 2;
@@ -24,8 +23,7 @@ class BadlyScaledAugmentedPowellFunction : public NonlinearSystem
       return ( -1924 + t * ( 4551 + t * ( 888 - t * 592 ) ) ) / 1998;
   }
 
-  real_type
-  phi_1( real_type t ) const
+  real_type phi_1( real_type t ) const
   {
     if ( t <= -1 )
       return 0.5;
@@ -56,8 +54,7 @@ public:
     check_three( n, 3 );
   }
 
-  virtual void
-  evaluate( Vector const & X, Vector & F ) const override
+  virtual void evaluate( Vector const & X, Vector & F ) const override
   {
     for ( integer k = 0; k < n; k += 3 )
     {
@@ -68,8 +65,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & X, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & X, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -91,8 +87,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -105,8 +100,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 2 );
     auto & x0{ x_vec[0] };

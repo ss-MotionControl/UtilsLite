@@ -64,8 +64,7 @@ namespace Utils
      *  Take the next job in the queue and run it.
      *  Notify the main thread that a job has completed.
      */
-    void
-    Task()
+    void Task()
     {
       TYPE job;
       while ( m_running )
@@ -84,8 +83,7 @@ namespace Utils
       }
     }
 
-    void
-    close_all()
+    void close_all()
     {
       wait();
       // note that we're done, and wake up any thread that's
@@ -121,8 +119,7 @@ namespace Utils
     //!
     //! \param job The function to be executed.
     //!
-    void
-    exec( FUN && fun ) override
+    void exec( FUN && fun ) override
     {
       std::unique_lock<std::mutex> lock( m_queue_mutex );
       ++m_jobs_left;
@@ -130,8 +127,7 @@ namespace Utils
       m_job_available_var.notify_one();
     }
 
-    void
-    wait() override
+    void wait() override
     {
       std::unique_lock<std::mutex> lock( m_wait_mutex );
       while ( m_jobs_left > 0 ) m_wait_var.wait( lock );
@@ -142,23 +138,11 @@ namespace Utils
     //!
     //! \return The number of threads.
     //!
-    unsigned
-    thread_count() const override
-    {
-      return unsigned( m_threads.size() );
-    }
+    unsigned thread_count() const override { return unsigned( m_threads.size() ); }
 
-    static char const *
-    Name()
-    {
-      return "ThreadPool2";
-    }  //!< Returns the name of the thread pool
+    static char const * Name() { return "ThreadPool2"; }  //!< Returns the name of the thread pool
 
-    char const *
-    name() const override
-    {
-      return Name();
-    }
+    char const * name() const override { return Name(); }
   };
 
   /*! @} */

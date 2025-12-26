@@ -26,23 +26,12 @@
  |  strategies on all nonlinear system test problems.                        |
 \*--------------------------------------------------------------------------*/
 
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <numeric>
-#include <sstream>
-#include <string>
-#include <vector>
-
 #include "Utils_CLI11.hh"  // CLI11 per il parsing degli argomenti
 #include "Utils_fmt.hh"
 #include "Utils_nonlinear_NewtonDumped.hh"
 #include "Utils_nonlinear_system.hh"
+#include "Utils_TicToc.hh"
+#include "Utils_progress_bar.hh"
 
 using namespace Utils;
 using namespace std;
@@ -252,8 +241,7 @@ static const map<string, NewtonDumped::DampingStrategy> damping_strategy_map = {
 };
 
 // Helper function to join vector of ints into string
-string
-join_ints( const vector<int> & vec, const string & delimiter = ", " )
+string join_ints( const vector<int> & vec, const string & delimiter = ", " )
 {
   ostringstream oss;
   for ( size_t i = 0; i < vec.size(); ++i )
@@ -265,16 +253,14 @@ join_ints( const vector<int> & vec, const string & delimiter = ", " )
 }
 
 // Funzione per troncare una stringa se troppo lunga
-string
-truncate_string( string const & str, size_t max_length )
+string truncate_string( string const & str, size_t max_length )
 {
   if ( str.length() <= max_length ) return str;
   return str.substr( 0, max_length - 3 ) + "...";
 }
 
 // Funzione per stampare una barra di progresso
-void
-print_progress( int current, int total )
+void print_progress( int current, int total )
 {
   double progress = static_cast<double>( current ) / static_cast<double>( total );
   Utils::progress_bar( std::cout, progress, 50, "Progress:" );
@@ -282,8 +268,7 @@ print_progress( int current, int total )
 
 // Funzione per stampare la tabella riassuntiva usando fmt con allineamento
 // perfetto
-void
-print_summary_table( const vector<TestResult> & results )
+void print_summary_table( const vector<TestResult> & results )
 {
   // Dimensioni delle colonne
   constexpr int col_idx      = 5;   // # (indice)
@@ -384,8 +369,7 @@ print_summary_table( const vector<TestResult> & results )
 }
 
 // Funzione per calcolare e stampare le statistiche con allineamento perfetto
-void
-print_statistics( const vector<TestResult> & results )
+void print_statistics( const vector<TestResult> & results )
 {
   OverallStatistics stats;
   stats.total_tests = results.size();
@@ -515,8 +499,7 @@ print_statistics( const vector<TestResult> & results )
 }
 
 // Funzione per stampare la tabella comparativa delle strategie
-void
-print_strategy_comparison_table( const vector<StrategyStatistics> & strategy_stats )
+void print_strategy_comparison_table( const vector<StrategyStatistics> & strategy_stats )
 {
   // Dimensioni delle colonne
   constexpr int col_strategy  = 25;  // Nome strategia
@@ -740,8 +723,7 @@ print_strategy_comparison_table( const vector<StrategyStatistics> & strategy_sta
 }
 
 // Funzione per eseguire i test per una specifica strategia
-StrategyStatistics
-run_tests_for_strategy(
+StrategyStatistics run_tests_for_strategy(
   const string &                    strategy_name,
   NewtonDumped::DampingStrategy     strategy,
   const vector<NonlinearSystem *> & selected_tests,
@@ -944,8 +926,7 @@ run_tests_for_strategy(
   return stats;
 }
 
-int
-main( int argc, char * argv[] )
+int main( int argc, char * argv[] )
 {
   Config config;  // Configurazione locale
 

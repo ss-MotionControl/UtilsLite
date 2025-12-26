@@ -19,12 +19,11 @@
 
 #include <iostream>
 
-#include "Utils.hh"
+#include "Utils_Table.hh"
 
 using std::cout;
 
-int
-main()
+int main()
 {
   Utils::Table::Style style;
   Utils::Table::Table table;

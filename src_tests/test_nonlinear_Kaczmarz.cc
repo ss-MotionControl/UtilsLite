@@ -22,18 +22,10 @@
  |  on all nonlinear system test problems.                                 |
 \*--------------------------------------------------------------------------*/
 
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <string>
-#include <vector>
-
 #include "Utils_fmt.hh"
 #include "Utils_nonlinear_Kaczmarz.hh"
 #include "Utils_nonlinear_system.hh"
+#include "Utils_progress_bar.hh"
 
 using namespace Utils;
 using namespace std;
@@ -98,24 +90,21 @@ struct Statistics
 };
 
 // Funzione per troncare una stringa se troppo lunga
-string
-truncate_string( const string & str, size_t max_length )
+string truncate_string( const string & str, size_t max_length )
 {
   if ( str.length() <= max_length ) return str;
   return str.substr( 0, max_length - 3 ) + "...";
 }
 
 // Funzione per stampare una barra di progresso
-void
-print_progress( int current, int total )
+void print_progress( int current, int total )
 {
   double progress = static_cast<double>( current ) / static_cast<double>( total );
   Utils::progress_bar( std::cout, progress, 50, "Progess:" );
 }
 
 // Funzione per stampare la tabella riassuntiva
-void
-print_summary_table( const vector<TestResult> & results )
+void print_summary_table( const vector<TestResult> & results )
 {
   // Dimensioni delle colonne
   constexpr int col_idx      = 4;   // # (indice)
@@ -222,8 +211,7 @@ print_summary_table( const vector<TestResult> & results )
 }
 
 // Funzione per calcolare e stampare le statistiche
-void
-print_statistics( const vector<TestResult> & results )
+void print_statistics( const vector<TestResult> & results )
 {
   Statistics stats;
   stats.total_tests = results.size();
@@ -358,8 +346,7 @@ print_statistics( const vector<TestResult> & results )
   fmt::print( fg( fmt::color::cyan ), "┗{}┛\n", fmt::format( "{:━^{}}", "", stat_total_width - 2 ) );
 }
 
-int
-main( int argc, char * argv[] )
+int main( int argc, char * argv[] )
 {
   // Banner
   fmt::print( "\n" );
@@ -657,20 +644,11 @@ main( int argc, char * argv[] )
   string strategy_name;
   switch ( strategy )
   {
-    case 0:
-      strategy_name = "CYCLIC";
-      break;
-    case 1:
-      strategy_name = "RANDOM_UNIFORM";
-      break;
-    case 2:
-      strategy_name = "RANDOM_WEIGHTED";
-      break;
-    case 3:
-      strategy_name = "GREEDY";
-      break;
-    default:
-      strategy_name = "RANDOM_UNIFORM";
+    case 0: strategy_name = "CYCLIC"; break;
+    case 1: strategy_name = "RANDOM_UNIFORM"; break;
+    case 2: strategy_name = "RANDOM_WEIGHTED"; break;
+    case 3: strategy_name = "GREEDY"; break;
+    default: strategy_name = "RANDOM_UNIFORM";
   }
   fmt::print( fg( fmt::color::white ), "{}\n", strategy_name );
   fmt::print( fg( fmt::color::yellow ), "Using line search: " );

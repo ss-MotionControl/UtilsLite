@@ -29,6 +29,11 @@ project(
   VERSION ${UTILS_PROJECT_VERSION}
   HOMEPAGE_URL "https://ebertolazzi.github.io/UtilsLite/"
 )
+#
+# C++ compiler
+#
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+set( CMAKE_CXX_STANDARD          17 )
 
 include( "${HOME}/CMakeLists-cflags.txt" )
 include( "${HOME}/CMakeLists-utilities.txt" )
@@ -86,13 +91,13 @@ endforeach()
 # Public headers (initial list)
 set( PUBLIC_HEADERS )
 file(
-  GLOB_RECURSE S CONFIGURE_DEPENDS
+  GLOB S CONFIGURE_DEPENDS
   ${SOURCE_DIR}/*.h*
   ${SOURCE_DIR}/Utils/*.h*
-  ${SOURCE_DIR}/Utils/3rd/*
-  ${SOURCE_DIR}/Utils/3rd/*/*
-  ${SOURCE_DIR}/Utils/3rd/*/*/*
-  ${SOURCE_DIR}/Utils/3rd/*/*/*/*
+  #${SOURCE_DIR}/Utils/3rd/*
+  #${SOURCE_DIR}/Utils/3rd/*/*
+  #${SOURCE_DIR}/Utils/3rd/*/*/*
+  #${SOURCE_DIR}/Utils/3rd/*/*/*/*
 )
 foreach (F ${S})
   file( RELATIVE_PATH RF "${SOURCE_DIR}" "${F}" )

@@ -26,13 +26,10 @@
 namespace Test
 {
 
-  template <typename T, size_t N>
-  using Point_type = typename Utils::ParetoFront<T, N>::Point_type;
+  template <typename T, size_t N> using Point_type = typename Utils::ParetoFront<T, N>::Point_type;
 
   // Placeholder function to format points for printing
-  template <typename T, size_t N>
-  std::string
-  fmt_point( std::array<T, N> const & p )
+  template <typename T, size_t N> std::string fmt_point( std::array<T, N> const & p )
   {
     std::string s = "{";
     for ( size_t i = 0; i < N; ++i )
@@ -46,9 +43,7 @@ namespace Test
     return s;
   }
 
-  template <typename T>
-  inline void
-  check_test( std::string const & name, T expected, T actual )
+  template <typename T> inline void check_test( std::string const & name, T expected, T actual )
   {
     auto const & GREEN{ fmt::fg( fmt::color::green ) };
     auto const & RED{ fmt::fg( fmt::color::red ) };
@@ -64,8 +59,7 @@ namespace Test
     }
   }
 
-  void
-  check_test_bool( std::string const & name, bool expected, bool actual )
+  void check_test_bool( std::string const & name, bool expected, bool actual )
   {
     // More readable formatting for boolean
     std::string  s_expected{ expected ? "true" : "false" };
@@ -96,8 +90,7 @@ namespace Test
    * \brief Helper function to print the front's state.
    */
   template <std::size_t N, typename Payload>
-  inline void
-  print_front_state( std::string const & title, PF<N, Payload> const & pf )
+  inline void print_front_state( std::string const & title, PF<N, Payload> const & pf )
   {
     fmt::print(
       "\n--- {} ---\n"
@@ -123,8 +116,7 @@ namespace Test
   /**
    * \brief Function to run the 2D minimization test.
    */
-  void
-  test_2d_minimization()
+  void test_2d_minimization()
   {
     fmt::print(
       "\n"
@@ -191,8 +183,7 @@ namespace Test
   /**
    * \brief Function to run the 3D minimization test with Payload.
    */
-  void
-  test_3d_with_payload()
+  void test_3d_with_payload()
   {
     fmt::print(
       "\n"
@@ -257,8 +248,7 @@ namespace Test
   /**
    * \brief Function to run the batch build and ID removal test.
    */
-  void
-  test_batch_build_and_erase()
+  void test_batch_build_and_erase()
   {
     fmt::print(
       "\n"
@@ -337,8 +327,7 @@ namespace Test
   /**
    * \brief Function to run the forced ND-Tree rebuild test.
    */
-  void
-  test_tree_rebuild()
+  void test_tree_rebuild()
   {
     fmt::print(
       "\n"
@@ -390,8 +379,7 @@ namespace Test
 /**
  * \brief Main function for executing all tests.
  */
-int
-main()
+int main()
 {
   try
   {

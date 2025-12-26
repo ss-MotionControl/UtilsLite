@@ -21,17 +21,17 @@
 #include <string>
 
 #include "Utils.hh"
+#include "Utils_TicToc.hh"
+#include "Utils_progress_bar.hh"
 
 using namespace std;
-using namespace rang;
 
 #ifdef __clang__
 [[clang::no_destroy]]
 #endif
 static Utils::Console C( &std::cout, 4 );
 
-int
-main()
+int main()
 {
   C.message( "message\n" );
   C.semaphore( 0, "semphore 0\n" );

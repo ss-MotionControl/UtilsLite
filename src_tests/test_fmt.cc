@@ -28,8 +28,7 @@ using namespace std;
 using integer   = int;
 using real_type = double;
 
-int
-main()
+int main()
 {
   fmt::print( "Don't {}\n\n", "panic" );
   fmt::print( "I'd rather be {1} than {0}.\n\n", "right", "happy" );

@@ -23,3 +23,6 @@ cmake-build-debug
 .ninja_deps
 .ninja_log
 .build
+*.nav
+*.snm
+.cache

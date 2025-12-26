@@ -48,16 +48,14 @@ public:
 
   //  f = f1 * f1 * ( 1.0 + f1 * f1 ) + f2;
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type sum1 = 0;
     for ( integer j = 0; j < n; ++j ) sum1 += ( j + 1 ) * ( x( j ) - 1 );
     for ( integer j = 0; j < n; ++j ) f( j ) = x( j ) - 1 + ( j + 1 ) * sum1 * ( 1 + 2 * power2( sum1 ) );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -76,8 +74,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

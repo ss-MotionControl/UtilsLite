@@ -24,38 +24,31 @@
 using Utils::m_pi;
 using real_type = double;
 
-static inline real_type
-power2( real_type x )
+static inline real_type power2( real_type x )
 {
   return x * x;
 }
-static inline real_type
-power3( real_type x )
+static inline real_type power3( real_type x )
 {
   return x * x * x;
 }
-static inline real_type
-power4( real_type x )
+static inline real_type power4( real_type x )
 {
   return power2( power2( x ) );
 }
-static inline real_type
-power5( real_type x )
+static inline real_type power5( real_type x )
 {
   return power4( x ) * x;
 }
-static inline real_type
-power6( real_type x )
+static inline real_type power6( real_type x )
 {
   return power4( x ) * power2( x );
 }
-static inline real_type
-power7( real_type x )
+static inline real_type power7( real_type x )
 {
   return power4( x ) * power3( x );
 }
-static inline real_type
-power8( real_type x )
+static inline real_type power8( real_type x )
 {
   return power2( power4( x ) );
 }
@@ -77,31 +70,11 @@ public:
   {
   }
 
-  real_type
-  operator()( real_type x ) const
-  {
-    return m_fun( x );
-  }
-  real_type
-  eval( real_type x ) const
-  {
-    return m_fun( x );
-  }
-  real_type
-  a0() const
-  {
-    return m_a0;
-  }
-  real_type
-  b0() const
-  {
-    return m_b0;
-  }
-  string
-  info() const
-  {
-    return m_info;
-  }
+  real_type operator()( real_type x ) const { return m_fun( x ); }
+  real_type eval( real_type x ) const { return m_fun( x ); }
+  real_type a0() const { return m_a0; }
+  real_type b0() const { return m_b0; }
+  string    info() const { return m_info; }
   FUN1D
   function() const { return m_fun; }
 };
@@ -124,8 +97,7 @@ public:
   }
 };
 
-static void
-build_1dfun_list( std::vector<std::unique_ptr<fun1D>> & f_list )
+static void build_1dfun_list( std::vector<std::unique_ptr<fun1D>> & f_list )
 {
   f_list.clear();
 

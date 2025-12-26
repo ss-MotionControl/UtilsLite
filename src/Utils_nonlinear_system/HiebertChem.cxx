@@ -30,15 +30,13 @@ class HiebertChem2x2 : public NonlinearSystem
 public:
   HiebertChem2x2() : NonlinearSystem( "Hiebert Chem 2x2", HIEBERT_BIBTEX, 2 ) {}
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = x( 1 ) - 10;
     f( 1 ) = x( 0 ) * x( 1 ) - 5E4;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -49,8 +47,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -58,8 +55,7 @@ public:
     x0 << 5000, 10;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -77,8 +73,7 @@ class HiebertChem6x6 : public NonlinearSystem
 public:
   HiebertChem6x6() : NonlinearSystem( "Hiebert Chem 6x6", HIEBERT_BIBTEX, 6 ) {}
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = x( 0 ) + x( 1 ) + x( 3 ) - 0.001;
     f( 1 ) = x( 4 ) + x( 5 ) - 55;
@@ -88,8 +83,7 @@ public:
     f( 5 ) = x( 3 ) - 55E14 * x( 2 ) * x( 5 );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -147,8 +141,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 3 );
     auto & x0{ x_vec[0] };
@@ -175,8 +168,7 @@ public:
       0.18181818181781818181818292640692640295982173534745e-15;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -196,8 +188,7 @@ class HiebertChem10x10 : public NonlinearSystem
 public:
   HiebertChem10x10() : NonlinearSystem( "Hiebert Chem 10x10", HIEBERT_BIBTEX, 10 ), R( 3 ) {}
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type TOT = x( 0 ) + x( 1 ) + x( 2 ) + x( 3 ) + x( 4 ) + x( 5 ) + x( 6 ) + x( 7 ) + x( 8 ) + x( 9 );
     f( 0 )        = x( 0 ) + x( 3 ) - 3.0;
@@ -212,8 +203,7 @@ public:
     f( 9 )        = ( x( 9 ) - ( 1923.0 / 50000000.0 ) * TOT ) * x( 3 ) * x( 3 );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -315,8 +305,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -326,8 +315,7 @@ public:
       0.02159005444686014319849639, 1.411134475268817487496289, 5.723908589993461301590475, -7.072216461786208715286129;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

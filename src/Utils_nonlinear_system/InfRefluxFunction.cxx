@@ -33,8 +33,7 @@ public:
   {
   }
 
-  virtual void
-  evaluate( Vector const & x_in, Vector & f ) const override
+  virtual void evaluate( Vector const & x_in, Vector & f ) const override
   {
     real_type x    = x_in[0];
     real_type arg1 = 1. / ( 1. - x );
@@ -45,8 +44,7 @@ public:
       f( 0 ) = nan( "InfRefluxFunction" );
   }
 
-  virtual void
-  jacobian( Vector const & x_in, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x_in, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -61,8 +59,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 4 );
     auto & x0{ x_vec[0] };
@@ -80,15 +77,13 @@ public:
     x3 << 0.01;
   }
 
-  virtual void
-  check_if_admissible( Vector const & x_in ) const override
+  virtual void check_if_admissible( Vector const & x_in ) const override
   {
     real_type x = x_in[0];
     UTILS_ASSERT( x > 0 && x < 0.95, "ARGUMENT ERROR" );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U[0] = 0.95;
     L[0] = 0;

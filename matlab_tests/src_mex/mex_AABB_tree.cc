@@ -29,8 +29,7 @@ namespace Utils
    *
   \*/
 
-  static void
-  do_new(
+  static void do_new(
     int       nlhs,
     mxArray * plhs[],
     int       nrhs,
@@ -46,8 +45,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_delete(
+  static void do_delete(
     int nlhs,
     mxArray *[],  // unused
     int             nrhs,
@@ -63,8 +61,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_copy( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_copy( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_3 "AABB_treeMexWrapper('copy',obj)"
 #define CMD MEX_ERROR_MESSAGE_3
@@ -76,8 +73,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_set_max_num_objects_per_node( int nlhs, mxArray *[], int nrhs, mxArray const * prhs[] )
+  static void do_set_max_num_objects_per_node( int nlhs, mxArray *[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_4 "AABB_treeMexWrapper('set_max_num_objects_per_node',obj,N)"
 #define CMD MEX_ERROR_MESSAGE_4
@@ -90,8 +86,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_set_bbox_long_edge_ratio( int nlhs, mxArray *[], int nrhs, mxArray const * prhs[] )
+  static void do_set_bbox_long_edge_ratio( int nlhs, mxArray *[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_5 "AABB_treeMexWrapper('set_bbox_long_edge_ratio',obj,V)"
 #define CMD MEX_ERROR_MESSAGE_5
@@ -104,8 +99,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_set_bbox_overlap_tolerance( int nlhs, mxArray *[], int nrhs, mxArray const * prhs[] )
+  static void do_set_bbox_overlap_tolerance( int nlhs, mxArray *[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_6 "AABB_treeMexWrapper('set_bbox_overlap_tolerance',obj,V)"
 #define CMD MEX_ERROR_MESSAGE_6
@@ -118,8 +112,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_build( int nlhs, mxArray *[], int nrhs, mxArray const * prhs[] )
+  static void do_build( int nlhs, mxArray *[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_7 "AABB_treeMexWrapper( 'build', obj, bb_min, bb_max )"
 #define CMD MEX_ERROR_MESSAGE_7
@@ -149,8 +142,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_get_bboxes_of_the_tree( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_get_bboxes_of_the_tree( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_8 "[bb_min,bb_max]=AABB_treeMexWrapper('get_bboxes_of_the_tree',obj,nmin)"
 #define CMD MEX_ERROR_MESSAGE_8
@@ -171,8 +163,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_get_bbox_indexes_of_a_node( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_get_bbox_indexes_of_a_node( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_9 "id_list=AABB_treeMexWrapper('get_bbox_indexes_of_a_node',obj,inode)"
 #define CMD MEX_ERROR_MESSAGE_9
@@ -193,8 +184,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_intersect( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_intersect( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_10 "id_list=AABB_treeMexWrapper('intersect',obj,aabb)"
 #define CMD MEX_ERROR_MESSAGE_10
@@ -225,8 +215,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_intersect_and_refine( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_intersect_and_refine( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_11 "id_list=AABB_treeMexWrapper( 'intersect_and_refine', obj, aabb )"
 #define CMD MEX_ERROR_MESSAGE_11
@@ -254,8 +243,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_intersect_with_one_bbox( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_intersect_with_one_bbox( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_12 "id_list=AABB_treeMexWrapper('intersect_with_one_bbox',obj,bb_min,bb_max)"
 #define CMD MEX_ERROR_MESSAGE_12
@@ -289,8 +277,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_intersect_with_one_point( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_intersect_with_one_point( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_13 "id_list=AABB_treeMexWrapper('intersect_with_one_point',obj,pnt)"
 #define CMD MEX_ERROR_MESSAGE_13
@@ -312,8 +299,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_info(
+  static void do_info(
     int nlhs,
     mxArray *[],  // unused
     int             nrhs,
@@ -329,8 +315,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_get_dim(
+  static void do_get_dim(
     int             nlhs,
     mxArray *       plhs[],  // unused
     int             nrhs,
@@ -346,8 +331,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_get_num_bb(
+  static void do_get_num_bb(
     int             nlhs,
     mxArray *       plhs[],  // unused
     int             nrhs,
@@ -363,8 +347,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_get_num_tree_nodes(
+  static void do_get_num_tree_nodes(
     int             nlhs,
     mxArray *       plhs[],  // unused
     int             nrhs,
@@ -384,8 +367,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_min_distance_candidates(
+  static void do_min_distance_candidates(
     int             nlhs,
     mxArray *       plhs[],  // unused
     int             nrhs,
@@ -482,8 +464,7 @@ namespace Utils
   "==========================================================================" \
   "===========\n"
 
-  extern "C" void
-  mexFunction( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  extern "C" void mexFunction( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
     // the first argument must be a string
     if ( nrhs == 0 )

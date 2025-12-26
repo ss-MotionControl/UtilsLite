@@ -83,28 +83,23 @@ namespace Utils
 
   using real_type = double;
 
-  static inline real_type
-  power2( real_type a )
+  static inline real_type power2( real_type a )
   {
     return a * a;
   }
-  static inline real_type
-  power3( real_type a )
+  static inline real_type power3( real_type a )
   {
     return a * a * a;
   }
-  static inline real_type
-  power4( real_type a )
+  static inline real_type power4( real_type a )
   {
     return a * a * a * a;
   }
-  static inline real_type
-  power5( real_type a )
+  static inline real_type power5( real_type a )
   {
     return a * a * a * a * a;
   }
-  static inline real_type
-  power6( real_type a )
+  static inline real_type power6( real_type a )
   {
     return a * a * a * a * a * a;
   }
@@ -234,8 +229,7 @@ namespace Utils
   std::vector<NonlinearSystem *> nonlinear_system_tests;
   std::map<string, unsigned>     nonlinear_system_tests_map;
 
-  void
-  init_nonlinear_system_tests()
+  void init_nonlinear_system_tests()
   {
     nonlinear_system_tests.push_back( new ArtificialTestOfNowakAndWeimann() );
     nonlinear_system_tests.push_back( new BadlyScaledAugmentedPowellFunction( 3 ) );

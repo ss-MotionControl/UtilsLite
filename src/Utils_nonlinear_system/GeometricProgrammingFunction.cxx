@@ -37,8 +37,7 @@ public:
   // ============================================================
   // f(x)
   // ============================================================
-  void
-  evaluate( Vector const & x, Vector & f ) const override
+  void evaluate( Vector const & x, Vector & f ) const override
   {
     f.fill( -1.0 );
 
@@ -81,8 +80,7 @@ public:
   // ============================================================
   // J(x)
   // ============================================================
-  void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     Matrix Jfull( n, n );
     Jfull.setZero();
@@ -153,8 +151,7 @@ public:
     J = Jfull.sparseView();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -162,43 +159,21 @@ public:
     // soluzione solo per n > 2
     switch ( n )
     {
-      case 3:
-        x0.fill( 0.1998358397137673483536787376895800631111 );
-        break;
-      case 4:
-        x0.fill( 0.4504094438079780141262271051664676993245 );
-        break;
-      case 5:
-        x0.fill( 0.5752676827564249696803041659800640074052 );
-        break;
-      case 6:
-        x0.fill( 0.6535160063654996023801965308489436831018 );
-        break;
-      case 7:
-        x0.fill( 0.7073521857908597934305906573214506518189 );
-        break;
-      case 8:
-        x0.fill( 0.7466921578931958109831452261293280849340 );
-        break;
-      case 9:
-        x0.fill( 0.7767040434991580564723357591126807540423 );
-        break;
-      case 10:
-        x0.fill( 0.8003562243848881877566691646546685244726 );
-        break;
-      case 50:
-        x0.fill( 0.9618792339620107524542660085692669885314 );
-        break;
-      case 100:
-        x0.fill( 0.9810472935851392047929164385524051070425 );
-        break;
-      default:
-        x_vec.clear();
+      case 3: x0.fill( 0.1998358397137673483536787376895800631111 ); break;
+      case 4: x0.fill( 0.4504094438079780141262271051664676993245 ); break;
+      case 5: x0.fill( 0.5752676827564249696803041659800640074052 ); break;
+      case 6: x0.fill( 0.6535160063654996023801965308489436831018 ); break;
+      case 7: x0.fill( 0.7073521857908597934305906573214506518189 ); break;
+      case 8: x0.fill( 0.7466921578931958109831452261293280849340 ); break;
+      case 9: x0.fill( 0.7767040434991580564723357591126807540423 ); break;
+      case 10: x0.fill( 0.8003562243848881877566691646546685244726 ); break;
+      case 50: x0.fill( 0.9618792339620107524542660085692669885314 ); break;
+      case 100: x0.fill( 0.9810472935851392047929164385524051070425 ); break;
+      default: x_vec.clear();
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -206,8 +181,7 @@ public:
     x0.fill( 1 );
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     for ( integer i = 0; i < n - 1; ++i ) UTILS_ASSERT( x( i ) > 0, "x[{}] = {} must be > 0", i, x( i ) );
   }

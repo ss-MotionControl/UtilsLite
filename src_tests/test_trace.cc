@@ -28,15 +28,13 @@ static void fun2( int i );
 static void fun3( int i );
 static void fun4( int i );
 
-static void
-fun5( char const str[] )
+static void fun5( char const str[] )
 {
   cout << "fun3: " << str << '\n';
   Utils::print_trace( __LINE__, __FILE__, "in fun3", std::cerr );
 }
 
-static void
-fun1( int const i )
+static void fun1( int const i )
 {
   cout << "in fun1\n";
   if ( i > 0 ) { fun2( i - 1 ); }
@@ -47,8 +45,7 @@ fun1( int const i )
   }
 }
 
-static void
-fun2( int i )
+static void fun2( int i )
 {
   cout << "in fun2\n";
   if ( i > 0 ) { fun3( i - 1 ); }
@@ -59,8 +56,7 @@ fun2( int i )
   }
 }
 
-static void
-fun3( int i )
+static void fun3( int i )
 {
   cout << "in fun3\n";
   if ( i > 0 ) { fun4( i - 1 ); }
@@ -71,8 +67,7 @@ fun3( int i )
   }
 }
 
-static void
-fun4( int i )
+static void fun4( int i )
 {
   cout << "in fun4\n";
   if ( i > 0 ) { fun1( i - 1 ); }
@@ -83,8 +78,7 @@ fun4( int i )
   }
 }
 
-int
-main()
+int main()
 {
   try
   {

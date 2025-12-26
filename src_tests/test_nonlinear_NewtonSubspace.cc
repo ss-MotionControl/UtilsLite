@@ -21,19 +21,11 @@
 // File: test_SubspaceNewton.cc
 // -----------------------------------------------------------------------------
 
-#include <algorithm>
-#include <chrono>
-#include <cmath>
-#include <fstream>
-#include <iomanip>
-#include <iostream>
-#include <numeric>
-#include <string>
-#include <vector>
-
 #include "Utils_fmt.hh"
 #include "Utils_nonlinear_NewtonSubspace.hh"
 #include "Utils_nonlinear_system.hh"
+#include "Utils_TicToc.hh"
+#include "Utils_progress_bar.hh"
 
 using namespace Utils;
 using namespace std;
@@ -95,22 +87,19 @@ struct Statistics
   }
 };
 
-string
-truncate_string( string const & str, size_t max_length )
+string truncate_string( string const & str, size_t max_length )
 {
   if ( str.length() <= max_length ) return str;
   return str.substr( 0, max_length - 3 ) + "...";
 }
 
-void
-print_progress( int current, int total )
+void print_progress( int current, int total )
 {
   double progress = static_cast<double>( current ) / static_cast<double>( total );
   Utils::progress_bar( std::cout, progress, 50, "Progress:" );
 }
 
-void
-print_summary_table( const vector<TestResult> & results )
+void print_summary_table( const vector<TestResult> & results )
 {
   constexpr int col_idx      = 5;
   constexpr int col_status   = 6;
@@ -180,8 +169,7 @@ print_summary_table( const vector<TestResult> & results )
   fmt::print( fg( fmt::color::cyan ), "┗{}┛\n", fmt::format( "{:━^{}}", "", total_width - 2 ) );
 }
 
-void
-print_statistics( const vector<TestResult> & results )
+void print_statistics( const vector<TestResult> & results )
 {
   Statistics stats;
   stats.total_tests = results.size();
@@ -307,8 +295,7 @@ print_statistics( const vector<TestResult> & results )
   fmt::print( fg( fmt::color::cyan ), "╰{}╯\n", fmt::format( "{:─^{}}", "", stat_total_width - 2 ) );
 }
 
-int
-main( int argc, char * argv[] )
+int main( int argc, char * argv[] )
 {
   Utils::TicToc tm;
 

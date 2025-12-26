@@ -63,16 +63,14 @@ class RooseKullaLombMeressoo129 : public NonlinearSystem
 public:
   RooseKullaLombMeressoo129() : NonlinearSystem( "Roose Kulla Lomb Meressoo N.129", RKM_BIBTEX, 3 ) {}
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = x( 0 ) + x( 1 ) - 2;
     f( 1 ) = x( 0 ) - log( x( 1 ) ) + x( 2 ) - 2;
     f( 2 ) = x( 1 ) * x( 1 ) - 2 * x( 2 ) + 1;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -92,8 +90,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 2 );
     auto & x0{ x_vec[0] };
@@ -104,8 +101,7 @@ public:
     x1 << -0.285888702509893511, 2.28588870250989329, 3.11264358013118247;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -113,11 +109,7 @@ public:
     x0.fill( 0.5 );
   }
 
-  string
-  note() const
-  {
-    return "Jacobian is singular at the solution";
-  }
+  string note() const { return "Jacobian is singular at the solution"; }
 };
 
 /*\
@@ -132,15 +124,13 @@ public:
     check_min_equations( n, 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = 1 - x( 0 );
     for ( integer k = 1; k < n; ++k ) f( k ) = 10 * k * power2( x( k ) - x( k - 1 ) );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -153,8 +143,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -162,8 +151,7 @@ public:
     x0.fill( 1 );
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -172,11 +160,7 @@ public:
     x0( n - 1 ) = -1;
   }
 
-  string
-  note() const
-  {
-    return "Jacobian is singular at the solution";
-  }
+  string note() const { return "Jacobian is singular at the solution"; }
 };
 
 /*\
@@ -191,15 +175,13 @@ public:
     check_min_equations( n, 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     for ( integer k = 0; k < n - 1; ++k ) f( k ) = x( k ) - 0.1 * power2( x( k + 1 ) );
     f( n - 1 ) = x( n - 1 ) - 0.1 * power2( x( 0 ) );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -213,8 +195,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 2 );
     auto & x0{ x_vec[0] };
@@ -225,8 +206,7 @@ public:
     x1.fill( 10 );
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -249,8 +229,7 @@ public:
     check_min_equations( n, 2 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type sum = 0;
     for ( integer i = 0; i < n; ++i ) sum += x( i );
@@ -258,8 +237,7 @@ public:
     f( n - 1 ) = sum - 1;
   }
 
-  virtual void
-  jacobian( Vector const &, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const &, SparseMatrix & J ) const override
   {
     Matrix J_full( n, n );
     J_full.fill( 1 );
@@ -268,8 +246,7 @@ public:
     J = J_full.sparseView();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -312,8 +289,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -334,15 +310,13 @@ public:
     check_even( n, 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     for ( integer k = 0; k < n; k += 2 ) f( k ) = 1 - x( k );
     for ( integer k = 1; k < n; k += 2 ) f( k ) = 10 * ( x( k ) - power2( x( k - 1 ) ) );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -355,8 +329,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -364,8 +337,7 @@ public:
     x0.fill( 1 );
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -387,8 +359,7 @@ public:
     check_min_equations( n, 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type acc = 0;
     for ( integer j = 0; j < n; ++j ) acc += power3( x( j ) );
@@ -396,8 +367,7 @@ public:
     for ( integer j = 0; j < n; ++j ) f( j ) = x( j ) - acc - ( 0.5 / n ) * ( j + 1 );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -414,8 +384,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -535,8 +504,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -560,8 +528,7 @@ public:
     h2 = 1.0 / power2( n + 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     for ( integer k = 0; k < n; ++k )
     {
@@ -572,8 +539,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -583,8 +549,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -645,8 +610,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -670,8 +634,7 @@ public:
     check_min_equations( n, 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     for ( integer k = 0; k < n; ++k )
     {
@@ -682,8 +645,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -693,8 +655,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -781,8 +742,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -790,14 +750,12 @@ public:
     x0.fill( -1.0 );
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     for ( integer i = 3; i < n; ++i ) UTILS_ASSERT( x( i ) < 0, "Bad range" );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     integer i = 0;
     for ( ; i < 3; ++i )
@@ -832,8 +790,7 @@ public:
     check_min_equations( n, 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     integer zero = 0;
     for ( integer k = 0; k < n; ++k )
@@ -845,8 +802,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -864,8 +820,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -926,8 +881,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -948,22 +902,19 @@ public:
     check_min_equations( n, 1 );
   }
 
-  void
-  checkx( Vector const & x ) const
+  void checkx( Vector const & x ) const
   {
     for ( integer i = 0; i < n; ++i )
       UTILS_ASSERT( x( i ) > 0, "RooseKullaLombMeressoo209, found x[{}] = {} <= 0", i, x( i ) );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = power2( x( 0 ) ) - 1;
     for ( integer k = 1; k < n; ++k ) f( k ) = power2( x( k - 1 ) ) - 1 + log( x( k ) );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -976,8 +927,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -985,8 +935,7 @@ public:
     x0.fill( 1 );
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -994,8 +943,7 @@ public:
     x0.fill( 0.5 );
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     for ( integer i = 1; i < n; ++i )
     {
@@ -1004,8 +952,7 @@ public:
     }
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( 1000 );
     L.fill( -1000 );
@@ -1025,16 +972,14 @@ public:
     check_min_equations( n, 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type acc = 0;
     for ( integer j = 0; j < n; ++j ) acc += x( j );
     for ( integer j = 0; j < n; ++j ) f( j ) = exp( cos( ( j + 1 ) * acc ) );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -1052,8 +997,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1061,11 +1005,7 @@ public:
     x0.setZero();
   }
 
-  string
-  note() const
-  {
-    return "This problem has no solution";
-  }
+  string note() const { return "This problem has no solution"; }
 };
 
 /*\
@@ -1080,16 +1020,14 @@ public:
     check_min_equations( n, 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type acc = 0;
     for ( integer j = 0; j < n; ++j ) acc += power3( x( j ) );
     for ( integer j = 0; j < n; ++j ) f( j ) = ( acc + j + 1 ) / ( 2 * n );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -1099,8 +1037,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1108,11 +1045,7 @@ public:
     x0.setZero();
   }
 
-  string
-  note() const
-  {
-    return "This problem has no solution";
-  }
+  string note() const { return "This problem has no solution"; }
 };
 
 /*\
@@ -1127,15 +1060,13 @@ public:
     check_min_equations( n, 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = x( 0 );
     for ( integer k = 1; k < n; ++k ) f( k ) = cos( x( k - 1 ) ) + x( k ) - 1;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -1148,8 +1079,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1157,8 +1087,7 @@ public:
     x0.setZero();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1182,8 +1111,7 @@ public:
     h2 = 1.0 / power2( n + 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     for ( integer k = 0; k < n; ++k )
     {
@@ -1194,8 +1122,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -1208,8 +1135,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -1269,8 +1195,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1291,8 +1216,7 @@ public:
     check_min_equations( n, 1 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     integer zero = 0;
     for ( integer k = 0; k < n; ++k )
@@ -1306,8 +1230,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -1327,8 +1250,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -1389,8 +1311,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1418,14 +1339,9 @@ public:
     grad_S.resize( n );
   }
 
-  real_type
-  g( integer k ) const
-  {
-    return ( k + 1.0 ) / 29.0;
-  }
+  real_type g( integer k ) const { return ( k + 1.0 ) / 29.0; }
 
-  real_type
-  S( Vector const & x, integer k ) const
+  real_type S( Vector const & x, integer k ) const
   {
     real_type sum = 0;
     real_type gkj = 1;
@@ -1434,16 +1350,14 @@ public:
     return sum;
   }
 
-  void
-  S_1( Vector const &, integer k, Vector & grad ) const
+  void S_1( Vector const &, integer k, Vector & grad ) const
   {
     real_type gkj = 1;
     real_type gk  = g( k );
     for ( integer j = 0; j < n; ++j, gkj *= gk ) grad[j] = gkj;
   }
 
-  real_type
-  dS( Vector const & x, integer k ) const
+  real_type dS( Vector const & x, integer k ) const
   {
     real_type sum = 0;
     real_type gkj = 1;
@@ -1452,8 +1366,7 @@ public:
     return sum;
   }
 
-  void
-  dS_1( Vector const &, integer k, Vector & grad ) const
+  void dS_1( Vector const &, integer k, Vector & grad ) const
   {
     real_type gkj = 1;
     real_type gk  = g( k );
@@ -1461,8 +1374,7 @@ public:
     for ( integer j = 1; j < n; ++j, gkj *= gk ) grad[j] = j * gkj;
   }
 
-  real_type
-  powergk( integer k, integer i ) const
+  real_type powergk( integer k, integer i ) const
   {
     real_type gk = g( k );
     if ( i == 0 ) return 1 / gk;
@@ -1471,8 +1383,7 @@ public:
     return res;
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & ff ) const override
+  virtual void evaluate( Vector const & x, Vector & ff ) const override
   {
     for ( integer i = 0; i < n; ++i )
     {
@@ -1491,8 +1402,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     Matrix J_full( n, n );
     J_full.setZero();
@@ -1524,8 +1434,7 @@ public:
     J = J_full.sparseView();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -1568,8 +1477,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1578,11 +1486,7 @@ public:
     // get_exact_solution( x, 0 );
   }
 
-  string
-  note() const
-  {
-    return "Watson Function";
-  }
+  string note() const { return "Watson Function"; }
 };
 
 /*\
@@ -1606,16 +1510,14 @@ public:
     }
   }
 
-  void
-  evalY( real_type s, std::vector<real_type> & y ) const
+  void evalY( real_type s, std::vector<real_type> & y ) const
   {
     y[0] = 2 * s - 1;
     y[1] = 8 * ( s - 1 ) * s + 1;
     for ( integer k = 2; k < n; ++k ) y[k] = 2 * y[0] * y[k - 1] - y[k - 2];
   }
 
-  void
-  evalY_D( real_type s, std::vector<real_type> & y, std::vector<real_type> & y_D ) const
+  void evalY_D( real_type s, std::vector<real_type> & y, std::vector<real_type> & y_D ) const
   {
     evalY( s, y );
     y_D[0] = 2;
@@ -1623,32 +1525,21 @@ public:
     for ( integer k = 2; k < n; ++k ) y_D[k] = 2 * ( y[0] * y_D[k - 1] + y_D[0] * y[k - 1] ) - y_D[k - 2];
   }
 
-  void
-  evalY( Vector const & x ) const
+  void evalY( Vector const & x ) const
   {
     for ( integer k = 0; k < n; ++k ) evalY( x( k ), m_y[k] );
   }
 
-  void
-  evalY_D( Vector const & x ) const
+  void evalY_D( Vector const & x ) const
   {
     for ( integer k = 0; k < n; ++k ) evalY_D( x( k ), m_y[k], m_y_D[k] );
   }
 
-  real_type
-  Y( integer xj, integer k ) const
-  {
-    return m_y[xj][k];
-  }
+  real_type Y( integer xj, integer k ) const { return m_y[xj][k]; }
 
-  real_type
-  Y_D( integer xj, integer k ) const
-  {
-    return m_y_D[xj][k];
-  }
+  real_type Y_D( integer xj, integer k ) const { return m_y_D[xj][k]; }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     evalY( x );
     for ( integer k = 0; k < n; ++k )
@@ -1660,8 +1551,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -1671,8 +1561,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -1738,8 +1627,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1748,17 +1636,12 @@ public:
     for ( integer k{ 0 }; k < n; ++k ) x0( k ) = bf * ( k + 1 );
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     for ( integer i = 0; i < n; ++i ) UTILS_ASSERT( x( i ) > 0, "Bad range" );
   }
 
-  string
-  note() const
-  {
-    return "Each permutation of x is a solution";
-  }
+  string note() const { return "Each permutation of x is a solution"; }
 };
 
 /*\
@@ -1773,8 +1656,7 @@ public:
     check_min_equations( n, 2 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     for ( integer k = 0; k < n; ++k )
     {
@@ -1785,8 +1667,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -1802,8 +1683,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -1859,8 +1739,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1885,14 +1764,9 @@ public:
     h2 = h * h;
   }
 
-  real_type
-  t( integer j ) const
-  {
-    return ( j + 1 ) * h;
-  }
+  real_type t( integer j ) const { return ( j + 1 ) * h; }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     for ( integer k = 0; k < n; ++k )
     {
@@ -1903,8 +1777,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -1914,8 +1787,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -1976,8 +1848,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1985,11 +1856,7 @@ public:
     for ( integer k{ 0 }; k < n; ++k ) x0( k ) = t( k ) * ( t( k ) - 1 );
   }
 
-  string
-  note() const
-  {
-    return "For any n all solutions are in the interval [-0.5,0]";
-  }
+  string note() const { return "For any n all solutions are in the interval [-0.5,0]"; }
 };
 
 /*\
@@ -2009,14 +1876,9 @@ public:
     h = 1.0 / ( n + 1 );
   }
 
-  real_type
-  t( integer j ) const
-  {
-    return ( j + 1 ) * h;
-  }
+  real_type t( integer j ) const { return ( j + 1 ) * h; }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     for ( integer i = 0; i < n; ++i )
     {
@@ -2028,8 +1890,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     Matrix J_full( n, n );
     J_full.setZero();
@@ -2049,8 +1910,7 @@ public:
     J = J_full.sparseView();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     switch ( n )
     {
@@ -2111,8 +1971,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

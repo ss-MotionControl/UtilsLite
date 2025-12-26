@@ -26,8 +26,7 @@
 namespace Utils
 {
 
-  string
-  fmt_table_row(
+  string fmt_table_row(
     unsigned const    width,
     string_view const L,
     string_view const R,
@@ -39,8 +38,7 @@ namespace Utils
     return fmt::format( FMT, L, title, R );
   }
 
-  string
-  fmt_table_row(
+  string fmt_table_row(
     unsigned const                           width,
     string_view const                        L,
     string_view const                        C,
@@ -78,8 +76,7 @@ namespace Utils
     return res;
   }
 
-  string
-  fmt_table_row(
+  string fmt_table_row(
     unsigned const    width,
     string_view const L,
     string_view const C,

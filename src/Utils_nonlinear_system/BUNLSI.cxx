@@ -31,8 +31,7 @@ class BUNLSI5 : public NonlinearSystem
 public:
   BUNLSI5() : NonlinearSystem( "BUNLSI example 5", BUNLSI_BIBTEX, 8 ) {}
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type x1 = x( 0 );
     real_type x2 = x( 1 );
@@ -52,8 +51,7 @@ public:
     f( 7 )       = x8 - x1 - x5 - x6 - x3;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -105,8 +103,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -117,8 +114,7 @@ public:
       -61079.62412297820687494549945165294788674, 986.0620119427175381061704391475772708566;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -136,8 +132,7 @@ class BUNLSI6 : public NonlinearSystem
 public:
   BUNLSI6() : NonlinearSystem( "BUNLSI example 6", BUNLSI_BIBTEX, 30 ) {}
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type x1  = x( 0 );
     real_type x2  = x( 1 );
@@ -201,8 +196,7 @@ public:
     f( 29 )       = x27 * x28 + x22 + sqrt( x28 ) - x30;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -372,8 +366,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -382,8 +375,7 @@ public:
       0.05, 50000, 5, 5000;
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     real_type x1  = x( 0 );
     real_type x4  = x( 3 );
@@ -403,8 +395,7 @@ public:
     UTILS_ASSERT( x28 > 0, "x28" );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( real_max );
     L.fill( -real_max );

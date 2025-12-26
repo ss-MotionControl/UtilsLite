@@ -35,7 +35,7 @@
 #include "Utils_eigen.hh"
 #include "Utils_fmt.hh"
 #include "Utils_nonlinear_system.hh"
-#include "Utils_pseudoinverse.hh"
+#include "Utils_Tikhonov.hh"
 
 namespace Utils
 {
@@ -87,61 +87,20 @@ namespace Utils
   public:
     SubspaceInnerSolver() = default;
 
-    void
-    set_max_iterations( int it )
-    {
-      m_max_inner_iter = it;
-    }
-    void
-    set_tolerance( Scalar t )
-    {
-      m_inner_tol = t;
-    }
-    void
-    set_damping( Scalar l )
-    {
-      m_inner_lambda = l;
-    }
-    void
-    enable_line_search( bool v )
-    {
-      m_use_linesearch = v;
-    }
-    void
-    set_verbose_level( int v )
-    {
-      m_verbose = v;
-    }
-    void
-    enable_lazy_jacobian( bool v )
-    {
-      m_lazy_jacobian = v;
-    }
-    void
-    enable_adaptive_damping( bool v )
-    {
-      m_adaptive_damping = v;
-    }
+    void set_max_iterations( int it ) { m_max_inner_iter = it; }
+    void set_tolerance( Scalar t ) { m_inner_tol = t; }
+    void set_damping( Scalar l ) { m_inner_lambda = l; }
+    void enable_line_search( bool v ) { m_use_linesearch = v; }
+    void set_verbose_level( int v ) { m_verbose = v; }
+    void enable_lazy_jacobian( bool v ) { m_lazy_jacobian = v; }
+    void enable_adaptive_damping( bool v ) { m_adaptive_damping = v; }
 
     // Getters for stats
-    int
-    get_total_inner_iterations() const
-    {
-      return m_total_inner_iter;
-    }
-    int
-    get_inner_function_evals() const
-    {
-      return m_inner_feval;
-    }
-    int
-    get_inner_jacobian_evals() const
-    {
-      return m_inner_jeval;
-    }
+    int get_total_inner_iterations() const { return m_total_inner_iter; }
+    int get_inner_function_evals() const { return m_inner_feval; }
+    int get_inner_jacobian_evals() const { return m_inner_jeval; }
 
-    void
-    reset_counters()
+    void reset_counters()
     {
       m_total_inner_iter    = 0;
       m_inner_feval         = 0;
@@ -151,8 +110,7 @@ namespace Utils
 
     // Risolve il problema ridotto mantenendo fisse le variabili non in
     // active_indices
-    bool
-    solve_in_subspace(
+    bool solve_in_subspace(
       NonlinearSystem const &  sys,
       Vector &                 x_full,
       std::vector<int> const & active_indices,
@@ -333,8 +291,11 @@ namespace Utils
   private:
     // Usa SP_TikhonovSolver2 per calcolare la direzione di Newton con
     // regolarizzazione diagonale
-    bool
-    compute_newton_direction_with_tikhonov( SparseMatrix const & J_sub, Vector const & f, Scalar lambda, Vector & dx )
+    bool compute_newton_direction_with_tikhonov(
+      SparseMatrix const & J_sub,
+      Vector const &       f,
+      Scalar               lambda,
+      Vector &             dx )
     {
       int n = J_sub.cols();
 
@@ -389,8 +350,7 @@ namespace Utils
       }
     }
 
-    bool
-    subspace_line_search(
+    bool subspace_line_search(
       NonlinearSystem const &  sys,
       Vector const &           x_full,
       Vector &                 x_active,
@@ -441,8 +401,7 @@ namespace Utils
       return false;
     }
 
-    bool
-    update_and_evaluate(
+    bool update_and_evaluate(
       NonlinearSystem const &  sys,
       Vector &                 x_full,
       Vector const &           x_active_new,
@@ -544,149 +503,51 @@ namespace Utils
     }
 
     // --- Configuration API (API compatibile con i Test) ---
-    void
-    set_max_iterations( int it )
-    {
-      m_max_outer_iter = it;
-    }
-    void
-    set_tolerance( Scalar t )
-    {
-      m_outer_tol = t;
-    }
-    void
-    set_block_size( int b )
-    {
-      m_block_size = std::max( 1, b );
-    }
-    void
-    set_verbose_level( int v )
+    void set_max_iterations( int it ) { m_max_outer_iter = it; }
+    void set_tolerance( Scalar t ) { m_outer_tol = t; }
+    void set_block_size( int b ) { m_block_size = std::max( 1, b ); }
+    void set_verbose_level( int v )
     {
       m_verbose = v;
       m_inner_solver.set_verbose_level( v );
     }
-    void
-    set_strategy( SelectionStrategy s )
-    {
-      m_strategy = s;
-    }
+    void set_strategy( SelectionStrategy s ) { m_strategy = s; }
 
     // Stagnation and adaptive configuration
-    void
-    enable_adaptive_block_size( bool enable )
-    {
-      m_adaptive_block_size = enable;
-    }
-    void
-    set_min_block_size( int s )
-    {
-      m_min_block_size = std::max( 1, s );
-    }
-    void
-    set_max_block_size( int s )
-    {
-      m_max_block_size = std::min( s, 1000 );
-    }
-    void
-    set_fallback_strategy( FallbackStrategy s )
-    {
-      m_fallback_strategy = s;
-    }
-    void
-    set_stagnation_tolerance( Scalar tol )
-    {
-      m_stagnation_tolerance = tol;
-    }
-    void
-    set_max_stagnation_before_reset( int n )
-    {
-      m_max_stagnation_before_reset = n;
-    }
-    void
-    enable_adaptive_strategy( bool enable )
-    {
-      m_adaptive_strategy = enable;
-    }
+    void enable_adaptive_block_size( bool enable ) { m_adaptive_block_size = enable; }
+    void set_min_block_size( int s ) { m_min_block_size = std::max( 1, s ); }
+    void set_max_block_size( int s ) { m_max_block_size = std::min( s, 1000 ); }
+    void set_fallback_strategy( FallbackStrategy s ) { m_fallback_strategy = s; }
+    void set_stagnation_tolerance( Scalar tol ) { m_stagnation_tolerance = tol; }
+    void set_max_stagnation_before_reset( int n ) { m_max_stagnation_before_reset = n; }
+    void enable_adaptive_strategy( bool enable ) { m_adaptive_strategy = enable; }
 
     // Proxy methods for Inner Solver configuration
-    void
-    set_inner_max_iterations( int i )
-    {
-      m_inner_solver.set_max_iterations( i );
-    }
-    void
-    set_inner_tolerance( Scalar t )
-    {
-      m_inner_solver.set_tolerance( t );
-    }
-    void
-    set_inner_damping( Scalar d )
-    {
-      m_inner_solver.set_damping( d );
-    }
-    void
-    enable_inner_line_search( bool b )
-    {
-      m_inner_solver.enable_line_search( b );
-    }
-    void
-    enable_inner_adaptive_damping( bool b )
-    {
-      m_inner_solver.enable_adaptive_damping( b );
-    }
+    void set_inner_max_iterations( int i ) { m_inner_solver.set_max_iterations( i ); }
+    void set_inner_tolerance( Scalar t ) { m_inner_solver.set_tolerance( t ); }
+    void set_inner_damping( Scalar d ) { m_inner_solver.set_damping( d ); }
+    void enable_inner_line_search( bool b ) { m_inner_solver.enable_line_search( b ); }
+    void enable_inner_adaptive_damping( bool b ) { m_inner_solver.enable_adaptive_damping( b ); }
 
     // Direct Access if needed
-    SubspaceInnerSolver &
-    inner_solver()
-    {
-      return m_inner_solver;
-    }
+    SubspaceInnerSolver & inner_solver() { return m_inner_solver; }
 
     // --- Getters for Statistics (API compatibile con i Test) ---
-    int
-    get_outer_iterations() const
-    {
-      return m_outer_iter;
-    }
-    int
-    get_total_iterations() const
-    {
-      return m_inner_solver.get_total_inner_iterations();
-    }
+    int get_outer_iterations() const { return m_outer_iter; }
+    int get_total_iterations() const { return m_inner_solver.get_total_inner_iterations(); }
 
-    int
-    get_function_evals() const
-    {
-      return 1 + m_inner_solver.get_inner_function_evals();
-    }
+    int get_function_evals() const { return 1 + m_inner_solver.get_inner_function_evals(); }
 
-    int
-    get_jacobian_evals() const
-    {
-      return m_outer_jeval + m_inner_solver.get_inner_jacobian_evals();
-    }
+    int get_jacobian_evals() const { return m_outer_jeval + m_inner_solver.get_inner_jacobian_evals(); }
 
-    Scalar
-    final_residual() const
-    {
-      return m_final_residual;
-    }
+    Scalar final_residual() const { return m_final_residual; }
 
     // Get current progress information
-    Scalar
-    get_current_progress() const
-    {
-      return m_current_progress;
-    }
-    int
-    get_stagnation_counter() const
-    {
-      return m_stagnation_counter;
-    }
+    Scalar get_current_progress() const { return m_current_progress; }
+    int    get_stagnation_counter() const { return m_stagnation_counter; }
 
     // --- Main Solver ---
-    bool
-    solve( NonlinearSystem const & sys, Vector & x )
+    bool solve( NonlinearSystem const & sys, Vector & x )
     {
       int n = x.size();
       m_inner_solver.reset_counters();
@@ -954,8 +815,7 @@ namespace Utils
     }
 
   private:
-    std::vector<int>
-    select_variables_enhanced(
+    std::vector<int> select_variables_enhanced(
       NonlinearSystem const & sys,
       Vector const &          x,
       Vector const &          f,
@@ -1057,8 +917,7 @@ namespace Utils
       return indices;
     }
 
-    int
-    adjust_block_size_based_on_progress( int current_size, int n )
+    int adjust_block_size_based_on_progress( int current_size, int n )
     {
       if ( m_residual_history.size() < 3 ) return current_size;
 
@@ -1102,8 +961,7 @@ namespace Utils
       return current_size;
     }
 
-    Scalar
-    compute_recent_progress() const
+    Scalar compute_recent_progress() const
     {
       if ( m_residual_history.size() < 3 ) return 0.0;
 
@@ -1124,8 +982,7 @@ namespace Utils
       return count > 0 ? progress / count : 0.0;
     }
 
-    bool
-    detect_stagnation()
+    bool detect_stagnation()
     {
       if ( m_residual_history.size() < 5 ) return false;
 
@@ -1170,8 +1027,7 @@ namespace Utils
       return false;
     }
 
-    bool
-    apply_fallback_strategy(
+    bool apply_fallback_strategy(
       NonlinearSystem const & sys,
       Vector &                x,
       Vector &                f,
@@ -1325,8 +1181,7 @@ namespace Utils
       return false;
     }
 
-    bool
-    line_search_full(
+    bool line_search_full(
       NonlinearSystem const & sys,
       Vector const &          x,
       Vector const &          f,
@@ -1350,8 +1205,7 @@ namespace Utils
       return false;
     }
 
-    SelectionStrategy
-    select_adaptive_strategy() const
+    SelectionStrategy select_adaptive_strategy() const
     {
       if ( m_current_progress < 0.01 )
       {
@@ -1370,43 +1224,29 @@ namespace Utils
       }
     }
 
-    const char *
-    strategy_name( SelectionStrategy s ) const
+    const char * strategy_name( SelectionStrategy s ) const
     {
       switch ( s )
       {
-        case RANDOM_UNIFORM:
-          return "Random";
-        case CYCLIC:
-          return "Cyclic";
-        case GREEDY:
-          return "Greedy";
-        case SCALED_GRADIENT:
-          return "ScaledGrad";
-        case ADAPTIVE:
-          return "Adaptive";
-        default:
-          return "?";
+        case RANDOM_UNIFORM: return "Random";
+        case CYCLIC: return "Cyclic";
+        case GREEDY: return "Greedy";
+        case SCALED_GRADIENT: return "ScaledGrad";
+        case ADAPTIVE: return "Adaptive";
+        default: return "?";
       }
     }
 
-    const char *
-    fallback_strategy_name( FallbackStrategy s ) const
+    const char * fallback_strategy_name( FallbackStrategy s ) const
     {
       switch ( s )
       {
-        case NO_FALLBACK:
-          return "NoFallback";
-        case INCREASE_BLOCK:
-          return "IncreaseBlock";
-        case FULL_NEWTON_STEP:
-          return "FullNewtonStep";
-        case GRADIENT_FALLBACK:
-          return "GradientFallback";
-        case RANDOM_RESTART:
-          return "RandomRestart";
-        default:
-          return "?";
+        case NO_FALLBACK: return "NoFallback";
+        case INCREASE_BLOCK: return "IncreaseBlock";
+        case FULL_NEWTON_STEP: return "FullNewtonStep";
+        case GRADIENT_FALLBACK: return "GradientFallback";
+        case RANDOM_RESTART: return "RandomRestart";
+        default: return "?";
       }
     }
   };

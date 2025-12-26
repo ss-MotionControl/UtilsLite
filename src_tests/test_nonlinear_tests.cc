@@ -20,8 +20,7 @@
 #include "Utils_fmt.hh"
 #include "Utils_nonlinear_system.hh"
 
-void
-test_exact_solutions()
+void test_exact_solutions()
 {
   using NS         = Utils::NonlinearSystem;
   const double tol = 1e-8;
@@ -156,8 +155,7 @@ test_exact_solutions()
   fmt::print( "\n" );
 }
 
-int
-main()
+int main()
 {
   Utils::init_nonlinear_system_tests();
   test_exact_solutions();

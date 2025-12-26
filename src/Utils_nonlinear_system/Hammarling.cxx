@@ -33,8 +33,7 @@ public:
   {
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = ( x( 0 ) * x( 0 ) + x( 1 ) * x( 2 ) ) - a00;
     f( 1 ) = ( x( 0 ) * x( 1 ) + x( 1 ) * x( 3 ) ) - a01;
@@ -42,8 +41,7 @@ public:
     f( 3 ) = ( x( 2 ) * x( 1 ) + x( 3 ) * x( 3 ) ) - a11;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -71,8 +69,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -80,8 +77,7 @@ public:
     x0 << 1E-2, 5E+1, 0, 1E-2;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -104,59 +100,23 @@ class Hammarling3x3matrixSquareRootProblem : public NonlinearSystem
 
   Vector xe;
 
-  real_type
-  f0( Vector const & x ) const
-  {
-    return x( 0 ) * x( 0 ) + x( 1 ) * x( 3 ) + x( 2 ) * x( 6 );
-  }
+  real_type f0( Vector const & x ) const { return x( 0 ) * x( 0 ) + x( 1 ) * x( 3 ) + x( 2 ) * x( 6 ); }
 
-  real_type
-  f1( Vector const & x ) const
-  {
-    return x( 0 ) * x( 1 ) + x( 1 ) * x( 4 ) + x( 2 ) * x( 7 );
-  }
+  real_type f1( Vector const & x ) const { return x( 0 ) * x( 1 ) + x( 1 ) * x( 4 ) + x( 2 ) * x( 7 ); }
 
-  real_type
-  f2( Vector const & x ) const
-  {
-    return x( 0 ) * x( 2 ) + x( 1 ) * x( 5 ) + x( 2 ) * x( 8 );
-  }
+  real_type f2( Vector const & x ) const { return x( 0 ) * x( 2 ) + x( 1 ) * x( 5 ) + x( 2 ) * x( 8 ); }
 
-  real_type
-  f3( Vector const & x ) const
-  {
-    return x( 3 ) * x( 0 ) + x( 4 ) * x( 3 ) + x( 5 ) * x( 6 );
-  }
+  real_type f3( Vector const & x ) const { return x( 3 ) * x( 0 ) + x( 4 ) * x( 3 ) + x( 5 ) * x( 6 ); }
 
-  real_type
-  f4( Vector const & x ) const
-  {
-    return x( 3 ) * x( 1 ) + x( 4 ) * x( 4 ) + x( 5 ) * x( 7 );
-  }
+  real_type f4( Vector const & x ) const { return x( 3 ) * x( 1 ) + x( 4 ) * x( 4 ) + x( 5 ) * x( 7 ); }
 
-  real_type
-  f5( Vector const & x ) const
-  {
-    return x( 3 ) * x( 2 ) + x( 4 ) * x( 5 ) + x( 5 ) * x( 8 );
-  }
+  real_type f5( Vector const & x ) const { return x( 3 ) * x( 2 ) + x( 4 ) * x( 5 ) + x( 5 ) * x( 8 ); }
 
-  real_type
-  f6( Vector const & x ) const
-  {
-    return x( 6 ) * x( 0 ) + x( 7 ) * x( 3 ) + x( 8 ) * x( 6 );
-  }
+  real_type f6( Vector const & x ) const { return x( 6 ) * x( 0 ) + x( 7 ) * x( 3 ) + x( 8 ) * x( 6 ); }
 
-  real_type
-  f7( Vector const & x ) const
-  {
-    return x( 6 ) * x( 1 ) + x( 7 ) * x( 4 ) + x( 8 ) * x( 7 );
-  }
+  real_type f7( Vector const & x ) const { return x( 6 ) * x( 1 ) + x( 7 ) * x( 4 ) + x( 8 ) * x( 7 ); }
 
-  real_type
-  f8( Vector const & x ) const
-  {
-    return x( 6 ) * x( 2 ) + x( 7 ) * x( 5 ) + x( 8 ) * x( 8 );
-  }
+  real_type f8( Vector const & x ) const { return x( 6 ) * x( 2 ) + x( 7 ) * x( 5 ) + x( 8 ) * x( 8 ); }
 
 public:
   Hammarling3x3matrixSquareRootProblem(
@@ -195,8 +155,7 @@ public:
     a22 = f8( xe );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = f0( x ) - a00;
     f( 1 ) = f1( x ) - a01;
@@ -209,8 +168,7 @@ public:
     f( 8 ) = f8( x ) - a22;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -272,8 +230,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -281,8 +238,7 @@ public:
     x0 = xe;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

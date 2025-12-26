@@ -35,8 +35,7 @@ public:
     check_three( n, 3 );
   }
 
-  virtual void
-  evaluate( Vector const & X, Vector & F ) const override
+  virtual void evaluate( Vector const & X, Vector & F ) const override
   {
     for ( integer i = 0; i < n; i += 3 )
     {
@@ -49,8 +48,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & X, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & X, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -72,8 +70,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

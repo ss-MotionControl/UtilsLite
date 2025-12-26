@@ -12,8 +12,7 @@
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-static inline string
-ini_msg_MexicanHatFunction( real_type tau )
+static inline string ini_msg_MexicanHatFunction( real_type tau )
 {
   return fmt::format( "Mexican Hat Function, tau = {}", tau );
 }
@@ -42,8 +41,7 @@ public:
   {
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type t1 = x( 0 ) * x( 0 );
     real_type t2 = x( 1 ) - t1;
@@ -54,8 +52,7 @@ public:
     f( 1 )       = 2 * ( 1 - x( 1 ) ) + tau * 40000.0 * t7 * t2;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     // Alias per chiarezza
     real_type const x0 = x( 0 );
@@ -124,8 +121,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 3 );
     auto & x0{ x_vec[0] };

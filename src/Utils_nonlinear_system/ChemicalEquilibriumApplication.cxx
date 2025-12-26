@@ -60,8 +60,7 @@ public:
   {
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = x( 0 ) * x( 1 ) + x( 0 ) - 3 * x( 4 );
     f( 1 ) = 2 * x( 0 ) * x( 1 ) + x( 0 ) + x( 1 ) * x( 2 ) * x( 2 ) + R8 * x( 1 ) - R * x( 4 ) +
@@ -72,8 +71,7 @@ public:
              ( R5 + x( 1 ) ) * x( 2 ) * x( 2 ) + x( 3 ) * x( 3 ) - 1 + R6 * x( 2 );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -104,8 +102,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

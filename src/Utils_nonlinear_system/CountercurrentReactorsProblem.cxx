@@ -47,8 +47,7 @@ public:
     check_min_equations( neq, 4 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const
+  virtual void evaluate( Vector const & x, Vector & f ) const
   {
     for ( integer i = 0; i < n; i += 2 )
     {
@@ -80,8 +79,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const
   {
     J.resize( n, n );
     J.setZero();
@@ -107,8 +105,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const
+  virtual void initial_points( vector<Vector> & x_vec ) const
   {
     x_vec.resize( 3 );
     x_vec[0].resize( n );
@@ -120,24 +117,14 @@ public:
     {
       switch ( i % 8 )
       {
-        case 0:
-          x0( i ) = 0.1;
-          break;
+        case 0: x0( i ) = 0.1; break;
         case 1:
-        case 7:
-          x0( i ) = 0.2;
-          break;
+        case 7: x0( i ) = 0.2; break;
         case 2:
-        case 6:
-          x0( i ) = 0.3;
-          break;
+        case 6: x0( i ) = 0.3; break;
         case 3:
-        case 5:
-          x0( i ) = 0.4;
-          break;
-        case 4:
-          x0( i ) = 0.5;
-          break;
+        case 5: x0( i ) = 0.4; break;
+        case 4: x0( i ) = 0.5; break;
       }
     }
     x_vec[1] = 10 * x0;
@@ -163,8 +150,7 @@ public:
     check_min_equations( neq, 6 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = A0 * x( 0 ) - ( 1 - x( 0 ) ) * x( 2 ) - A1 - theta * A1 * x( 1 );
     f( 1 ) = B0 * x( 0 ) - ( 1 - x( 0 ) ) * x( 3 ) - A1 - theta * A1 * x( 1 );
@@ -181,8 +167,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -216,8 +201,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 3 );
     x_vec[0].resize( n );
@@ -229,30 +213,14 @@ public:
     {
       switch ( i % 8 )
       {
-        case 0:
-          x0( i ) = 0.1;
-          break;
-        case 1:
-          x0( i ) = 0.2;
-          break;
-        case 2:
-          x0( i ) = 0.3;
-          break;
-        case 3:
-          x0( i ) = 0.4;
-          break;
-        case 4:
-          x0( i ) = 0.5;
-          break;
-        case 5:
-          x0( i ) = 0.4;
-          break;
-        case 6:
-          x0( i ) = 0.3;
-          break;
-        case 7:
-          x0( i ) = 0.2;
-          break;
+        case 0: x0( i ) = 0.1; break;
+        case 1: x0( i ) = 0.2; break;
+        case 2: x0( i ) = 0.3; break;
+        case 3: x0( i ) = 0.4; break;
+        case 4: x0( i ) = 0.5; break;
+        case 5: x0( i ) = 0.4; break;
+        case 6: x0( i ) = 0.3; break;
+        case 7: x0( i ) = 0.2; break;
       }
     }
     x_vec[1] = 10 * x0;

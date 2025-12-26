@@ -64,8 +64,7 @@ public:
     }
   }
 
-  void
-  Chebyshev( real_type x ) const
+  void Chebyshev( real_type x ) const
   {
     // Polinomi di Chebyshev shiftati T_i^*(x) = T_i(2x-1)
     // Usiamo la ricorrenza stabile con scaling se necessario
@@ -90,8 +89,7 @@ public:
     }
   }
 
-  void
-  Chebyshev_D( real_type x ) const
+  void Chebyshev_D( real_type x ) const
   {
     // Polinomi di Chebyshev shiftati e loro derivate
     T[0]  = 1.0;
@@ -121,8 +119,7 @@ public:
     }
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     // Inizializza f a zero
     f.fill( 0.0 );
@@ -146,8 +143,7 @@ public:
     for ( integer k = 0; k < n; ++k ) { f( k ) = f( k ) * inv_n - integrals[k + 1]; }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -164,8 +160,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x{ x_vec[0] };
@@ -174,12 +169,8 @@ public:
     // Soluzioni simmetriche e ordinate in modo crescente
     switch ( n )
     {
-      case 1:
-        x << 0.5;
-        break;
-      case 2:
-        x << 0.21132486540518711774542560974902, 0.78867513459481288225457439025098;
-        break;
+      case 1: x << 0.5; break;
+      case 2: x << 0.21132486540518711774542560974902, 0.78867513459481288225457439025098; break;
       case 3:
         x << 0.14644660940672623779957781894758, 0.50000000000000000000000000000000, 0.85355339059327376220042218105242;
         break;
@@ -212,8 +203,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -221,8 +211,7 @@ public:
     for ( integer i = 0; i < n; ++i ) { x0( i ) = ( i + 1.0 ) / ( n + 1.0 ); }
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     // Restringe il bounding box a [0,1] per stabilità
     L.fill( 0.0 );

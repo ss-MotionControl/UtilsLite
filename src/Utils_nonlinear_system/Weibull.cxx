@@ -42,8 +42,7 @@ public:
     }
   }
 
-  void
-  map( Vector const & x, Vector & eq ) const
+  void map( Vector const & x, Vector & eq ) const
   {
     for ( integer k = 0; k < NPT; ++k )
     {
@@ -54,8 +53,7 @@ public:
     }
   }
 
-  void
-  Grad_map( Vector const & x, integer k, Vector & G ) const
+  void Grad_map( Vector const & x, integer k, Vector & G ) const
   {
     real_type y2 = y[k] - x( 2 );
     real_type g  = pow( y2, x( 1 ) ) / x( 0 );
@@ -66,8 +64,7 @@ public:
     G( 2 )       = fg * x( 1 ) / y2;
   }
 
-  void
-  Hess_map( Vector const & x, integer k, Matrix & H ) const
+  void Hess_map( Vector const & x, integer k, Matrix & H ) const
   {
     real_type y2   = y[k] - x( 2 );
     real_type g    = pow( y2, x( 1 ) ) / x( 0 );
@@ -95,8 +92,7 @@ public:
     H( 2, 2 ) = ( fg_1 * g_x2 + fg / y2 ) * x( 1 ) / y2;
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     Vector eq( NPT ), G( n );
     map( x, eq );
@@ -108,8 +104,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     Vector eq( NPT ), G( n );
     Matrix H( n, n ), J_full( n, n );
@@ -128,8 +123,7 @@ public:
     J = J_full.sparseView();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

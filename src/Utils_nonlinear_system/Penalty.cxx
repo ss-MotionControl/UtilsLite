@@ -42,8 +42,7 @@ public:
     check_min_equations( n, 2 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type sum = 0;
     for ( integer i = 0; i < n; ++i ) sum += x( i ) * x( i );
@@ -51,8 +50,7 @@ public:
     f( n - 1 ) = ( sum / n - 1 ) / 4;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -61,8 +59,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -97,24 +94,21 @@ public:
     check_min_equations( n, 2 );
   }
 
-  real_type
-  sum( Vector const & x ) const
+  real_type sum( Vector const & x ) const
   {
     real_type t1 = 0;
     for ( integer i = 0; i < n; ++i ) t1 += x( i ) * x( i );
     return 4 * t1 - 1;
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type ap = 2 * epsilon;
     real_type t1 = sum( x );
     for ( integer i = 0; i < n; ++i ) f( i ) = ( ap + t1 ) * x( i ) - ap;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -132,8 +126,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -170,8 +163,7 @@ public:
     check_min_equations( n, 2 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type ap = epsilon;
 
@@ -197,8 +189,7 @@ public:
     f( 0 ) += 2.0 * ( x( 0 ) - 0.2 );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     Matrix J_full( n, n );
     J_full.setZero();
@@ -238,8 +229,7 @@ public:
     J = J_full.sparseView();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

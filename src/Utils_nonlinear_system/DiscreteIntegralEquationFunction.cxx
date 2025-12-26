@@ -34,8 +34,7 @@ public:
     check_min_equations( n, 2 );
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type h = 1 / real_type( n + 1 );
 
@@ -58,8 +57,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -79,8 +77,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.clear();
     x_vec.resize( 1 );
@@ -88,9 +85,7 @@ public:
     x0.resize( n );
     switch ( n )
     {
-      case 2:
-        x0 << -0.1282467630337316243876390987485189444347, -0.1592675672446408630494624980879210125394;
-        break;
+      case 2: x0 << -0.1282467630337316243876390987485189444347, -0.1592675672446408630494624980879210125394; break;
       case 3:
         x0 << -0.1048174251268790134252362144215285375609, -0.1627022933732565189436998826409546303353,
           -0.1458503921843392374798322333967325583654;
@@ -110,14 +105,11 @@ public:
           -0.159908696181983122325572374408, -0.169877202312774918976188661992, -0.169089983781208351844136654063,
           -0.155249535221831821946902537001, -0.125355891678934989400407791540;
         break;
-      default:
-        x_vec.clear();
-        break;
+      default: x_vec.clear(); break;
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };

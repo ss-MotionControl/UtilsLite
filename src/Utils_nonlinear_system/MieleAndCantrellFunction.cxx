@@ -38,16 +38,14 @@ public:
 private:
   static constexpr real_type eps = 1e-12;  // soglia per x0 vicino a zero
 
-  inline real_type
-  safe_power( real_type x, int n ) const
+  inline real_type safe_power( real_type x, int n ) const
   {
     if ( std::abs( x ) < eps ) return 0.0;
     return std::pow( x, n );
   }
 
   /* Gradient contributions */
-  inline void
-  add_grad1( const Vector & x, Vector & g ) const
+  inline void add_grad1( const Vector & x, Vector & g ) const
   {
     const real_type e  = std::exp( x( 0 ) );
     const real_type d  = e - x( 1 );
@@ -57,16 +55,14 @@ private:
     g( 1 ) -= c;
   }
 
-  inline void
-  add_grad2( const Vector & x, Vector & g ) const
+  inline void add_grad2( const Vector & x, Vector & g ) const
   {
     const real_type d = x( 1 ) - x( 2 );
     g( 1 ) += 600 * d * d * d * d * d;
     g( 2 ) -= 600 * d * d * d * d * d;
   }
 
-  inline void
-  add_grad3( const Vector & x, Vector & g ) const
+  inline void add_grad3( const Vector & x, Vector & g ) const
   {
     const real_type z = x( 2 ) - x( 3 );
     const real_type t = std::tan( z );
@@ -75,8 +71,7 @@ private:
   }
 
   /* Hessian contributions */
-  inline void
-  add_hess1( const Vector & x, Matrix & h ) const
+  inline void add_hess1( const Vector & x, Matrix & h ) const
   {
     const real_type e   = std::exp( x( 0 ) );
     const real_type t   = e - x( 1 );
@@ -88,8 +83,7 @@ private:
     h( 1, 1 ) += 12 * t2;
   }
 
-  inline void
-  add_hess2( const Vector & x, Matrix & h ) const
+  inline void add_hess2( const Vector & x, Matrix & h ) const
   {
     const real_type d   = x( 1 ) - x( 2 );
     const real_type d4  = d * d * d * d;
@@ -100,8 +94,7 @@ private:
     h( 2, 2 ) += tmp;
   }
 
-  inline void
-  add_hess3( const Vector & x, Matrix & h ) const
+  inline void add_hess3( const Vector & x, Matrix & h ) const
   {
     const real_type z    = x( 2 ) - x( 3 );
     const real_type t    = std::tan( z );
@@ -115,8 +108,7 @@ private:
   }
 
 public:
-  void
-  evaluate( const Vector & x, Vector & f ) const override
+  void evaluate( const Vector & x, Vector & f ) const override
   {
     f.setZero();
     f( 0 ) = 56 * safe_power( x( 0 ), 6 );  // protezione numerica per x0 ~ 0
@@ -125,8 +117,7 @@ public:
     add_grad1( x, f );
   }
 
-  void
-  jacobian( const Vector & x, SparseMatrix & J ) const override
+  void jacobian( const Vector & x, SparseMatrix & J ) const override
   {
     Matrix h( 4, 4 );
     h.setZero();
@@ -143,16 +134,14 @@ public:
     J.makeCompressed();
   }
 
-  void
-  exact_solution( vector<Vector> & x_vec ) const override
+  void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     x_vec[0].resize( 4 );
     x_vec[0] << 0, 1, 1, 1;
   }
 
-  void
-  initial_points( vector<Vector> & x_vec ) const override
+  void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 2 );
     x_vec[0].resize( 4 );

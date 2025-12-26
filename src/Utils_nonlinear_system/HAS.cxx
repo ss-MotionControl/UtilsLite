@@ -25,8 +25,7 @@
   "  doi     = {10.1007/BF01385810},\n"                            \
   "}\n"
 
-static inline string
-ini_msg_HAS64( real_type tau )
+static inline string ini_msg_HAS64( real_type tau )
 {
   return fmt::format( "HAS 64, tau = {}", tau );
 }
@@ -39,8 +38,7 @@ class HAS64 : public NonlinearSystem
 public:
   HAS64( real_type tau_in ) : NonlinearSystem( ini_msg_HAS64( tau_in ), HAS_BIBTEX, 7 ), tau( tau_in ) {}
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type x0 = x( 0 );
     real_type x1 = x( 1 );
@@ -86,8 +84,7 @@ public:
     f( 6 ) = -( 4 * tau ) * ( penalty_term4 * x6 );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     Matrix J_full( n, n );
     J_full.setZero();
@@ -206,8 +203,7 @@ public:
     J = J_full.sparseView();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -242,8 +238,7 @@ public:
     }
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -251,16 +246,14 @@ public:
     x0 << 1, 1, 1, -10, -10, -10, -10;
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     UTILS_ASSERT( x( 0 ) > 0, "check_if_admissible x(0) = {} must be > 0", x( 0 ) );
     UTILS_ASSERT( x( 1 ) > 0, "check_if_admissible x(1) = {} must be > 0", x( 1 ) );
     UTILS_ASSERT( x( 2 ) > 0, "check_if_admissible x(2) = {} must be > 0", x( 2 ) );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( real_max );
     L.fill( -real_max );
@@ -272,8 +265,7 @@ public:
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-static inline string
-ini_msg_HAS93( real_type tau )
+static inline string ini_msg_HAS93( real_type tau )
 {
   return fmt::format( "HAS 93, tau = {}", tau );
 }
@@ -287,8 +279,7 @@ class HAS93 : public NonlinearSystem
 public:
   HAS93( real_type tau_in ) : NonlinearSystem( ini_msg_HAS93( tau_in ), HAS_BIBTEX, 14 ), tau( tau_in ) {}
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     {
       real_type t4  = x( 3 ) * x( 4 ) * x( 5 );
@@ -355,8 +346,7 @@ public:
     f( 5 ) += 0.874E-1 * t13 * t36 * x( 5 );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     Matrix J_full( n, n );
     J_full.setZero();
@@ -662,8 +652,7 @@ public:
     J = J_full.sparseView();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -723,8 +712,7 @@ public:
     c[9] = -22.179;
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type ex0 = exp( x( 0 ) );
     real_type ex1 = exp( x( 1 ) );
@@ -763,8 +751,7 @@ public:
     f( 9 ) = ex9 * ( c[9] + x( 9 ) - logss ) + fact * f( 9 );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     real_type ex0 = exp( x( 0 ) );
     real_type ex1 = exp( x( 1 ) );
@@ -971,8 +958,7 @@ public:
     J = J_full.sparseView();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 2 );
     auto & x0{ x_vec[0] };

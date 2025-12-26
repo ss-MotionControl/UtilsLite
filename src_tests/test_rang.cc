@@ -20,18 +20,17 @@
 #include <string>
 
 #include "Utils.hh"
+#include "Utils_rang.hh"
 
 using namespace std;
 using namespace rang;
 
-static void
-printHeading( string_view const heading )
+static void printHeading( string_view const heading )
 {
   cout << '\n' << style::reset << heading << style::reset << bg::reset << fg::reset << endl;
 }
 
-static void
-test_colors( ostream & os, winTerm const opt )
+static void test_colors( ostream & os, winTerm const opt )
 {
   setWinTermMode( opt );
 
@@ -87,8 +86,7 @@ test_colors( ostream & os, winTerm const opt )
   os << fgB::gray << " Grey " << fg::reset << endl;
 }
 
-static void
-enumerateWinTerms()
+static void enumerateWinTerms()
 {
   cout << endl;
   cout << "_________________________________________________________________";
@@ -124,8 +122,7 @@ enumerateWinTerms()
   cout << "-------------------------------------------------------------\n\n";
 }
 
-int
-main()
+int main()
 {
   cout << "\n\n\n"
        << style::reset << style::underline << style::bold << "Control = Auto" << style::reset << bg::reset << fg::reset

@@ -27,21 +27,9 @@ namespace Utils
     void set_b( double b );
     void set_c( double c );
 
-    double
-    a() const
-    {
-      return m_a;
-    }
-    double
-    b() const
-    {
-      return m_b;
-    }
-    double
-    c() const
-    {
-      return m_c;
-    }
+    double a() const { return m_a; }
+    double b() const { return m_b; }
+    double c() const { return m_c; }
 
     void info( std::ostream & ) const;
   };

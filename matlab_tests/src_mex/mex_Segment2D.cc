@@ -29,8 +29,7 @@ namespace Utils
    *
   \*/
 
-  static void
-  do_new(
+  static void do_new(
     int       nlhs,
     mxArray * plhs[],
     int       nrhs,
@@ -46,8 +45,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_delete(
+  static void do_delete(
     int nlhs,
     mxArray *[],  // unused
     int             nrhs,
@@ -63,8 +61,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_copy( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_copy( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_3 "Segment2DMexWrapper('copy',obj)"
 #define CMD MEX_ERROR_MESSAGE_3
@@ -76,8 +73,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_setup( int nlhs, mxArray *[], int nrhs, mxArray const * prhs[] )
+  static void do_setup( int nlhs, mxArray *[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_4 "Segment2DMexWrapper('setup',obj,A,B)"
 #define CMD MEX_ERROR_MESSAGE_4
@@ -94,8 +90,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_getAB( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_getAB( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_5 "[A,B]=Segment2DMexWrapper('getAB',obj)"
 #define CMD MEX_ERROR_MESSAGE_5
@@ -114,8 +109,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_evals( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_evals( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_6 "P=Segment2DMexWrapper('evals',obj,s)"
 #define CMD MEX_ERROR_MESSAGE_6
@@ -131,8 +125,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_evalst( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_evalst( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_7 "P=Segment2DMexWrapper('evalst',obj,s,t)"
 #define CMD MEX_ERROR_MESSAGE_7
@@ -149,8 +142,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_point_coord( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_point_coord( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_8 "[s,t,PP]=Segment2DMexWrapper('point_coord',obj,P)"
 #define CMD MEX_ERROR_MESSAGE_8
@@ -176,8 +168,7 @@ namespace Utils
 
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
-  static void
-  do_intersect( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  static void do_intersect( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_9 "[s,t,ok]=Segment2DMexWrapper('intersect',obj,obj2)"
 #define CMD MEX_ERROR_MESSAGE_9
@@ -242,8 +233,7 @@ namespace Utils
   "==========================================================================" \
   "===========\n"
 
-  extern "C" void
-  mexFunction( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
+  extern "C" void mexFunction( int nlhs, mxArray * plhs[], int nrhs, mxArray const * prhs[] )
   {
     // the first argument must be a string
     if ( nrhs == 0 )

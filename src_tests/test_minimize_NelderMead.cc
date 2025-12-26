@@ -26,7 +26,7 @@
 
 #include "Utils_fmt.hh"
 #include "Utils_eigen.hh"
-#include "Utils_minimize_NelderMead.hh"
+#include "Utils_minimize_NelderMead_BlockCoordinate.hh"
 #include "ND_func.cxx"
 
 using Scalar   = double;
@@ -47,9 +47,7 @@ struct TestResult
 static std::vector<TestResult> global_results;
 
 // Safe initialization
-template <typename ProblemFunc>
-Vector
-get_safe_initial_point( ProblemFunc & problem )
+template <typename ProblemFunc> Vector get_safe_initial_point( ProblemFunc & problem )
 {
   try
   {
@@ -76,9 +74,7 @@ get_safe_initial_point( ProblemFunc & problem )
   return x0;
 }
 
-template <typename ProblemFunc>
-void
-test( ProblemFunc & problem, std::string const & name, int verbosity_level = 1 )
+template <typename ProblemFunc> void test( ProblemFunc & problem, std::string const & name, int verbosity_level = 1 )
 {
   Vector L        = problem.lower();
   Vector U        = problem.upper();
@@ -115,33 +111,32 @@ test( ProblemFunc & problem, std::string const & name, int verbosity_level = 1 )
   solver.set_bounds( L, U );
 
   // 2. Run Optimization
-  auto result = solver.minimize( x0, [&]( Vector const & x ) { return problem( x ); } );
+  bool success = solver.minimize( x0, [&]( Vector const & x ) { return problem( x ); } );
 
   fmt::print( "\n" );
   fmt::print( "-> Initial Point:  {}\n", Utils::NelderMead::format_vector( x0 ) );
-  fmt::print( "-> Final Point:    {}\n", Utils::NelderMead::format_vector( result.solution ) );
+  fmt::print( "-> Final Point:    {}\n", Utils::NelderMead::format_vector( solver.get_solution() ) );
   fmt::print( "-> Initial Value:  {:.6e}\n", init_val );
-  fmt::print( "-> Final Value:    {:.8e}\n", result.final_function_value );
+  fmt::print( "-> Final Value:    {:.8e}\n", solver.get_final_function_value() );
 
   // 4. Print Final Point & Stats
-  fmt::print( "-> Final Status:   {}\n", Utils::NelderMead::status_to_string( result.status ) );
-  fmt::print( "-> Total Outer It: {}\n", result.outer_iterations );
-  fmt::print( "-> Total Inner It: {}\n", result.inner_iterations );
-  fmt::print( "-> Total Evals:    {}\n", result.total_evaluations );
+  fmt::print( "-> Final Status:   {}\n", Utils::NelderMead::status_to_string( solver.get_status() ) );
+  fmt::print( "-> Total Outer It: {}\n", solver.get_outer_iterations() );
+  fmt::print( "-> Total Inner It: {}\n", solver.get_inner_iterations() );
+  fmt::print( "-> Total Evals:    {}\n", solver.get_total_evaluations() );
 
   TestResult tr;
   tr.problem_name      = name;
   tr.dimension         = dim;
-  tr.final_value       = result.final_function_value;
-  tr.status_str        = Utils::NelderMead::status_to_string( result.status );
-  tr.outer_iters       = result.outer_iterations;
-  tr.inner_iters       = result.inner_iterations;
-  tr.total_evaluations = result.total_evaluations;
+  tr.final_value       = solver.get_final_function_value();
+  tr.status_str        = Utils::NelderMead::status_to_string( solver.get_status() );
+  tr.outer_iters       = solver.get_outer_iterations();
+  tr.inner_iters       = solver.get_inner_iterations();
+  tr.total_evaluations = solver.get_total_evaluations();
   global_results.push_back( tr );
 }
 
-void
-print_summary_table()
+void print_summary_table()
 {
   if ( global_results.empty() ) return;
 
@@ -194,59 +189,11 @@ print_summary_table()
   fmt::print( "   • Total evaluations: {}\n", total_evals );
 }
 
-int
-main()
+int main()
 {
   try
   {
-    Rosenbrock2D<Scalar> rosen;
-    test( rosen, "Rosenbrock2D", 2 );
-
-    RosenbrockN<Scalar, 10> rosenN;
-    test( rosenN, "Rosenbrock10D", 2 );
-
-    PowellSingularN<Scalar, 16> powellN;
-    test( powellN, "PowellSingular16D", 1 );
-
-    ExtendedWoodN<Scalar, 16> woodN;
-    test( woodN, "ExtendedWood16D", 1 );
-
-    // Altri problemi (se presenti in ND_func.cxx)
-    Beale2D<Scalar> beale;
-    test( beale, "Beale2D", 1 );
-
-    Himmelblau2D<Scalar> himm;
-    test( himm, "Himmelblau2D", 2 );
-
-    FreudensteinRoth2D<Scalar> fr;
-    test( fr, "FreudensteinRoth2D" );
-
-    HelicalValley3D<Scalar> heli;
-    test( heli, "HelicalValley3D" );
-
-    PowellBadlyScaled2D<Scalar> pbs;
-    test( pbs, "PowellBadlyScaled2D" );
-
-    BrownAlmostLinearN<Scalar, 10> brown;
-    test( brown, "BrownAlmostLinear10D" );
-
-    BroydenTridiagonalN<Scalar, 12> broy;
-    test( broy, "BroydenTridiagonal12D" );
-
-    IllConditionedQuadraticN<Scalar, 20> illq;
-    test( illq, "IllConditionedQuadratic20D" );
-
-    TrigonometricSumN<Scalar, 15> trig;
-    test( trig, "TrigonometricSum15D" );
-
-    SchwefelN<Scalar, 15> schwefel;
-    test( schwefel, "SchwefelN15D" );
-
-    AckleyN<Scalar, 15> ackley;
-    test( ackley, "AckleyN15D" );
-
-    RastriginN<Scalar, 15> rastrigin;
-    test( rastrigin, "RastriginN15D" );
+    for ( auto [ptr, name] : NL_list ) test( *ptr, name );
 
     print_summary_table();
   }

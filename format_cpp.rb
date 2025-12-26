@@ -5,6 +5,7 @@ require 'fileutils'
 require 'tempfile'
 require 'json'
 
+# Sostituisci la sezione CLANG_FORMAT_CONFIG con questa versione:
 CLANG_FORMAT_CONFIG = {
   BasedOnStyle: "Google",
   IndentWidth: 2,
@@ -19,7 +20,7 @@ CLANG_FORMAT_CONFIG = {
   AllowAllParametersOfDeclarationOnNextLine: false,
   AllowAllArgumentsOnNextLine: false,
   AlwaysBreakAfterReturnType: "None",
-  AlwaysBreakAfterDefinitionReturnType: "All",
+  AlwaysBreakAfterDefinitionReturnType: "None",  # MODIFICATO: da "All" a "None"
   ContinuationIndentWidth: 2,
 
   # --- ALLINEAMENTO VERTICALE (EFFETTO TABELLA) ---
@@ -60,7 +61,7 @@ CLANG_FORMAT_CONFIG = {
   SortIncludes: false,
 
   # --- FUNZIONI CORTE ---
-  AllowShortFunctionsOnASingleLine: "All",
+  AllowShortFunctionsOnASingleLine: "InlineOnly",  # MODIFICATO: da "All" a "InlineOnly"
   AllowShortIfStatementsOnASingleLine: true,
   AllowShortLoopsOnASingleLine: true,
   AllowShortBlocksOnASingleLine: true,
@@ -70,7 +71,43 @@ CLANG_FORMAT_CONFIG = {
   PenaltyBreakAssignment: 100,
   PenaltyBreakBeforeFirstCallParameter: 1, 
   PenaltyExcessCharacter: 1000,
-  PenaltyReturnTypeOnItsOwnLine: 60
+  PenaltyReturnTypeOnItsOwnLine: 1000,  # MODIFICATO: aumentata per evitare ritorni a capo
+
+  # --- NUOVE IMPOSTAZIONI AGGIUNTE ---
+  # Aggiungi queste impostazioni per gestire meglio le funzioni inline
+  AllowShortLambdasOnASingleLine: "All",
+  AllowShortCaseLabelsOnASingleLine: true,
+  AlwaysBreakTemplateDeclarations: "No",
+  
+  # Per mantenere le funzioni inline su una riga
+  BreakAfterJavaFieldAnnotations: false,
+  BreakStringLiterals: false,
+  
+  # Aggiunto per gestire le funzioni nelle classi
+  AllowShortFunctionsOnASingleLine: "Inline",  # MODIFICATO: imposta su "Inline"
+  BraceWrapping: {
+    AfterClass: false,
+    AfterControlStatement: false,
+    AfterEnum: false,
+    AfterFunction: false,
+    AfterNamespace: false,
+    AfterObjCDeclaration: false,
+    AfterStruct: false,
+    AfterUnion: false,
+    AfterExternBlock: false,
+    BeforeCatch: false,
+    BeforeElse: false,
+    BeforeLambdaBody: false,
+    BeforeWhile: false,
+    IndentBraces: false,
+    SplitEmptyFunction: true,
+    SplitEmptyRecord: true,
+    SplitEmptyNamespace: true
+  },
+  # Aggiungi queste se non sono già presenti:
+  SeparateDefinitionBlocks: "Leave",
+  EmptyLineAfterAccessModifier: "Never",
+  CompactNamespaces: true,
 }.freeze
 
 

@@ -34,26 +34,104 @@
 #include <optional>
 #include <limits>
 #include "Utils_fmt.hh"
-#include "Utils_nonlinear_linesearch.hh"
+#include "Utils_Linesearch.hh"
 
 namespace Utils
 {
 
-  template <typename Scalar = double>
-  class BoxConstraintHandler
+  /**
+   * @class BoxConstraintHandler
+   * @brief Efficient handler for box constraints with QP subproblem solving capabilities
+   *
+   * This class provides comprehensive handling of box constraints for optimization problems:
+   * \f[
+   *   \ell \leq x \leq u
+   * \f]
+   *
+   * Features include:
+   * - Projection operations
+   * - Active set identification
+   * - KKT condition checking
+   * - QP subproblem solving with both sparse and dense Hessians
+   * - Efficient vectorized operations using Eigen3
+   *
+   * @tparam Scalar Floating-point type (default: double)
+   */
+  template <typename Scalar = double> class BoxConstraintHandler
   {
   public:
-    using Vector  = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+    /// @brief Integer type for indexing
     using integer = Eigen::Index;
 
+    /// @brief Vector type
+    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
+
+    /// @brief Integer vector type
+    using VectorI = Eigen::Matrix<integer, Eigen::Dynamic, 1>;
+
+    /// @brief Dense matrix type
+    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
+
+    /// @brief Sparse matrix type
+    using SparseMatrix = Eigen::SparseMatrix<Scalar>;
+
   private:
-    Vector m_lower, m_upper, m_tol_lower, m_tol_upper;
-    bool   m_active{ false };
-    Scalar m_epsi{ std::numeric_limits<Scalar>::epsilon() };
+    Vector m_lower;            ///< Lower bounds ℓ
+    Vector m_upper;            ///< Upper bounds u
+    Vector m_tol_lower;        ///< Adaptive tolerances for lower bounds
+    Vector m_tol_upper;        ///< Adaptive tolerances for upper bounds
+    Vector m_lambda_lower;     ///< Multipliers for lower bounds
+    Vector m_lambda_upper;     ///< Multipliers for upper bounds
+    bool   m_active{ false };  ///< Whether constraints are active
+    Scalar m_epsi;             ///< Machine epsilon or user-defined tolerance
 
   public:
-    void
-    set_bounds( Vector const & lower, Vector const & upper )
+    // =========================================================================
+    //  Constructors and Destructor
+    // =========================================================================
+
+    /**
+     * @brief Default constructor (no constraints)
+     */
+    BoxConstraintHandler() : m_epsi( std::numeric_limits<Scalar>::epsilon() ) {}
+
+    /**
+     * @brief Constructor with explicit bounds
+     * @param lower Lower bounds vector
+     * @param upper Upper bounds vector
+     */
+    BoxConstraintHandler( Vector const & lower, Vector const & upper )
+      : m_lower( lower ), m_upper( upper ), m_active( true ), m_epsi( std::numeric_limits<Scalar>::epsilon() )
+    {
+      UTILS_ASSERT(
+        lower.size() == upper.size(),
+        "Lower and upper bounds must have same size (#lower={},#upper={})",
+        lower.size(),
+        upper.size() );
+      UTILS_ASSERT( ( lower.array() <= upper.array() ).all(), "Lower bounds must be <= upper bounds" );
+      update_tolerances();
+      m_lambda_lower.resize( m_lower.size() );
+      m_lambda_upper.resize( m_upper.size() );
+    }
+
+    /**
+     * @brief Destructor
+     */
+    ~BoxConstraintHandler() = default;
+
+    // =========================================================================
+    //  Constraint Management
+    // =========================================================================
+
+    /**
+     * @brief Set box constraints
+     *
+     * Resets all existing constraints and applies new bounds
+     *
+     * @param lower Lower bounds ℓ
+     * @param upper Upper bounds u
+     */
+    void set_bounds( Vector const & lower, Vector const & upper )
     {
       UTILS_ASSERT(
         lower.size() == upper.size(),
@@ -65,668 +143,890 @@ namespace Utils
       m_lower  = lower;
       m_upper  = upper;
       m_active = true;
-
-      m_tol_lower = m_epsi * ( Vector::Ones( lower.size() ).array() + lower.array().abs() );
-      m_tol_upper = m_epsi * ( Vector::Ones( upper.size() ).array() + upper.array().abs() );
+      update_tolerances();
     }
 
-    void
-    translate( Vector const & dir )
-    {
-      m_lower -= dir;
-      m_upper -= dir;
-      m_active = true;
-    }
-
-    Scalar
-    lower( Eigen::Index i ) const
-    {
-      return m_lower( i );
-    }
-    Scalar
-    upper( Eigen::Index i ) const
-    {
-      return m_upper( i );
-    }
-
-    Scalar &
-    lower( Eigen::Index i )
-    {
-      return m_lower( i );
-    }
-    Scalar &
-    upper( Eigen::Index i )
-    {
-      return m_upper( i );
-    }
-
-    Vector const &
-    lower() const
-    {
-      return m_lower;
-    }
-    Vector const &
-    upper() const
-    {
-      return m_upper;
-    }
-
-    bool
-    is_active() const
-    {
-      return m_active;
-    }
-
-    void
-    project( Vector & x ) const
-    {
-      if ( m_active ) x = x.cwiseMax( m_lower ).cwiseMin( m_upper );
-    }
-
-    void
-    project_gradient( Vector const & x, Vector & g ) const
+    /**
+     * @brief Update adaptive tolerances based on current epsilon
+     *
+     * Computes: tol = ε * (1 + |bound|) for numerical stability
+     */
+    void update_tolerances()
     {
       if ( !m_active ) return;
 
-      const Scalar eps = Scalar( 10 ) * m_epsi;
-
-      for ( int i = 0; i < x.size(); ++i )
-      {
-        bool on_lower = ( x[i] <= m_lower[i] + m_tol_lower[i] );
-        bool on_upper = ( x[i] >= m_upper[i] - m_tol_upper[i] );
-
-        if ( ( on_lower && g[i] < -eps ) || ( on_upper && g[i] > eps ) ) { g[i] = Scalar( 0 ); }
-      }
-    }
-
-    void
-    project_direction( Vector const & x, Vector & d ) const
-    {
-      if ( !m_active ) return;
-
-      const Scalar eps = Scalar( 10 ) * m_epsi;
-
-      integer sz = x.size();
-      for ( integer i = 0; i < sz; ++i )
-      {
-        bool on_lower = ( x[i] <= m_lower[i] + m_tol_lower[i] );
-        bool on_upper = ( x[i] >= m_upper[i] - m_tol_upper[i] );
-
-        if ( ( on_lower && d[i] < -eps ) || ( on_upper && d[i] > eps ) ) { d[i] = Scalar( 0 ); }
-      }
-    }
-
-    Scalar
-    projected_gradient_norm( Vector const & x, Vector const & g ) const
-    {
-      Vector pg = g;
-      project_gradient( x, pg );
-      return pg.template lpNorm<Eigen::Infinity>();
-    }
-
-    // NEW: Get maximum feasible step along direction
-    Scalar
-    max_step_length( Vector const & x, Vector const & d ) const
-    {
-      if ( !m_active ) return std::numeric_limits<Scalar>::infinity();
-
-      Scalar alpha_max = std::numeric_limits<Scalar>::infinity();
-
-      integer sz = x.size();
-      for ( integer i = 0; i < sz; ++i )
-      {
-        if ( d[i] > m_epsi ) { alpha_max = std::min( alpha_max, ( m_upper[i] - x[i] ) / d[i] ); }
-        else if ( d[i] < -m_epsi ) { alpha_max = std::min( alpha_max, ( m_lower[i] - x[i] ) / d[i] ); }
-      }
-
-      return Scalar( 0.99 ) * alpha_max;  // Safety margin
-    }
-
-    void
-    center( Scalar const rho, Vector & X, BoxConstraintHandler<Scalar> const & box )
-    {
-      m_lower.resize( X.size() );
-      m_upper.resize( X.size() );
-      m_tol_lower.resize( X.size() );
-      m_tol_upper.resize( X.size() );
-      integer N = X.size();
-      for ( integer j = 0; j < N; ++j )
-      {
-        Scalar L  = box.m_lower( j );
-        Scalar U  = box.m_upper( j );
-        Scalar Xj = X( j );
-
-        Scalar temp = U - L;
-        Scalar wsl  = L - Xj;
-        Scalar wsu  = U - Xj;
-
-        if ( wsl >= -rho )
-        {
-          if ( wsl >= Scalar( 0 ) )
-          {
-            Xj  = L;
-            wsl = Scalar( 0 );
-            wsu = temp;
-          }
-          else
-          {
-            Xj  = L + rho;
-            wsl = -rho;
-            wsu = std::max( U - Xj, rho );
-          }
-        }
-        else if ( wsu <= rho )
-        {
-          if ( wsu <= Scalar( 0 ) )
-          {
-            X( j ) = U;
-            wsl    = -temp;
-            wsu    = Scalar( 0 );
-          }
-          else
-          {
-            X( j ) = U - rho;
-            wsl    = std::min( L - Xj, -rho );
-            wsu    = rho;
-          }
-        }
-
-        m_lower( j ) = wsl;
-        m_upper( j ) = wsu;
-      }
-
+      // Vectorized tolerance computation
       m_tol_lower = m_epsi * ( Vector::Ones( m_lower.size() ).array() + m_lower.array().abs() );
       m_tol_upper = m_epsi * ( Vector::Ones( m_upper.size() ).array() + m_upper.array().abs() );
+      m_lambda_lower.resize( m_tol_lower.size() );
+      m_lambda_upper.resize( m_tol_upper.size() );
     }
 
-    Scalar
-    kkt_violation_norm2( Vector const & x, Vector const & v ) const
+    /**
+     * @brief Set epsilon value for adaptive tolerances
+     * @param eps New epsilon value
+     */
+    void set_epsilon( Scalar eps )
     {
-      if ( !m_active ) return 0;
-
-      auto xa = x.array();
-      auto va = v.array();
-
-      auto atLower = ( xa <= m_lower.array() + m_tol_lower.array() );
-      auto atUpper = ( xa >= m_upper.array() - m_tol_upper.array() );
-      auto freeVar = !( atLower || atUpper );
-
-      return freeVar.select( va, Scalar( 0 ) ).cwiseAbs2().sum() +
-             atLower.select( va.min( Scalar( 0 ) ), Scalar( 0 ) ).cwiseAbs2().sum() +
-             atUpper.select( va.max( Scalar( 0 ) ), Scalar( 0 ) ).cwiseAbs2().sum();
+      m_epsi = eps;
+      update_tolerances();
     }
 
-    void
-    clear()
+    /**
+     * @brief Clear all constraints
+     */
+    void clear()
     {
       m_active = false;
       m_lower.resize( 0 );
       m_upper.resize( 0 );
       m_tol_lower.resize( 0 );
       m_tol_upper.resize( 0 );
+      m_lambda_lower.resize( 0 );
+      m_lambda_upper.resize( 0 );
     }
-  };
 
-  //============================================================================
-  // Interpolation Model - Manages quadratic model
-  //============================================================================
+    // =========================================================================
+    //  Accessors
+    // =========================================================================
 
-  /**
-   * @class InterpolationModel
-   * @brief Manages the local quadratic interpolation model for the BOBYQA algorithm.
-   *
-   * The model approximates the objective function \f$ f(x) \f$ in the neighborhood
-   * of the current base point \f$ x_{base} \f$ using a quadratic function \f$ Q(\delta) \f$,
-   * where \f$ \delta \f$ is the offset from \f$ x_{base} \f$.
-   *
-   * The quadratic model is defined as:
-   * \f[
-   * Q(\delta) = f(x_{base} + x_{opt}) + g_{opt}^T (\delta - x_{opt}) + \frac{1}{2} (\delta - x_{opt})^T H (\delta -
-   * x_{opt})
-   * \f]
-   *
-   * In BOBYQA, the Hessian matrix \f$ H \f$ is not stored explicitly. Instead, it is
-   * composed of an explicit part \f$ H_Q \f$ and an implicit part derived from the
-   * interpolation points:
-   * \f[
-   * H \cdot v = H_Q \cdot v + \sum_{i=1}^{npt} pq_i (x_i^T v) x_i
-   * \f]
-   * where \f$ x_i \f$ are the columns of \f$ m\_xpt \f$ and \f$ pq_i \f$ are the
-   * coefficients in \f$ m\_pq \f$.
-   *
-   * @tparam Scalar The floating-point type (e.g., double, float).
-   */
-  template <typename Scalar>
-  class InterpolationModel
-  {
-  public:
-    using Vector = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-    using Matrix = Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic>;
-    using Index  = Eigen::Index;
+    /// @brief Check if constraints are active
+    bool is_active() const { return m_active; }
 
-  private:
-    Index m_nv{ 0 };    ///< Number of variables (dimension of the problem)
-    Index m_npt{ 0 };   ///< Number of interpolation points (usually 2n+1)
-    Index m_nptm{ 0 };  ///< Equal to npt - nv - 1
+    /// @brief Get problem dimension (0 if inactive)
+    integer dimension() const { return m_active ? m_lower.size() : 0; }
 
-    Matrix m_xpt;   ///< Matrix (nv x npt) containing interpolation points (offsets from base)
-    Vector m_fval;  ///< Function values \f$ f(x_i) \f$ at the interpolation points
-    Matrix m_HQ;    ///< Upper triangular part of the explicit Hessian \f$ H_Q \f$
-    Vector m_pq;    ///< Coefficients for the implicit part of the Hessian
-    Matrix m_B;     ///< Matrix used for updating Lagrange polynomials
-    Matrix m_Z;     ///< Null space matrix for Frobenius norm minimization of the Hessian
+    /// @brief Get current epsilon value
+    Scalar epsilon() const { return m_epsi; }
 
-    Index m_kopt{ 0 };  ///< Index of the current best point (trust region center) in the set
+    /// @brief Get lower bounds (read-only)
+    Vector const & lower() const { return m_lower; }
 
-  public:
-    InterpolationModel() = default;
+    /// @brief Get upper bounds (read-only)
+    Vector const & upper() const { return m_upper; }
+
+    /// @brief Get lower bound tolerances (read-only)
+    Vector const & tolerance_lower() const { return m_tol_lower; }
+
+    /// @brief Get upper bound tolerances (read-only)
+    Vector const & tolerance_upper() const { return m_tol_upper; }
 
     /**
-     * @brief Initializes the data structures for the model.
-     * * Resizes all internal matrices and vectors according to the problem size
-     * and the number of interpolation points.
-     * * @param nv Number of variables.
-     * @param npt Number of interpolation points.
+     * @brief Get specific lower bound
+     * @param i Index
+     * @return Lower bound at index i
      */
-    void
-    initialize( Index nv, Index npt )
-    {
-      m_nv   = nv;
-      m_npt  = npt;
-      m_nptm = npt - nv - 1;
-
-      m_xpt.resize( nv, npt );
-      m_fval.resize( npt );
-      m_HQ.resize( nv, nv );
-      m_pq.resize( npt );
-      m_B.resize( nv, npt + nv );
-      m_Z.resize( npt, m_nptm );
-      this->setZero();
-      m_kopt = 0;
-    }
-
-    void
-    setZero()
-    {
-      m_xpt.setZero();
-      m_fval.setZero();
-      m_HQ.setZero();
-      m_pq.setZero();
-      m_B.setZero();
-      m_Z.setZero();
-    }
-
+    Scalar lower( integer i ) const { return m_lower( i ); }
 
     /**
-     * @brief Computes the model gradient \f$ \nabla Q \f$ at a given point.
-     * * The gradient is calculated as:
+     * @brief Get specific upper bound
+     * @param i Index
+     * @return Upper bound at index i
+     */
+    Scalar upper( integer i ) const { return m_upper( i ); }
+
+    /// @brief Get lower bound multipliers (read-only)
+    Vector const & lambda_lower() const { return m_lambda_lower; }
+
+    /// @brief Get upper bound multipliers (read-only)
+    Vector const & lambda_upper() const { return m_lambda_upper; }
+
+    // =========================================================================
+    //  Feasibility Checking
+    // =========================================================================
+
+    /**
+     * @brief Check if point is within bounds
+     *
+     * Vectorized implementation using Eigen array operations
+     *
+     * @param x Point to check
+     * @param extra_tol Additional tolerance margin
+     * @return True if ℓ - tol ≤ x ≤ u + tol
+     */
+    bool is_feasible( Vector const & x, Scalar extra_tol = 0 ) const
+    {
+      if ( !m_active ) return true;
+
+      // Vectorized feasibility check
+      auto lower_ok = ( x.array() >= ( m_lower.array() - m_tol_lower.array() - extra_tol ) ).all();
+      auto upper_ok = ( x.array() <= ( m_upper.array() + m_tol_upper.array() + extra_tol ) ).all();
+
+      return lower_ok && upper_ok;
+    }
+
+    /**
+     * @brief Count constraint violations
+     *
+     * Vectorized implementation using coefficient-wise operations
+     *
+     * @param x Point to check
+     * @return Number of violated constraints
+     */
+    integer count_violations( Vector const & x ) const
+    {
+      if ( !m_active ) return 0;
+
+      // Vectorized violation counting
+      auto lower_viol = ( x.array() < ( m_lower.array() - m_tol_lower.array() ) ).template cast<integer>();
+      auto upper_viol = ( x.array() > ( m_upper.array() + m_tol_upper.array() ) ).template cast<integer>();
+
+      return lower_viol.sum() + upper_viol.sum();
+    }
+
+    /**
+     * @brief Minimum distance to boundary
+     *
+     * Computes minimum perpendicular distance to any constraint boundary
+     *
+     * @param x Reference point
+     * @return Minimum distance to boundary (infinity if no constraints)
+     */
+    Scalar min_distance_to_boundary( Vector const & x ) const
+    {
+      if ( !m_active ) return std::numeric_limits<Scalar>::infinity();
+
+      // Vectorized distance computation
+      auto dist_lower = ( x - m_lower ).array().abs();
+      auto dist_upper = ( m_upper - x ).array().abs();
+
+      return std::min( dist_lower.minCoeff(), dist_upper.minCoeff() );
+    }
+
+    // =========================================================================
+    //  Projection Operations
+    // =========================================================================
+
+    /**
+     * @brief Project point onto box (in-place)
+     *
+     * Vectorized projection: x = max(ℓ, min(x, u))
+     *
+     * @param x Point to project (modified in-place)
+     */
+    void project( Vector & x ) const
+    {
+      if ( m_active )
+      {
+        // Vectorized projection using coefficient-wise operations
+        x = x.cwiseMax( m_lower ).cwiseMin( m_upper );
+      }
+    }
+
+    /**
+     * @brief Project point onto box (non-destructive)
+     * @param x Original point
+     * @return Projected point
+     */
+    Vector projected( Vector const & x ) const
+    {
+      Vector y = x;
+      project( y );
+      return y;
+    }
+
+    /**
+     * @brief Project gradient according to optimality conditions
+     *
+     * For active constraints, zeroes gradient components pointing outward
+     * Vectorized implementation using masks
+     *
+     * @param x Current point
+     * @param g Gradient to project (modified in-place)
+     */
+    void project_gradient( Vector const & x, Vector & g ) const
+    {
+      if ( !m_active ) return;
+
+      // Vectorized gradient projection using masks
+      auto lower_mask = ( x.array() <= ( m_lower.array() + m_tol_lower.array() ) ) && ( g.array() > 0 );
+      auto upper_mask = ( x.array() >= ( m_upper.array() - m_tol_upper.array() ) ) && ( g.array() < 0 );
+
+      // Apply masks using select()
+      g.array() = lower_mask.select( 0, g.array() );
+      g.array() = upper_mask.select( 0, g.array() );
+    }
+
+    /**
+     * @brief Project direction to maintain feasibility
+     *
+     * Zeroes direction components that would violate active constraints
+     * Vectorized implementation
+     *
+     * @param x Current point
+     * @param d Direction to project (modified in-place)
+     */
+    void project_direction( Vector const & x, Vector & d ) const
+    {
+      if ( !m_active ) return;
+
+      // Vectorized direction projection using masks
+      auto lower_mask = ( x.array() <= ( m_lower.array() + m_tol_lower.array() ) ) && ( d.array() < 0 );
+      auto upper_mask = ( x.array() >= ( m_upper.array() - m_tol_upper.array() ) ) && ( d.array() > 0 );
+
+      // Apply masks using select()
+      d.array() = lower_mask.select( 0, d.array() );
+      d.array() = upper_mask.select( 0, d.array() );
+    }
+
+    /**
+     * @brief Projected gradient (non-destructive)
+     * @param x Current point
+     * @param g Original gradient
+     * @return Projected gradient
+     */
+    Vector projected_gradient( Vector const & x, Vector const & g ) const
+    {
+      Vector pg = g;
+      project_gradient( x, pg );
+      return pg;
+    }
+
+    // =========================================================================
+    //  Active Set and Multipliers
+    // =========================================================================
+
+    /**
+     * @brief Identify active constraints using Bertsekas' method
+     *
+     * Vectorized identification of active constraints:
+     * - -1: lower bound active
+     * -  1: upper bound active
+     * -  0: free variable
+     *
+     * @param x Current point
+     * @param g Gradient ∇f(x)
+     * @param active Output vector indicating active constraints
+     * @return Number of active constraints
+     */
+    integer identify_active_set( Vector const & x, Vector const & g, VectorI & active ) const
+    {
+      active.setZero();
+      if ( !m_active ) return 0;
+
+      // Vectorized active set identification
+      auto dist_lower = ( x - m_lower ).array();
+      auto dist_upper = ( m_upper - x ).array();
+
+      auto lower_active = ( dist_lower <= m_tol_lower.array() ) && ( g.array() > 0 );
+      auto upper_active = ( dist_upper <= m_tol_upper.array() ) && ( g.array() < 0 );
+
+      // Combine masks using select()
+      active.array() = lower_active.select( -1, upper_active.select( 1, active.array() ) );
+
+      return lower_active.template cast<integer>().sum() + upper_active.template cast<integer>().sum();
+    }
+
+    /**
+     * @brief Counts the number of active constraints at a given point
+     * @param x Point to check
+     * @return Number of active constraints (variables at lower or upper bounds)
+     */
+    integer num_active( Vector const & x ) const
+    {
+      if ( !m_active ) return 0;
+      return ( ( x.array() <= ( m_lower + m_tol_lower ).array() ) ||
+               ( x.array() >= ( m_upper - m_tol_upper ).array() ) )
+        .count();
+    }
+
+    /**
+     * @brief Check if a specific variable is at a bound
+     * @param i Index of the variable
+     * @param x Current point
+     * @return 1 if at upper bound, -1 if at lower bound, 0 if free
+     */
+    integer active_status( integer i, Vector const & x ) const
+    {
+      if ( !m_active ) return 0;
+
+      if ( x( i ) <= ( m_lower( i ) + m_tol_lower( i ) ) ) return -1;
+      if ( x( i ) >= ( m_upper( i ) - m_tol_upper( i ) ) ) return 1;
+      return 0;
+    }
+
+    /**
+     * @brief Compute optimal Lagrange multipliers
+     *
+     * Computes KKT multipliers for box constraints:
+     * λ_lower = max(0, -g) when x at lower bound
+     * λ_upper = max(0, g) when x at upper bound
+     *
+     * @param x Current point
+     * @param g Gradient ∇f(x)
+     * @param lambda_lower Output multipliers for lower bounds
+     * @param lambda_upper Output multipliers for upper bounds
+     */
+    void update_multipliers( Vector const & x, Vector const & g )
+    {
+      m_lambda_lower.setZero();
+      m_lambda_upper.setZero();
+
+      if ( !m_active ) return;
+
+      // Vectorized multiplier computation - CORRETTO
+      auto at_lower = ( x.array() <= ( m_lower.array() + m_tol_lower.array() ) );
+      auto at_upper = ( x.array() >= ( m_upper.array() - m_tol_upper.array() ) );
+
+      // Per limiti inferiori: λ = max(0, ∇f(x))
+      m_lambda_lower.array() = at_lower.select( g.array().cwiseMax( 0 ), 0 );
+
+      // Per limiti superiori: λ = max(0, -∇f(x))
+      m_lambda_upper.array() = at_upper.select( ( -g.array() ).cwiseMax( 0 ), 0 );
+    }
+
+    /**
+     * @brief Compute complementarity error
+     *
+     * Computes maximum violation of complementarity conditions:
+     * λ_lower·(x - ℓ) = 0 and λ_upper·(u - x) = 0
+     *
+     * @param x Current point
+     * @return Maximum complementarity error
+     */
+    Scalar complementarity_error( Vector const & x ) const
+    {
+      if ( !m_active ) return 0;
+
+      // Vectorized complementarity error computation
+      auto comp_lower = m_lambda_lower.array() * ( x.array() - m_lower.array() );
+      auto comp_upper = m_lambda_upper.array() * ( m_upper.array() - x.array() );
+
+      return ( comp_lower.abs() + comp_upper.abs() ).maxCoeff();
+    }
+
+    // =========================================================================
+    //  KKT Analysis
+    // =========================================================================
+
+    /**
+     * @brief Projected gradient norm (∞-norm)
+     *
+     * Computes ‖P(x - ∇f(x)) - x‖_∞ for optimality measure
+     *
+     * @param x Current point
+     * @param g Gradient ∇f(x)
+     * @return Infinity norm of projected gradient
+     */
+    Scalar projected_gradient_norm_inf( Vector const & x, Vector const & g ) const
+    {
+      Vector pg = projected_gradient( x, g );
+      return pg.template lpNorm<Eigen::Infinity>();
+    }
+
+    /**
+     * @brief Projected gradient norm (2-norm)
+     * @param x Current point
+     * @param g Gradient ∇f(x)
+     * @return 2-norm of projected gradient
+     */
+    Scalar projected_gradient_norm2( Vector const & x, Vector const & g ) const
+    {
+      Vector pg = projected_gradient( x, g );
+      return pg.norm();
+    }
+
+    /**
+     * @brief KKT stationarity error (∞-norm)
+     *
+     * Computes ‖∇f(x) - λ_lower + λ_upper‖_∞
+     *
+     * @param g Gradient ∇f(x)
+     * @return Stationarity error
+     */
+    Scalar kkt_stationarity_error_inf( Vector const & g ) const
+    {
+      if ( !m_active ) return g.template lpNorm<Eigen::Infinity>();
+      Vector stationarity = g - m_lambda_lower + m_lambda_upper;
+      return stationarity.template lpNorm<Eigen::Infinity>();
+    }
+
+    /**
+     * @brief KKT violation norm (2-norm)
+     *
+     * Computes weighted violation of KKT conditions
+     *
+     * @param x Current point
+     * @param v Violation vector
+     * @return 2-norm of KKT violation
+     */
+    Scalar kkt_violation_norm2( Vector const & x, Vector const & v ) const
+    {
+      if ( !m_active ) return 0;
+
+      // Vectorized KKT violation computation
+      auto xa = x.array();
+      auto va = v.array();
+
+      auto at_lower = ( xa <= m_lower.array() + m_tol_lower.array() );
+      auto at_upper = ( xa >= m_upper.array() - m_tol_upper.array() );
+      auto free_var = !( at_lower || at_upper );
+
+      // Compute violations for different constraint types
+      auto free_viol  = free_var.select( va.abs2(), 0 );
+      auto lower_viol = at_lower.select( va.min( 0 ).abs2(), 0 );
+      auto upper_viol = at_upper.select( va.max( 0 ).abs2(), 0 );
+
+      return ( free_viol + lower_viol + upper_viol ).sum();
+    }
+
+    /**
+     * @brief Total KKT error
+     *
+     * Computes maximum of stationarity, complementarity, and feasibility errors
+     *
+     * @param x Current point
+     * @param g Gradient ∇f(x)
+     * @return Maximum KKT error component
+     */
+    Scalar total_kkt_error( Vector const & x, Vector const & g ) const
+    {
+      Scalar stationarity    = kkt_stationarity_error_inf( g );
+      Scalar complementarity = complementarity_error( x );
+
+      // Vectorized feasibility error computation
+      auto   lower_viol  = ( m_lower - x ).cwiseMax( 0 );
+      auto   upper_viol  = ( x - m_upper ).cwiseMax( 0 );
+      Scalar feasibility = std::max(
+        lower_viol.template lpNorm<Eigen::Infinity>(),
+        upper_viol.template lpNorm<Eigen::Infinity>() );
+
+      return std::max( { stationarity, complementarity, feasibility } );
+    }
+
+    // =========================================================================
+    //  Line Search Optimization
+    // =========================================================================
+
+    /**
+     * @brief Maximum feasible step along direction
+     *
+     * Computes α_max = max{α : ℓ ≤ x + αd ≤ u}
+     * Vectorized computation of minimum ratio
+     *
+     * @param x Current point
+     * @param d Search direction
+     * @param safety_margin Safety factor (default: 0.99)
+     * @return Maximum feasible step
+     */
+    Scalar max_feasible_step( Vector const & x, Vector const & d, Scalar safety_margin = 0.99 ) const
+    {
+      if ( !m_active ) return std::numeric_limits<Scalar>::infinity();
+
+      // Vectorized step computation using masks
+      auto pos_mask = ( d.array() > m_epsi );
+      auto neg_mask = ( d.array() < -m_epsi );
+
+      Vector ratios = Vector::Constant( x.size(), std::numeric_limits<Scalar>::infinity() );
+
+      // Compute upper bound ratios for positive directions
+      ratios.array() = pos_mask.select( ( m_upper - x ).array() / d.array(), ratios.array() );
+
+      // Compute lower bound ratios for negative directions
+      ratios.array() = neg_mask.select( ( m_lower - x ).array() / d.array(), ratios.array() );
+
+      // Find minimum positive ratio
+      Scalar alpha_max = ratios.minCoeff();
+
+      return safety_margin * ( alpha_max < 0 ? 0 : alpha_max );
+    }
+
+    /**
+     * @brief Optimal projection step for steepest descent
+     *
+     * Computes step for projected gradient method
+     *
+     * @param x Current point
+     * @param g Gradient ∇f(x)
+     * @param max_step Maximum step length
+     * @return Optimal projection step
+     */
+    Scalar optimal_projection_step( Vector const & x, Vector const & g, Scalar max_step = 1.0 ) const
+    {
+      if ( !m_active ) return max_step;
+
+      Vector d         = -projected_gradient( x, g );
+      Scalar alpha_max = max_feasible_step( x, d, 1.0 );
+
+      return std::min( max_step, alpha_max );
+    }
+
+    // =========================================================================
+    //  QP Subproblem Solving
+    // =========================================================================
+
+    /**
+     * @brief Solve QP subproblem with sparse Hessian
+     *
+     * Solves the box-constrained QP:
      * \f[
-     * \nabla Q(\delta) = g_{opt} + H (\delta - x_{opt})
+     * \min_{p} \frac{1}{2} p^T (H + \lambda I) p + g^T p
+     * \quad \text{s.t.} \quad \ell - x \leq p \leq u - x
      * \f]
-     * where \f$ H \f$ is the composite Hessian.
-     * * @param g_opt The gradient of the model at the current optimal point \f$ x_{opt} \f$.
-     * @param x_opt The offset of the current best point from the base.
-     * @param delta The point (offset) where the gradient is to be evaluated.
-     * @param[out] grad Output vector for the computed gradient.
+     *
+     * Uses:
+     * - Sparse LDLT decomposition for large sparse problems
+     * - Dense LDLT for smaller or denser problems
+     * - Efficient projection with incremental Hessian-vector product updates
+     *
+     * @param x Current point
+     * @param g Gradient ∇f(x)
+     * @param H Hessian ∇²f(x) (sparse)
+     * @param lambda Regularization parameter
+     * @param verbosity Verbosity level (0: silent, ≥3: detailed)
+     * @return QPSolution structure
      */
-    void
-    gradient( Vector const & g_opt, Vector const & x_opt, Vector const & delta, Vector & grad ) const
+    bool solve_qp_subproblem_sparse(
+      Vector const &       x,
+      Vector const &       g,
+      SparseMatrix const & H,
+      Scalar               lambda,
+      Vector &             p,            ///< Search direction (step)
+      Vector &             multipliers,  ///< Lagrange multipliers (size 2*n: lower then upper)
+      integer              verbosity = 0 ) const
     {
-      Vector diff = delta - x_opt;
+      integer n = x.size();
+      p.resize( n );
+      p.setZero();
+      multipliers.resize( 2 * n );
+      multipliers.setZero();
 
-      // Part 1: g_opt + H_Q * (delta - x_opt)
-      grad.noalias() = g_opt + m_HQ.template selfadjointView<Eigen::Upper>() * diff;
-
-      // Part 2: Add implicit terms sum( pq_i * (xpt_i^T * diff) * xpt_i )
-      // Optimized via Eigen arrays to avoid explicit summation loops.
-      grad.noalias() += m_xpt * ( m_pq.array() * ( m_xpt.transpose() * diff ).array() ).matrix();
-    }
-
-    /**
-     * @brief Computes the Hessian-vector product \f$ hs = H \cdot s \f$.
-     * * This operation is performed in \f$ O(n \cdot npt) \f$ time by exploiting
-     * the implicit structure of the Hessian in BOBYQA.
-     * * @param s The vector to be multiplied.
-     * @param[out] hs Output vector for the product \f$ H \cdot s \f$.
-     */
-    void
-    add_hessian_product( Vector const & s, Vector & hs ) const
-    {
-      // Explicit part
-      hs.noalias() += m_HQ.template selfadjointView<Eigen::Upper>() * s;
-
-      // Implicit part: sum_i [ pq_i * (xpt_i . s) * xpt_i ]
-      hs.noalias() += m_xpt * ( m_pq.array() * ( m_xpt.transpose() * s ).array() ).matrix();
-    }
-
-    /**
-     * @brief Evaluates the quadratic model \f$ Q(\delta) \f$ at a specific offset.
-     * * Uses the Taylor expansion around \f$ x_{opt} \f$:
-     * \f[
-     * Q(\delta) = f_{opt} + g_{opt}^T (\delta - x_{opt}) + \frac{1}{2} (\delta - x_{opt})^T H (\delta - x_{opt})
-     * \f]
-     * * @param g_opt Model gradient at the optimum.
-     * @param x_opt Offset of the optimum point.
-     * @param delta Point where the model is evaluated.
-     * @return The scalar value of the quadratic model.
-     */
-    Scalar
-    evaluate( Vector const & g_opt, Vector const & x_opt, Vector const & delta ) const
-    {
-      Vector diff = delta - x_opt;
-      Vector h_diff( m_nv );
-      hessian_product( diff, h_diff );
-      return m_fval( m_kopt ) + diff.dot( g_opt ) + Scalar( 0.5 ) * diff.dot( h_diff );
-    }
-
-    /**
-     * @brief Updates the data for a specific interpolation point.
-     * * @param knew The index of the point to be replaced [0, npt-1].
-     * @param xnew The new offset vector for the point.
-     * @param fnew The function value at the new point.
-     */
-    void
-    update_point( Index knew, Vector const & xnew, Scalar fnew )
-    {
-      m_xpt.col( knew ) = xnew;
-      m_fval( knew )    = fnew;
-
-      // Check if the new point is better than the current optimum
-      if ( fnew < m_fval( m_kopt ) ) { m_kopt = knew; }
-    }
-
-    /**
-     * @brief Performs a base point shift to maintain numerical stability.
-     * * When the trust region center \f$ x_{opt} \f$ becomes the new base point,
-     * the coordinates of all interpolation points and the Hessian coefficients
-     * must be updated. This ensures the model remains mathematically equivalent
-     * in the new coordinate system.
-     * * @param xopt The translation vector (offset of the new base from the old base).
-     */
-    void
-    shift_base( Vector const & xopt )
-    {
-      // Translate all points: xpt_new = xpt_old - xopt
-      m_xpt.colwise() -= xopt;
-
-      // Update the explicit Hessian HQ to reflect the coordinate change.
-      // This follows Powell's specific algebraic update rules for BOBYQA.
-      Scalar sumpq = m_pq.sum();
-      Vector temp  = ( m_xpt * m_pq ).noalias() - ( Scalar( 0.5 ) * sumpq ) * xopt;
-
-      for ( Index j = 0; j < m_nv; ++j )
+      try
       {
-        for ( Index i = 0; i <= j; ++i ) { m_HQ( i, j ) += temp( i ) * xopt( j ) + xopt( i ) * temp( j ); }
-      }
-    }
+        // Choose solver based on problem characteristics
+        integer nnz               = H.nonZeros();
+        Scalar  sparsity_ratio    = Scalar( nnz ) / ( n * n );
+        bool    use_sparse_solver = ( n > 100 && sparsity_ratio < 0.1 );
 
-    // --- Basic Getters ---
-    Index
-    nv() const
-    {
-      return m_nv;
-    }
-    Index
-    npt() const
-    {
-      return m_npt;
-    }
-    Index
-    kopt() const
-    {
-      return m_kopt;
-    }
-    Scalar
-    fopt() const
-    {
-      return m_fval( m_kopt );
-    }
+        // Regularize Hessian matrix
+        SparseMatrix A = H;
+        A.diagonal().array() += lambda;
 
-    /** @return The offset of the best point currently in the model. */
-    auto
-    xopt_vec() const
-    {
-      return m_xpt.col( m_kopt );
-    }
-
-    // --- Matrix/Vector Accessors (Required for B and Z updates) ---
-    Matrix &
-    xpt()
-    {
-      return m_xpt;
-    }
-    Vector &
-    fval()
-    {
-      return m_fval;
-    }
-    Matrix &
-    HQ()
-    {
-      return m_HQ;
-    }
-    Vector &
-    pq()
-    {
-      return m_pq;
-    }
-    Matrix &
-    B()
-    {
-      return m_B;
-    }
-    Matrix &
-    Z()
-    {
-      return m_Z;
-    }
-    Index &
-    kopt()
-    {
-      return m_kopt;
-    }
-
-    Matrix const &
-    xpt() const
-    {
-      return m_xpt;
-    }
-    Vector const &
-    fval() const
-    {
-      return m_fval;
-    }
-    Matrix const &
-    HQ() const
-    {
-      return m_HQ;
-    }
-    Vector const &
-    pq() const
-    {
-      return m_pq;
-    }
-    Matrix const &
-    B() const
-    {
-      return m_B;
-    }
-    Matrix const &
-    Z() const
-    {
-      return m_Z;
-    }
-  };
-
-  //============================================================================
-  // Trust Region Solver - Solves trust region subproblem
-  //============================================================================
-
-  template <typename Scalar>
-  class TrustRegionSolver
-  {
-  public:
-    using Vector  = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
-    using VectorI = Eigen::Matrix<Eigen::Index, Eigen::Dynamic, 1>;
-    using Index   = Eigen::Index;
-
-    struct Result
-    {
-      Vector step;
-      Scalar reduction;
-      Scalar crvmin;
-      bool   converged;
-    };
-
-  private:
-    Index                                m_nv;
-    BoxConstraintHandler<Scalar> const * m_bounds;
-
-    // Working arrays
-    VectorI m_xbdi;
-    Vector  m_s, m_hs, m_hred, m_gnew;
-
-  public:
-    TrustRegionSolver() = default;
-
-    void
-    initialize( Index nv, BoxConstraintHandler<Scalar> const * bounds )
-    {
-      m_nv     = nv;
-      m_bounds = bounds;
-
-      m_xbdi.resize( nv );
-      m_s.resize( nv );
-      m_hs.resize( nv );
-      m_hred.resize( nv );
-      m_gnew.resize( nv );
-    }
-
-    Result
-    solve( Vector const & xopt, Vector const & gopt, InterpolationModel<Scalar> const & model, Scalar delta )
-    {
-      Result res;
-      res.step.resize( m_nv );
-      res.step.setZero();
-      res.reduction = 0;
-      res.crvmin    = -1;
-      res.converged = false;
-
-      // Identify active constraints
-      m_xbdi.setZero();
-      Index nact = 0;
-
-      for ( Index i = 0; i < m_nv; ++i )
-      {
-        if ( xopt( i ) <= m_bounds->lower( i ) && gopt( i ) >= 0 )
+        if ( use_sparse_solver )
         {
-          m_xbdi( i ) = -1;
-          ++nact;
-        }
-        else if ( xopt( i ) >= m_bounds->upper( i ) && gopt( i ) <= 0 )
-        {
-          m_xbdi( i ) = 1;
-          ++nact;
-        }
-      }
+          // Sparse LDLT for large sparse problems
+          Eigen::SimplicialLDLT<SparseMatrix> solver;
+          solver.compute( A );
 
-      // Truncated conjugate gradient
-      m_gnew        = gopt;
-      Scalar delsq  = delta * delta;
-      Scalar gredsq = 0;
-
-      for ( Index i = 0; i < m_nv; ++i )
-      {
-        if ( m_xbdi( i ) == 0 ) { gredsq += m_gnew( i ) * m_gnew( i ); }
-      }
-
-      if ( gredsq == 0 )
-      {
-        res.converged = true;
-        return res;
-      }
-
-      Index  itermax = m_nv - nact;
-      Scalar beta    = 0;
-
-      for ( Index iter = 0; iter < itermax; ++iter )
-      {
-        // Compute search direction
-        m_s = beta * m_s - m_gnew;
-
-        for ( Index i = 0; i < m_nv; ++i )
-        {
-          if ( m_xbdi( i ) != 0 ) m_s( i ) = 0;
-        }
-
-        Scalar stepsq = m_s.squaredNorm();
-        if ( stepsq == 0 ) break;
-
-        // Compute Hessian-vector product
-        model.hessian_product( m_s, m_hs );
-
-        // Line search in trust region
-        Scalar ds    = res.step.dot( m_s );
-        Scalar shs   = m_s.dot( m_hs );
-        Scalar resid = delsq - res.step.squaredNorm();
-
-        if ( resid <= 0 ) break;
-
-        Scalar temp = std::sqrt( stepsq * resid + ds * ds );
-        Scalar blen = ( ds < 0 ) ? ( temp - ds ) / stepsq : resid / ( temp + ds );
-
-        Scalar stplen = ( shs > 0 ) ? std::min( blen, gredsq / shs ) : blen;
-
-        // Check bound constraints
-        for ( Index i = 0; i < m_nv; ++i )
-        {
-          if ( m_s( i ) != 0 )
+          if ( solver.info() != Eigen::Success )
           {
-            Scalar xsum  = xopt( i ) + res.step( i );
-            Scalar bound = ( m_s( i ) > 0 ) ? ( m_bounds->upper( i ) - xsum ) / m_s( i )
-                                            : ( m_bounds->lower( i ) - xsum ) / m_s( i );
-
-            stplen = std::min( stplen, bound );
+            if ( verbosity >= 3 ) fmt::print( "  QP: Sparse decomposition failed\n" );
+            return false;
           }
-        }
-
-        // Update step
-        if ( stplen > 0 )
-        {
-          Scalar ggsav = gredsq;
-          gredsq       = 0;
-
-          m_gnew += stplen * m_hs;
-          res.step += stplen * m_s;
-
-          for ( Index i = 0; i < m_nv; ++i )
-          {
-            if ( m_xbdi( i ) == 0 ) { gredsq += m_gnew( i ) * m_gnew( i ); }
-          }
-
-          Scalar sdec = std::max( stplen * ( ggsav - Scalar( 0.5 ) * stplen * shs ), Scalar( 0 ) );
-          res.reduction += sdec;
-
-          if ( shs > 0 && res.crvmin < 0 ) { res.crvmin = shs / stepsq; }
-
-          beta = gredsq / ggsav;
-
-          // Check convergence
-          if ( gredsq * delsq <= Scalar( 1e-4 ) * res.reduction * res.reduction )
-          {
-            res.converged = true;
-            break;
-          }
+          p = -solver.solve( g );
         }
         else
         {
-          break;
+          // Dense LDLT for smaller/denser problems
+          Matrix              A_dense = A;
+          Eigen::LDLT<Matrix> solver;
+          solver.compute( A_dense );
+
+          if ( solver.info() != Eigen::Success )
+          {
+            if ( verbosity >= 3 ) fmt::print( "  QP: Dense decomposition failed\n" );
+            return false;
+          }
+          p = -solver.solve( g );
         }
+
+        // Check for numerical issues
+        if ( !p.allFinite() )
+        {
+          if ( verbosity >= 3 ) fmt::print( "  QP: Non-finite solution\n" );
+          return false;
+        }
+
+        // Project step to satisfy box constraints
+        if ( m_active )
+        {
+          // Compute H*p once
+          Vector Hp = H * p;
+
+          // Vectorized clamping with efficient Hp updates
+          for ( integer i = 0; i < n; ++i )
+          {
+            Scalar x_new = x( i ) + p( i );
+
+            if ( x_new < m_lower( i ) )
+            {
+              // Clamp to lower bound
+              Scalar delta = m_lower( i ) - x( i ) - p( i );
+              p( i )       = m_lower( i ) - x( i );
+
+              if ( sparsity_ratio > 0.01 )
+              {
+                // Incremental update of Hp using sparse column access
+                for ( typename SparseMatrix::InnerIterator it( H, i ); it; ++it )
+                {
+                  integer row = it.row();
+                  Scalar  val = it.value();
+
+                  if ( row == i )
+                    Hp( i ) += val * delta;  // Diagonal
+                  else
+                    Hp( row ) += val * delta;  // Off-diagonal
+                }
+              }
+              else
+              {
+                // Recompute for very sparse matrices
+                Hp = H * p;
+              }
+
+              multipliers( i ) = std::max<Scalar>( 0, -g( i ) - Hp( i ) );
+            }
+            else if ( x_new > m_upper( i ) )
+            {
+              // Clamp to upper bound
+              Scalar delta = m_upper( i ) - x( i ) - p( i );
+              p( i )       = m_upper( i ) - x( i );
+
+              if ( sparsity_ratio > 0.01 )
+              {
+                for ( typename SparseMatrix::InnerIterator it( H, i ); it; ++it )
+                {
+                  integer row = it.row();
+                  Scalar  val = it.value();
+
+                  if ( row == i )
+                    Hp( i ) += val * delta;
+                  else
+                    Hp( row ) += val * delta;
+                }
+              }
+              else
+              {
+                Hp = H * p;
+              }
+
+              multipliers( i + n ) = std::max<Scalar>( 0, g( i ) + Hp( i ) );
+            }
+          }
+        }
+        if ( verbosity >= 3 ) { fmt::print( "  QP: ‖p‖={:.2e}, λ={:.2e}\n", p.norm(), lambda ); }
+      }
+      catch ( const std::exception & e )
+      {
+        if ( verbosity >= 3 ) fmt::print( "  QP: Exception: {}\n", e.what() );
+        return false;
       }
 
-      return res;
+      return true;
+    }
+
+    /**
+     * @brief Solve QP subproblem with dense Hessian
+     *
+     * Optimized version for dense Hessian matrices
+     * Uses dense LDLT decomposition and efficient matrix-vector operations
+     *
+     * @param x Current point
+     * @param g Gradient ∇f(x)
+     * @param H Hessian ∇²f(x) (dense)
+     * @param lambda Regularization parameter
+     * @param verbosity Verbosity level
+     * @return QPSolution structure
+     */
+    bool solve_qp_subproblem_dense(
+      Vector const & x,
+      Vector const & g,
+      Matrix const & H,
+      Scalar         lambda,
+      Vector &       p,            ///< Search direction (step)
+      Vector &       multipliers,  ///< Lagrange multipliers (size 2*n: lower then upper)
+      integer        verbosity = 0 ) const
+    {
+      integer n = x.size();
+      p.resize( n );
+      p.setZero();
+      multipliers.resize( 2 * n );
+      multipliers.setZero();
+
+      try
+      {
+        // Regularize Hessian
+        Matrix A = H;
+        A.diagonal().array() += lambda;
+
+        // Dense LDLT decomposition
+        Eigen::LDLT<Matrix> solver;
+        solver.compute( A );
+
+        if ( solver.info() != Eigen::Success )
+        {
+          if ( verbosity >= 3 ) fmt::print( "  QP: Dense decomposition failed\n" );
+          return false;
+        }
+
+        p = -solver.solve( g );
+
+        if ( !p.allFinite() )
+        {
+          if ( verbosity >= 3 ) fmt::print( "  QP: Non-finite solution\n" );
+          return false;
+        }
+
+        // Project step with efficient Hp updates
+        if ( m_active )
+        {
+          Vector Hp = H * p;
+
+          // Vectorized constraint checking with manual loop for Hp updates
+          for ( integer i = 0; i < n; ++i )
+          {
+            Scalar x_new = x( i ) + p( i );
+
+            if ( x_new < m_lower( i ) )
+            {
+              // Efficient Hp update using matrix column
+              Scalar delta = m_lower( i ) - x( i ) - p( i );
+              p( i )       = m_lower( i ) - x( i );
+              Hp.noalias() += H.col( i ) * delta;
+
+              multipliers( i ) = std::max<Scalar>( 0, -g( i ) - Hp( i ) );
+            }
+            else if ( x_new > m_upper( i ) )
+            {
+              Scalar delta = m_upper( i ) - x( i ) - p( i );
+              p( i )       = m_upper( i ) - x( i );
+              Hp.noalias() += H.col( i ) * delta;
+
+              multipliers( i + n ) = std::max<Scalar>( 0, g( i ) + Hp( i ) );
+            }
+          }
+        }
+
+        if ( verbosity >= 3 ) { fmt::print( "  QP: ‖p‖={:.2e}, λ={:.2e}\n", p.norm(), lambda ); }
+      }
+      catch ( const std::exception & e )
+      {
+        if ( verbosity >= 3 ) fmt::print( "  QP: Exception: {}\n", e.what() );
+        return false;
+      }
+
+      return true;
+    }
+
+    /**
+     * @brief Template QP solver with automatic Hessian type dispatch
+     *
+     * Compile-time dispatch to appropriate implementation
+     * Supports both sparse and dense Hessian matrices
+     *
+     * @tparam HessianType Type of Hessian matrix (SparseMatrix or Matrix)
+     * @param x Current point
+     * @param g Gradient ∇f(x)
+     * @param H Hessian ∇²f(x)
+     * @param lambda Regularization parameter
+     * @param verbosity Verbosity level
+     * @return QPSolution structure
+     */
+    template <typename HessianType> bool solve_qp_subproblem(
+      Vector const &      x,
+      Vector const &      g,
+      HessianType const & H,
+      Scalar              lambda,
+      Vector &            p,            ///< Search direction (step)
+      Vector &            multipliers,  ///< Lagrange multipliers (size 2*n: lower then upper)
+      integer             verbosity = 0 ) const
+    {
+      // Compile-time dispatch based on Hessian type
+      if constexpr ( std::is_same_v<HessianType, SparseMatrix> )
+      {
+        return solve_qp_subproblem_sparse( x, g, H, lambda, p, multipliers, verbosity );
+      }
+      else if constexpr ( std::is_same_v<HessianType, Matrix> )
+      {
+        return solve_qp_subproblem_dense( x, g, H, lambda, p, multipliers, verbosity );
+      }
+      else
+      {
+        // Convert to dense matrix for unknown types
+        Matrix H_dense = H;
+        return solve_qp_subproblem_dense( x, g, H_dense, lambda, p, multipliers, verbosity );
+      }
+    }
+
+    // =========================================================================
+    //  Debugging and Reporting
+    // =========================================================================
+
+    /**
+     * @brief Print constraint bounds
+     *
+     * Displays first 10 bounds for large problems
+     */
+    void print_bounds() const
+    {
+      if ( !m_active )
+      {
+        fmt::print( "No box constraints active\n" );
+        return;
+      }
+
+      integer n = dimension();
+      fmt::print( "Box constraints (dimension={}):\n", n );
+      fmt::print( "{:>5} {:>15} {:>15} {:>15}\n", "i", "lower", "upper", "active" );
+
+      integer display_count = std::min( n, integer( 10 ) );
+      for ( integer i = 0; i < display_count; ++i )
+      {
+        fmt::print( "{:5d} {:15.6e} {:15.6e}\n", i, m_lower( i ), m_upper( i ) );
+      }
+
+      if ( n > 10 ) fmt::print( "... (showing first 10 of {})\n", n );
+    }
+
+    /**
+     * @brief Get constraint summary
+     * @return String with basic constraint information
+     */
+    std::string summary() const
+    {
+      if ( !m_active ) return "No box constraints";
+
+      integer n      = dimension();
+      Scalar  volume = ( m_upper - m_lower ).prod();
+
+      return fmt::format( "Box[dim={}, volume={:.3e}, active={}]", n, volume, m_active ? "yes" : "no" );
+    }
+
+    /**
+     * @brief Get detailed constraint information
+     * @return String with comprehensive constraint statistics
+     */
+    std::string detailed_info() const
+    {
+      if ( !m_active ) return "No box constraints active";
+
+      integer n         = dimension();
+      Scalar  min_lower = m_lower.minCoeff();
+      Scalar  max_lower = m_lower.maxCoeff();
+      Scalar  min_upper = m_upper.minCoeff();
+      Scalar  max_upper = m_upper.maxCoeff();
+      Scalar  avg_width = ( m_upper - m_lower ).mean();
+      Scalar  max_width = ( m_upper - m_lower ).maxCoeff();
+      Scalar  min_width = ( m_upper - m_lower ).minCoeff();
+
+      return fmt::format(
+        "Box Constraints Statistics:\n"
+        "  Dimension: {}\n"
+        "  Lower bounds: [{:.3e}, {:.3e}]\n"
+        "  Upper bounds: [{:.3e}, {:.3e}]\n"
+        "  Width range: [{:.3e}, {:.3e}]\n"
+        "  Average width: {:.3e}",
+        n,
+        min_lower,
+        max_lower,
+        min_upper,
+        max_upper,
+        min_width,
+        max_width,
+        avg_width );
     }
   };
+
 }  // namespace Utils
 
 #endif

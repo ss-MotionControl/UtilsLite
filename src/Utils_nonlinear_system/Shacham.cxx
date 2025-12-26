@@ -50,8 +50,7 @@ class ChemicalReactorEquilibriumConversion : public NonlinearSystem
 {
   mutable real_type y, T, k, kkp, k_1, kkp_1;
 
-  void
-  eval( Vector const & x ) const
+  void eval( Vector const & x ) const
   {
     T = x( 0 );
     y = x( 1 );
@@ -76,40 +75,25 @@ public:
   {
   }
 
-  real_type
-  f1( real_type _y ) const
-  {
-    return sqrt( 1 - _y ) * ( 1.82 - _y ) / ( 18.2 - _y );
-  }
+  real_type f1( real_type _y ) const { return sqrt( 1 - _y ) * ( 1.82 - _y ) / ( 18.2 - _y ); }
 
-  real_type
-  f1_1( real_type _y ) const
+  real_type f1_1( real_type _y ) const
   {
     return ( _y * ( 26.39 - 0.5 * _y ) - 32.942 ) / ( sqrt( 1 - _y ) * power2( _y - 18.2 ) );
   }
 
-  real_type
-  f2( real_type _y ) const
-  {
-    return _y * _y * pow( 1 - _y, -1.5 );
-  }
+  real_type f2( real_type _y ) const { return _y * _y * pow( 1 - _y, -1.5 ); }
 
-  real_type
-  f2_1( real_type _y ) const
-  {
-    return 0.5 * _y * ( 4 - _y ) * pow( 1 - _y, -2.5 );
-  }
+  real_type f2_1( real_type _y ) const { return 0.5 * _y * ( 4 - _y ) * pow( 1 - _y, -2.5 ); }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     eval( x );
     f( 0 ) = k * f1( y ) - kkp * f2( y );
     f( 1 ) = T * ( 1.84 * y + 77.3 ) - 43260 * y - 105128;  // nell'articolo originale trovo 150128!
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -121,8 +105,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -130,8 +113,7 @@ public:
     x0 << 1637.7032294649301990, 0.53337289955233521695;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 8 );
     auto & x0{ x_vec[0] };
@@ -163,8 +145,7 @@ public:
     x7 << 1650.0, 0.0;
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     real_type _T = x( 0 );
     real_type _y = x( 1 );
@@ -195,8 +176,7 @@ public:
       k2 );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     L[0] = 0;
     U[0] = 20000;
@@ -219,8 +199,7 @@ class ChemicalReactorSteadyState : public NonlinearSystem
 {
   mutable real_type y, T, arg, k;
 
-  bool
-  eval( Vector const & x ) const
+  bool eval( Vector const & x ) const
   {
     y   = x( 0 );
     T   = x( 1 );
@@ -234,8 +213,7 @@ class ChemicalReactorSteadyState : public NonlinearSystem
 public:
   ChemicalReactorSteadyState() : NonlinearSystem( "Chemical Reactor Steady State", SHACHAM_BIBTEX, 2 ) {}
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     if ( eval( x ) )
     {
@@ -248,8 +226,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -262,8 +239,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -271,8 +247,7 @@ public:
     x0 << 0.96386805127953300008, 346.16369814644557483739;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 9 );
     auto & x0{ x_vec[0] };
@@ -306,8 +281,7 @@ public:
     x8 << 0.906948356846E+00, 0.308103350833E+03;
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     real_type _y = x( 0 );
     real_type _T = x( 1 );
@@ -316,8 +290,7 @@ public:
     UTILS_ASSERT( _T >= 298.0, "bad point2" );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U[0] = real_max;
     L[0] = 0;
@@ -344,8 +317,7 @@ public:
   {
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = 0.5 * x( 0 ) + x( 1 ) + 0.5 * x( 2 ) - x( 5 ) / x( 6 );
     f( 1 ) = x( 2 ) + x( 3 ) + 2 * x( 4 ) - 2 / x( 6 );
@@ -357,8 +329,7 @@ public:
     f( 6 ) = x( 0 ) * x( 2 ) - 2.6058 * x( 1 ) * x( 3 );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -406,8 +377,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 5 );
     auto & x0{ x_vec[0] };
@@ -433,16 +403,14 @@ public:
     x4 << 1.5, 0.001, 1.33, 1.e-3, 1.e-4, 0.8, 3.0;
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     UTILS_ASSERT( x( 0 ) > 0, "check_if_admissible: x(0) = {}", x( 0 ) );
     for ( integer i = 0; i < n; ++i )
       UTILS_ASSERT( std::abs( x( i ) ) < 20, "check_if_admissible: x[{}] = {} out of [-20,20]", i, x( i ) );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( 20 );
     L.fill( -20 );
@@ -450,8 +418,7 @@ public:
   }
 };
 
-static inline string
-ini_msg_CutlipsSteadyStateForReactionRateEquations( int k_set )
+static inline string ini_msg_CutlipsSteadyStateForReactionRateEquations( int k_set )
 {
   return fmt::format( "Cutlips steady state for reaction rate equations, k set N.{}", k_set );
 }
@@ -520,8 +487,7 @@ public:
     }
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     f( 0 ) = 1 - x( 0 ) - p_k1 * x( 0 ) * x( 5 ) + p_kr1 * x( 3 );
     f( 1 ) = 1 - x( 1 ) - p_k2 * x( 1 ) * x( 5 ) + p_kr2 * x( 4 );
@@ -531,8 +497,7 @@ public:
     f( 5 ) = 1 - x( 3 ) - x( 4 ) - x( 5 );
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -566,8 +531,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 7 );
     auto & x0{ x_vec[0] };
@@ -594,8 +558,7 @@ public:
   }
 };
 
-static inline string
-ini_msg_Hiebert3ChemicalEquilibriumProblem( real_type R )
+static inline string ini_msg_Hiebert3ChemicalEquilibriumProblem( real_type R )
 {
   return fmt::format( "Hiebert's 3rd Chemical Equilibrium Problem, R={}", R );
 }
@@ -629,15 +592,13 @@ public:
   {
   }
 
-  bool
-  check_x( Vector const & x ) const
+  bool check_x( Vector const & x ) const
   {
     if ( x( 0 ) > 0 && x( 1 ) > 0 && x( 2 ) > 0 && x( 3 ) >= 0 ) return true;
     return false;
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     if ( check_x( x ) )
     {
@@ -660,8 +621,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -787,8 +747,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 4 );
     auto & x0{ x_vec[0] };
@@ -805,8 +764,7 @@ public:
     x3 << 2, 1, 20, 1, 0, 0, 0, 0, 0, 0;
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     // for (  i = 0; i < n; ++i )
     //   UTILS_ASSERT( std::abs(x(i)) < 1000, "Bad range" );
@@ -818,8 +776,7 @@ public:
     UTILS_ASSERT( s >= 0, "Bad range" );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     for ( integer i = 0; i < n; ++i )
     {
@@ -856,14 +813,9 @@ public:
   {
   }
 
-  bool
-  check_x( real_type x ) const
-  {
-    return x >= 0 && x < 0.8;
-  }
+  bool check_x( real_type x ) const { return x >= 0 && x < 0.8; }
 
-  virtual void
-  evaluate( Vector const & x_in, Vector & f ) const override
+  virtual void evaluate( Vector const & x_in, Vector & f ) const override
   {
     real_type x = x_in[0];
     if ( check_x( x ) )
@@ -872,8 +824,7 @@ public:
       f( 0 ) = nan( "FractionalConversionInAchemicalReactor" );
   }
 
-  virtual void
-  jacobian( Vector const & x_in, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x_in, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -885,8 +836,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -894,8 +844,7 @@ public:
     x0 << 0.7573962462537538794596412979291452934280;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 8 );
     for ( integer i{ 0 }; i < 8; ++i )
@@ -905,14 +854,12 @@ public:
     }
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     UTILS_ASSERT( x( 0 ) >= 0 && x( 0 ) < 0.8, "x(0) = {} must be in [0,0.8)", x( 0 ) );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U[0] = 0.8;
     L[0] = 0;
@@ -927,8 +874,7 @@ public:
   {
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type x1 = x( 0 );
     real_type x2 = x( 1 );
@@ -942,8 +888,7 @@ public:
     }
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -967,8 +912,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -977,8 +921,7 @@ public:
       0.02130187687312306027017935103542735328602;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 8 );
     for ( integer ini{ 0 }; ini < 8; ++ini )
@@ -992,8 +935,7 @@ public:
     }
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     real_type x2 = x( 1 );
     real_type x3 = x( 2 );
@@ -1001,8 +943,7 @@ public:
     UTILS_ASSERT( x3 > 0, "FractionalConversionInAchemicalReactor2, x3 = {} must be > 0", x3 );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( real_max );
     L.fill( -real_max );
@@ -1034,8 +975,7 @@ public:
   {
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type x1 = x( 0 );
     real_type x2 = x( 1 );
@@ -1053,8 +993,7 @@ public:
     f( 6 )       = x1 * x3 - 2.6058 * x2 * x4;
   }
 
-  virtual void
-  jacobian( const Vector & x, SparseMatrix & J ) const override
+  virtual void jacobian( const Vector & x, SparseMatrix & J ) const override
   {
     // Estrazione variabili
     const real_type x1 = x( 0 );
@@ -1121,8 +1060,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1131,8 +1069,7 @@ public:
       0.37168509528154416956e-2, 0.57671539593554916672, 2.9778634507911453048;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1140,14 +1077,9 @@ public:
     x0 << 0.208, 0.042, 0.048, 0.452, 0.250, 0.340, 2;
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
-  {
-    UTILS_ASSERT( x( 6 ) > 0, "Bad range" );
-  }
+  virtual void check_if_admissible( Vector const & x ) const override { UTILS_ASSERT( x( 6 ) > 0, "Bad range" ); }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( real_max );
     L.fill( -real_max );
@@ -1167,8 +1099,7 @@ public:
   {
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type x1 = x( 0 );
     real_type x2 = x( 1 );
@@ -1190,8 +1121,7 @@ public:
     f( 8 )       = x9 - x6 / x7;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -1253,8 +1183,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1270,8 +1199,7 @@ public:
     x0( 8 ) = x0( 5 ) / x0( 6 );
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1281,14 +1209,9 @@ public:
     x0( 8 ) = x0( 5 ) / x0( 6 );
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
-  {
-    UTILS_ASSERT( x( 6 ) > 0, "Bad range" );
-  }
+  virtual void check_if_admissible( Vector const & x ) const override { UTILS_ASSERT( x( 6 ) > 0, "Bad range" ); }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( real_max );
     L.fill( -real_max );
@@ -1328,8 +1251,7 @@ public:
     CBO = 50 / vo;
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     real_type T   = x( 0 );
     real_type SRH = x( 1 );
@@ -1369,8 +1291,7 @@ public:
     f( 14 ) = SRH - 40000 * k1B * CA * CB - 20000 * k2C * CC * CB * CB + 5000 * k3E * CD;
   }
 
-  virtual void
-  jacobian( Vector const & x, SparseMatrix & J ) const override
+  virtual void jacobian( Vector const & x, SparseMatrix & J ) const override
   {
     real_type T = x( 0 );
     // real_type SRH = x(1);
@@ -1456,8 +1377,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1495,8 +1415,7 @@ public:
     k3E = 1098.3958631006667095;
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1535,8 +1454,7 @@ public:
     k3E = 422.9115;
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     real_type T = x( 0 );
     // real_type SRH = x(1);
@@ -1560,8 +1478,7 @@ public:
     // ASSERT( rB < 0, "T non positive" );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     U.fill( real_max );
     L.fill( -real_max );
@@ -1580,8 +1497,7 @@ public:
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-static inline string
-ini_msg_ModelEquationsForCombustionOfPropane( real_type R_set )
+static inline string ini_msg_ModelEquationsForCombustionOfPropane( real_type R_set )
 {
   return fmt::format( "Model equations for combustion of propane, R={}", R_set );
 }
@@ -1634,8 +1550,7 @@ public:
   {
   }
 
-  virtual void
-  evaluate( Vector const & x, Vector & f ) const override
+  virtual void evaluate( Vector const & x, Vector & f ) const override
   {
     // Check for non-negative concentrations
     if ( x.minCoeff() < 0 )
@@ -1674,8 +1589,7 @@ public:
     f( 9 ) = K10 * n1 * n1 - n4 * n4 * n10 * ( p / nT );
   }
 
-  virtual void
-  jacobian( const Vector & x, SparseMatrix & J ) const override
+  virtual void jacobian( const Vector & x, SparseMatrix & J ) const override
   {
     J.resize( n, n );
     J.setZero();
@@ -1887,8 +1801,7 @@ public:
     J.makeCompressed();
   }
 
-  virtual void
-  initial_points( vector<Vector> & x_vec ) const override
+  virtual void initial_points( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 4 );
 
@@ -1916,8 +1829,7 @@ public:
     x_vec[3].setConstant( 0.1 );  // All small values
   }
 
-  virtual void
-  exact_solution( vector<Vector> & x_vec ) const override
+  virtual void exact_solution( vector<Vector> & x_vec ) const override
   {
     x_vec.resize( 1 );
     auto & x0{ x_vec[0] };
@@ -1944,8 +1856,7 @@ public:
     }
   }
 
-  virtual void
-  check_if_admissible( Vector const & x ) const override
+  virtual void check_if_admissible( Vector const & x ) const override
   {
     // All concentrations must be non-negative
     for ( int i = 0; i < n; ++i )
@@ -1957,8 +1868,7 @@ public:
     UTILS_ASSERT( x.sum() > 0, "Total moles must be positive" );
   }
 
-  virtual void
-  bounding_box( Vector & L, Vector & U ) const override
+  virtual void bounding_box( Vector & L, Vector & U ) const override
   {
     L.resize( n );
     U.resize( n );

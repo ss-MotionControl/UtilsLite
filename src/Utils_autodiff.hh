@@ -39,45 +39,39 @@
 
 namespace fmt
 {
-  template <>
-  struct formatter<autodiff::dual1st> : ostream_formatter
+  template <> struct formatter<autodiff::dual1st> : ostream_formatter
   {
   };
-  template <>
-  struct formatter<autodiff::dual2nd> : ostream_formatter
+  template <> struct formatter<autodiff::dual2nd> : ostream_formatter
   {
   };
-  template <>
-  struct formatter<autodiff::dual3rd> : ostream_formatter
+  template <> struct formatter<autodiff::dual3rd> : ostream_formatter
   {
   };
-  template <>
-  struct formatter<autodiff::dual4th> : ostream_formatter
+  template <> struct formatter<autodiff::dual4th> : ostream_formatter
   {
   };
 }  // namespace fmt
 
 #include <type_traits>
 
-#define UTILS_AUTODIFF_ADD_UNARY_FUNCTION( FUN )                             \
-  struct FUN##Op                                                             \
-  {                                                                          \
-  };                                                                         \
-  template <typename R, Requires<isExpr<R>> = true>                          \
-  AUTODIFF_DEVICE_FUNC constexpr auto FUN( R && r ) -> UnaryExpr<FUN##Op, R> \
-  {                                                                          \
-    return { r };                                                            \
-  }                                                                          \
-  template <typename T, typename G>                                          \
-  AUTODIFF_DEVICE_FUNC constexpr void apply( Dual<T, G> & self, FUN##Op )
+#define UTILS_AUTODIFF_ADD_UNARY_FUNCTION( FUN )                                                      \
+  struct FUN##Op                                                                                      \
+  {                                                                                                   \
+  };                                                                                                  \
+  template <typename R, Requires<isExpr<R>> = true> AUTODIFF_DEVICE_FUNC constexpr auto FUN( R && r ) \
+    -> UnaryExpr<FUN##Op, R>                                                                          \
+  {                                                                                                   \
+    return { r };                                                                                     \
+  }                                                                                                   \
+  template <typename T, typename G> AUTODIFF_DEVICE_FUNC constexpr void apply( Dual<T, G> & self, FUN##Op )
 
 namespace autodiff::detail
 {
 
   using std::erfc;
 
-  template <size_t A, size_t... Rest>
-  struct MaxN
+  template <size_t A, size_t... Rest> struct MaxN
   {
     static constexpr size_t value = []()
     {
@@ -93,21 +87,17 @@ namespace autodiff::detail
   template <typename T>
   using GetDual_t = HigherOrderDual<NumberTraits<T>::Order, typename NumberTraits<T>::NumericType>;
 
-  template <typename T>
-  constexpr auto
-  to_dual( T const & x )
+  template <typename T> constexpr auto to_dual( T const & x )
   {
     return GetDual_t<T>( x );
   }
 
   // Caso base: nessun tipo (valore 0 per default)
-  template <typename... Ts>
-  struct DualOrder
+  template <typename... Ts> struct DualOrder
   {
     static constexpr size_t value = 0;
   };
-  template <typename T, typename... Ts>
-  struct DualOrder<T, Ts...>
+  template <typename T, typename... Ts> struct DualOrder<T, Ts...>
   {
     static constexpr size_t value = []()
     {
@@ -136,21 +126,29 @@ namespace autodiff::detail
   struct CbrtOp
   {
   };  // CUBIC ROOT OPERATOR
-  template <typename R>
-  using CbrtExpr = UnaryExpr<CbrtOp, R>;
-  template <typename R, Requires<isExpr<R>> = true>
-  AUTODIFF_DEVICE_FUNC constexpr auto
-  cbrt( R && r ) -> CbrtExpr<R>
+  template <typename R> using CbrtExpr = UnaryExpr<CbrtOp, R>;
+  template <typename R, Requires<isExpr<R>> = true> AUTODIFF_DEVICE_FUNC constexpr auto cbrt( R && r ) -> CbrtExpr<R>
   {
     return { r };
   }
 
-  template <typename T, typename G>
-  AUTODIFF_DEVICE_FUNC constexpr void
-  apply( Dual<T, G> & self, CbrtOp )
+  template <typename T, typename G> AUTODIFF_DEVICE_FUNC constexpr void apply( Dual<T, G> & self, CbrtOp )
   {
-    self.val = cbrt( self.val );
-    self.grad *= 1 / ( 3 * self.val * self.val );
+    if ( self.val > 0 )
+    {
+      self.val = cbrt( self.val );
+      self.grad *= 1 / ( 3 * self.val * self.val );
+    }
+    else if ( self.val < 0 )
+    {
+      self.val = -cbrt( -self.val );
+      self.grad *= 1 / ( 3 * self.val * self.val );
+    }
+    else
+    {
+      self.val  = 0;
+      self.grad = Utils::Inf<NumericType<T>>();
+    }
   }
 
   /*
@@ -165,18 +163,13 @@ namespace autodiff::detail
   struct ErfcOp
   {
   };  // ERROR FUNCTION OPERATOR
-  template <typename R>
-  using ErfcExpr = UnaryExpr<ErfcOp, R>;
-  template <typename R, Requires<isExpr<R>> = true>
-  AUTODIFF_DEVICE_FUNC constexpr auto
-  erfc( R && r ) -> ErfcExpr<R>
+  template <typename R> using ErfcExpr = UnaryExpr<ErfcOp, R>;
+  template <typename R, Requires<isExpr<R>> = true> AUTODIFF_DEVICE_FUNC constexpr auto erfc( R && r ) -> ErfcExpr<R>
   {
     return { r };
   }
 
-  template <typename T, typename G>
-  AUTODIFF_DEVICE_FUNC constexpr void
-  apply( Dual<T, G> & self, ErfcOp )
+  template <typename T, typename G> AUTODIFF_DEVICE_FUNC constexpr void apply( Dual<T, G> & self, ErfcOp )
   {
     constexpr NumericType<T> sqrt_pi = 1.7724538509055160272981674833411451872554456638435;
     const T                  aux     = self.val;
@@ -193,9 +186,7 @@ namespace autodiff::detail
   //
   */
 
-  template <size_t N, typename T>
-  AUTODIFF_DEVICE_FUNC constexpr auto
-  round( Real<N, T> const & x )
+  template <size_t N, typename T> AUTODIFF_DEVICE_FUNC constexpr auto round( Real<N, T> const & x )
   {
     Real<N, T> res;
     res[0] = std::round( x[0] );
@@ -215,8 +206,7 @@ namespace autodiff::detail
 
   // overload per tipi floating-point (double, float, ...)
   template <typename T>
-  constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type
-  round( T const & x )
+  constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type round( T const & x )
   {
     return round( Real<0, T>{ x } )[0];
   }
@@ -230,9 +220,7 @@ namespace autodiff::detail
   //
   */
 
-  template <size_t N, typename T>
-  AUTODIFF_DEVICE_FUNC constexpr auto
-  floor( Real<N, T> const & x )
+  template <size_t N, typename T> AUTODIFF_DEVICE_FUNC constexpr auto floor( Real<N, T> const & x )
   {
     Real<N, T> res;
     res[0] = std::floor( x[0] );
@@ -251,8 +239,7 @@ namespace autodiff::detail
 
   // overload per tipi floating-point (double, float, ...)
   template <typename T>
-  constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type
-  floor( T const & x )
+  constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type floor( T const & x )
   {
     return floor( Real<0, T>{ x } )[0];
   }
@@ -266,9 +253,7 @@ namespace autodiff::detail
   //
   */
 
-  template <size_t N, typename T>
-  AUTODIFF_DEVICE_FUNC constexpr auto
-  ceil( Real<N, T> const & x )
+  template <size_t N, typename T> AUTODIFF_DEVICE_FUNC constexpr auto ceil( Real<N, T> const & x )
   {
     Real<N, T> res;
     res[0] = std::ceil( x[0] );
@@ -287,9 +272,7 @@ namespace autodiff::detail
   }
 
   // overload per tipi floating-point (double, float, ...)
-  template <typename T>
-  constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type
-  ceil( T const & x )
+  template <typename T> constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type ceil( T const & x )
   {
     return ceil( Real<0, T>{ x } )[0];
   }
@@ -303,9 +286,7 @@ namespace autodiff::detail
   //           |___/  |_|
   */
 
-  template <size_t N, typename T>
-  AUTODIFF_DEVICE_FUNC constexpr auto
-  log1p( Real<N, T> const & x )
+  template <size_t N, typename T> AUTODIFF_DEVICE_FUNC constexpr auto log1p( Real<N, T> const & x )
   {
     assert( x[0] != 1 && "autodiff::log(1+x) has undefined value and derivatives when x = -1" );
     Real<N, T> log1px;
@@ -335,8 +316,7 @@ namespace autodiff::detail
 
   // overload per tipi floating-point (double, float, ...)
   template <typename T>
-  constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type
-  log1p( T const & x )
+  constexpr typename std::enable_if<std::is_floating_point<T>::value, T>::type log1p( T const & x )
   {
     return log1p( Real<0, T>{ x } )[0];
   }
@@ -352,8 +332,8 @@ namespace autodiff::detail
   UTILS_AUTODIFF_ADD_UNARY_FUNCTION( atanh )
   {
     using std::atanh;
+    self.grad *= One<T>() / ( One<T>() - self.val * self.val );
     self.val = atanh( self.val );
-    self.grad *= One<T>() / ( 1 - self.val * self.val );
   }
 
   /*
@@ -367,8 +347,8 @@ namespace autodiff::detail
   UTILS_AUTODIFF_ADD_UNARY_FUNCTION( asinh )
   {
     using std::asinh;
+    self.grad *= One<T>() / sqrt( One<T>() + self.val * self.val );
     self.val = asinh( self.val );
-    self.grad *= One<T>() / ( 1 + self.val * self.val );
   }
 
   /*
@@ -382,8 +362,8 @@ namespace autodiff::detail
   UTILS_AUTODIFF_ADD_UNARY_FUNCTION( acosh )
   {
     using std::acosh;
+    self.grad *= One<T>() / sqrt( self.val * self.val - One<T>() );
     self.val = asinh( self.val );
-    self.grad *= One<T>() / sqrt( self.val * self.val - 1 );
   }
 
   /*
@@ -395,98 +375,70 @@ namespace autodiff::detail
   //  |_|
   */
 
-  template <typename T>
-  inline auto
-  power2( T const & a )
+  template <typename T> inline auto power2( T const & a )
   {
     return a * a;
   }
-  template <typename T>
-  inline auto
-  power3( T const & a )
+  template <typename T> inline auto power3( T const & a )
   {
     return a * a * a;
   }
-  template <typename T>
-  inline auto
-  power4( T const & a )
+  template <typename T> inline auto power4( T const & a )
   {
     auto a2{ a * a };
     return a2 * a2;
   }
-  template <typename T>
-  inline auto
-  power5( T const & a )
+  template <typename T> inline auto power5( T const & a )
   {
     auto a2{ a * a };
     return a2 * a2 * a;
   }
-  template <typename T>
-  inline auto
-  power6( T const & a )
+  template <typename T> inline auto power6( T const & a )
   {
     auto a2{ a * a };
     return a2 * a2 * a2;
   }
-  template <typename T>
-  inline auto
-  power7( T const & a )
+  template <typename T> inline auto power7( T const & a )
   {
     auto a2{ a * a };
     return a2 * a2 * a2 * a;
   }
-  template <typename T>
-  inline auto
-  power8( T const & a )
+  template <typename T> inline auto power8( T const & a )
   {
     auto a2{ a * a };
     auto a4{ a2 * a2 };
     return a4 * a4;
   }
 
-  template <typename T>
-  inline auto
-  rpower2( T const & a )
+  template <typename T> inline auto rpower2( T const & a )
   {
     return 1 / ( a * a );
   }
-  template <typename T>
-  inline auto
-  rpower3( T const & a )
+  template <typename T> inline auto rpower3( T const & a )
   {
     return 1 / ( a * a * a );
   }
-  template <typename T>
-  inline auto
-  rpower4( T const & a )
+  template <typename T> inline auto rpower4( T const & a )
   {
     auto a2{ a * a };
     return 1 / ( a2 * a2 );
   }
-  template <typename T>
-  inline auto
-  rpower5( T const & a )
+  template <typename T> inline auto rpower5( T const & a )
   {
     auto a2{ a * a };
     return 1 / ( a2 * a2 * a );
   }
-  template <typename T>
-  inline auto
-  rpower6( T const & a )
+  template <typename T> inline auto rpower6( T const & a )
   {
     auto a2{ a * a };
     return 1 / ( a2 * a2 * a2 );
   }
-  template <typename T>
-  inline auto
-  rpower7( T const & a )
+  template <typename T> inline auto rpower7( T const & a )
   {
     auto a2{ a * a };
     return 1 / ( a2 * a2 * a2 * a );
   }
-  template <typename T>
-  inline auto
-  rpower8( T const & a )
+  template <typename T> inline auto rpower8( T const & a )
   {
     auto a2{ a * a };
     auto a4{ a2 * a2 };
