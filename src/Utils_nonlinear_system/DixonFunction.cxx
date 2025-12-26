@@ -16,19 +16,20 @@ class DixonFunction : public NonlinearSystem
 {
 public:
   DixonFunction( integer neq )
-    : NonlinearSystem( "Dixon Function",
-                       "@Article{Dixon1988,\n"
-                       "  author  = {Dixon, L. C. W. and Price, R. C.},\n"
-                       "  title   = {Numerical experience with the truncated Newton\n"
-                       "             method for unconstrained optimization},\n"
-                       "  journal = {Journal of Optimization Theory and Applications},\n"
-                       "  year    = {1988},\n"
-                       "  volume  = {56},\n"
-                       "  number  = {2},\n"
-                       "  pages   = {245--255},\n"
-                       "  doi     = {10.1007/BF00939410}\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Dixon Function",
+        "@Article{Dixon1988,\n"
+        "  author  = {Dixon, L. C. W. and Price, R. C.},\n"
+        "  title   = {Numerical experience with the truncated Newton\n"
+        "             method for unconstrained optimization},\n"
+        "  journal = {Journal of Optimization Theory and Applications},\n"
+        "  year    = {1988},\n"
+        "  volume  = {56},\n"
+        "  number  = {2},\n"
+        "  pages   = {245--255},\n"
+        "  doi     = {10.1007/BF00939410}\n"
+        "}\n",
+        neq )
   {
     check_min_equations( n, 2 );
   }

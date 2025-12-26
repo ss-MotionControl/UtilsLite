@@ -528,8 +528,10 @@ namespace Utils
       m_next_id    = 1;
 
       // 1. Sort points using L1-norm based strict-weak ordering
-      std::sort( pts.begin(), pts.end(),
-                 []( auto const & a, auto const & b ) { return compare_points( a.first, b.first ); } );
+      std::sort(
+        pts.begin(),
+        pts.end(),
+        []( auto const & a, auto const & b ) { return compare_points( a.first, b.first ); } );
 
       std::vector<Entry> front;
       for ( auto const & pr : pts )

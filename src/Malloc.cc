@@ -106,8 +106,8 @@ namespace Utils
     }
     catch ( exception const & exc )
     {
-      string const reason = fmt::format( "Memory allocation failed: {}\nTry to allocate {} bytes for {}\n", exc.what(),
-                                         n, m_name );
+      string const reason =
+        fmt::format( "Memory allocation failed: {}\nTry to allocate {} bytes for {}\n", exc.what(), n, m_name );
       print_trace( __LINE__, __FILE__, reason, cerr );
       exit( 0 );
     }
@@ -127,10 +127,12 @@ namespace Utils
   void
   Malloc<T>::allocate( size_t n )
   {
-    UTILS_ASSERT( m_num_allocated == 0,
-                  "Malloc[{}]::allocate( {} ), try to allocate already "
-                  "allocated memory!\n",
-                  m_name, n );
+    UTILS_ASSERT(
+      m_num_allocated == 0,
+      "Malloc[{}]::allocate( {} ), try to allocate already "
+      "allocated memory!\n",
+      m_name,
+      n );
     if ( n > m_num_total_reserved ) allocate_internal( n );
     m_num_total_values = n;
   }
@@ -152,8 +154,11 @@ namespace Utils
   T *
   Malloc<T>::malloc( size_t n )
   {
-    UTILS_ASSERT( m_num_allocated == 0, "Malloc[{}]::malloc( {} ), try to allocate already allocated memory!\n", m_name,
-                  n );
+    UTILS_ASSERT(
+      m_num_allocated == 0,
+      "Malloc[{}]::malloc( {} ), try to allocate already allocated memory!\n",
+      m_name,
+      n );
     if ( n > m_num_total_reserved ) allocate_internal( n );
     m_num_total_values = n;
     m_num_allocated    = n;
@@ -228,14 +233,20 @@ namespace Utils
   {
     if ( m_num_allocated < m_num_total_values )
     {
-      string const tmp = fmt::format( "in {} {}: not fully used!\nUnused: {} values\n", m_name, where,
-                                      m_num_total_values - m_num_allocated );
+      string const tmp = fmt::format(
+        "in {} {}: not fully used!\nUnused: {} values\n",
+        m_name,
+        where,
+        m_num_total_values - m_num_allocated );
       print_trace( __LINE__, __FILE__, tmp, cerr );
     }
     if ( m_num_allocated > m_num_total_values )
     {
-      string const tmp = fmt::format( "in {} {}: too much used!\nMore used: {} values\n", m_name, where,
-                                      m_num_allocated - m_num_total_values );
+      string const tmp = fmt::format(
+        "in {} {}: too much used!\nMore used: {} values\n",
+        m_name,
+        where,
+        m_num_allocated - m_num_total_values );
       print_trace( __LINE__, __FILE__, tmp, cerr );
     }
   }
@@ -249,11 +260,15 @@ namespace Utils
     std::size_t diff = m_num_allocated > m_num_total_values ? m_num_allocated - m_num_total_values
                                                             : m_num_total_values - m_num_allocated;
     return fmt::format(
-        "in {} {}\n"
-        "Allocated:  {}\n"
-        "Reserved:   {}\n"
-        "Difference: {} [|A-R|]\n",
-        m_name, where, m_num_allocated, m_num_total_values, diff );
+      "in {} {}\n"
+      "Allocated:  {}\n"
+      "Reserved:   {}\n"
+      "Difference: {} [|A-R|]\n",
+      m_name,
+      where,
+      m_num_allocated,
+      m_num_total_values,
+      diff );
   }
 
   template class Malloc<char>;

@@ -16,16 +16,17 @@ class GregoryAndKarney : public NonlinearSystem
 {
 public:
   GregoryAndKarney( integer n )
-    : NonlinearSystem( "Gregory and Karney Tridiagonal Matrix Function",
-                       "@book{brent2013,\n"
-                       "  author    = {Brent, R.P.},\n"
-                       "  title     = {Algorithms for Minimization Without Derivatives},\n"
-                       "  isbn      = {9780486143682},\n"
-                       "  series    = {Dover Books on Mathematics},\n"
-                       "  year      = {2013},\n"
-                       "  publisher = {Dover Publications}\n"
-                       "}\n",
-                       n )
+    : NonlinearSystem(
+        "Gregory and Karney Tridiagonal Matrix Function",
+        "@book{brent2013,\n"
+        "  author    = {Brent, R.P.},\n"
+        "  title     = {Algorithms for Minimization Without Derivatives},\n"
+        "  isbn      = {9780486143682},\n"
+        "  series    = {Dover Books on Mathematics},\n"
+        "  year      = {2013},\n"
+        "  publisher = {Dover Publications}\n"
+        "}\n",
+        n )
   {
   }
 

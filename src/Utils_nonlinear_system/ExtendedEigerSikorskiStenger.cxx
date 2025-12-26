@@ -16,29 +16,30 @@ class ExtendedEigerSikorskiStenger : public NonlinearSystem
 {
 public:
   ExtendedEigerSikorskiStenger()
-    : NonlinearSystem( "Extended Eiger-Sikorski-Stenger Function",
-                       "@article{Eiger:1984,\n"
-                       "  author  = {Eiger, A. and Sikorski, K. and Stenger, F.},\n"
-                       "  title   = {A Bisection Method for Systems of Nonlinear "
-                       "Equations},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1984},\n"
-                       "  volume  = {10},\n"
-                       "  number  = {4},\n"
-                       "  pages   = {367--377},\n"
-                       "  doi     = {10.1145/2701.2705},\n"
-                       "}\n\n"
-                       "@article{Kearfott:1987,\n"
-                       "  author  = {Kearfott, R. Baker},\n"
-                       "  title   = {Some Tests of Generalized Bisection},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1987},\n"
-                       "  volume  = {13},\n"
-                       "  number  = {3},\n"
-                       "  pages   = {197--220},\n"
-                       "  doi     = {10.1145/29380.29862},\n"
-                       "}\n",
-                       9 )
+    : NonlinearSystem(
+        "Extended Eiger-Sikorski-Stenger Function",
+        "@article{Eiger:1984,\n"
+        "  author  = {Eiger, A. and Sikorski, K. and Stenger, F.},\n"
+        "  title   = {A Bisection Method for Systems of Nonlinear "
+        "Equations},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1984},\n"
+        "  volume  = {10},\n"
+        "  number  = {4},\n"
+        "  pages   = {367--377},\n"
+        "  doi     = {10.1145/2701.2705},\n"
+        "}\n\n"
+        "@article{Kearfott:1987,\n"
+        "  author  = {Kearfott, R. Baker},\n"
+        "  title   = {Some Tests of Generalized Bisection},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1987},\n"
+        "  volume  = {13},\n"
+        "  number  = {3},\n"
+        "  pages   = {197--220},\n"
+        "  doi     = {10.1145/29380.29862},\n"
+        "}\n",
+        9 )
   {
   }
 

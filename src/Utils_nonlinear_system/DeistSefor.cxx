@@ -19,19 +19,20 @@ class DeistSefor : public NonlinearSystem
 public:
   // sum log(xi-2)^2+log(xi-10)^2 - prod( xi) ^(1/5)
   DeistSefor()
-    : NonlinearSystem( "DeistSefor function",
-                       "@Article{Martinez1980,\n"
-                       "  author  = {Mart{\\'i}nez, Jos{\\'e} Mario},\n"
-                       "  title   = {Solving nonlinear simultaneous equations with\n"
-                       "             a generalization of Brent's method},\n"
-                       "  journal = {BIT Numerical Mathematics},\n"
-                       "  year    = {1980},\n"
-                       "  volume  = {20},\n"
-                       "  number  = {4},\n"
-                       "  pages   = {501--510},\n"
-                       "  doi     = {10.1007/BF01933643}\n"
-                       "}\n",
-                       6 )
+    : NonlinearSystem(
+        "DeistSefor function",
+        "@Article{Martinez1980,\n"
+        "  author  = {Mart{\\'i}nez, Jos{\\'e} Mario},\n"
+        "  title   = {Solving nonlinear simultaneous equations with\n"
+        "             a generalization of Brent's method},\n"
+        "  journal = {BIT Numerical Mathematics},\n"
+        "  year    = {1980},\n"
+        "  volume  = {20},\n"
+        "  number  = {4},\n"
+        "  pages   = {501--510},\n"
+        "  doi     = {10.1007/BF01933643}\n"
+        "}\n",
+        6 )
   {
     beta[0] = 0.02249;
     beta[1] = 0.02166;

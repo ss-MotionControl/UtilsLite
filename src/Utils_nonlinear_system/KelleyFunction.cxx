@@ -16,16 +16,17 @@ class KelleyFunction : public NonlinearSystem
 {
 public:
   KelleyFunction()
-    : NonlinearSystem( "Kelley Function",
-                       "@book{Dennis:1996,\n"
-                       "  author    = {Dennis, J. and Schnabel, R.},\n"
-                       "  title     = {Numerical Methods for Unconstrained\n"
-                       "               Optimization and Nonlinear Equations},\n"
-                       "  publisher = {Society for Industrial and Applied Mathematics},\n"
-                       "  year      = {1996},\n"
-                       "  doi       = {10.1137/1.9781611971200},\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Kelley Function",
+        "@book{Dennis:1996,\n"
+        "  author    = {Dennis, J. and Schnabel, R.},\n"
+        "  title     = {Numerical Methods for Unconstrained\n"
+        "               Optimization and Nonlinear Equations},\n"
+        "  publisher = {Society for Industrial and Applied Mathematics},\n"
+        "  year      = {1996},\n"
+        "  doi       = {10.1137/1.9781611971200},\n"
+        "}\n",
+        2 )
   {
   }
 

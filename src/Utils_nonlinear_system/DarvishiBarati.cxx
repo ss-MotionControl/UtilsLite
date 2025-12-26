@@ -16,19 +16,20 @@ class DarvishiBarati : public NonlinearSystem
 {
 public:
   DarvishiBarati()
-    : NonlinearSystem( "DarvishiBarati",
-                       "@article{Darvishi:2007,\n"
-                       "  author  = {Darvishi, M.T. and Barati, A.},\n"
-                       "  title   = {Super cubic iterative methods to solve systems\n"
-                       "             of nonlinear equations},\n"
-                       "  journal = {Applied Mathematics and Computation},\n"
-                       "  volume  = {188},\n"
-                       "  number  = {2},\n"
-                       "  pages   = {1678--1685},\n"
-                       "  year    = {2007},\n"
-                       "  doi     = {10.1016/j.amc.2006.11.022}\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "DarvishiBarati",
+        "@article{Darvishi:2007,\n"
+        "  author  = {Darvishi, M.T. and Barati, A.},\n"
+        "  title   = {Super cubic iterative methods to solve systems\n"
+        "             of nonlinear equations},\n"
+        "  journal = {Applied Mathematics and Computation},\n"
+        "  volume  = {188},\n"
+        "  number  = {2},\n"
+        "  pages   = {1678--1685},\n"
+        "  year    = {2007},\n"
+        "  doi     = {10.1016/j.amc.2006.11.022}\n"
+        "}\n",
+        2 )
   {
   }
 

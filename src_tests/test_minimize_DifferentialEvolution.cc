@@ -143,8 +143,11 @@ print_summary_table( const vector<DETestResult> & results )
 
   // Intestazione della tabella
   fmt::print( "\n\n" );
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold, "{:━^{}}\n", " DIFFERENTIAL EVOLUTION TEST RESULTS ",
-              total_width );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "{:━^{}}\n",
+    " DIFFERENTIAL EVOLUTION TEST RESULTS ",
+    total_width );
 
   // Linea divisoria
   fmt::print( fg( fmt::color::cyan ), "┏{}┓\n", fmt::format( "{:━^{}}", "", total_width - 2 ) );
@@ -293,15 +296,21 @@ print_statistics( const vector<DETestResult> & results )
   // Converged Tests
   fmt::print( fg( fmt::color::cyan ), "┃ " );
   fmt::print( "{:<{}}", "Converged Tests:", stat_col_label );
-  fmt::print( fg( fmt::color::green ), "{:>{}}",
-              fmt::format( "{} ({:.1f}%)", stats.converged_tests, stats.success_rate ), stat_col_value );
+  fmt::print(
+    fg( fmt::color::green ),
+    "{:>{}}",
+    fmt::format( "{} ({:.1f}%)", stats.converged_tests, stats.success_rate ),
+    stat_col_value );
   fmt::print( fg( fmt::color::cyan ), " ┃\n" );
 
   // Failed Tests
   fmt::print( fg( fmt::color::cyan ), "┃ " );
   fmt::print( "{:<{}}", "Failed Tests:", stat_col_label );
-  fmt::print( fg( fmt::color::red ), "{:>{}}",
-              fmt::format( "{} ({:.1f}%)", stats.failed_tests, 100.0 - stats.success_rate ), stat_col_value );
+  fmt::print(
+    fg( fmt::color::red ),
+    "{:>{}}",
+    fmt::format( "{} ({:.1f}%)", stats.failed_tests, 100.0 - stats.success_rate ),
+    stat_col_value );
   fmt::print( fg( fmt::color::cyan ), " ┃\n" );
 
   // Linea divisoria
@@ -415,14 +424,14 @@ print_usage( const char * prog_name )
   fmt::print( "  --help                 Show this help and exit\n" );
   fmt::print( "  --verbose              Enable verbose output\n" );
   fmt::print(
-      "  --max-iter=N           Set maximum number of DE iterations "
-      "(integer)\n" );
+    "  --max-iter=N           Set maximum number of DE iterations "
+    "(integer)\n" );
   fmt::print(
-      "  --tolerance=VAL        Set stopping tolerance (floating, e.g. "
-      "1e-8)\n" );
+    "  --tolerance=VAL        Set stopping tolerance (floating, e.g. "
+    "1e-8)\n" );
   fmt::print(
-      "  --pop-size=N           Set population size (integer, default: "
-      "10*Dim)\n" );
+    "  --pop-size=N           Set population size (integer, default: "
+    "10*Dim)\n" );
   fmt::print( "  --strategy=N           Set DE strategy (1-7, default: 1=RAND_1)\n" );
   fmt::print( "  --weight=F             Set differential weight F (default: 0.8)\n" );
   fmt::print( "  --cr=CR                Set crossover rate (default: 0.9)\n" );
@@ -439,15 +448,13 @@ main( int argc, char * argv[] )
 
   // Banner
   fmt::print( "\n" );
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold,
-              "\n"
-              "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-              "━━━━━━━━━━━┓\n"
-              "┃ DIFFERENTIAL EVOLUTION - NONLINEAR SYSTEM TEST SUITE          "
-              "          ┃\n"
-              "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-              "━━━━━━━━━━━┛\n"
-              "\n" );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "\n"
+    "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
+    "┃ DIFFERENTIAL EVOLUTION - NONLINEAR SYSTEM TEST SUITE                     ┃\n"
+    "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
+    "\n" );
 
   // Default parameters
   real_type tolerance             = 1e-6;
@@ -744,26 +751,31 @@ main( int argc, char * argv[] )
   if ( !all_results.empty() )
   {
     // Trova il test con il miglior fitness
-    auto best_it = min_element( all_results.begin(), all_results.end(),
-                                []( const DETestResult & a, const DETestResult & b )
-                                { return a.best_fitness < b.best_fitness; } );
+    auto best_it = min_element(
+      all_results.begin(),
+      all_results.end(),
+      []( const DETestResult & a, const DETestResult & b ) { return a.best_fitness < b.best_fitness; } );
 
     // Trova il test con il peggior fitness (tra quelli convergati)
-    auto worst_it = max_element( all_results.begin(), all_results.end(),
-                                 []( const DETestResult & a, const DETestResult & b )
-                                 {
-                                   return a.converged ? a.best_fitness : -1e100 < b.converged ? b.best_fitness : -1e100;
-                                 } );
+    auto worst_it = max_element(
+      all_results.begin(),
+      all_results.end(),
+      []( const DETestResult & a, const DETestResult & b )
+      { return a.converged            ? a.best_fitness
+               : -1e100 < b.converged ? b.best_fitness
+                                      : -1e100; } );
 
     // Trova il test più veloce
-    auto fastest_it = min_element( all_results.begin(), all_results.end(),
-                                   []( const DETestResult & a, const DETestResult & b )
-                                   { return a.elapsed_time_ms < b.elapsed_time_ms; } );
+    auto fastest_it = min_element(
+      all_results.begin(),
+      all_results.end(),
+      []( const DETestResult & a, const DETestResult & b ) { return a.elapsed_time_ms < b.elapsed_time_ms; } );
 
     // Trova il test più lento
-    auto slowest_it = max_element( all_results.begin(), all_results.end(),
-                                   []( const DETestResult & a, const DETestResult & b )
-                                   { return a.elapsed_time_ms < b.elapsed_time_ms; } );
+    auto slowest_it = max_element(
+      all_results.begin(),
+      all_results.end(),
+      []( const DETestResult & a, const DETestResult & b ) { return a.elapsed_time_ms < b.elapsed_time_ms; } );
 
     fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold, "\n{:━^{}}\n", " PERFORMANCE HIGHLIGHTS ", 70 );
 

@@ -139,7 +139,6 @@ testVV()
   fmt::print( "All done!\n" );
 }
 
-
 template <int N>
 void
 testMM()
@@ -240,7 +239,6 @@ testMM()
 
   fmt::print( "All done!\n" );
 }
-
 
 template <int N>
 void
@@ -345,7 +343,6 @@ testMv()
 
   fmt::print( "All done!\n" );
 }
-
 
 template <int N>
 void
@@ -472,7 +469,6 @@ testCopy()
 
   fmt::print( "All done!\n" );
 }
-
 
 static void
 testVVall()

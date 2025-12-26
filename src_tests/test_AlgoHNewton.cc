@@ -320,10 +320,15 @@ do_solve( real_type const a, real_type const b, Utils::AlgoHNewton_base_fun<real
   ++ntest;
   nfuneval += solver.num_fun_eval();
   fmt::print(
-      "#{:<3} iter = {:<3} #nfun = {:<3} #nfun_D = {:<3} converged={} x = "
-      "{:12} f(x) = {}\n",
-      ntest, solver.used_iter(), solver.num_fun_eval(), solver.num_fun_D_eval(), solver.converged(),
-      fmt::format( "{:.6}", res ), fmt::format( "{:.3}", fres ) );
+    "#{:<3} iter = {:<3} #nfun = {:<3} #nfun_D = {:<3} converged={} x = "
+    "{:12} f(x) = {}\n",
+    ntest,
+    solver.used_iter(),
+    solver.num_fun_eval(),
+    solver.num_fun_D_eval(),
+    solver.converged(),
+    fmt::format( "{:.6}", res ),
+    fmt::format( "{:.3}", fres ) );
 }
 
 int

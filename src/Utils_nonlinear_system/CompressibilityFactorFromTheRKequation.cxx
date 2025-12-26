@@ -18,18 +18,19 @@ class CompressibilityFactorFromTheRKequation : public NonlinearSystem
 
 public:
   CompressibilityFactorFromTheRKequation()
-    : NonlinearSystem( "Compressibility factor from the RK equation",
-                       "@book{Cutlip:2007,\n"
-                       "  author    = {Cutlip, Michael and Shacham, Mordechai},\n"
-                       "  title     = {Problem Solving in Chemical and Biochemical "
-                       "Engineering\n"
-                       "               with Polymath,\\texttrademark Excel,\n"
-                       "               and Matlab\\textregistered, Second Edition},\n"
-                       "  year      = {2007},\n"
-                       "  isbn      = {9780131482043},\n"
-                       "  publisher = {Prentice Hall Press},\n"
-                       "}\n",
-                       1 )
+    : NonlinearSystem(
+        "Compressibility factor from the RK equation",
+        "@book{Cutlip:2007,\n"
+        "  author    = {Cutlip, Michael and Shacham, Mordechai},\n"
+        "  title     = {Problem Solving in Chemical and Biochemical "
+        "Engineering\n"
+        "               with Polymath,\\texttrademark Excel,\n"
+        "               and Matlab\\textregistered, Second Edition},\n"
+        "  year      = {2007},\n"
+        "  isbn      = {9780131482043},\n"
+        "  publisher = {Prentice Hall Press},\n"
+        "}\n",
+        1 )
   {
     real_type P    = 200;
     real_type Pc   = 33.5;

@@ -21,7 +21,6 @@
 // file: Utils_AABBtree.hh
 //
 
-
 #pragma once
 
 #ifndef UTILS_AABB_TREE_dot_HH
@@ -233,7 +232,6 @@ namespace Utils
     //!
     void intersect_with_one_bbox( Real const bbox[], AABB_SET & bb_index ) const;
 
-
     //!
     //! \brief Intersects the tree with another AABB tree.
     //!
@@ -257,7 +255,6 @@ namespace Utils
     //! \param bb_index Set to store indices of intersecting bounding boxes.
     //!
     void intersect_with_one_bbox_and_refine( Real const bbox[], AABB_SET & bb_index ) const;
-
 
     //!
     //! \brief Intersects the tree with another AABB tree and refines the

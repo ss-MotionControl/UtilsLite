@@ -12,17 +12,17 @@
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-#define SoniaKrzyworzcka1_BIBTEX                                                                                       \
-  "@article{Krzyworzcka:1996,\n"                                                                                       \
-  "  author  = {Sonia Krzyworzcka},\n"                                                                                 \
-  "  title   = {Extension of the Lanczos and {CGS}\n"                                                                  \
-  "             methods to systems of nonlinear equations},\n"                                                         \
-  "  journal = {Journal of Computational and Applied Mathematics},\n"                                                  \
-  "  volume  = {69},\n"                                                                                                \
-  "  number  = {1},\n"                                                                                                 \
-  "  pages   = {181--190},\n"                                                                                          \
-  "  year    = {1996},\n"                                                                                              \
-  "  doi     = {10.1016/0377-0427(95)00032-1}\n"                                                                       \
+#define SoniaKrzyworzcka1_BIBTEX                                      \
+  "@article{Krzyworzcka:1996,\n"                                      \
+  "  author  = {Sonia Krzyworzcka},\n"                                \
+  "  title   = {Extension of the Lanczos and {CGS}\n"                 \
+  "             methods to systems of nonlinear equations},\n"        \
+  "  journal = {Journal of Computational and Applied Mathematics},\n" \
+  "  volume  = {69},\n"                                               \
+  "  number  = {1},\n"                                                \
+  "  pages   = {181--190},\n"                                         \
+  "  year    = {1996},\n"                                             \
+  "  doi     = {10.1016/0377-0427(95)00032-1}\n"                      \
   "}\n"
 
 class SoniaKrzyworzcka1 : public NonlinearSystem

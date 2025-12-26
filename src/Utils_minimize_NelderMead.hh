@@ -68,17 +68,6 @@ namespace Utils
     template <typename Scalar>
     using Callback = std::function<Scalar( Vector<Scalar> const & )>;
 
-    // Color definitions for consistent styling
-    namespace PrintColors
-    {
-      constexpr auto HEADER    = fmt::fg( fmt::color::light_blue );
-      constexpr auto SUCCESS   = fmt::fg( fmt::color::green );
-      constexpr auto WARNING   = fmt::fg( fmt::color::yellow );
-      constexpr auto ERROR     = fmt::fg( fmt::color::red );
-      constexpr auto INFO      = fmt::fg( fmt::color::cyan );
-      constexpr auto ITERATION = fmt::fg( fmt::color::white );
-    }  // namespace PrintColors
-
     enum class Status
     {
       RUNNING,
@@ -322,7 +311,7 @@ namespace Utils
     Scalar m_best_value{ std::numeric_limits<Scalar>::max() };  ///< Best value found
 
     Scalar m_current_rho, m_current_chi, m_current_gamma,
-        m_current_sigma;  ///< Current adaptive parameters
+      m_current_sigma;  ///< Current adaptive parameters
 
     string m_indent{ "" };
 
@@ -334,9 +323,8 @@ namespace Utils
     };
 
     ConvergenceFlags
-    compute_convergence_flags( Scalar                  best_value,
-                               [[maybe_unused]] Scalar worst_value,
-                               const SimplexStats &    stats ) const
+    compute_convergence_flags( Scalar best_value, [[maybe_unused]] Scalar worst_value, const SimplexStats & stats )
+      const
     {
       ConvergenceFlags flags;
 
@@ -370,16 +358,23 @@ namespace Utils
 
       if ( show_summary )
       {
-        fmt::print( NelderMead::PrintColors::ITERATION,
-                    "{}┌─ Inner Iteration {:5d} "
-                    "────────────────────────────────────────────────────────────┐\n"
-                    "{}│ Best F:{:<12.6e} Diameter:{:<12.6e} Std Dev:{:<12.6e} "
-                    "Volume:{:<12.6e} │\n"
-                    "{}"
-                    "└─────────────────────────────────────────────────────────────────"
-                    "───────────────────┘\n",
-                    m_indent, iter_count, m_indent, best_value, stats.diameter, stats.std_dev, compute_volume(),
-                    m_indent );
+        fmt::print(
+          PrintColors::ITERATION,
+          "{}┌─ Inner Iteration {:5d} "
+          "────────────────────────────────────────────────────────────┐\n"
+          "{}│ Best F:{:<12.6e} Diameter:{:<12.6e} Std Dev:{:<12.6e} "
+          "Volume:{:<12.6e} │\n"
+          "{}"
+          "└─────────────────────────────────────────────────────────────────"
+          "───────────────────┘\n",
+          m_indent,
+          iter_count,
+          m_indent,
+          best_value,
+          stats.diameter,
+          stats.std_dev,
+          compute_volume(),
+          m_indent );
       }
     }
 
@@ -393,9 +388,15 @@ namespace Utils
 
       if ( !show_detailed ) return;
 
-      auto color = NelderMead::PrintColors::ITERATION;
-      fmt::print( color, "{}[{:4d}] F = {:<12.6e} | Diam = {:<12.6e} | Vol = {:<12.6e}\n", m_indent, iter, best_value,
-                  diameter, compute_volume() );
+      auto color = PrintColors::ITERATION;
+      fmt::print(
+        color,
+        "{}[{:4d}] F = {:<12.6e} | Diam = {:<12.6e} | Vol = {:<12.6e}\n",
+        m_indent,
+        iter,
+        best_value,
+        diameter,
+        compute_volume() );
     }
 
     void
@@ -403,7 +404,7 @@ namespace Utils
     {
       if ( m_options.verbosity_level < 3 ) return;
 
-      auto   color = improved ? NelderMead::PrintColors::SUCCESS : NelderMead::PrintColors::WARNING;
+      auto   color = improved ? PrintColors::SUCCESS : PrintColors::WARNING;
       string icon  = improved ? "✓" : "✗";
 
       string coords = m_dim <= 5 ? fmt::format( " | x = {}", NelderMead::format_vector<Scalar>( m_trial_point ) ) : "";
@@ -425,21 +426,28 @@ namespace Utils
       if ( show_output )
       {
         // Scegli il colore in base allo stato di convergenza
-        auto color = ( flags.value_converged && flags.geometry_converged ) ? NelderMead::PrintColors::SUCCESS
+        auto color = ( flags.value_converged && flags.geometry_converged ) ? PrintColors::SUCCESS
                      : ( flags.value_converged || flags.geometry_converged || flags.variance_converged )
-                         ? NelderMead::PrintColors::WARNING
-                         : NelderMead::PrintColors::INFO;
+                       ? PrintColors::WARNING
+                       : PrintColors::INFO;
 
         // Crea simboli più descrittivi
         string value_symbol = flags.value_converged ? "✓V" : "✗V";
         string geom_symbol  = flags.geometry_converged ? "✓G" : "✗G";
         string var_symbol   = flags.variance_converged ? "✓S" : "✗S";
 
-        fmt::print( color,
-                    "{}[Conv{:4d}] {} {} {} | Range={:<10.3e} Diam={:<10.3e} "
-                    "StdDev={:<10.3e}",
-                    m_indent, m_global_iterations, value_symbol, geom_symbol, var_symbol, stats.value_range,
-                    stats.diameter, stats.std_dev );
+        fmt::print(
+          color,
+          "{}[Conv{:4d}] {} {} {} | Range={:<10.3e} Diam={:<10.3e} "
+          "StdDev={:<10.3e}",
+          m_indent,
+          m_global_iterations,
+          value_symbol,
+          geom_symbol,
+          var_symbol,
+          stats.value_range,
+          stats.diameter,
+          stats.std_dev );
 
         // Aggiungi informazioni aggiuntive per verbosità alta
         if ( m_options.verbosity_level >= 3 )
@@ -451,29 +459,32 @@ namespace Utils
 
         // Stampa un warning se siamo vicini alla convergenza ma non
         // completamente
-        if ( ( flags.value_converged || flags.geometry_converged ) &&
-             !( flags.value_converged && flags.geometry_converged ) )
+        if (
+          ( flags.value_converged || flags.geometry_converged ) &&
+          !( flags.value_converged && flags.geometry_converged ) )
         {
           if ( flags.value_converged && !flags.geometry_converged )
           {
-            fmt::print( NelderMead::PrintColors::WARNING,
-                        "{}       ⚠ Convergenza valori raggiunta, ma geometria "
-                        "simplex ancora ampia\n",
-                        m_indent );
+            fmt::print(
+              PrintColors::WARNING,
+              "{}       ⚠ Convergenza valori raggiunta, ma geometria "
+              "simplex ancora ampia\n",
+              m_indent );
           }
           else if ( !flags.value_converged && flags.geometry_converged )
           {
-            fmt::print( NelderMead::PrintColors::WARNING,
-                        "{}       ⚠ Geometria simplex convergente, ma valori "
-                        "funzione ancora dispersi\n",
-                        m_indent );
+            fmt::print(
+              PrintColors::WARNING,
+              "{}       ⚠ Geometria simplex convergente, ma valori "
+              "funzione ancora dispersi\n",
+              m_indent );
           }
         }
 
         // Stampa messaggio di successo se completamente convergente
         if ( flags.value_converged && flags.geometry_converged )
         {
-          fmt::print( NelderMead::PrintColors::SUCCESS, "{}       🎯 CONVERGENZA RAGGIUNTA!\n", m_indent );
+          fmt::print( PrintColors::SUCCESS, "{}       🎯 CONVERGENZA RAGGIUNTA!\n", m_indent );
         }
       }
     }
@@ -579,8 +590,10 @@ namespace Utils
       {
         m_sorted_indices.resize( m_dim + 1 );
         std::iota( m_sorted_indices.begin(), m_sorted_indices.end(), 0 );
-        std::sort( m_sorted_indices.begin(), m_sorted_indices.end(),
-                   [this]( size_t i, size_t j ) { return m_values[i] < m_values[j]; } );
+        std::sort(
+          m_sorted_indices.begin(),
+          m_sorted_indices.end(),
+          [this]( size_t i, size_t j ) { return m_values[i] < m_values[j]; } );
         m_simplex_ordered = true;
       }
       return m_sorted_indices;
@@ -699,9 +712,9 @@ namespace Utils
         if ( m_options.verbose )
         {
           fmt::print(
-              "{}[Warning] Initial simplex has zero volume, adding "
-              "perturbation\n",
-              m_indent );
+            "{}[Warning] Initial simplex has zero volume, adding "
+            "perturbation\n",
+            m_indent );
         }
         // EIGEN3: Use Vector::Random() for efficient random vector generation
         // This is optimized and may use vectorized random number generation
@@ -887,10 +900,15 @@ namespace Utils
       if ( m_options.verbose && ( converged || m_global_iterations % m_options.progress_frequency == 0 ) )
       {
         fmt::print(
-            "{}[Conv Check] V:{} G:{} S:{} | Range={:<12.4e} Diam={:<12.4e} "
-            "StdDev={:<12.4e}\n",
-            m_indent, ( value_converged ? "✓" : "✗" ), ( geometry_converged ? "✓" : "✗" ),
-            ( variance_converged ? "✓" : "✗" ), stats.value_range, stats.diameter, stats.std_dev );
+          "{}[Conv Check] V:{} G:{} S:{} | Range={:<12.4e} Diam={:<12.4e} "
+          "StdDev={:<12.4e}\n",
+          m_indent,
+          ( value_converged ? "✓" : "✗" ),
+          ( geometry_converged ? "✓" : "✗" ),
+          ( variance_converged ? "✓" : "✗" ),
+          stats.value_range,
+          stats.diameter,
+          stats.std_dev );
       }
       return converged;
     }
@@ -954,15 +972,17 @@ namespace Utils
       Scalar scale               = 1.0 + m_best_point.norm();
       Scalar normalized_diameter = current_result.simplex_diameter / scale;
 
-      if ( normalized_diameter < m_options.simplex_tolerance * m_options.restart_simplex_diameter_factor1 &&
-           relative_improvement < m_options.restart_simplex_geometry_threshold )
+      if (
+        normalized_diameter < m_options.simplex_tolerance * m_options.restart_simplex_diameter_factor1 &&
+        relative_improvement < m_options.restart_simplex_geometry_threshold )
       {
         return true;
       }
 
       // 4. Restart for too many shrink operations without progress
-      if ( m_shrink_count > m_options.restart_shrink_count_threshold &&
-           relative_improvement < m_options.restart_after_shrink_improvement )
+      if (
+        m_shrink_count > m_options.restart_shrink_count_threshold &&
+        relative_improvement < m_options.restart_after_shrink_improvement )
       {
         return true;
       }
@@ -971,8 +991,9 @@ namespace Utils
       if ( m_dim > 10 )
       {
         Scalar expected_progress = 1.0 / std::sqrt( 1.0 + current_result.iterations );
-        if ( relative_improvement < expected_progress * m_options.restart_expected_progress_ratio &&
-             current_result.iterations > 200 )
+        if (
+          relative_improvement < expected_progress * m_options.restart_expected_progress_ratio &&
+          current_result.iterations > 200 )
         {
           return true;
         }
@@ -988,9 +1009,10 @@ namespace Utils
       // 7. Restart if simplex is degenerate but not converged
       auto   stats              = compute_simplex_stats();
       Scalar normalized_std_dev = stats.std_dev / ( 1.0 + abs( m_best_value ) );
-      if ( normalized_diameter < m_options.simplex_tolerance * m_options.restart_simplex_diameter_factor2 &&
-           normalized_std_dev < m_options.tolerance * m_options.restart_std_dev_factor &&
-           relative_improvement < m_options.restart_degenerate_improvement_threshold )
+      if (
+        normalized_diameter < m_options.simplex_tolerance * m_options.restart_simplex_diameter_factor2 &&
+        normalized_std_dev < m_options.tolerance * m_options.restart_std_dev_factor &&
+        relative_improvement < m_options.restart_degenerate_improvement_threshold )
       {
         return true;
       }
@@ -1191,12 +1213,17 @@ namespace Utils
     print_iteration_header( size_t iter, Scalar best_value, Scalar diameter ) const
     {
       if ( !m_options.verbose ) return;
-      fmt::print( NelderMead::PrintColors::INFO,
-                  "{}┌─────────────────────────┬───────────────┬───────────────┐\n"
-                  "{}│ {:^23} │ {:^13} │ {:^13} │\n"
-                  "{}└─────────────────────────┴───────────────┴───────────────┘\n",
-                  m_indent, m_indent, fmt::format( "Iteration {}", iter ), fmt::format( "F = {:.4e}", best_value ),
-                  fmt::format( "Diam = {:.4e}", diameter ), m_indent );
+      fmt::print(
+        PrintColors::INFO,
+        "{}┌─────────────────────────┬───────────────┬───────────────┐\n"
+        "{}│ {:^23} │ {:^13} │ {:^13} │\n"
+        "{}└─────────────────────────┴───────────────┴───────────────┘\n",
+        m_indent,
+        m_indent,
+        fmt::format( "Iteration {}", iter ),
+        fmt::format( "F = {:.4e}", best_value ),
+        fmt::format( "Diam = {:.4e}", diameter ),
+        m_indent );
     }
 
     void
@@ -1204,13 +1231,20 @@ namespace Utils
     {
       if ( !m_options.verbose ) return;
 
-      auto   color = improved ? NelderMead::PrintColors::SUCCESS : NelderMead::PrintColors::ERROR;
+      auto   color = improved ? PrintColors::SUCCESS : PrintColors::ERROR;
       string icon  = improved ? "↗" : "↘";
 
       // Stampare le coordinate solo per problemi piccoli
       string tmp = m_dim > 5 ? "" : fmt::format( " | x = {}", NelderMead::format_vector<Scalar>( m_trial_point ) );
-      fmt::print( color, "{}{:4} {} {:>12}: F = {:<12.6e}{}\n", m_indent, m_global_iterations, icon, step_name, fval,
-                  tmp );
+      fmt::print(
+        color,
+        "{}{:4} {} {:>12}: F = {:<12.6e}{}\n",
+        m_indent,
+        m_global_iterations,
+        icon,
+        step_name,
+        fval,
+        tmp );
     }
 
     /**
@@ -1247,8 +1281,11 @@ namespace Utils
       // MODIFICA: Usare verbosity_level invece di verbose
       if ( m_options.verbosity_level >= 1 )
       {
-        fmt::print( "{}[NM-Run]  Start | Dim={:<10} | F_0={:<12.6e}\n", m_indent, m_dim,
-                    result.initial_function_value );
+        fmt::print(
+          "{}[NM-Run]  Start | Dim={:<10} | F_0={:<12.6e}\n",
+          m_indent,
+          m_dim,
+          result.initial_function_value );
       }
 
       size_t local_iter = 0;
@@ -1302,8 +1339,12 @@ namespace Utils
         if ( m_options.verbose && ( m_global_iterations % m_options.progress_frequency ) == 0 )
         {
           indices = get_sorted_indices();
-          fmt::print( "{}[NM-Iter] {:>5} | F={:<12.6e} | Diam={:<12.6e}\n", m_indent, m_global_iterations,
-                      m_values[indices[0]], result.simplex_diameter );
+          fmt::print(
+            "{}[NM-Iter] {:>5} | F={:<12.6e} | Diam={:<12.6e}\n",
+            m_indent,
+            m_global_iterations,
+            m_values[indices[0]],
+            result.simplex_diameter );
         }
       }
 
@@ -1333,29 +1374,38 @@ namespace Utils
     print_header( Vector const & x0 ) const
     {
       if ( !m_options.verbose ) return;
-      fmt::print( NelderMead::PrintColors::HEADER,
-                  "{}"
-                  "╔════════════════════════════════════════════════════════════════╗\n"
-                  "{}║                    Nelder-Mead Optimization                    "
-                  "║\n"
-                  "{}"
-                  "╠════════════════════════════════════════════════════════════════╣\n"
-                  "{}║ {:62} ║\n"
-                  "{}║ {:62} ║\n"
-                  "{}║ {:62} ║\n"
-                  "{}║ {:62} ║\n"
-                  "{}║ {:62} ║\n"
-                  "{}║ {:62} ║\n"
-                  "{}"
-                  "╚════════════════════════════════════════════════════════════════╝"
-                  "\n",
-                  m_indent, m_indent, m_indent, m_indent, fmt::format( "Dimension: {:d}", x0.size() ), m_indent,
-                  fmt::format( "Max Iterations: {:d}", m_options.max_iterations ), m_indent,
-                  fmt::format( "Max Evaluations: {:d}", m_options.max_function_evaluations ), m_indent,
-                  fmt::format( "Tolerance: {:.2e}", m_options.tolerance ), m_indent,
-                  fmt::format( "Bounds: {}", ( m_use_bounds ? "Active" : "None" ) ), m_indent,
-                  fmt::format( "Adaptive Parameters: {}", ( m_options.adaptive_parameters ? "Yes" : "No" ) ),
-                  m_indent );
+      fmt::print(
+        PrintColors::HEADER,
+        "{}"
+        "╔════════════════════════════════════════════════════════════════╗\n"
+        "{}║                    Nelder-Mead Optimization                    ║\n"
+        "{}"
+        "╠════════════════════════════════════════════════════════════════╣\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}"
+        "╚════════════════════════════════════════════════════════════════╝"
+        "\n",
+        m_indent,
+        m_indent,
+        m_indent,
+        m_indent,
+        fmt::format( "Dimension: {:d}", x0.size() ),
+        m_indent,
+        fmt::format( "Max Iterations: {:d}", m_options.max_iterations ),
+        m_indent,
+        fmt::format( "Max Evaluations: {:d}", m_options.max_function_evaluations ),
+        m_indent,
+        fmt::format( "Tolerance: {:.2e}", m_options.tolerance ),
+        m_indent,
+        fmt::format( "Bounds: {}", ( m_use_bounds ? "Active" : "None" ) ),
+        m_indent,
+        fmt::format( "Adaptive Parameters: {}", ( m_options.adaptive_parameters ? "Yes" : "No" ) ),
+        m_indent );
       fmt::print( "{}Initial point: {}\n", m_indent, NelderMead::format_vector<Scalar>( x0 ) );
     }
 
@@ -1368,25 +1418,40 @@ namespace Utils
     {
       if ( !m_options.verbose ) return;
       fmt::print(
-          "{}"
-          "╔════════════════════════════════════════════════════════════════╗\n"
-          "{}║                    Optimization Finished                       "
-          "║\n"
-          "{}"
-          "╠════════════════════════════════════════════════════════════════╣\n"
-          "{}║  Final Status       : {:<39}  ║\n"
-          "{}║  Final Value        : {:<39.6e}  ║\n"
-          "{}║  Total Iterations   : {:<39}  ║\n"
-          "{}║  Total Evals        : {:<39}  ║\n"
-          "{}║  Restarts           : {:<39}  ║\n"
-          "{}║  Shrink Operations  : {:<39}  ║\n"
-          "{}║  Simplex Diameter   : {:<39.6e}  ║\n"
-          "{}"
-          "╚════════════════════════════════════════════════════════════════╝\n"
-          "\n",
-          m_indent, m_indent, m_indent, m_indent, status_to_string( res.status ), m_indent, res.final_function_value,
-          m_indent, res.iterations, m_indent, res.function_evaluations, m_indent, res.restarts_performed, m_indent,
-          res.shrink_operations, m_indent, res.simplex_diameter, m_indent );
+        "{}"
+        "╔════════════════════════════════════════════════════════════════╗\n"
+        "{}║                    Optimization Finished                       "
+        "║\n"
+        "{}"
+        "╠════════════════════════════════════════════════════════════════╣\n"
+        "{}║  Final Status       : {:<39}  ║\n"
+        "{}║  Final Value        : {:<39.6e}  ║\n"
+        "{}║  Total Iterations   : {:<39}  ║\n"
+        "{}║  Total Evals        : {:<39}  ║\n"
+        "{}║  Restarts           : {:<39}  ║\n"
+        "{}║  Shrink Operations  : {:<39}  ║\n"
+        "{}║  Simplex Diameter   : {:<39.6e}  ║\n"
+        "{}"
+        "╚════════════════════════════════════════════════════════════════╝\n"
+        "\n",
+        m_indent,
+        m_indent,
+        m_indent,
+        m_indent,
+        status_to_string( res.status ),
+        m_indent,
+        res.final_function_value,
+        m_indent,
+        res.iterations,
+        m_indent,
+        res.function_evaluations,
+        m_indent,
+        res.restarts_performed,
+        m_indent,
+        res.shrink_operations,
+        m_indent,
+        res.simplex_diameter,
+        m_indent );
     }
 
   public:
@@ -1474,9 +1539,13 @@ namespace Utils
 
         if ( m_options.verbose )
         {
-          fmt::print( "{}[NM-Restart] #{}/{} | Reason: {:<16} | F={:12.6e}\n", m_indent, ( restarts + 1 ),
-                      m_options.max_restarts, status_to_string( best_result.status ),
-                      best_result.final_function_value );
+          fmt::print(
+            "{}[NM-Restart] #{}/{} | Reason: {:<16} | F={:12.6e}\n",
+            m_indent,
+            ( restarts + 1 ),
+            m_options.max_restarts,
+            status_to_string( best_result.status ),
+            best_result.final_function_value );
         }
 
         Scalar perturbation_scale = m_options.restart_perturbation_ratio * ( 1.0 + restarts * 0.1 );
@@ -1579,8 +1648,9 @@ namespace Utils
       // Final best point update - correct comparison for minimization
       if ( m_options.track_best_point )
       {
-        if ( std::isnan( best_result.final_function_value ) ||
-             ( !std::isnan( m_best_value ) && m_best_value < best_result.final_function_value ) )
+        if (
+          std::isnan( best_result.final_function_value ) ||
+          ( !std::isnan( m_best_value ) && m_best_value < best_result.final_function_value ) )
         {
           best_result.final_function_value = m_best_value;
           best_result.solution             = m_best_point;
@@ -1699,95 +1769,133 @@ namespace Utils
     }
 
     void
-    print_outer_iteration_header( size_t                 outer_iter,
-                                  size_t                 total_cycles,
-                                  const vector<size_t> & block_indices,
-                                  size_t                 block_size ) const
+    print_outer_iteration_header(
+      size_t                 outer_iter,
+      size_t                 total_cycles,
+      const vector<size_t> & block_indices,
+      size_t                 block_size ) const
     {
       if ( m_options.verbosity_level < 1 ) return;
 
-      fmt::print( NelderMead::PrintColors::HEADER,
-                  "\n"
-                  "{}"
-                  "╔════════════════════════════════════════════════════════════════╗\n"
-                  "{}║ Outer Iteration {:3d} - Block {:2d}/{:2d}                       "
-                  "       ║\n"
-                  "{}"
-                  "╠════════════════════════════════════════════════════════════════╣\n"
-                  "{}║ Block Indices: {:<47} ║\n"
-                  "{}║ Block Size:    {:<47} ║\n"
-                  "{}"
-                  "╚════════════════════════════════════════════════════════════════╝"
-                  "\n",
-                  m_indent, m_indent, outer_iter, ( outer_iter % total_cycles ) + 1, total_cycles, m_indent, m_indent,
-                  Utils::format_index_vector<size_t>( block_indices, 7 ), m_indent, block_size, m_indent );
+      fmt::print(
+        PrintColors::HEADER,
+        "\n"
+        "{}"
+        "╔════════════════════════════════════════════════════════════════╗\n"
+        "{}║ Outer Iteration {:3d} - Block {:2d}/{:2d}                              ║\n"
+        "{}"
+        "╠════════════════════════════════════════════════════════════════╣\n"
+        "{}║ Block Indices: {:<47} ║\n"
+        "{}║ Block Size:    {:<47} ║\n"
+        "{}"
+        "╚════════════════════════════════════════════════════════════════╝"
+        "\n",
+        m_indent,
+        m_indent,
+        outer_iter,
+        ( outer_iter % total_cycles ) + 1,
+        total_cycles,
+        m_indent,
+        m_indent,
+        Utils::format_index_vector<size_t>( block_indices, 7 ),
+        m_indent,
+        block_size,
+        m_indent );
     }
 
     void
-    print_outer_iteration_result( size_t outer_iter,
-                                  size_t block_size,
-                                  Scalar current_f,
-                                  size_t inner_iters,
-                                  size_t inner_evals,
-                                  Scalar improvement,
-                                  bool   improved ) const
+    print_outer_iteration_result(
+      size_t outer_iter,
+      size_t block_size,
+      Scalar current_f,
+      size_t inner_iters,
+      size_t inner_evals,
+      Scalar improvement,
+      bool   improved ) const
     {
       if ( m_options.verbosity_level < 1 ) return;
 
-      auto color = improved ? NelderMead::PrintColors::SUCCESS : NelderMead::PrintColors::WARNING;
+      auto color = improved ? PrintColors::SUCCESS : PrintColors::WARNING;
 
-      fmt::print( color,
-                  "{}"
-                  "┌──────────────┬───────────┬────────────────┬───────────────"
-                  "───┬──────────────────┐\n"
-                  "{}│ out iter:{:<3} │ block:{:<3} │ F:{:<12.6e} │ inner "
-                  "iter:{:<5} │ inner eval:{:<5} │\n"
-                  "{}"
-                  "└──────────────┴───────────┴────────────────┴───────────────"
-                  "───┴──────────────────┘\n",
-                  m_indent, m_indent, outer_iter, block_size, current_f, inner_iters, inner_evals, m_indent );
+      fmt::print(
+        color,
+        "{}"
+        "┌──────────────┬───────────┬────────────────┬───────────────"
+        "───┬──────────────────┐\n"
+        "{}│ out iter:{:<3} │ block:{:<3} │ F:{:<12.6e} │ inner "
+        "iter:{:<5} │ inner eval:{:<5} │\n"
+        "{}"
+        "└──────────────┴───────────┴────────────────┴───────────────"
+        "───┴──────────────────┘\n",
+        m_indent,
+        m_indent,
+        outer_iter,
+        block_size,
+        current_f,
+        inner_iters,
+        inner_evals,
+        m_indent );
 
       if ( improved )
       {
-        fmt::print( NelderMead::PrintColors::SUCCESS, "{}✓ Improvement: {:.6e} → {:.6e} (Δ = {:.6e})\n", m_indent,
-                    current_f + improvement, current_f, improvement );
+        fmt::print(
+          PrintColors::SUCCESS,
+          "{}✓ Improvement: {:.6e} → {:.6e} (Δ = {:.6e})\n",
+          m_indent,
+          current_f + improvement,
+          current_f,
+          improvement );
       }
       else
       {
-        fmt::print( NelderMead::PrintColors::WARNING, "{}⚠ No significant improvement (Δ = {:.6e})\n", m_indent,
-                    improvement );
+        fmt::print( PrintColors::WARNING, "{}⚠ No significant improvement (Δ = {:.6e})\n", m_indent, improvement );
       }
     }
 
     void
-    print_outer_statistics( size_t outer_iter,
-                            size_t total_outer_iters,
-                            size_t total_inner_iters,
-                            size_t total_evals,
-                            Scalar best_value,
-                            bool   converged ) const
+    print_outer_statistics(
+      size_t outer_iter,
+      size_t total_outer_iters,
+      size_t total_inner_iters,
+      size_t total_evals,
+      Scalar best_value,
+      bool   converged ) const
     {
       if ( m_options.verbosity_level < 1 ) return;
 
-      fmt::print( NelderMead::PrintColors::INFO,
-                  "\n"
-                  "{}"
-                  "╔═══════════════════════════════════════════════════════════════╗\n"
-                  "{}║                      Outer Iteration Summary                  "
-                  "║\n"
-                  "{}"
-                  "╠═══════════════════════════════════════════════════════════════╣\n"
-                  "{}║ Completed:        {:<43} ║\n"
-                  "{}║ Outer Iterations: {:<43} ║\n"
-                  "{}║ Inner Iterations: {:<43} ║\n"
-                  "{}║ Total Evals:      {:<43} ║\n"
-                  "{}║ Best Value:       {:<43.6e} ║\n"
-                  "{}║ Status:           {:<43} ║\n"
-                  "{}"
-                  "╚═══════════════════════════════════════════════════════════════╝\n",
-                  m_indent, m_indent, m_indent, m_indent, fmt::format( "{}/{}", outer_iter, total_outer_iters ),
-                  m_indent, outer_iter, m_indent, total_inner_iters, m_indent, total_evals, m_indent, best_value,
-                  m_indent, ( converged ? "CONVERGED" : "RUNNING" ), m_indent );
+      fmt::print(
+        PrintColors::INFO,
+        "\n"
+        "{}"
+        "╔═══════════════════════════════════════════════════════════════╗\n"
+        "{}║                      Outer Iteration Summary                  "
+        "║\n"
+        "{}"
+        "╠═══════════════════════════════════════════════════════════════╣\n"
+        "{}║ Completed:        {:<43} ║\n"
+        "{}║ Outer Iterations: {:<43} ║\n"
+        "{}║ Inner Iterations: {:<43} ║\n"
+        "{}║ Total Evals:      {:<43} ║\n"
+        "{}║ Best Value:       {:<43.6e} ║\n"
+        "{}║ Status:           {:<43} ║\n"
+        "{}"
+        "╚═══════════════════════════════════════════════════════════════╝\n",
+        m_indent,
+        m_indent,
+        m_indent,
+        m_indent,
+        fmt::format( "{}/{}", outer_iter, total_outer_iters ),
+        m_indent,
+        outer_iter,
+        m_indent,
+        total_inner_iters,
+        m_indent,
+        total_evals,
+        m_indent,
+        best_value,
+        m_indent,
+        ( converged ? "CONVERGED" : "RUNNING" ),
+        m_indent );
     }
 
   public:
@@ -1833,9 +1941,9 @@ namespace Utils
         // MODIFICA: Usare verbosity_level
         if ( m_options.verbosity_level >= 1 )
           fmt::print(
-              "{}[Info] Dim <= BlockSize. Switching to DIRECT CLASSIC "
-              "solver.\n",
-              m_indent );
+            "{}[Info] Dim <= BlockSize. Switching to DIRECT CLASSIC "
+            "solver.\n",
+            m_indent );
 
         auto full_opts                     = m_options.sub_options;
         full_opts.max_function_evaluations = m_options.max_function_evaluations;
@@ -1859,8 +1967,8 @@ namespace Utils
         res.inner_evaluations      = inner_res.inner_evaluations;
         res.total_evaluations      = 1 + inner_res.inner_evaluations;
         res.status                 = inner_res.status == NelderMead_classic<Scalar>::Status::CONVERGED
-                                         ? NelderMead::Status::CONVERGED
-                                         : NelderMead::Status::MAX_ITERATIONS;
+                                       ? NelderMead::Status::CONVERGED
+                                       : NelderMead::Status::MAX_ITERATIONS;
         return res;
       }
 
@@ -1948,8 +2056,14 @@ namespace Utils
         }
 
         // MODIFICA: Usare il nuovo metodo di stampa
-        print_outer_iteration_result( outer_iter, k, current_f, sub_res.inner_iterations, sub_res.inner_evaluations,
-                                      improvement, improved );
+        print_outer_iteration_result(
+          outer_iter,
+          k,
+          current_f,
+          sub_res.inner_iterations,
+          sub_res.inner_evaluations,
+          improvement,
+          improved );
 
         // Stagnation Check Logic
         if ( improvement > m_options.tolerance )
@@ -1964,8 +2078,13 @@ namespace Utils
         // MODIFICA: Stampare statistiche periodiche
         if ( m_options.verbosity_level >= 1 && ( outer_iter % 5 == 0 || converged ) )
         {
-          print_outer_statistics( outer_iter, m_options.max_outer_iterations, count_inner_iters,
-                                  count_outer_evals + count_inner_evals, current_f, converged );
+          print_outer_statistics(
+            outer_iter,
+            m_options.max_outer_iterations,
+            count_inner_iters,
+            count_outer_evals + count_inner_evals,
+            current_f,
+            converged );
         }
       }
 
@@ -1989,8 +2108,13 @@ namespace Utils
       // MODIFICA: Stampare statistiche finali
       if ( m_options.verbosity_level >= 1 )
       {
-        print_outer_statistics( outer_iter, m_options.max_outer_iterations, count_inner_iters,
-                                count_outer_evals + count_inner_evals, current_f, true );
+        print_outer_statistics(
+          outer_iter,
+          m_options.max_outer_iterations,
+          count_inner_iters,
+          count_outer_evals + count_inner_evals,
+          current_f,
+          true );
       }
 
       return res;

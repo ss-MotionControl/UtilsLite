@@ -21,29 +21,30 @@ class BroydenTridiagonalFunction : public NonlinearSystem
 
 public:
   BroydenTridiagonalFunction( real_type _alpha, real_type _beta, integer _neq )
-    : NonlinearSystem( "Broyden tridiagonal function",
-                       "@article{Broyden:1965,\n"
-                       "  author  = {Broyden, C. G.},\n"
-                       "  title   = {A class of methods for solving nonlinear "
-                       "simultaneous equations},\n"
-                       "  journal = {Mathematics of Computation},\n"
-                       "  volume  = {19},\n"
-                       "  year    = {1965},\n"
-                       "  pages   = {577--593},\n"
-                       "  doi     = {10.2307/2003941}\n"
-                       "}\n\n"
-                       "@article{More:1981,\n"
-                       "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
-                       "Hillstrom, Kenneth E.},\n"
-                       "  title   = {Testing Unconstrained Optimization Software},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1981},\n"
-                       "  volume  = {7},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {17--41},\n"
-                       "  doi     = {10.1145/355934.355936},\n"
-                       "}\n",
-                       _neq )
+    : NonlinearSystem(
+        "Broyden tridiagonal function",
+        "@article{Broyden:1965,\n"
+        "  author  = {Broyden, C. G.},\n"
+        "  title   = {A class of methods for solving nonlinear "
+        "simultaneous equations},\n"
+        "  journal = {Mathematics of Computation},\n"
+        "  volume  = {19},\n"
+        "  year    = {1965},\n"
+        "  pages   = {577--593},\n"
+        "  doi     = {10.2307/2003941}\n"
+        "}\n\n"
+        "@article{More:1981,\n"
+        "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
+        "Hillstrom, Kenneth E.},\n"
+        "  title   = {Testing Unconstrained Optimization Software},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1981},\n"
+        "  volume  = {7},\n"
+        "  number  = {1},\n"
+        "  pages   = {17--41},\n"
+        "  doi     = {10.1145/355934.355936},\n"
+        "}\n",
+        _neq )
     , alpha( _alpha )
     , beta( _beta )
   {

@@ -83,8 +83,8 @@ print_line_search_statistics()
   {
     Scalar success_rate   = ( stats.total_tests > 0 ) ? 100.0 * stats.successful_tests / stats.total_tests : 0.0;
     Scalar avg_iterations = ( stats.successful_tests > 0 )
-                                ? static_cast<Scalar>( stats.total_iterations ) / stats.successful_tests
-                                : 0.0;
+                              ? static_cast<Scalar>( stats.total_iterations ) / stats.successful_tests
+                              : 0.0;
     auto   color          = ( success_rate >= 80.0 )   ? fmt::fg( fmt::color::green )
                             : ( success_rate >= 60.0 ) ? fmt::fg( fmt::color::yellow )
                                                        : fmt::fg( fmt::color::red );
@@ -103,8 +103,14 @@ void
 print_summary_table()
 {
   fmt::print( "\n\n{:=^80}\n", " SUMMARY TEST RESULTS " );
-  fmt::print( "{:<28} {:<12} {:<8} {:<12} {:<15} {:<10}\n", "Problem", "Optimizer", "Dimension", "Iterations",
-              "final f(x)", "Status" );
+  fmt::print(
+    "{:<28} {:<12} {:<8} {:<12} {:<15} {:<10}\n",
+    "Problem",
+    "Optimizer",
+    "Dimension",
+    "Iterations",
+    "final f(x)",
+    "Status" );
   fmt::print( "{:-<80}\n", "" );
 
   for ( auto const & result : global_test_results )
@@ -113,8 +119,13 @@ print_summary_table()
     auto const & GREEN{ fmt::fg( fmt::color::green ) };
     auto const & RED{ fmt::fg( fmt::color::red ) };
 
-    fmt::print( "{:<28} {:<12} {:<8} {:<12} {:<15.6e}", result.problem_name, result.linesearch_name, result.dimension,
-                result.iteration_data.iterations, result.final_value );
+    fmt::print(
+      "{:<28} {:<12} {:<8} {:<12} {:<15.6e}",
+      result.problem_name,
+      result.linesearch_name,
+      result.dimension,
+      result.iteration_data.iterations,
+      result.final_value );
 
     if ( result.iteration_data.converged )
       fmt::print( GREEN, "{}\n", status_str );
@@ -160,13 +171,17 @@ test( Problem & prob, std::string const & problem_name )
   result.iteration_data  = iter_data;
   result.final_value     = iter_data.final_f;
   result.final_solution  = iter_data.final_x;
-  result.dimension       = x0.size();
+  result.dimension       = static_cast<size_t>( x0.size() );
 
   global_test_results.push_back( result );
   update_line_search_statistics( result );
 
-  fmt::print( "{}: final f = {:.6e}, iterations = {}\n{}\n\n\n", problem_name, iter_data.final_f, iter_data.iterations,
-              iter_data.final_x.transpose() );
+  fmt::print(
+    "{}: final f = {:.6e}, iterations = {}\n{}\n\n\n",
+    problem_name,
+    iter_data.final_f,
+    iter_data.iterations,
+    iter_data.final_x.transpose() );
 }
 
 // -------------------------------------------------------------------

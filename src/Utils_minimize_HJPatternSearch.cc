@@ -117,15 +117,17 @@ namespace Utils
     }
     else if ( m_fun_evaluation >= m_max_fun_evaluation )
     {
-      res += fmt::format( "function evaluations {} exceeded the maximum limit [{}]\n", m_fun_evaluation,
-                          m_max_fun_evaluation );
+      res += fmt::format(
+        "function evaluations {} exceeded the maximum limit [{}]\n",
+        m_fun_evaluation,
+        m_max_fun_evaluation );
     }
     else
     {
       res += fmt::format( "mesh size h = {} less than tolerance = {}\n", m_h, m_tolerance );
     }
-    res += fmt::format( "[#iterations/#feval] F(x_best): [{}/{}]  {:6}\n\n", m_iteration_count, m_fun_evaluation,
-                        m_f_best );
+    res +=
+      fmt::format( "[#iterations/#feval] F(x_best): [{}/{}]  {:6}\n\n", m_iteration_count, m_fun_evaluation, m_f_best );
     return res;
   }
 
@@ -151,10 +153,14 @@ namespace Utils
     if ( m_verbose > 0 && m_console != nullptr && m_console->get_level() >= 3 )
     {
       string line =
-          "--------------------------------------------------------------------"
-          "-----";
-      string msg = fmt::format( "Iteration={} f(x_best)/#f/|h| = {:.6} / {} / {:.6}\n", m_iteration_count, m_f_best,
-                                m_fun_evaluation, m_h );
+        "--------------------------------------------------------------------"
+        "-----";
+      string msg = fmt::format(
+        "Iteration={} f(x_best)/#f/|h| = {:.6} / {} / {:.6}\n",
+        m_iteration_count,
+        m_f_best,
+        m_fun_evaluation,
+        m_h );
       if ( m_verbose > 2 )
       {
         for ( integer ii = 0; ii < m_dim; ++ii ) msg += fmt::format( "x[{}] = {:.6}\n", ii, m_x_best( ii ) );
@@ -264,8 +270,8 @@ namespace Utils
     std::copy_n( x, m_dim, m_x_best.data() );
     m_f_best          = eval_function( m_x_best );
     m_stencil_failure = false;  // initialize stencil failure flag
-    m_search_sign.setOnes();    // Initialize search verse vector to all ones (first verse
-                                // will be positive for each direction)
+    m_search_sign.setOnes();    // Initialize search verse vector to all ones (first
+                                // verse will be positive for each direction)
     m_h = h;
 
     m_iteration_count      = 0;  // initialize explore iteration counter

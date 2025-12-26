@@ -20,18 +20,19 @@ class Weibull : public NonlinearSystem
 
 public:
   Weibull()
-    : NonlinearSystem( "Weibull function",
-                       "@Article{Shan70,\n"
-                       "  Title   = {Conditioning of quasi-{N}ewton methods "
-                       "for function minimization},\n"
-                       "  Author  = {David F. Shanno},\n"
-                       "  Journal = {Mathematics of Computation},\n"
-                       "  Year    = {1970},\n"
-                       "  Number  = {111},\n"
-                       "  Pages   = {647--656},\n"
-                       "  Volume  = {24}\n"
-                       "}\n",
-                       3 )
+    : NonlinearSystem(
+        "Weibull function",
+        "@Article{Shan70,\n"
+        "  Title   = {Conditioning of quasi-{N}ewton methods "
+        "for function minimization},\n"
+        "  Author  = {David F. Shanno},\n"
+        "  Journal = {Mathematics of Computation},\n"
+        "  Year    = {1970},\n"
+        "  Number  = {111},\n"
+        "  Pages   = {647--656},\n"
+        "  Volume  = {24}\n"
+        "}\n",
+        3 )
     , NPT( 99 )
   {
     for ( integer i = 0; i < NPT; ++i )

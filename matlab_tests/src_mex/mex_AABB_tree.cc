@@ -11,8 +11,8 @@
 #include "Utils_AABB_tree.hh"
 #include "Utils_mex.hh"
 
-#define IN_OUT( IN, OUT )                                                                                              \
-  UTILS_MEX_ASSERT( nlhs == OUT, "{}: expected " #OUT " output, nlhs = {}\n", CMD, nlhs );                             \
+#define IN_OUT( IN, OUT )                                                                  \
+  UTILS_MEX_ASSERT( nlhs == OUT, "{}: expected " #OUT " output, nlhs = {}\n", CMD, nlhs ); \
   UTILS_MEX_ASSERT( nrhs == IN, "{}: expected " #IN " input, nrhs = {}\n", CMD, nrhs )
 
 namespace Utils
@@ -30,7 +30,11 @@ namespace Utils
   \*/
 
   static void
-  do_new( int nlhs, mxArray * plhs[], int nrhs, mxArray const *[]  // unused
+  do_new(
+    int       nlhs,
+    mxArray * plhs[],
+    int       nrhs,
+    mxArray const *[]  // unused
   )
   {
 #define MEX_ERROR_MESSAGE_1 "AABB_treeMexWrapper('new')"
@@ -43,10 +47,11 @@ namespace Utils
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
   static void
-  do_delete( int nlhs,
-             mxArray *[],  // unused
-             int             nrhs,
-             mxArray const * prhs[] )
+  do_delete(
+    int nlhs,
+    mxArray *[],  // unused
+    int             nrhs,
+    mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_2 "AABB_treeMexWrapper('delete',obj)"
 #define CMD MEX_ERROR_MESSAGE_2
@@ -123,10 +128,21 @@ namespace Utils
     AABB_TREE *    ptr    = Utils::mex_convert_mx_to_ptr<AABB_TREE>( arg_in_1 );
     double const * bb_min = Utils::mex_matrix_pointer( arg_in_2, ldim0, ncol0, CMD ": parameter bb_min" );
     double const * bb_max = Utils::mex_matrix_pointer( arg_in_3, ldim1, ncol1, CMD ": parameter bb_max" );
-    UTILS_MEX_ASSERT( ldim0 == ldim1 && ncol0 == ncol1,
-                      "{}: size(bb_min) = {} x {} must be equal to size(bb_max) = {} x {}\n", CMD, ldim0, ncol0, ldim1,
-                      ncol1 );
-    ptr->build( bb_min, ldim0, bb_max, ldim1, ncol0, ldim0  // nbox, dim
+    UTILS_MEX_ASSERT(
+      ldim0 == ldim1 && ncol0 == ncol1,
+      "{}: size(bb_min) = {} x {} must be equal to size(bb_max) = {} x {}\n",
+      CMD,
+      ldim0,
+      ncol0,
+      ldim1,
+      ncol1 );
+    ptr->build(
+      bb_min,
+      ldim0,
+      bb_max,
+      ldim1,
+      ncol0,
+      ldim0  // nbox, dim
     );
 #undef CMD
   }
@@ -297,10 +313,11 @@ namespace Utils
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
   static void
-  do_info( int nlhs,
-           mxArray *[],  // unused
-           int             nrhs,
-           mxArray const * prhs[] )
+  do_info(
+    int nlhs,
+    mxArray *[],  // unused
+    int             nrhs,
+    mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_14 "AABB_treeMexWrapper('info',obj)"
 #define CMD MEX_ERROR_MESSAGE_14
@@ -313,10 +330,11 @@ namespace Utils
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
   static void
-  do_get_dim( int             nlhs,
-              mxArray *       plhs[],  // unused
-              int             nrhs,
-              mxArray const * prhs[] )
+  do_get_dim(
+    int             nlhs,
+    mxArray *       plhs[],  // unused
+    int             nrhs,
+    mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_15 "res=AABB_treeMexWrapper('get_dim',obj)"
 #define CMD MEX_ERROR_MESSAGE_15
@@ -329,10 +347,11 @@ namespace Utils
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
   static void
-  do_get_num_bb( int             nlhs,
-                 mxArray *       plhs[],  // unused
-                 int             nrhs,
-                 mxArray const * prhs[] )
+  do_get_num_bb(
+    int             nlhs,
+    mxArray *       plhs[],  // unused
+    int             nrhs,
+    mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_16 "res=AABB_treeMexWrapper('get_num_bb',obj)"
 #define CMD MEX_ERROR_MESSAGE_16
@@ -345,10 +364,11 @@ namespace Utils
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
   static void
-  do_get_num_tree_nodes( int             nlhs,
-                         mxArray *       plhs[],  // unused
-                         int             nrhs,
-                         mxArray const * prhs[] )
+  do_get_num_tree_nodes(
+    int             nlhs,
+    mxArray *       plhs[],  // unused
+    int             nrhs,
+    mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_17 "res=AABB_treeMexWrapper('get_num_tree_nodes',obj,nmin)"
 #define CMD MEX_ERROR_MESSAGE_17
@@ -365,10 +385,11 @@ namespace Utils
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
   static void
-  do_min_distance_candidates( int             nlhs,
-                              mxArray *       plhs[],  // unused
-                              int             nrhs,
-                              mxArray const * prhs[] )
+  do_min_distance_candidates(
+    int             nlhs,
+    mxArray *       plhs[],  // unused
+    int             nrhs,
+    mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_18 "res=AABB_treeMexWrapper('min_distance_candidates',obj,pnt)"
 #define CMD MEX_ERROR_MESSAGE_18
@@ -411,54 +432,54 @@ namespace Utils
                                                       { "get_num_tree_nodes", do_get_num_tree_nodes },
                                                       { "min_distance_candidates", do_min_distance_candidates } };
 
-#define MEX_ERROR_MESSAGE                                                                                              \
-  "=========================================================================="                                         \
-  "===========\n"                                                                                                      \
-  "FiberMexWrapper: \n"                                                                                                \
-  "\n"                                                                                                                 \
-  "USAGE:\n"                                                                                                           \
-  "  - Constructors:\n"                                                                                                \
-  "    OBJ = AABB_treeMexWrapper( 'new' );\n"                                                                          \
-  "\n"                                                                                                                 \
-  "  On output:\n"                                                                                                     \
-  "    OBJ = pointer to the internal object\n"                                                                         \
-  "   " MEX_ERROR_MESSAGE_1                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_2                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_3                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_4                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_5                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_6                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_7                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_8                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_9                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_10                                                                                           \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_11                                                                                           \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_12                                                                                           \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_13                                                                                           \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_14                                                                                           \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_15                                                                                           \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_16                                                                                           \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_17                                                                                           \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_18                                                                                           \
-  "\n"                                                                                                                 \
-  "=========================================================================="                                         \
+#define MEX_ERROR_MESSAGE                                                      \
+  "==========================================================================" \
+  "===========\n"                                                              \
+  "FiberMexWrapper: \n"                                                        \
+  "\n"                                                                         \
+  "USAGE:\n"                                                                   \
+  "  - Constructors:\n"                                                        \
+  "    OBJ = AABB_treeMexWrapper( 'new' );\n"                                  \
+  "\n"                                                                         \
+  "  On output:\n"                                                             \
+  "    OBJ = pointer to the internal object\n"                                 \
+  "   " MEX_ERROR_MESSAGE_1                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_2                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_3                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_4                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_5                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_6                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_7                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_8                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_9                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_10                                                   \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_11                                                   \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_12                                                   \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_13                                                   \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_14                                                   \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_15                                                   \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_16                                                   \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_17                                                   \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_18                                                   \
+  "\n"                                                                         \
+  "==========================================================================" \
   "===========\n"
 
   extern "C" void

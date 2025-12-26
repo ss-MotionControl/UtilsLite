@@ -303,10 +303,11 @@ namespace Utils
   void
   AABBtree<Real>::set_max_num_objects_per_node( integer n )
   {
-    UTILS_ASSERT( n > 0 && n <= 4096,
-                  "AABBtree::set_max_num_objects_per_node( nobj = {} )\n"
-                  "nobj must be > 0 and <= 4096\n",
-                  n );
+    UTILS_ASSERT(
+      n > 0 && n <= 4096,
+      "AABBtree::set_max_num_objects_per_node( nobj = {} )\n"
+      "nobj must be > 0 and <= 4096\n",
+      n );
     m_max_num_objects_per_node = n;
   }
 
@@ -316,10 +317,11 @@ namespace Utils
   void
   AABBtree<Real>::set_bbox_long_edge_ratio( Real ratio )
   {
-    UTILS_ASSERT( ratio > 0 && ratio < 1,
-                  "AABBtree::set_bbox_long_edge_ratio( ratio = {} )\n"
-                  "tol must be > 0 and < 1\n",
-                  ratio );
+    UTILS_ASSERT(
+      ratio > 0 && ratio < 1,
+      "AABBtree::set_bbox_long_edge_ratio( ratio = {} )\n"
+      "tol must be > 0 and < 1\n",
+      ratio );
     m_bbox_long_edge_ratio = ratio;
   }
 
@@ -329,10 +331,11 @@ namespace Utils
   void
   AABBtree<Real>::set_bbox_overlap_tolerance( Real tol )
   {
-    UTILS_ASSERT( tol > 0 && tol < 1,
-                  "AABBtree::set_bbox_overlap_tolerance( tol = {} )\n"
-                  "tol must be > 0 and < 1\n",
-                  tol );
+    UTILS_ASSERT(
+      tol > 0 && tol < 1,
+      "AABBtree::set_bbox_overlap_tolerance( tol = {} )\n"
+      "tol must be > 0 and < 1\n",
+      tol );
     m_bbox_overlap_tolerance = tol;
   }
 
@@ -342,10 +345,11 @@ namespace Utils
   void
   AABBtree<Real>::set_bbox_min_size_tolerance( Real tol )
   {
-    UTILS_ASSERT( tol >= 0,
-                  "AABBtree::set_bbox_min_size_tolerance( tol = {} )\n"
-                  "tol must be >= 0\n",
-                  tol );
+    UTILS_ASSERT(
+      tol >= 0,
+      "AABBtree::set_bbox_min_size_tolerance( tol = {} )\n"
+      "tol must be >= 0\n",
+      tol );
     m_bbox_min_size_tolerance = tol;
   }
 
@@ -355,10 +359,11 @@ namespace Utils
   void
   AABBtree<Real>::allocate( integer const nbox, integer const dim )
   {
-    UTILS_WARNING( dim <= 10,
-                   "AABBtree::allocate( nbox, dim={} )\n"
-                   "dim is greather that 10!!!",
-                   dim );
+    UTILS_WARNING(
+      dim <= 10,
+      "AABBtree::allocate( nbox, dim={} )\n"
+      "dim is greather that 10!!!",
+      dim );
 
     switch ( dim )
     {
@@ -436,10 +441,13 @@ namespace Utils
   void
   AABBtree<Real>::add_bboxes( Real const bbox_min[], integer ldim0, Real const bbox_max[], integer ldim1 )
   {
-    UTILS_ASSERT( ldim0 >= m_dim && ldim1 >= m_dim,
-                  "AABBtree::add_bboxes( bb_min, ldim0={}, bb_max, ldim1={} )\n"
-                  "must be ldim0, ldim1 >= dim = {}\n",
-                  ldim0, ldim1, m_dim );
+    UTILS_ASSERT(
+      ldim0 >= m_dim && ldim1 >= m_dim,
+      "AABBtree::add_bboxes( bb_min, ldim0={}, bb_max, ldim1={} )\n"
+      "must be ldim0, ldim1 >= dim = {}\n",
+      ldim0,
+      ldim1,
+      m_dim );
 
     Real * bb = m_bbox_objs;
     for ( integer i = 0; i < m_num_objects; ++i )
@@ -463,10 +471,12 @@ namespace Utils
   void
   AABBtree<Real>::replace_bbox( Real const bbox_min[], Real const bbox_max[], integer ipos )
   {
-    UTILS_ASSERT( ipos >= 0 && ipos < m_num_objects,
-                  "AABBtree::replace_bbox( bb_min, bb_max, ipos = {})"
-                  " ipos must be in [0,{})\n",
-                  ipos, m_num_objects );
+    UTILS_ASSERT(
+      ipos >= 0 && ipos < m_num_objects,
+      "AABBtree::replace_bbox( bb_min, bb_max, ipos = {})"
+      " ipos must be in [0,{})\n",
+      ipos,
+      m_num_objects );
     Real * bb = m_bbox_objs + ipos * m_2dim;
     for ( integer j = 0; j < m_dim; ++j )
     {
@@ -515,8 +525,11 @@ namespace Utils
       // pop node from stack
       integer id_father = m_stack.back();
       m_stack.pop_back();
-      UTILS_ASSERT_DEBUG( id_father < m_nmax, "AABBtree::build, id_father = {} must be less than m_nmax ={}\n",
-                          id_father, m_nmax );
+      UTILS_ASSERT_DEBUG(
+        id_father < m_nmax,
+        "AABBtree::build, id_father = {} must be less than m_nmax ={}\n",
+        id_father,
+        m_nmax );
 
       // set no childer for the moment
       m_child[id_father] = -1;
@@ -558,8 +571,11 @@ namespace Utils
       while ( n_long + n_short < num )
       {
         integer id = ptr[n_long];
-        UTILS_ASSERT_DEBUG( id < m_num_objects, "AABBtree::build, id = {} must be less than m_num_objects ={}\n", id,
-                            m_num_objects );
+        UTILS_ASSERT_DEBUG(
+          id < m_num_objects,
+          "AABBtree::build, id = {} must be less than m_num_objects ={}\n",
+          id,
+          m_num_objects );
         Real const * id_min = m_bbox_objs + id * m_2dim;
         Real const * id_max = id_min + m_dim;
         Real         id_len = id_max[idim] - id_min[idim];
@@ -612,8 +628,11 @@ namespace Utils
       integer id_left{ m_num_tree_nodes + 0 };
       integer id_right{ m_num_tree_nodes + 1 };
 
-      UTILS_ASSERT_DEBUG( id_right < m_nmax, "AABBtree::build, id_right = {} must be less than m_nmax ={}\n", id_right,
-                          m_nmax );
+      UTILS_ASSERT_DEBUG(
+        id_right < m_nmax,
+        "AABBtree::build, id_right = {} must be less than m_nmax ={}\n",
+        id_right,
+        m_nmax );
 
       // compute bbox of left and right child
       Real * bb_left_min{ m_bbox_tree + id_left * m_2dim };
@@ -621,8 +640,11 @@ namespace Utils
       for ( integer i{ 0 }; i < n_left; ++i )
       {
         integer id{ ptr[n_long + i] };
-        UTILS_ASSERT_DEBUG( id < m_num_objects, "AABBtree::build, id = {} must be less than m_num_objects ={}\n", id,
-                            m_num_objects );
+        UTILS_ASSERT_DEBUG(
+          id < m_num_objects,
+          "AABBtree::build, id = {} must be less than m_num_objects ={}\n",
+          id,
+          m_num_objects );
         Real const * bb_id_min{ m_bbox_objs + id * m_2dim };
         Real const * bb_id_max{ bb_id_min + m_dim };
         if ( i == 0 )
@@ -645,8 +667,11 @@ namespace Utils
       for ( integer i = 0; i < n_right; ++i )
       {
         integer id = ptr[n_long + n_left + i];
-        UTILS_ASSERT_DEBUG( id < m_num_objects, "AABBtree::build, id = {} must be less than m_num_objects ={}\n", id,
-                            m_num_objects );
+        UTILS_ASSERT_DEBUG(
+          id < m_num_objects,
+          "AABBtree::build, id = {} must be less than m_num_objects ={}\n",
+          id,
+          m_num_objects );
         Real const * bb_id_min = m_bbox_objs + id * m_2dim;
         Real const * bb_id_max = bb_id_min + m_dim;
         if ( i == 0 )
@@ -927,10 +952,12 @@ namespace Utils
       integer id_lr1{ sroot1 >= 0 ? m_child[root1] : -1 };
       integer id_lr2{ aabb.m_child[root2] };
 
-      UTILS_ASSERT_DEBUG( n_stack + 3 < 2 * m_nmax,
-                          "AABBtree::intersect, n_stack+2 = {} must be less "
-                          "than 2*m_nmax ={}\n",
-                          n_stack + 2, 2 * m_nmax );
+      UTILS_ASSERT_DEBUG(
+        n_stack + 3 < 2 * m_nmax,
+        "AABBtree::intersect, n_stack+2 = {} must be less "
+        "than 2*m_nmax ={}\n",
+        n_stack + 2,
+        2 * m_nmax );
 
       if ( id_lr1 >= 0 )
       {
@@ -1139,10 +1166,12 @@ namespace Utils
   void
   AABBtree<Real>::get_bbox_indexes_of_a_node( integer i_pos, AABB_SET & bb_index ) const
   {
-    UTILS_ASSERT( i_pos >= 0 && i_pos < m_num_tree_nodes,
-                  "AABBtree::get_bbox_indexes_of_a_node( i_pos={}, bb_index ) "
-                  "i_pos must be >= 0 and < {}\n",
-                  i_pos, m_num_tree_nodes );
+    UTILS_ASSERT(
+      i_pos >= 0 && i_pos < m_num_tree_nodes,
+      "AABBtree::get_bbox_indexes_of_a_node( i_pos={}, bb_index ) "
+      "i_pos must be >= 0 and < {}\n",
+      i_pos,
+      m_num_tree_nodes );
     integer num = m_num_nodes[i_pos];
     integer ptr = m_ptr_nodes[i_pos];
     while ( num-- > 0 ) bb_index.insert( m_id_nodes[ptr++] );
@@ -1175,15 +1204,19 @@ namespace Utils
   template <typename Real>
   void
   AABBtree<Real>::get_bboxes_of_the_tree( Real bbox_min[], integer ldim0, Real bbox_max[], integer ldim1, integer nmin )
-      const
+    const
   {
-    UTILS_ASSERT( ldim0 >= m_dim && ldim1 >= m_dim,
-                  "AABBtree::get_bboxes_of_the_tree(\n"
-                  "  bbox_min, ldim0={},\n"
-                  "  bbox_max, ldim1={},\n"
-                  "  nmin={} )\n"
-                  "must be nmin >= 0 and ldim0:1 >= {}\n",
-                  ldim0, ldim1, nmin, m_dim );
+    UTILS_ASSERT(
+      ldim0 >= m_dim && ldim1 >= m_dim,
+      "AABBtree::get_bboxes_of_the_tree(\n"
+      "  bbox_min, ldim0={},\n"
+      "  bbox_max, ldim1={},\n"
+      "  nmin={} )\n"
+      "must be nmin >= 0 and ldim0:1 >= {}\n",
+      ldim0,
+      ldim1,
+      nmin,
+      m_dim );
 
     for ( integer i = 0; i < m_num_tree_nodes; ++i )
     {

@@ -18,19 +18,20 @@ class MieleAndCantrellFunction : public NonlinearSystem
 
 public:
   MieleAndCantrellFunction()
-    : NonlinearSystem( "Miele and Cantrell function",
-                       "@article{Grippo:1991,\n"
-                       "  author  = {Grippo, L. and Lampariello, F. and Lucidi, S.},\n"
-                       "  title   = {A Class of Nonmonotone Stabilization Methods\n"
-                       "             in Unconstrained Optimization},\n"
-                       "  journal = {Numer. Math.},\n"
-                       "  year    = {1991},\n"
-                       "  volume  = {59},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {779--805},\n"
-                       "  doi     = {10.1007/BF01385810},\n"
-                       "}\n",
-                       4 )
+    : NonlinearSystem(
+        "Miele and Cantrell function",
+        "@article{Grippo:1991,\n"
+        "  author  = {Grippo, L. and Lampariello, F. and Lucidi, S.},\n"
+        "  title   = {A Class of Nonmonotone Stabilization Methods\n"
+        "             in Unconstrained Optimization},\n"
+        "  journal = {Numer. Math.},\n"
+        "  year    = {1991},\n"
+        "  volume  = {59},\n"
+        "  number  = {1},\n"
+        "  pages   = {779--805},\n"
+        "  doi     = {10.1007/BF01385810},\n"
+        "}\n",
+        4 )
   {
   }
 

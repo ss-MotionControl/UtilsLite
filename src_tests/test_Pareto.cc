@@ -100,20 +100,23 @@ namespace Test
   print_front_state( std::string const & title, PF<N, Payload> const & pf )
   {
     fmt::print(
-        "\n--- {} ---\n"
-        "Front Size: {}, Raw Size (incl. tombstones): {}, Empty: {}\n"
-        "Live Points:\n",
-        title, pf.size(), pf.raw_size(), pf.empty() );
+      "\n--- {} ---\n"
+      "Front Size: {}, Raw Size (incl. tombstones): {}, Empty: {}\n"
+      "Live Points:\n",
+      title,
+      pf.size(),
+      pf.raw_size(),
+      pf.empty() );
     int count{ 0 };
     pf.for_each_alive(
-        [&]( auto const & e )
-        {
-          fmt::print( "  ID={} P={}", e.id, fmt_point( e.p ) );
-          // Payload printing, handles both monostate (void) and custom type
-          if constexpr ( !std::is_same<Payload, void>::value ) { fmt::print( " Payload={}", e.payload ); }
-          fmt::print( "\n" );
-          ++count;
-        } );
+      [&]( auto const & e )
+      {
+        fmt::print( "  ID={} P={}", e.id, fmt_point( e.p ) );
+        // Payload printing, handles both monostate (void) and custom type
+        if constexpr ( !std::is_same<Payload, void>::value ) { fmt::print( " Payload={}", e.payload ); }
+        fmt::print( "\n" );
+        ++count;
+      } );
     fmt::print( "Total Live Count: {}\n", count );
   }
 
@@ -124,10 +127,10 @@ namespace Test
   test_2d_minimization()
   {
     fmt::print(
-        "\n"
-        "======================================================\n"
-        "      TEST 1: 2D MINIMIZATION (Payload=void)          \n"
-        "======================================================\n" );
+      "\n"
+      "======================================================\n"
+      "      TEST 1: 2D MINIMIZATION (Payload=void)          \n"
+      "======================================================\n" );
 
     PF<2, void> pf;
 
@@ -192,10 +195,10 @@ namespace Test
   test_3d_with_payload()
   {
     fmt::print(
-        "\n"
-        "======================================================\n"
-        "  TEST 2: MINIMIZE 3D (Payload=int) + Rebuild         \n"
-        "======================================================\n" );
+      "\n"
+      "======================================================\n"
+      "  TEST 2: MINIMIZE 3D (Payload=int) + Rebuild         \n"
+      "======================================================\n" );
 
     // Maximize x, Minimize y, Maximize z
     PF<3, int> pf;
@@ -258,10 +261,10 @@ namespace Test
   test_batch_build_and_erase()
   {
     fmt::print(
-        "\n"
-        "======================================================\n"
-        "      TEST 3: BATCH BUILD & ID ERASE (2D)             \n"
-        "======================================================\n" );
+      "\n"
+      "======================================================\n"
+      "      TEST 3: BATCH BUILD & ID ERASE (2D)             \n"
+      "======================================================\n" );
 
     PF<2, int> pf;  // Minimize x, Minimize y
 
@@ -299,13 +302,13 @@ namespace Test
     // Find the ID of a point to remove (e.g., {10.0, 0.1} with payload 20)
     std::size_t id_to_remove = 0;
     pf.for_each_alive(
-        [&]( auto const & e )
+      [&]( auto const & e )
+      {
+        if ( e.payload == 20 && std::abs( e.p[0] - 10.0 ) < 1e-9 && std::abs( e.p[1] - 0.1 ) < 1e-9 )
         {
-          if ( e.payload == 20 && std::abs( e.p[0] - 10.0 ) < 1e-9 && std::abs( e.p[1] - 0.1 ) < 1e-9 )
-          {
-            id_to_remove = e.id;
-          }
-        } );
+          id_to_remove = e.id;
+        }
+      } );
 
     check_test_bool( "4. ID to Remove Found (Expected true)", true, id_to_remove != 0 );
 
@@ -338,10 +341,10 @@ namespace Test
   test_tree_rebuild()
   {
     fmt::print(
-        "\n"
-        "======================================================\n"
-        "      TEST 4: FORCED TREE REBUILD (N=2)               \n"
-        "======================================================\n" );
+      "\n"
+      "======================================================\n"
+      "      TEST 4: FORCED TREE REBUILD (N=2)               \n"
+      "======================================================\n" );
 
     // RebuildThreshold is set to 8
     PF<2, void> pf;
@@ -398,11 +401,12 @@ main()
     Test::test_tree_rebuild();
 
     // Print the final message in green
-    fmt::print( fmt::fg( fmt::color::green ),
-                "\n"
-                "======================================================\n"
-                "      All tests completed successfully.               \n"
-                "======================================================\n" );
+    fmt::print(
+      fmt::fg( fmt::color::green ),
+      "\n"
+      "======================================================\n"
+      "      All tests completed successfully.               \n"
+      "======================================================\n" );
   }
   catch ( const std::exception & e )
   {

@@ -53,9 +53,13 @@ test_TP( int const NN, int nt, int sz )
   double t_delete{ tm.elapsed_mus() };
 
   fmt::print(
-      "[{:30}] [LAUNCH: {:12.8}mus, WAIT {:12.8}mus, DELETE {:12.8}mus] "
-      "{:.8}mus\n",
-      TP::Name(), t_launch, t_wait, t_delete, t_launch + t_wait );
+    "[{:30}] [LAUNCH: {:12.8}mus, WAIT {:12.8}mus, DELETE {:12.8}mus] "
+    "{:.8}mus\n",
+    TP::Name(),
+    t_launch,
+    t_wait,
+    t_delete,
+    t_launch + t_wait );
 }
 
 int

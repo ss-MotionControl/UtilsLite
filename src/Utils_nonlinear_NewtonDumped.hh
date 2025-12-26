@@ -1748,8 +1748,14 @@ namespace Utils
             {
               fmt::color  col  = ( actual_reduction >= expected_reduction ) ? fmt::color::green : fmt::color::yellow;
               std::string mark = ( actual_reduction >= expected_reduction ) ? "✓" : "…";
-              fmt::print( fg( col ), "  θ={:.2e} → {:.2e} Δ={:.2e}/{:.2e} {}\n", theta, norm_f_new, actual_reduction,
-                          expected_reduction, mark );
+              fmt::print(
+                fg( col ),
+                "  θ={:.2e} → {:.2e} Δ={:.2e}/{:.2e} {}\n",
+                theta,
+                norm_f_new,
+                actual_reduction,
+                expected_reduction,
+                mark );
             }
 
             if ( actual_reduction >= expected_reduction )
@@ -1899,8 +1905,14 @@ namespace Utils
             {
               fmt::color  col  = ( actual_reduction >= expected_reduction ) ? fmt::color::green : fmt::color::yellow;
               std::string mark = ( actual_reduction >= expected_reduction ) ? "✓" : "…";
-              fmt::print( fg( col ), "  λ={:.2e} → {:.2e} ΔF={:.2e}/{:.2e} {}\n", lambda, norm_f_new, actual_reduction,
-                          expected_reduction, mark );
+              fmt::print(
+                fg( col ),
+                "  λ={:.2e} → {:.2e} ΔF={:.2e}/{:.2e} {}\n",
+                lambda,
+                norm_f_new,
+                actual_reduction,
+                expected_reduction,
+                mark );
             }
 
             if ( actual_reduction >= expected_reduction )
@@ -2066,8 +2078,15 @@ namespace Utils
             {
               fmt::color  col  = ( acceptable_to_filter && armijo ) ? fmt::color::green : fmt::color::yellow;
               std::string mark = ( acceptable_to_filter && armijo ) ? "✓" : "…";
-              fmt::print( fg( col ), "  α={:.2e} → θ={:.2e}, F={:.2e} Filter:{}, Armijo:{} {}\n", alpha, theta_new,
-                          F_new, acceptable_to_filter ? "Y" : "N", armijo ? "Y" : "N", mark );
+              fmt::print(
+                fg( col ),
+                "  α={:.2e} → θ={:.2e}, F={:.2e} Filter:{}, Armijo:{} {}\n",
+                alpha,
+                theta_new,
+                F_new,
+                acceptable_to_filter ? "Y" : "N",
+                armijo ? "Y" : "N",
+                mark );
             }
 
             if ( acceptable_to_filter && armijo )
@@ -2586,8 +2605,14 @@ namespace Utils
             {
               fmt::color col = ( wolfe1 && wolfe2 ) ? fmt::color::green : wolfe1 ? fmt::color::yellow : fmt::color::red;
               std::string mark = ( wolfe1 && wolfe2 ) ? "✓✓" : wolfe1 ? "✓" : "✗";
-              fmt::print( fg( col ), "  α={:.2e} → {:.2e} W1:{}, W2:{} {}\n", alpha, norm_f_new, wolfe1 ? "Y" : "N",
-                          wolfe2 ? "Y" : "N", mark );
+              fmt::print(
+                fg( col ),
+                "  α={:.2e} → {:.2e} W1:{}, W2:{} {}\n",
+                alpha,
+                norm_f_new,
+                wolfe1 ? "Y" : "N",
+                wolfe2 ? "Y" : "N",
+                mark );
             }
 
             if ( wolfe1 && wolfe2 )
@@ -2899,8 +2924,14 @@ namespace Utils
             {
               fmt::color  col  = ( actual_reduction >= expected_reduction ) ? fmt::color::green : fmt::color::yellow;
               std::string mark = ( actual_reduction >= expected_reduction ) ? "✓" : "…";
-              fmt::print( fg( col ), "  α={:.2e} → {:.2e} Δ={:.2e}/{:.2e} {}\n", alpha, norm_f_new, actual_reduction,
-                          expected_reduction, mark );
+              fmt::print(
+                fg( col ),
+                "  α={:.2e} → {:.2e} Δ={:.2e}/{:.2e} {}\n",
+                alpha,
+                norm_f_new,
+                actual_reduction,
+                expected_reduction,
+                mark );
             }
 
             if ( actual_reduction >= expected_reduction )
@@ -2956,7 +2987,6 @@ namespace Utils
 
       return false;
     }
-
 
     // -------------------------------------------------------------------------
     // Helper methods for verbose output
@@ -3047,16 +3077,24 @@ namespace Utils
      * @param ratio Reduction ratio
      */
     void
-    print_trust_region_info( real_type mu,
-                             real_type radius,
-                             real_type step_norm,
-                             real_type norm_f_new,
-                             real_type ratio )
+    print_trust_region_info(
+      real_type mu,
+      real_type radius,
+      real_type step_norm,
+      real_type norm_f_new,
+      real_type ratio )
     {
       fmt::color  col  = ( ratio > m_acceptance_ratio_bad ) ? fmt::color::green : fmt::color::yellow;
       std::string mark = ( ratio > m_acceptance_ratio_bad ) ? "✓" : "…";
-      fmt::print( fg( col ), "  μ={:.2e} Δ={:.2e} ‖dx‖={:.2e} → {:.2e} ρ={:.2f} {}\n", mu, radius, step_norm,
-                  norm_f_new, ratio, mark );
+      fmt::print(
+        fg( col ),
+        "  μ={:.2e} Δ={:.2e} ‖dx‖={:.2e} → {:.2e} ρ={:.2f} {}\n",
+        mu,
+        radius,
+        step_norm,
+        norm_f_new,
+        ratio,
+        mark );
     }
 
     /**
@@ -3162,9 +3200,10 @@ namespace Utils
     void
     print_ctr_failure()
     {
-      fmt::print( fmt::fg( fmt::color::red ),
-                  "    ✗ Cubic trust region failed (trust region too small, "
-                  "sigma too large)\n" );
+      fmt::print(
+        fmt::fg( fmt::color::red ),
+        "    ✗ Cubic trust region failed (trust region too small, "
+        "sigma too large)\n" );
     }
 
     /**

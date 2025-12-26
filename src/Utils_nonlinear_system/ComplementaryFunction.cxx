@@ -16,34 +16,35 @@ class ComplementaryFunction : public NonlinearSystem
 {
 public:
   ComplementaryFunction( integer neq )
-    : NonlinearSystem( "Complementary Function",
-                       "@article{LaCruz:2006,\n"
-                       "  title   = {Spectral Residual Method without Gradient "
-                       "Information\n"
-                       "             for Solving Large-Scale Nonlinear Systems of "
-                       "Equations},\n"
-                       "  author  = {William La Cruz and Jos\\`e Mario Mart\\`\\inez and "
-                       "Marcos Raydan},\n"
-                       "  journal = {Mathematics of Computation},\n"
-                       "  year    = {2006},\n"
-                       "  volume  = {75},\n"
-                       "  number  = {255},\n"
-                       "  pages   = {1429--1448},\n"
-                       "  publisher = {American Mathematical Society},\n"
-                       "}\n\n"
-                       "@article{LaCruz:2003,\n"
-                       "  author    = { William {La Cruz}  and  Marcos Raydan},\n"
-                       "  title     = {Nonmonotone Spectral Methods for Large-Scale "
-                       "Nonlinear Systems},\n"
-                       "  journal   = {Optimization Methods and Software},\n"
-                       "  year      = {2003},\n"
-                       "  volume    = {18},\n"
-                       "  number    = {5},\n"
-                       "  pages     = {583--599},\n"
-                       "  publisher = {Taylor & Francis},\n"
-                       "  doi       = {10.1080/10556780310001610493},\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Complementary Function",
+        "@article{LaCruz:2006,\n"
+        "  title   = {Spectral Residual Method without Gradient "
+        "Information\n"
+        "             for Solving Large-Scale Nonlinear Systems of "
+        "Equations},\n"
+        "  author  = {William La Cruz and Jos\\`e Mario Mart\\`\\inez and "
+        "Marcos Raydan},\n"
+        "  journal = {Mathematics of Computation},\n"
+        "  year    = {2006},\n"
+        "  volume  = {75},\n"
+        "  number  = {255},\n"
+        "  pages   = {1429--1448},\n"
+        "  publisher = {American Mathematical Society},\n"
+        "}\n\n"
+        "@article{LaCruz:2003,\n"
+        "  author    = { William {La Cruz}  and  Marcos Raydan},\n"
+        "  title     = {Nonmonotone Spectral Methods for Large-Scale "
+        "Nonlinear Systems},\n"
+        "  journal   = {Optimization Methods and Software},\n"
+        "  year      = {2003},\n"
+        "  volume    = {18},\n"
+        "  number    = {5},\n"
+        "  pages     = {583--599},\n"
+        "  publisher = {Taylor & Francis},\n"
+        "  doi       = {10.1080/10556780310001610493},\n"
+        "}\n",
+        neq )
   {
     check_even( n, 2 );
   }

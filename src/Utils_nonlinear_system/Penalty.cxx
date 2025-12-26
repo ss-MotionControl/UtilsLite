@@ -8,26 +8,26 @@
  |    email: enrico.bertolazzi@unitn.it
 \*/
 
-#define PENALTY_FUNCTION_BIBTEX                                                                                        \
-  "@techreport{Raydan:2004,\n"                                                                                         \
-  "  author = {William La Cruz and Jose Mario Martinez and Marcos Raydan},\n"                                          \
-  "  title  = {Spectral residual method without gradient\n"                                                            \
-  "             information for solving large-scale nonlinear\n"                                                       \
-  "             systems of equations: Theory and experiments},\n"                                                      \
-  "  number = {Technical Report RT-04-08},\n"                                                                          \
-  "  year   = {2004}\n"                                                                                                \
-  "}\n\n"                                                                                                              \
-  "@article{LaCruz:2003,\n"                                                                                            \
-  "  author    = {William {La Cruz}  and  Marcos Raydan},\n"                                                           \
-  "  title     = {Nonmonotone Spectral Methods for Large-Scale Nonlinear "                                             \
-  "Systems},\n"                                                                                                        \
-  "  journal   = {Optimization Methods and Software},\n"                                                               \
-  "  year      = {2003},\n"                                                                                            \
-  "  volume    = {18},\n"                                                                                              \
-  "  number    = {5},\n"                                                                                               \
-  "  pages     = {583--599},\n"                                                                                        \
-  "  publisher = {Taylor & Francis},\n"                                                                                \
-  "  doi       = {10.1080/10556780310001610493},\n"                                                                    \
+#define PENALTY_FUNCTION_BIBTEX                                               \
+  "@techreport{Raydan:2004,\n"                                                \
+  "  author = {William La Cruz and Jose Mario Martinez and Marcos Raydan},\n" \
+  "  title  = {Spectral residual method without gradient\n"                   \
+  "             information for solving large-scale nonlinear\n"              \
+  "             systems of equations: Theory and experiments},\n"             \
+  "  number = {Technical Report RT-04-08},\n"                                 \
+  "  year   = {2004}\n"                                                       \
+  "}\n\n"                                                                     \
+  "@article{LaCruz:2003,\n"                                                   \
+  "  author    = {William {La Cruz}  and  Marcos Raydan},\n"                  \
+  "  title     = {Nonmonotone Spectral Methods for Large-Scale Nonlinear "    \
+  "Systems},\n"                                                               \
+  "  journal   = {Optimization Methods and Software},\n"                      \
+  "  year      = {2003},\n"                                                   \
+  "  volume    = {18},\n"                                                     \
+  "  number    = {5},\n"                                                      \
+  "  pages     = {583--599},\n"                                               \
+  "  publisher = {Taylor & Francis},\n"                                       \
+  "  doi       = {10.1080/10556780310001610493},\n"                           \
   "}\n"
 
 /*\
@@ -81,16 +81,17 @@ class PenaltyN1 : public NonlinearSystem
 
 public:
   PenaltyN1( integer neq )
-    : NonlinearSystem( "Penalty Function #1",
-                       "@book{brent2013,\n"
-                       "  author    = {Brent, R.P.},\n"
-                       "  title     = {Algorithms for Minimization Without Derivatives},\n"
-                       "  isbn      = {9780486143682},\n"
-                       "  series    = {Dover Books on Mathematics},\n"
-                       "  year      = {2013},\n"
-                       "  publisher = {Dover Publications}\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Penalty Function #1",
+        "@book{brent2013,\n"
+        "  author    = {Brent, R.P.},\n"
+        "  title     = {Algorithms for Minimization Without Derivatives},\n"
+        "  isbn      = {9780486143682},\n"
+        "  series    = {Dover Books on Mathematics},\n"
+        "  year      = {2013},\n"
+        "  publisher = {Dover Publications}\n"
+        "}\n",
+        neq )
     , epsilon( 0.00001 )
   {
     check_min_equations( n, 2 );
@@ -153,16 +154,17 @@ class PenaltyN2 : public NonlinearSystem
 
 public:
   PenaltyN2( integer neq )
-    : NonlinearSystem( "Penalty Function #2",
-                       "@book{brent2013,\n"
-                       "  author    = {Brent, R.P.},\n"
-                       "  title     = {Algorithms for Minimization Without Derivatives},\n"
-                       "  isbn      = {9780486143682},\n"
-                       "  series    = {Dover Books on Mathematics},\n"
-                       "  year      = {2013},\n"
-                       "  publisher = {Dover Publications}\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Penalty Function #2",
+        "@book{brent2013,\n"
+        "  author    = {Brent, R.P.},\n"
+        "  title     = {Algorithms for Minimization Without Derivatives},\n"
+        "  isbn      = {9780486143682},\n"
+        "  series    = {Dover Books on Mathematics},\n"
+        "  year      = {2013},\n"
+        "  publisher = {Dover Publications}\n"
+        "}\n",
+        neq )
     , epsilon( 0.00001 )
   {
     check_min_equations( n, 2 );

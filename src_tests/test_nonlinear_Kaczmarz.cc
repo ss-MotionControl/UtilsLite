@@ -118,16 +118,16 @@ void
 print_summary_table( const vector<TestResult> & results )
 {
   // Dimensioni delle colonne
-  constexpr int col_idx      = 5;   // # (indice)
+  constexpr int col_idx      = 4;   // # (indice)
   constexpr int col_status   = 8;   // Status
-  constexpr int col_neq      = 7;   // NEQ
-  constexpr int col_iter     = 8;   // Iter (Kaczmarz usa più iterazioni)
-  constexpr int col_feval    = 10;  // F-Eval
-  constexpr int col_jeval    = 10;  // J-Eval
+  constexpr int col_neq      = 4;   // NEQ
+  constexpr int col_iter     = 5;   // Iter (Kaczmarz usa più iterazioni)
+  constexpr int col_feval    = 5;   // F-Eval
+  constexpr int col_jeval    = 5;   // J-Eval
   constexpr int col_ls       = 8;   // Line Search
-  constexpr int col_residual = 12;  // Residual
-  constexpr int col_time     = 12;  // Time(ms)
-  constexpr int col_name     = 35;  // Test Name
+  constexpr int col_residual = 10;  // Residual
+  constexpr int col_time     = 10;  // Time(ms)
+  constexpr int col_name     = 30;  // Test Name
 
   // Calcola la larghezza totale della tabella
   constexpr int total_width = 2 + col_idx + 3 + col_status + 3 + col_neq + 3 + col_iter + 3 + col_feval + 3 +
@@ -135,8 +135,11 @@ print_summary_table( const vector<TestResult> & results )
 
   // Intestazione della tabella
   fmt::print( "\n\n" );
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold, "{:━^{}}\n", " NONLINEAR KACZMARZ TEST RESULTS ",
-              total_width );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "{:━^{}}\n",
+    " NONLINEAR KACZMARZ TEST RESULTS ",
+    total_width );
 
   // Linea divisoria
   fmt::print( fg( fmt::color::cyan ), "┏{}┓\n", fmt::format( "{:━^{}}", "", total_width - 2 ) );
@@ -284,15 +287,21 @@ print_statistics( const vector<TestResult> & results )
   // Converged Tests
   fmt::print( fg( fmt::color::cyan ), "┃ " );
   fmt::print( "{:<{}}", "Converged Tests:", stat_col_label );
-  fmt::print( fg( fmt::color::green ), "{:>{}}",
-              fmt::format( "{} ({:.1f}%)", stats.converged_tests, stats.success_rate ), stat_col_value );
+  fmt::print(
+    fg( fmt::color::green ),
+    "{:>{}}",
+    fmt::format( "{} ({:.1f}%)", stats.converged_tests, stats.success_rate ),
+    stat_col_value );
   fmt::print( fg( fmt::color::cyan ), " ┃\n" );
 
   // Failed Tests
   fmt::print( fg( fmt::color::cyan ), "┃ " );
   fmt::print( "{:<{}}", "Failed Tests:", stat_col_label );
-  fmt::print( fg( fmt::color::red ), "{:>{}}",
-              fmt::format( "{} ({:.1f}%)", stats.failed_tests, 100.0 - stats.success_rate ), stat_col_value );
+  fmt::print(
+    fg( fmt::color::red ),
+    "{:>{}}",
+    fmt::format( "{} ({:.1f}%)", stats.failed_tests, 100.0 - stats.success_rate ),
+    stat_col_value );
   fmt::print( fg( fmt::color::cyan ), " ┃\n" );
 
   // Linea divisoria
@@ -354,17 +363,14 @@ main( int argc, char * argv[] )
 {
   // Banner
   fmt::print( "\n" );
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold,
-              "\n"
-              "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-              "━━━━━━━━━━━━━━━━━━━━━━━┓\n"
-              "┃                    NONLINEAR KACZMARZ - COMPREHENSIVE TEST "
-              "SUITE                   ┃\n"
-              "┃               (Randomized Kaczmarz Method for Nonlinear "
-              "Systems)                   ┃\n"
-              "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-              "━━━━━━━━━━━━━━━━━━━━━━━┛\n"
-              "\n" );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "\n"
+    "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n"
+    "┃                  NONLINEAR KACZMARZ - COMPREHENSIVE TEST SUITE                       ┃\n"
+    "┃                (Randomized Kaczmarz Method for Nonlinear Systems)                    ┃\n"
+    "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n"
+    "\n" );
 
   // Inizializza i test
   init_nonlinear_system_tests();
@@ -375,8 +381,8 @@ main( int argc, char * argv[] )
   // Parametri del metodo con valori di default
   double       tolerance          = 1e-8;
   double       rel_tolerance      = 1e-8;
-  int          max_iterations     = 10000;
-  int          max_function_evals = 100000;
+  int          max_iterations     = 1000;
+  int          max_function_evals = 10000;
   double       relaxation         = 1.0;
   int          strategy           = 1;  // 0: CYCLIC, 1: RANDOM_UNIFORM, 2: RANDOM_WEIGHTED, 3: GREEDY
   bool         use_line_search    = false;
@@ -391,49 +397,23 @@ main( int argc, char * argv[] )
     fmt::print( "Options:\n" );
     fmt::print( "  --help                 Show this help and exit\n" );
     fmt::print( "  --verbose-level=N      Set verbose level (0,1,2, default=1)\n" );
+    fmt::print( "  --max-iter=N           Set maximum number of iterations (integer)\n" );
+    fmt::print( "  --max-feval=N          Set maximum number of function evaluations (integer)\n" );
+    fmt::print( "  --tolerance=VAL        Set absolute tolerance (floating, e.g. 1e-8)\n" );
+    fmt::print( "  --rel-tolerance=VAL    Set relative tolerance (floating, e.g. 1e-8)\n" );
+    fmt::print( "  --relaxation=VAL       Set relaxation parameter (floating, efault=1.0)\n" );
     fmt::print(
-        "  --max-iter=N           Set maximum number of iterations "
-        "(integer)\n" );
-    fmt::print(
-        "  --max-feval=N          Set maximum number of function evaluations "
-        "(integer)\n" );
-    fmt::print(
-        "  --tolerance=VAL        Set absolute tolerance (floating, e.g. "
-        "1e-8)\n" );
-    fmt::print(
-        "  --rel-tolerance=VAL    Set relative tolerance (floating, e.g. "
-        "1e-8)\n" );
-    fmt::print(
-        "  --relaxation=VAL       Set relaxation parameter (floating, "
-        "default=1.0)\n" );
-    fmt::print(
-        "  --strategy=N           Set selection strategy "
-        "(0:CYCLIC,1:RANDOM_UNIFORM,2:RANDOM_WEIGHTED,3:GREEDY, default=1)\n" );
-    fmt::print(
-        "  --line-search=N        Enable line search (0:OFF, 1:ON, "
-        "default=0)\n" );
-    fmt::print(
-        "  --block-size=N         Set block size for Block Kaczmarz (integer, "
-        "default=1)\n" );
-    fmt::print(
-        "  --print-freq=N         Set print frequency (integer, "
-        "default=1000)\n" );
-    fmt::print(
-        "  --seed=N               Set random seed (unsigned integer, default=0 "
-        "means time)\n" );
+      "  --strategy=N           Set selection strategy "
+      "(0:CYCLIC,1:RANDOM_UNIFORM,2:RANDOM_WEIGHTED,3:GREEDY, default=1)\n" );
+    fmt::print( "  --line-search=N        Enable line search (0:OFF, 1:ON, default=0)\n" );
+    fmt::print( "  --block-size=N         Set block size for Block Kaczmarz (integer, default=1)\n" );
+    fmt::print( "  --print-freq=N         Set print frequency (integer, default=1000)\n" );
+    fmt::print( "  --seed=N               Set random seed (unsigned integer, default=0 means time)\n" );
     fmt::print( "\n" );
-    fmt::print(
-        "You can also use positional arguments (for backward "
-        "compatibility):\n" );
-    fmt::print(
-        "  {} [tolerance] [max_iter] [relaxation] [strategy] [line_search] "
-        "[block_size]\n",
-        argv[0] );
+    fmt::print( "You can also use positional arguments (for backward compatibility):\n" );
+    fmt::print( "  {} [tolerance] [max_iter] [relaxation] [strategy] [line_search] [block_size]\n", argv[0] );
     fmt::print( "Examples:\n" );
-    fmt::print(
-        "  {} --verbose-level=2 --max-iter=5000 --tolerance=1e-10 "
-        "--strategy=3\n",
-        argv[0] );
+    fmt::print( "  {} --verbose-level=2 --max-iter=5000 --tolerance=1e-10 --strategy=3\n", argv[0] );
     fmt::print( "  {} 1e-10 5000 1.0 3 0 1\n", argv[0] );
   };
 

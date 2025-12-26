@@ -125,8 +125,8 @@ namespace Utils
   AlgoHNewton<Real>::p_zero2() const
   {
     Real D1{ m_fb - m_fa };
-    Real theta{ ( m_d - m_a ) / m_ba };
-    Real D2{ m_fd - m_fa };
+    Real theta{ ( m_c - m_a ) / m_ba };
+    Real D2{ m_fc - m_fa };
     Real A{ D2 / theta - D1 };
     Real B{ D1 * theta - D2 / theta };
     Real C{ m_fa * ( theta - 1 ) };
@@ -154,11 +154,11 @@ namespace Utils
 
     Real x0{ m_fa };
     Real x1{ m_fb };
-    Real x2{ m_fd };
+    Real x2{ m_fc };
 
     Real D0{ 0 };
     Real D1{ 1 };
-    Real D2{ ( m_d - m_a ) / m_ba };
+    Real D2{ ( m_c - m_a ) / m_ba };
 
     Real D01{ ( D0 - D1 ) / ( x0 - x1 ) };
     Real D12{ ( D1 - D2 ) / ( x1 - x2 ) };
@@ -172,12 +172,18 @@ namespace Utils
     Real P1{ P0 + D01 * O1 };
     Real P2{ P1 + D012 * O2 };
 
-    UTILS_ASSERT( is_finite( P2 ),
-                  "AlgoHNewton<Real>::pzero(), compute NaN or Inf at\n"
-                  "a={} f(a)={}\n"
-                  "b={} f(b)={}\n"
-                  "d={} f(d)={}\n",
-                  m_a, m_fa, m_b, m_fb, m_d, m_fd );
+    UTILS_ASSERT(
+      is_finite( P2 ),
+      "AlgoHNewton<Real>::pzero(), compute NaN or Inf at\n"
+      "a={} f(a)={}\n"
+      "b={} f(b)={}\n"
+      "c={} f(c)={}\n",
+      m_a,
+      m_fa,
+      m_b,
+      m_fb,
+      m_c,
+      m_fc );
 
     // CALCULATE THE OUTPUT C.
     return P2;
@@ -401,12 +407,17 @@ namespace Utils
       else
       {
         UTILS_ERROR(
-            "AlgoHNewton::eval() cannot determine if to choose left or right "
-            "segment\n"
-            "a={} fa={}\n"
-            "b={} fb={}\n"
-            "c={} fc={}\n",
-            m_a, m_fa, m_c, m_fb, m_a, m_fc );
+          "AlgoHNewton::eval() cannot determine if to choose left or right "
+          "segment\n"
+          "a={} fa={}\n"
+          "b={} fb={}\n"
+          "c={} fc={}\n",
+          m_a,
+          m_fa,
+          m_c,
+          m_fb,
+          m_a,
+          m_fc );
       }
       m_converged = ( m_b - m_a ) <= m_tolerance;
       if ( m_converged ) return abs( m_fb ) < abs( m_fa ) ? m_b : m_a;
@@ -473,40 +484,40 @@ namespace Utils
         }
       }
 
-      bool all_diff{ diff( m_fa, m_fd ) && diff( m_fb, m_fd ) };
-      Real x{ all_diff ? invp_zero2() : p_zero2() };
+      bool all_diff{ diff( m_fa, m_fb ) && diff( m_fa, m_fc ) && diff( m_fb, m_fc ) };
+      Real x{ all_diff ? this->invp_zero2() : this->p_zero2() };
       if ( x < m_kappa )
         x = m_kappa;
       else if ( x > 1 - m_kappa )
         x = 1 - m_kappa;
-      m_d  = m_a + x * m_ba;
-      m_fd = evaluate( m_d );
+      Real d  = m_a + x * m_ba;
+      Real fd = evaluate( d );
 
-      m_converged = m_fd == 0;
-      if ( m_converged ) return m_d;
+      m_converged = fd == 0;
+      if ( m_converged ) return d;
 
-      if ( m_c > m_d )
+      if ( m_c > d )
       {
-        swap( m_c, m_d );
-        swap( m_fc, m_fd );
+        swap( m_c, d );
+        swap( m_fc, fd );
       }
 
-      if ( m_fc * m_fd < 0 )
+      if ( m_fc * fd < 0 )
       {
         m_a    = m_c;
         m_fa   = m_fc;
         abs_fa = abs( m_fa );
-        m_b    = m_d;
-        m_fb   = m_fd;
-        abs_fb = abs( m_fb );
+        m_b    = d;
+        m_fb   = fd;
+        abs_fb = abs( fd );
       }
       else
       {
         if ( m_fa * m_fc > 0 )
         {
-          m_a    = m_d;
-          m_fa   = m_fd;
-          abs_fa = abs( m_fa );
+          m_a    = d;
+          m_fa   = fd;
+          abs_fa = abs( fd );
         }
         else
         {

@@ -19,19 +19,20 @@ class GheriMancino : public NonlinearSystem
 public:
   // sum log(xi-2)^2+log(xi-10)^2 - prod( xi) ^(1/5)
   GheriMancino( integer neq )
-    : NonlinearSystem( "Gheri-Mancino function",
-                       "@Article{Gheri1971,\n"
-                       "  author  = {Gheri, G. and Mancino, O. G.},\n"
-                       "  title   = {A significant example to test methods for\n"
-                       "             solving systems of nonlinear equations},\n"
-                       "  journal = {CALCOLO},\n"
-                       "  year    = {1971},\n"
-                       "  volume  = {8},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {107--113},\n"
-                       "  doi     = {10.1007/BF02575578}\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Gheri-Mancino function",
+        "@Article{Gheri1971,\n"
+        "  author  = {Gheri, G. and Mancino, O. G.},\n"
+        "  title   = {A significant example to test methods for\n"
+        "             solving systems of nonlinear equations},\n"
+        "  journal = {CALCOLO},\n"
+        "  year    = {1971},\n"
+        "  volume  = {8},\n"
+        "  number  = {1},\n"
+        "  pages   = {107--113},\n"
+        "  doi     = {10.1007/BF02575578}\n"
+        "}\n",
+        neq )
     , alpha( 7 )
     , beta( 17 )
     , gamma( 4 )

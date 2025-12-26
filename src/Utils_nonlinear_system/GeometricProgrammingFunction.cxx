@@ -18,17 +18,18 @@ class GeometricProgrammingFunction : public NonlinearSystem
 
 public:
   GeometricProgrammingFunction( integer neq )
-    : NonlinearSystem( "Geometric Programming Function",
-                       "@techreport{Raydan:2004,\n"
-                       "  author = {William La Cruz and Jose Mario Martinez and Marcos "
-                       "Raydan},\n"
-                       "  title  = {Spectral residual method without gradient\n"
-                       "             information for solving large-scale nonlinear\n"
-                       "             systems of equations: Theory and experiments},\n"
-                       "  number = {Technical Report RT-04-08},\n"
-                       "  year   = {2004}\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Geometric Programming Function",
+        "@techreport{Raydan:2004,\n"
+        "  author = {William La Cruz and Jose Mario Martinez and Marcos "
+        "Raydan},\n"
+        "  title  = {Spectral residual method without gradient\n"
+        "             information for solving large-scale nonlinear\n"
+        "             systems of equations: Theory and experiments},\n"
+        "  number = {Technical Report RT-04-08},\n"
+        "  year   = {2004}\n"
+        "}\n",
+        neq )
   {
     check_min_equations( n, 2 );
   }

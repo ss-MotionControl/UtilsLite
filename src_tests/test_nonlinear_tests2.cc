@@ -66,14 +66,38 @@ namespace Utils
       return res;
     };
 
-    fmt::print( "\n╔{}╦{}╦{}╦{}╦{}╦{}╗\n", rep( Wname + 2, "═" ), rep( Wpoint + 2, "═" ), rep( Wpos + 2, "═" ),
-                rep( Werror + 2, "═" ), rep( Wanalytical + 2, "═" ), rep( Wfd + 2, "═" ) );
+    fmt::print(
+      "\n╔{}╦{}╦{}╦{}╦{}╦{}╗\n",
+      rep( Wname + 2, "═" ),
+      rep( Wpoint + 2, "═" ),
+      rep( Wpos + 2, "═" ),
+      rep( Werror + 2, "═" ),
+      rep( Wanalytical + 2, "═" ),
+      rep( Wfd + 2, "═" ) );
 
-    fmt::print( "║ {:^{}} ║ {:^{}} ║ {:^{}} ║ {:^{}} ║ {:^{}} ║ {:^{}} ║\n", "Test", Wname, "Point", Wpoint, "Position",
-                Wpos, "Error", Werror, "Analytical", Wanalytical, "FiniteDiff", Wfd );
+    fmt::print(
+      "║ {:^{}} ║ {:^{}} ║ {:^{}} ║ {:^{}} ║ {:^{}} ║ {:^{}} ║\n",
+      "Test",
+      Wname,
+      "Point",
+      Wpoint,
+      "Position",
+      Wpos,
+      "Error",
+      Werror,
+      "Analytical",
+      Wanalytical,
+      "FiniteDiff",
+      Wfd );
 
-    fmt::print( "╠{}╬{}╬{}╬{}╬{}╬{}╣\n", rep( Wname + 2, "═" ), rep( Wpoint + 2, "═" ), rep( Wpos + 2, "═" ),
-                rep( Werror + 2, "═" ), rep( Wanalytical + 2, "═" ), rep( Wfd + 2, "═" ) );
+    fmt::print(
+      "╠{}╬{}╬{}╬{}╬{}╬{}╣\n",
+      rep( Wname + 2, "═" ),
+      rep( Wpoint + 2, "═" ),
+      rep( Wpos + 2, "═" ),
+      rep( Werror + 2, "═" ),
+      rep( Wanalytical + 2, "═" ),
+      rep( Wfd + 2, "═" ) );
 
     int total_tests   = 0;
     int failed_tests  = 0;
@@ -202,8 +226,14 @@ namespace Utils
       }
     }
 
-    fmt::print( "╚{}╩{}╩{}╩{}╩{}╩{}╝\n", rep( Wname + 2, "═" ), rep( Wpoint + 2, "═" ), rep( Wpos + 2, "═" ),
-                rep( Werror + 2, "═" ), rep( Wanalytical + 2, "═" ), rep( Wfd + 2, "═" ) );
+    fmt::print(
+      "╚{}╩{}╩{}╩{}╩{}╩{}╝\n",
+      rep( Wname + 2, "═" ),
+      rep( Wpoint + 2, "═" ),
+      rep( Wpos + 2, "═" ),
+      rep( Werror + 2, "═" ),
+      rep( Wanalytical + 2, "═" ),
+      rep( Wfd + 2, "═" ) );
 
     // Summary
     fmt::print( "\nJacobian Verification Summary:\n" );

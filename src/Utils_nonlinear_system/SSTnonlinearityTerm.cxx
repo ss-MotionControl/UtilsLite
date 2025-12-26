@@ -8,7 +8,6 @@
  |    email: enrico.bertolazzi@unitn.it
 \*/
 
-
 /*\
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
@@ -27,19 +26,20 @@ class SSTnonlinearityTerm : public NonlinearSystem
 
 public:
   SSTnonlinearityTerm( integer idx_in )
-    : NonlinearSystem( ini_msg_SSTnonlinearityTerm( idx_in ),
-                       "@article{Sincovec:1975,\n"
-                       "  author  = {Sincovec, Richard F. and Madsen, Niel K.},\n"
-                       "  title   = {Software for Nonlinear Partial Differential "
-                       "Equations},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  volume  = {1},\n"
-                       "  number  = {3},\n"
-                       "  year    = {1975},\n"
-                       "  pages   = {232--260},\n"
-                       "  doi     = {10.1145/355644.355649}\n"
-                       "}\n",
-                       4 )
+    : NonlinearSystem(
+        ini_msg_SSTnonlinearityTerm( idx_in ),
+        "@article{Sincovec:1975,\n"
+        "  author  = {Sincovec, Richard F. and Madsen, Niel K.},\n"
+        "  title   = {Software for Nonlinear Partial Differential "
+        "Equations},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  volume  = {1},\n"
+        "  number  = {3},\n"
+        "  year    = {1975},\n"
+        "  pages   = {232--260},\n"
+        "  doi     = {10.1145/355644.355649}\n"
+        "}\n",
+        4 )
     , idx( idx_in )
     , SCALE( 1e7 )
   {
@@ -107,9 +107,9 @@ public:
     x0.resize( n );
     x1.resize( n );
     x0 << 1.264224341494800168746220557617102243320e6, 8.501430437421119197727722658565357159210e11,
-        8.547006912362613482744674003963465220779e10, 3.702993087637386517255325996036534779221e10;
+      8.547006912362613482744674003963465220779e10, 3.702993087637386517255325996036534779221e10;
     x1 << 1.167055115589686729437819269080948198165e6, 3.069755937686399353641443136774453022013e11,
-        2.621168343680655428727664834155029399049e11, 4.100816563193445712723351658449706009508e10;
+      2.621168343680655428727664834155029399049e11, 4.100816563193445712723351658449706009508e10;
   }
 
   virtual void

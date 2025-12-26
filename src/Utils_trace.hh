@@ -35,7 +35,7 @@
 #endif
 
 #ifndef UTILS_ASSERT_TRACE0
-#define UTILS_ASSERT_TRACE0( COND, MSG )                                                                               \
+#define UTILS_ASSERT_TRACE0( COND, MSG ) \
   if ( !( COND ) ) UTILS_ERROR_TRACE0( MSG )
 #endif
 
@@ -44,7 +44,7 @@
 #endif
 
 #ifndef UTILS_ASSERT_TRACE
-#define UTILS_ASSERT_TRACE( COND, ... )                                                                                \
+#define UTILS_ASSERT_TRACE( COND, ... ) \
   if ( !( COND ) ) UTILS_ERROR_TRACE( __VA_ARGS__ )
 #endif
 

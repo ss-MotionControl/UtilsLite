@@ -32,12 +32,13 @@ namespace Utils
 
   template <typename Real>
   void
-  TVD<Real>::denoise( Integer const N,
-                      Real const    y[],
-                      Integer const incy,
-                      Real const    lambda,
-                      Real          x[],
-                      Integer const incx )
+  TVD<Real>::denoise(
+    Integer const N,
+    Real const    y[],
+    Integer const incy,
+    Real const    lambda,
+    Real          x[],
+    Integer const incx )
   {
     for ( Integer j = 0; j < N; ++j ) x[j * incx] = 0;
     Real          vmin{ y[0] - lambda };

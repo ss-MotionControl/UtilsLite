@@ -16,19 +16,20 @@ class Toint225 : public NonlinearSystem
 {
 public:
   Toint225( integer neq )
-    : NonlinearSystem( "Toint N.225",
-                       "@Article{Spedicato1997,\n"
-                       "  author  = {Spedicato, E. and Huang, Z.},\n"
-                       "  title   = {Numerical experience with newton-like methods\n"
-                       "             for nonlinear algebraic systems},\n"
-                       "  journal = {Computing},\n"
-                       "  year    = {1997},\n"
-                       "  volume  = {58},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {69--89},\n"
-                       "  doi     = {10.1007/BF02684472},\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Toint N.225",
+        "@Article{Spedicato1997,\n"
+        "  author  = {Spedicato, E. and Huang, Z.},\n"
+        "  title   = {Numerical experience with newton-like methods\n"
+        "             for nonlinear algebraic systems},\n"
+        "  journal = {Computing},\n"
+        "  year    = {1997},\n"
+        "  volume  = {58},\n"
+        "  number  = {1},\n"
+        "  pages   = {69--89},\n"
+        "  doi     = {10.1007/BF02684472},\n"
+        "}\n",
+        neq )
   {
     check_min_equations( n, 2 );
   }

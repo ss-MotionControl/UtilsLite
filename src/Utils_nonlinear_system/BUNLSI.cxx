@@ -13,17 +13,17 @@
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-#define BUNLSI_BIBTEX                                                                                                  \
-  "@article{Buzzi:1986,\n"                                                                                             \
-  "  author  = {Guido Buzzi Ferraris and Enrico Tronconi},\n"                                                          \
-  "  title   = {Bunlsi—{A} fortran program for solution of systems\n"                                                  \
-  "             of nonlinear algebraic equations},\n"                                                                  \
-  "  journal = {Computers \\& Chemical Engineering},\n"                                                                \
-  "  volume  = {10},\n"                                                                                                \
-  "  number  = {2},\n"                                                                                                 \
-  "  pages   = {129--141},\n"                                                                                          \
-  "  year    = {1986},\n"                                                                                              \
-  "  doi     = {10.1016/0098-1354(86)85025-6},\n"                                                                      \
+#define BUNLSI_BIBTEX                                                 \
+  "@article{Buzzi:1986,\n"                                            \
+  "  author  = {Guido Buzzi Ferraris and Enrico Tronconi},\n"         \
+  "  title   = {Bunlsi—{A} fortran program for solution of systems\n" \
+  "             of nonlinear algebraic equations},\n"                 \
+  "  journal = {Computers \\& Chemical Engineering},\n"               \
+  "  volume  = {10},\n"                                               \
+  "  number  = {2},\n"                                                \
+  "  pages   = {129--141},\n"                                         \
+  "  year    = {1986},\n"                                             \
+  "  doi     = {10.1016/0098-1354(86)85025-6},\n"                     \
   "}\n"
 
 class BUNLSI5 : public NonlinearSystem
@@ -112,9 +112,9 @@ public:
     auto & x0{ x_vec[0] };
     x0.resize( n );
     x0 << 1.000000000000000000000000000000000000000, 18.71828182845904523536028747135266249776,
-        2.028653803092486959006105196343825624600, 279.8410647514915106118923581352729397598,
-        6.876553786347144986146293257311354434906, 976.1568043532779061610180406939220907971,
-        -61079.62412297820687494549945165294788674, 986.0620119427175381061704391475772708566;
+      2.028653803092486959006105196343825624600, 279.8410647514915106118923581352729397598,
+      6.876553786347144986146293257311354434906, 976.1568043532779061610180406939220907971,
+      -61079.62412297820687494549945165294788674, 986.0620119427175381061704391475772708566;
   }
 
   virtual void
@@ -379,7 +379,7 @@ public:
     auto & x0{ x_vec[0] };
     x0.resize( n );
     x0 << 1.5, 1, 50, 50, 500, 5000, 0, 5000, 0, 5000, 0.5, 50, 5, 0.5, 50, 50, 5, 50, 50, 5, 50, 500, 5, 50, -50, 5000,
-        0.05, 50000, 5, 5000;
+      0.05, 50000, 5, 5000;
   }
 
   virtual void

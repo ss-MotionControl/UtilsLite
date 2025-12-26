@@ -72,8 +72,8 @@
 #if ( defined( _MSC_VER ) && _MSC_VER >= 1800 ) || ( defined( __cplusplus ) && __cplusplus > 199711L )
 
 #if ( defined( __cplusplus ) && __cplusplus <= 201103L )
-#define UTILS_DEFAULT                                                                                                  \
-  {                                                                                                                    \
+#define UTILS_DEFAULT \
+  {                   \
   }
 #else
 #define UTILS_DEFAULT = default
@@ -333,33 +333,17 @@ namespace Utils
   void search_interval( T_int npts, T_real const X[], T_real & x, T_int & last_interval, bool closed, bool can_extend );
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
-  extern template void search_interval( int32_t     npts,
-                                        float const X[],
-                                        float &     x,
-                                        int32_t &   last_interval,
-                                        bool        closed,
-                                        bool        can_extend );
+  extern template void
+  search_interval( int32_t npts, float const X[], float & x, int32_t & last_interval, bool closed, bool can_extend );
 
-  extern template void search_interval( int32_t      npts,
-                                        double const X[],
-                                        double &     x,
-                                        int32_t &    last_interval,
-                                        bool         closed,
-                                        bool         can_extend );
+  extern template void
+  search_interval( int32_t npts, double const X[], double & x, int32_t & last_interval, bool closed, bool can_extend );
 
-  extern template void search_interval( int64_t     npts,
-                                        float const X[],
-                                        float &     x,
-                                        int64_t &   last_interval,
-                                        bool        closed,
-                                        bool        can_extend );
+  extern template void
+  search_interval( int64_t npts, float const X[], float & x, int64_t & last_interval, bool closed, bool can_extend );
 
-  extern template void search_interval( int64_t      npts,
-                                        double const X[],
-                                        double &     x,
-                                        int64_t &    last_interval,
-                                        bool         closed,
-                                        bool         can_extend );
+  extern template void
+  search_interval( int64_t npts, double const X[], double & x, int64_t & last_interval, bool closed, bool can_extend );
 #endif
 
   template <typename T_int, typename T_real>
@@ -372,14 +356,20 @@ namespace Utils
   static inline void
   to_upper( string & str )
   {
-    std::transform( str.begin(), str.end(), str.begin(), []( unsigned char c ) -> unsigned char
-                    { return static_cast<unsigned char>( std::toupper( c ) ); } );
+    std::transform(
+      str.begin(),
+      str.end(),
+      str.begin(),
+      []( unsigned char c ) -> unsigned char { return static_cast<unsigned char>( std::toupper( c ) ); } );
   }
   static inline void
   to_lower( string & str )
   {
-    std::transform( str.begin(), str.end(), str.begin(), []( unsigned char c ) -> unsigned char
-                    { return static_cast<unsigned char>( std::tolower( c ) ); } );
+    std::transform(
+      str.begin(),
+      str.end(),
+      str.begin(),
+      []( unsigned char c ) -> unsigned char { return static_cast<unsigned char>( std::tolower( c ) ); } );
   }
   static inline bool
   is_lower( string_view s )

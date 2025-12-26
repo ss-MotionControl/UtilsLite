@@ -8,18 +8,18 @@
  |    email: enrico.bertolazzi@unitn.it
 \*/
 
-#define SINGULAR_SYSTEM_BIBTEX                                                                                         \
-  "@article{Waziri:2011,\n"                                                                                            \
-  "  author  = {Waziri Yusuf, Mohammed and June, Leong Wah and Hassan, Malik "                                         \
-  "Abu},\n"                                                                                                            \
-  "  title   = {Jacobian-free diagonal {N}ewton's method for solving "                                                 \
-  "nonlinear\n"                                                                                                        \
-  "             systems with singular {J}acobian},\n"                                                                  \
-  "  joirnal = {Malaysian Journal of Mathematical Sciences},\n"                                                        \
-  "  volume  = {5},\n"                                                                                                 \
-  "  year    = {2011},\n"                                                                                              \
-  "  number  = {2},\n"                                                                                                 \
-  "  pages   = {241--255}\n"                                                                                           \
+#define SINGULAR_SYSTEM_BIBTEX                                                 \
+  "@article{Waziri:2011,\n"                                                    \
+  "  author  = {Waziri Yusuf, Mohammed and June, Leong Wah and Hassan, Malik " \
+  "Abu},\n"                                                                    \
+  "  title   = {Jacobian-free diagonal {N}ewton's method for solving "         \
+  "nonlinear\n"                                                                \
+  "             systems with singular {J}acobian},\n"                          \
+  "  joirnal = {Malaysian Journal of Mathematical Sciences},\n"                \
+  "  volume  = {5},\n"                                                         \
+  "  year    = {2011},\n"                                                      \
+  "  number  = {2},\n"                                                         \
+  "  pages   = {241--255}\n"                                                   \
   "}\n"
 
 /*

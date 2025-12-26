@@ -16,19 +16,20 @@ class ShenYpma5 : public NonlinearSystem
 {
 public:
   ShenYpma5()
-    : NonlinearSystem( "Shen-Ypma Example N.5",
-                       "@article{,\n"
-                       "  Author = {Yun-Qiu Shen and Tjalling J. Ypma},\n"
-                       "  Doi = {10.1016/j.apnum.2004.09.029},\n"
-                       "  Journal = {Applied Numerical Mathematics},\n"
-                       "  Number = {2},\n"
-                       "  Pages = {256 - 265},\n"
-                       "  Title = {Newton's method for singular nonlinear equations using "
-                       "approximate left and right nullspaces of the Jacobian},\n"
-                       "  Volume = {54},\n"
-                       "  Year = {2005},\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Shen-Ypma Example N.5",
+        "@article{,\n"
+        "  Author = {Yun-Qiu Shen and Tjalling J. Ypma},\n"
+        "  Doi = {10.1016/j.apnum.2004.09.029},\n"
+        "  Journal = {Applied Numerical Mathematics},\n"
+        "  Number = {2},\n"
+        "  Pages = {256 - 265},\n"
+        "  Title = {Newton's method for singular nonlinear equations using "
+        "approximate left and right nullspaces of the Jacobian},\n"
+        "  Volume = {54},\n"
+        "  Year = {2005},\n"
+        "}\n",
+        2 )
   {
   }
 
@@ -86,19 +87,20 @@ class ShenYpma7 : public NonlinearSystem
 {
 public:
   ShenYpma7()
-    : NonlinearSystem( "Shen-Ypma Example N.7",
-                       "@article{,\n"
-                       "  Author = {Yun-Qiu Shen and Tjalling J. Ypma},\n"
-                       "  Doi = {10.1016/j.apnum.2004.09.029},\n"
-                       "  Journal = {Applied Numerical Mathematics},\n"
-                       "  Number = {2},\n"
-                       "  Pages = {256 - 265},\n"
-                       "  Title = {Newton's method for singular nonlinear equations using "
-                       "approximate left and right nullspaces of the Jacobian},\n"
-                       "  Volume = {54},\n"
-                       "  Year = {2005},\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Shen-Ypma Example N.7",
+        "@article{,\n"
+        "  Author = {Yun-Qiu Shen and Tjalling J. Ypma},\n"
+        "  Doi = {10.1016/j.apnum.2004.09.029},\n"
+        "  Journal = {Applied Numerical Mathematics},\n"
+        "  Number = {2},\n"
+        "  Pages = {256 - 265},\n"
+        "  Title = {Newton's method for singular nonlinear equations using "
+        "approximate left and right nullspaces of the Jacobian},\n"
+        "  Volume = {54},\n"
+        "  Year = {2005},\n"
+        "}\n",
+        2 )
   {
   }
 
@@ -156,19 +158,20 @@ class ShenYpma8 : public NonlinearSystem
 {
 public:
   ShenYpma8()
-    : NonlinearSystem( "Shen-Ypma Example N.8",
-                       "@article{,\n"
-                       "  Author = {Yun-Qiu Shen and Tjalling J. Ypma},\n"
-                       "  Doi = {10.1016/j.apnum.2004.09.029},\n"
-                       "  Journal = {Applied Numerical Mathematics},\n"
-                       "  Number = {2},\n"
-                       "  Pages = {256 - 265},\n"
-                       "  Title = {Newton's method for singular nonlinear equations using "
-                       "approximate left and right nullspaces of the Jacobian},\n"
-                       "  Volume = {54},\n"
-                       "  Year = {2005},\n"
-                       "}\n",
-                       5 )
+    : NonlinearSystem(
+        "Shen-Ypma Example N.8",
+        "@article{,\n"
+        "  Author = {Yun-Qiu Shen and Tjalling J. Ypma},\n"
+        "  Doi = {10.1016/j.apnum.2004.09.029},\n"
+        "  Journal = {Applied Numerical Mathematics},\n"
+        "  Number = {2},\n"
+        "  Pages = {256 - 265},\n"
+        "  Title = {Newton's method for singular nonlinear equations using "
+        "approximate left and right nullspaces of the Jacobian},\n"
+        "  Volume = {54},\n"
+        "  Year = {2005},\n"
+        "}\n",
+        5 )
   {
   }
 

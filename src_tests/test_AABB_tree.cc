@@ -190,7 +190,6 @@ main()
   tm.toc();
   fmt::print( "intersect_with_refine T1 vs T2 elapsed {} ms\nsize = {}\n", tm.elapsed_ms(), bbb_index.size() );
 
-
   fmt::print( "T1\n{}\n", T1.info() );
   fmt::print( "T2\n{}\n", T2.info() );
 

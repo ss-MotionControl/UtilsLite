@@ -145,32 +145,39 @@ print_summary_table()
 {
   if ( global_results.empty() ) return;
 
-  fmt::print( fmt::fg( fmt::color::light_blue ),
-              "\n\n"
-              "╔═══════════════════════════════════════════════════════════════"
-              "═══════════════════════╗\n"
-              "║                                OPTIMIZATION SUMMARY           "
-              "                       ║\n"
-              "╠════════════════════════╤════════╤══════════╤══════════╤═══════"
-              "═════════╤═════════════╣\n"
-              "║ Function               │ Dim    │ Outer It │ Inner It │ Final "
-              "Value    │ Status      ║\n"
-              "╠════════════════════════╪════════╪══════════╪══════════╪═══════"
-              "═════════╪═════════════╣\n" );
+  fmt::print(
+    fmt::fg( fmt::color::light_blue ),
+    "\n\n"
+    "╔═══════════════════════════════════════════════════════════════"
+    "═══════════════════════╗\n"
+    "║                                OPTIMIZATION SUMMARY           "
+    "                       ║\n"
+    "╠════════════════════════╤════════╤══════════╤══════════╤═══════"
+    "═════════╤═════════════╣\n"
+    "║ Function               │ Dim    │ Outer It │ Inner It │ Final "
+    "Value    │ Status      ║\n"
+    "╠════════════════════════╪════════╪══════════╪══════════╪═══════"
+    "═════════╪═════════════╣\n" );
 
   for ( const auto & r : global_results )
   {
     auto status_color = r.status_str == "CONVERGED" ? fmt::fg( fmt::color::green ) : fmt::fg( fmt::color::yellow );
 
-    fmt::print( "║ {:<22} │ {:>6} │ {:>8} │ {:>8} │ {:<14.4e} │ ", r.problem_name.substr( 0, 22 ), r.dimension,
-                r.outer_iters, r.inner_iters, r.final_value );
+    fmt::print(
+      "║ {:<22} │ {:>6} │ {:>8} │ {:>8} │ {:<14.4e} │ ",
+      r.problem_name.substr( 0, 22 ),
+      r.dimension,
+      r.outer_iters,
+      r.inner_iters,
+      r.final_value );
     fmt::print( status_color, "{:<11}", r.status_str );
     fmt::print( " ║\n" );
   }
 
-  fmt::print( fmt::fg( fmt::color::light_blue ),
-              "╚════════════════════════╧════════╧══════════╧══════════╧═══════"
-              "═════════╧═════════════╝\n" );
+  fmt::print(
+    fmt::fg( fmt::color::light_blue ),
+    "╚════════════════════════╧════════╧══════════╧══════════╧═══════"
+    "═════════╧═════════════╝\n" );
 
   // Aggiungere statistiche globali
   size_t total_evals     = 0;

@@ -16,19 +16,20 @@ class XiaoYin1 : public NonlinearSystem
 {
 public:
   XiaoYin1()
-    : NonlinearSystem( "XiaoYin example 3",
-                       "@article{XiaoYin:2015,\n"
-                       "  author    = {Xiaoyong Xiao and Hongwei Yin},\n"
-                       "  title     = {A new class of methods with higher order of "
-                       "convergence for solving systems of nonlinear equations},\n"
-                       "  Journal   = {Applied Mathematics and Computation},\n"
-                       "  Number    = {264},\n"
-                       "  Pages     = {300–-309},\n"
-                       "  Publisher = {Elsevier},\n"
-                       "  Year      = {2015},\n"
-                       "  Doi       = {10.1016/j.amc.2015.04.094},\n"
-                       "}\n",
-                       8 )
+    : NonlinearSystem(
+        "XiaoYin example 3",
+        "@article{XiaoYin:2015,\n"
+        "  author    = {Xiaoyong Xiao and Hongwei Yin},\n"
+        "  title     = {A new class of methods with higher order of "
+        "convergence for solving systems of nonlinear equations},\n"
+        "  Journal   = {Applied Mathematics and Computation},\n"
+        "  Number    = {264},\n"
+        "  Pages     = {300–-309},\n"
+        "  Publisher = {Elsevier},\n"
+        "  Year      = {2015},\n"
+        "  Doi       = {10.1016/j.amc.2015.04.094},\n"
+        "}\n",
+        8 )
   {
   }
 
@@ -69,19 +70,20 @@ class XiaoYin2 : public NonlinearSystem
 {
 public:
   XiaoYin2()
-    : NonlinearSystem( "XiaoYin example 4",
-                       "@article{XiaoYin:2015,\n"
-                       "  author    = {Xiaoyong Xiao and Hongwei Yin},\n"
-                       "  title     = {A new class of methods with higher order of "
-                       "convergence for solving systems of nonlinear equations},\n"
-                       "  Journal   = {Applied Mathematics and Computation},\n"
-                       "  Number    = {264},\n"
-                       "  Pages     = {300–-309},\n"
-                       "  Publisher = {Elsevier},\n"
-                       "  Year      = {2015},\n"
-                       "  Doi       = {10.1016/j.amc.2015.04.094},\n"
-                       "}\n",
-                       16 )
+    : NonlinearSystem(
+        "XiaoYin example 4",
+        "@article{XiaoYin:2015,\n"
+        "  author    = {Xiaoyong Xiao and Hongwei Yin},\n"
+        "  title     = {A new class of methods with higher order of "
+        "convergence for solving systems of nonlinear equations},\n"
+        "  Journal   = {Applied Mathematics and Computation},\n"
+        "  Number    = {264},\n"
+        "  Pages     = {300–-309},\n"
+        "  Publisher = {Elsevier},\n"
+        "  Year      = {2015},\n"
+        "  Doi       = {10.1016/j.amc.2015.04.094},\n"
+        "}\n",
+        16 )
   {
   }
 
@@ -122,19 +124,20 @@ class XiaoYin3 : public NonlinearSystem
 {
 public:
   XiaoYin3()
-    : NonlinearSystem( "XiaoYin example 5",
-                       "@article{XiaoYin:2015,\n"
-                       "  author    = {Xiaoyong Xiao and Hongwei Yin},\n"
-                       "  title     = {A new class of methods with higher order of "
-                       "convergence for solving systems of nonlinear equations},\n"
-                       "  Journal   = {Applied Mathematics and Computation},\n"
-                       "  Number    = {264},\n"
-                       "  Pages     = {300–-309},\n"
-                       "  Publisher = {Elsevier},\n"
-                       "  Year      = {2015},\n"
-                       "  Doi       = {10.1016/j.amc.2015.04.094},\n"
-                       "}\n",
-                       35 )
+    : NonlinearSystem(
+        "XiaoYin example 5",
+        "@article{XiaoYin:2015,\n"
+        "  author    = {Xiaoyong Xiao and Hongwei Yin},\n"
+        "  title     = {A new class of methods with higher order of "
+        "convergence for solving systems of nonlinear equations},\n"
+        "  Journal   = {Applied Mathematics and Computation},\n"
+        "  Number    = {264},\n"
+        "  Pages     = {300–-309},\n"
+        "  Publisher = {Elsevier},\n"
+        "  Year      = {2015},\n"
+        "  Doi       = {10.1016/j.amc.2015.04.094},\n"
+        "}\n",
+        35 )
   {
   }
 

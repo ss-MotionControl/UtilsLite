@@ -40,69 +40,6 @@ namespace Utils
   using std::min;
   using std::set;
 
-  namespace LBFGS_utils
-  {
-
-    // ===========================================================================
-    // COLOR DEFINITIONS (consistent with NelderMead)
-    // ===========================================================================
-
-    namespace PrintColors
-    {
-      constexpr auto HEADER    = fmt::fg( fmt::color::light_blue );
-      constexpr auto SUCCESS   = fmt::fg( fmt::color::green );
-      constexpr auto WARNING   = fmt::fg( fmt::color::yellow );
-      constexpr auto ERROR     = fmt::fg( fmt::color::red );
-      constexpr auto INFO      = fmt::fg( fmt::color::cyan );
-      constexpr auto ITERATION = fmt::fg( fmt::color::white );
-      constexpr auto DETAIL    = fmt::fg( fmt::color::gray );
-    }  // namespace PrintColors
-
-    // ===========================================================================
-    // UTILITY FUNCTIONS
-    // ===========================================================================
-
-    /**
-     * @brief Format a vector of indices in a compact representation
-     *
-     * @tparam T Index type (typically size_t or int)
-     * @param indices Vector of indices to format
-     * @param max_display Maximum number of indices to display before truncating
-     * @return std::string Compact string representation
-     */
-    template <typename T>
-    std::string
-    format_index_vector_compact( std::vector<T> const & indices, size_t max_display = 5 )
-    {
-      if ( indices.empty() ) return "[]";
-
-      std::stringstream ss;
-      ss << "[";
-
-      if ( indices.size() <= max_display )
-      {
-        for ( size_t i = 0; i < indices.size(); ++i )
-        {
-          if ( i > 0 ) ss << ", ";
-          ss << indices[i];
-        }
-      }
-      else
-      {
-        for ( size_t i = 0; i < max_display - 1; ++i )
-        {
-          if ( i > 0 ) ss << ", ";
-          ss << indices[i];
-        }
-        ss << ", ..., " << indices.back();
-      }
-
-      ss << "]";
-      return ss.str();
-    }
-
-  }  // namespace LBFGS_utils
-
   // ===========================================================================
   // LBFGS: Core Two-Loop Recursion Implementation
   // ===========================================================================
@@ -577,10 +514,11 @@ namespace Utils
      * @see Nocedal & Wright (2006), Section 18.3 for modified BFGS
      */
     bool
-    add_correction_with_damping( LBFGS<Scalar> & lb,
-                                 Vector const &  s,
-                                 Vector const &  y,
-                                 Scalar const    min_curvature_ratio = 1e-8 )
+    add_correction_with_damping(
+      LBFGS<Scalar> & lb,
+      Vector const &  s,
+      Vector const &  y,
+      Scalar const    min_curvature_ratio = 1e-8 )
     {
       using Vector            = Eigen::Matrix<Scalar, Eigen::Dynamic, 1>;
       Scalar const sty        = s.dot( y );

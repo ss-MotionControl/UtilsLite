@@ -41,46 +41,74 @@ do_solve( real_type const x_guess, Utils::Zeros_base_fun<real_type> * pf )
   real_type        x{ solver.solve_Newton( x_guess, pf ) };
   ++ntest;
   fmt::print(
-      "[NEWTON]    #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
-      "f(x) = {}\n",
-      ntest, solver.used_iter(), solver.num_fun_eval(), solver.converged(), fmt::format( "{:.6}", x ),
-      fmt::format( "{:.3}", pf->eval( x ) ) );
+    "[NEWTON]    #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
+    "f(x) = {}\n",
+    ntest,
+    solver.used_iter(),
+    solver.num_fun_eval(),
+    solver.converged(),
+    fmt::format( "{:.6}", x ),
+    fmt::format( "{:.3}", pf->eval( x ) ) );
   x = solver.solve_Halley( x_guess, pf );
   fmt::print(
-      "[HALLEY]    #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
-      "f(x) = {}\n",
-      ntest, solver.used_iter(), solver.num_fun_eval(), solver.converged(), fmt::format( "{:.6}", x ),
-      fmt::format( "{:.3}", pf->eval( x ) ) );
+    "[HALLEY]    #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
+    "f(x) = {}\n",
+    ntest,
+    solver.used_iter(),
+    solver.num_fun_eval(),
+    solver.converged(),
+    fmt::format( "{:.6}", x ),
+    fmt::format( "{:.3}", pf->eval( x ) ) );
   x = solver.solve_Chebyshev( x_guess, pf );
   fmt::print(
-      "[CHEBYSHEV] #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
-      "f(x) = {}\n",
-      ntest, solver.used_iter(), solver.num_fun_eval(), solver.converged(), fmt::format( "{:.6}", x ),
-      fmt::format( "{:.3}", pf->eval( x ) ) );
+    "[CHEBYSHEV] #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
+    "f(x) = {}\n",
+    ntest,
+    solver.used_iter(),
+    solver.num_fun_eval(),
+    solver.converged(),
+    fmt::format( "{:.6}", x ),
+    fmt::format( "{:.3}", pf->eval( x ) ) );
   x = solver.solve_Order4( x_guess, pf );
   fmt::print(
-      "[ORDER4]    #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
-      "f(x) = {}\n",
-      ntest, solver.used_iter(), solver.num_fun_eval(), solver.converged(), fmt::format( "{:.6}", x ),
-      fmt::format( "{:.3}", pf->eval( x ) ) );
+    "[ORDER4]    #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
+    "f(x) = {}\n",
+    ntest,
+    solver.used_iter(),
+    solver.num_fun_eval(),
+    solver.converged(),
+    fmt::format( "{:.6}", x ),
+    fmt::format( "{:.3}", pf->eval( x ) ) );
   x = solver.solve_Order8( x_guess, pf );
   fmt::print(
-      "[ORDER8]    #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
-      "f(x) = {}\n",
-      ntest, solver.used_iter(), solver.num_fun_eval(), solver.converged(), fmt::format( "{:.6}", x ),
-      fmt::format( "{:.3}", pf->eval( x ) ) );
+    "[ORDER8]    #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
+    "f(x) = {}\n",
+    ntest,
+    solver.used_iter(),
+    solver.num_fun_eval(),
+    solver.converged(),
+    fmt::format( "{:.6}", x ),
+    fmt::format( "{:.3}", pf->eval( x ) ) );
   x = solver.solve_Order16( x_guess, pf );
   fmt::print(
-      "[ORDER16]   #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
-      "f(x) = {}\n",
-      ntest, solver.used_iter(), solver.num_fun_eval(), solver.converged(), fmt::format( "{:.6}", x ),
-      fmt::format( "{:.3}", pf->eval( x ) ) );
+    "[ORDER16]   #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
+    "f(x) = {}\n",
+    ntest,
+    solver.used_iter(),
+    solver.num_fun_eval(),
+    solver.converged(),
+    fmt::format( "{:.6}", x ),
+    fmt::format( "{:.3}", pf->eval( x ) ) );
   x = solver.solve_Order32( x_guess, pf );
   fmt::print(
-      "[ORDER32]   #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
-      "f(x) = {}\n",
-      ntest, solver.used_iter(), solver.num_fun_eval(), solver.converged(), fmt::format( "{:.6}", x ),
-      fmt::format( "{:.3}", pf->eval( x ) ) );
+    "[ORDER32]   #{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} "
+    "f(x) = {}\n",
+    ntest,
+    solver.used_iter(),
+    solver.num_fun_eval(),
+    solver.converged(),
+    fmt::format( "{:.6}", x ),
+    fmt::format( "{:.3}", pf->eval( x ) ) );
   fmt::print( "\n\n" );
 }
 
@@ -116,7 +144,6 @@ public:
     return 6;
   };
 };
-
 
 class class_fun1 : public Utils::Zeros_base_fun<real_type>
 {
@@ -167,7 +194,7 @@ public:
     real_type const t19{ exp( x * ( x - 3.0 ) ) };
     return 1 / t15 *
            ( 8.0 * t19 * t15 *
-                 ( t6 * ( t2 - t3 + 3.0 ) * ( x - 3.0 / 2.0 ) + 3.0 / 2.0 * t9 * ( t2 - t3 + 8.0 / 3.0 ) ) +
+               ( t6 * ( t2 - t3 + 3.0 ) * ( x - 3.0 / 2.0 ) + 3.0 / 2.0 * t9 * ( t2 - t3 + 8.0 / 3.0 ) ) +
              4.0 * t2 * x - 12.0 * x );
   };
 };

@@ -27,25 +27,27 @@ namespace Utils
 {
 
   string
-  fmt_table_row( unsigned const    width,
-                 string_view const L,
-                 string_view const R,
-                 string_view const F,
-                 string_view const title,
-                 string_view const align )
+  fmt_table_row(
+    unsigned const    width,
+    string_view const L,
+    string_view const R,
+    string_view const F,
+    string_view const title,
+    string_view const align )
   {
     string const FMT{ fmt::format( "{{}}{{:{}{}{}}}{{}}", F, align, width ) };
     return fmt::format( FMT, L, title, R );
   }
 
   string
-  fmt_table_row( unsigned const                           width,
-                 string_view const                        L,
-                 string_view const                        C,
-                 string_view const                        R,
-                 string_view const                        F,
-                 std::initializer_list<string_view> const names,
-                 string_view                              align )
+  fmt_table_row(
+    unsigned const                           width,
+    string_view const                        L,
+    string_view const                        C,
+    string_view const                        R,
+    string_view const                        F,
+    std::initializer_list<string_view> const names,
+    string_view                              align )
   {
     unsigned const N{ static_cast<unsigned>( names.size() ) };
     unsigned const ww{ width + 1 - N };
@@ -77,12 +79,13 @@ namespace Utils
   }
 
   string
-  fmt_table_row( unsigned const    width,
-                 string_view const L,
-                 string_view const C,
-                 string_view const R,
-                 string_view const F,
-                 unsigned const    N )
+  fmt_table_row(
+    unsigned const    width,
+    string_view const L,
+    string_view const C,
+    string_view const R,
+    string_view const F,
+    unsigned const    N )
   {
     unsigned const ww{ width + 1 - N };
     unsigned const w{ ww / N };

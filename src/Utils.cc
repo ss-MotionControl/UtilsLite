@@ -85,11 +85,16 @@ namespace Utils
   {
     // check points
     T_int n{ npts - 1 };
-    UTILS_ASSERT( npts > 1 && last_interval >= 0 && last_interval < n,
-                  "In search_interval( npts={}, X, x={}, last_interval={}, "
-                  "closed={}, can_extend={})\n"
-                  "npts must be >= 2 and last_interval must be in [0,npts-2]\n",
-                  npts, x, last_interval, closed, can_extend );
+    UTILS_ASSERT(
+      npts > 1 && last_interval >= 0 && last_interval < n,
+      "In search_interval( npts={}, X, x={}, last_interval={}, "
+      "closed={}, can_extend={})\n"
+      "npts must be >= 2 and last_interval must be in [0,npts-2]\n",
+      npts,
+      x,
+      last_interval,
+      closed,
+      can_extend );
 
     // check range
     T_real xl{ X[0] };
@@ -104,11 +109,18 @@ namespace Utils
     }
     else
     {
-      UTILS_ASSERT( can_extend || ( x >= xl && x <= xr ),
-                    "In search_interval( npts={}, X, x={}, last_interval={}, "
-                    "closed={}, can_extend={})\n"
-                    "out of range: [{},{}]\n",
-                    npts, x, last_interval, closed, can_extend, xl, xr );
+      UTILS_ASSERT(
+        can_extend || ( x >= xl && x <= xr ),
+        "In search_interval( npts={}, X, x={}, last_interval={}, "
+        "closed={}, can_extend={})\n"
+        "out of range: [{},{}]\n",
+        npts,
+        x,
+        last_interval,
+        closed,
+        can_extend,
+        xl,
+        xr );
     }
 
     // find the interval of the support of the B-spline
@@ -153,40 +165,31 @@ namespace Utils
       // x in the interval [ XL[0], XL[1] ] nothing to do
     }
     // check computed interval
-    UTILS_ASSERT( last_interval >= 0 && last_interval < n,
-                  "In search_interval( npts={}, X, x={}, last_interval={}, "
-                  "closed={}, can_extend={})\n"
-                  "computed last_interval of range: [{},{}]\n",
-                  npts, x, last_interval, closed, can_extend, xl, xr );
+    UTILS_ASSERT(
+      last_interval >= 0 && last_interval < n,
+      "In search_interval( npts={}, X, x={}, last_interval={}, "
+      "closed={}, can_extend={})\n"
+      "computed last_interval of range: [{},{}]\n",
+      npts,
+      x,
+      last_interval,
+      closed,
+      can_extend,
+      xl,
+      xr );
   }
 
-  extern template void search_interval( int32_t     npts,
-                                        float const X[],
-                                        float &     x,
-                                        int32_t &   last_interval,
-                                        bool        closed,
-                                        bool        can_extend );
+  extern template void
+  search_interval( int32_t npts, float const X[], float & x, int32_t & last_interval, bool closed, bool can_extend );
 
-  template void search_interval( int32_t      npts,
-                                 double const X[],
-                                 double &     x,
-                                 int32_t &    last_interval,
-                                 bool         closed,
-                                 bool         can_extend );
+  template void
+  search_interval( int32_t npts, double const X[], double & x, int32_t & last_interval, bool closed, bool can_extend );
 
-  template void search_interval( int64_t     npts,
-                                 float const X[],
-                                 float &     x,
-                                 int64_t &   last_interval,
-                                 bool        closed,
-                                 bool        can_extend );
+  template void
+  search_interval( int64_t npts, float const X[], float & x, int64_t & last_interval, bool closed, bool can_extend );
 
-  template void search_interval( int64_t      npts,
-                                 double const X[],
-                                 double &     x,
-                                 int64_t &    last_interval,
-                                 bool         closed,
-                                 bool         can_extend );
+  template void
+  search_interval( int64_t npts, double const X[], double & x, int64_t & last_interval, bool closed, bool can_extend );
 }  // namespace Utils
 
 #endif

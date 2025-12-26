@@ -25,8 +25,11 @@ using std::cout;
 static void
 mem_info( char const msg[] )
 {
-  fmt::print( "{}: mem actual {} max {}\n", msg, Utils::out_bytes( Utils::AllocatedBytes ),
-              Utils::out_bytes( Utils::MaximumAllocatedBytes ) );
+  fmt::print(
+    "{}: mem actual {} max {}\n",
+    msg,
+    Utils::out_bytes( Utils::AllocatedBytes ),
+    Utils::out_bytes( Utils::MaximumAllocatedBytes ) );
 }
 
 static void

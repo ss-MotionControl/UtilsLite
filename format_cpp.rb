@@ -10,62 +10,69 @@ CLANG_FORMAT_CONFIG = {
   IndentWidth: 2,
   UseTab: false,
   TabWidth: 2,
-  
-  IndentPPDirectives: "None",
-  
-  BreakBeforeBraces: "Allman",
-  
-  BreakConstructorInitializers: "BeforeComma",
-  ConstructorInitializerAllOnOneLineOrOnePerLine: true,
-  ConstructorInitializerIndentWidth: 2,
-  
+  ColumnLimit: 120,
+
+  # --- FORZA UN PARAMETRO PER RIGA ---
+  AlignAfterOpenBracket: "AlwaysBreak",
+  BinPackParameters: false,
+  BinPackArguments: false,
+  AllowAllParametersOfDeclarationOnNextLine: false,
+  AllowAllArgumentsOnNextLine: false,
   AlwaysBreakAfterReturnType: "None",
   AlwaysBreakAfterDefinitionReturnType: "All",
-  
+  ContinuationIndentWidth: 2,
+
+  # --- ALLINEAMENTO VERTICALE (EFFETTO TABELLA) ---
+  AlignConsecutiveDeclarations: true,
+  AlignConsecutiveAssignments: true,
+  AlignOperands: true,
   PointerAlignment: "Middle",
   DerivePointerAlignment: false,
-  
+
+  # --- PARENTESI E SPAZI ---
+  BreakBeforeBraces: "Allman",
   SpacesInParentheses: true,
   SpacesInAngles: false,
   SpacesInSquareBrackets: false,
-  
   SpaceBeforeParens: "ControlStatements",
   SpaceAfterCStyleCast: true,
   SpaceAfterTemplateKeyword: true,
   SpaceBeforeCpp11BracedList: false,
-  
-  BinPackParameters: false,
-  AllowAllParametersOfDeclarationOnNextLine: false,
-  AlignAfterOpenBracket: "Align",
-  AlignConsecutiveDeclarations: true,
-  AlignConsecutiveAssignments: true,
-  AlignOperands: true,
-  
-  AlignEscapedNewlines: "Right",
-  ColumnLimit: 120,  # Aumentato per evitare rottura per l'assegnazione di y
-  
-  ReflowComments: true,
-  SpacesBeforeTrailingComments: 2,
-  
+  Cpp11BracedListStyle: false,
+
+  # --- COSTRUTTORI ---
+  BreakConstructorInitializers: "BeforeComma",
+  ConstructorInitializerAllOnOneLineOrOnePerLine: true,
+  ConstructorInitializerIndentWidth: 2,
+
+  # --- LOGICA DI INDENTAZIONE ---
   NamespaceIndentation: "All",
   FixNamespaceComments: true,
   AccessModifierOffset: -2,
+  IndentCaseLabels: true,
+  IndentPPDirectives: "None",
   
+  # --- PULIZIA RIGHE ---
+  MaxEmptyLinesToKeep: 2,
+  KeepEmptyLinesAtTheStartOfBlocks: false,
+  ReflowComments: true,
+  SpacesBeforeTrailingComments: 2,
   SortIncludes: false,
-  
+
+  # --- FUNZIONI CORTE ---
   AllowShortFunctionsOnASingleLine: "All",
   AllowShortIfStatementsOnASingleLine: true,
   AllowShortLoopsOnASingleLine: true,
   AllowShortBlocksOnASingleLine: true,
-  
-  IndentCaseLabels: true,
-  MaxEmptyLinesToKeep: 2,
-  KeepEmptyLinesAtTheStartOfBlocks: false,
-  Cpp11BracedListStyle: false,
 
-  PenaltyBreakAssignment: 1000,
-  PenaltyBreakBeforeFirstCallParameter: 1000,
+  # --- PENALITÀ (FORZANO IL COMPORTAMENTO) ---
+  # Alziamo la penalità per chi mette tutto su una riga
+  PenaltyBreakAssignment: 100,
+  PenaltyBreakBeforeFirstCallParameter: 1, 
+  PenaltyExcessCharacter: 1000,
+  PenaltyReturnTypeOnItsOwnLine: 60
 }.freeze
+
 
 # Estensioni dei file da processare
 EXTENSIONS = ['.cc', '.hh', '.cxx', '.hxx']

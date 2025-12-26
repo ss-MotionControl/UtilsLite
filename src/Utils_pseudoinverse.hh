@@ -334,7 +334,8 @@ namespace Utils
     }
 
     /**
-     * @brief Construct dense Tikhonov solver via KKT factorization with diagonal regularization
+     * @brief Construct dense Tikhonov solver via KKT factorization with diagonal
+     * regularization
      *
      * @param A Dense m×n matrix
      * @param D Diagonal regularization vector (≥ 0 element-wise)
@@ -402,14 +403,16 @@ namespace Utils
       return m_A * x;
     }
 
-    /// @brief Return regularization parameter λ (only valid if constructed with scalar)
+    /// @brief Return regularization parameter λ (only valid if constructed with
+    /// scalar)
     Scalar
     lambda() const
     {
       return m_lambda;
     }
 
-    /// @brief Return diagonal regularization vector (only valid if constructed with diagonal)
+    /// @brief Return diagonal regularization vector (only valid if constructed
+    /// with diagonal)
     Vector const &
     diagonal() const
     {
@@ -750,7 +753,8 @@ namespace Utils
     }
 
     /**
-     * @brief Constructor for sparse KKT Tikhonov solver with diagonal regularization
+     * @brief Constructor for sparse KKT Tikhonov solver with diagonal
+     * regularization
      *
      * @param A Sparse m×n matrix
      * @param D Diagonal regularization vector (≥ 0 element-wise)
@@ -830,14 +834,16 @@ namespace Utils
       return m_KKT;
     }
 
-    /// @brief Return regularization parameter λ (only valid if constructed with scalar)
+    /// @brief Return regularization parameter λ (only valid if constructed with
+    /// scalar)
     Scalar
     lambda() const
     {
       return m_lambda;
     }
 
-    /// @brief Return diagonal regularization vector (only valid if constructed with diagonal)
+    /// @brief Return diagonal regularization vector (only valid if constructed
+    /// with diagonal)
     Vector const &
     diagonal() const
     {

@@ -16,11 +16,12 @@ class SixHumpCamelBackFunction : public NonlinearSystem
 {
 public:
   SixHumpCamelBackFunction()
-    : NonlinearSystem( "Six Hump Camel Back function",
-                       "Molga M. and Smutnicki C. (2005).\n"
-                       "Test functions for optimization needs,\n"
-                       "http://www.zsd.ict.pwr.wroc.pl/files/docs/functions\n",
-                       2 )
+    : NonlinearSystem(
+        "Six Hump Camel Back function",
+        "Molga M. and Smutnicki C. (2005).\n"
+        "Test functions for optimization needs,\n"
+        "http://www.zsd.ict.pwr.wroc.pl/files/docs/functions\n",
+        2 )
   {
   }
 

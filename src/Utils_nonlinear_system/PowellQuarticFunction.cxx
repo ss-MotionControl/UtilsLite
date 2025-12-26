@@ -16,29 +16,30 @@ class PowellQuarticFunction : public NonlinearSystem
 {
 public:
   PowellQuarticFunction()
-    : NonlinearSystem( "Powell's quartic function",
-                       "@article{Colville:1970,\n"
-                       "  author    = {Colville, A. R.},\n"
-                       "  title     = {A comparative study of nonlinear programming "
-                       "codes},\n"
-                       "  booktitle = {Proceedings of the {P}rinceton {S}ymposium on\n"
-                       "               {M}athematical {P}rogramming (1967)},\n"
-                       "  pages     = {487--501},\n"
-                       "  publisher = {Princeton Univ. Press, Princeton, N.J.},\n"
-                       "  year      = {1970},\n"
-                       "}\n\n"
-                       "@article{More:1981,\n"
-                       "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
-                       "Hillstrom, Kenneth E.},\n"
-                       "  title   = {Testing Unconstrained Optimization Software},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1981},\n"
-                       "  volume  = {7},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {17--41},\n"
-                       "  doi     = {10.1145/355934.355936},\n"
-                       "}\n",
-                       4 )
+    : NonlinearSystem(
+        "Powell's quartic function",
+        "@article{Colville:1970,\n"
+        "  author    = {Colville, A. R.},\n"
+        "  title     = {A comparative study of nonlinear programming "
+        "codes},\n"
+        "  booktitle = {Proceedings of the {P}rinceton {S}ymposium on\n"
+        "               {M}athematical {P}rogramming (1967)},\n"
+        "  pages     = {487--501},\n"
+        "  publisher = {Princeton Univ. Press, Princeton, N.J.},\n"
+        "  year      = {1970},\n"
+        "}\n\n"
+        "@article{More:1981,\n"
+        "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
+        "Hillstrom, Kenneth E.},\n"
+        "  title   = {Testing Unconstrained Optimization Software},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1981},\n"
+        "  volume  = {7},\n"
+        "  number  = {1},\n"
+        "  pages   = {17--41},\n"
+        "  doi     = {10.1145/355934.355936},\n"
+        "}\n",
+        4 )
   {
   }
 

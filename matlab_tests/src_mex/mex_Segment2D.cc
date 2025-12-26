@@ -11,8 +11,8 @@
 #include "Utils_GG2D.hh"
 #include "Utils_mex.hh"
 
-#define IN_OUT( IN, OUT )                                                                                              \
-  UTILS_MEX_ASSERT( nlhs == OUT, "{}: expected " #OUT " output, nlhs = {}\n", CMD, nlhs );                             \
+#define IN_OUT( IN, OUT )                                                                  \
+  UTILS_MEX_ASSERT( nlhs == OUT, "{}: expected " #OUT " output, nlhs = {}\n", CMD, nlhs ); \
   UTILS_MEX_ASSERT( nrhs == IN, "{}: expected " #IN " input, nrhs = {}\n", CMD, nrhs )
 
 namespace Utils
@@ -30,7 +30,11 @@ namespace Utils
   \*/
 
   static void
-  do_new( int nlhs, mxArray * plhs[], int nrhs, mxArray const *[]  // unused
+  do_new(
+    int       nlhs,
+    mxArray * plhs[],
+    int       nrhs,
+    mxArray const *[]  // unused
   )
   {
 #define MEX_ERROR_MESSAGE_1 "Segment2DMexWrapper('new')"
@@ -43,10 +47,11 @@ namespace Utils
   // . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
 
   static void
-  do_delete( int nlhs,
-             mxArray *[],  // unused
-             int             nrhs,
-             mxArray const * prhs[] )
+  do_delete(
+    int nlhs,
+    mxArray *[],  // unused
+    int             nrhs,
+    mxArray const * prhs[] )
   {
 #define MEX_ERROR_MESSAGE_2 "Segment2DMexWrapper('delete',obj)"
 #define CMD MEX_ERROR_MESSAGE_2
@@ -205,36 +210,36 @@ namespace Utils
                                                       { "point_coord", do_point_coord },
                                                       { "intersect", do_intersect } };
 
-#define MEX_ERROR_MESSAGE                                                                                              \
-  "=========================================================================="                                         \
-  "===========\n"                                                                                                      \
-  "FiberMexWrapper: \n"                                                                                                \
-  "\n"                                                                                                                 \
-  "USAGE:\n"                                                                                                           \
-  "  - Constructors:\n"                                                                                                \
-  "    OBJ = AABB_treeMexWrapper( 'new' );\n"                                                                          \
-  "\n"                                                                                                                 \
-  "  On output:\n"                                                                                                     \
-  "    OBJ = pointer to the internal object\n"                                                                         \
-  "   " MEX_ERROR_MESSAGE_1                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_2                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_3                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_4                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_5                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_6                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_7                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_8                                                                                            \
-  "\n"                                                                                                                 \
-  "   " MEX_ERROR_MESSAGE_9                                                                                            \
-  "\n"                                                                                                                 \
-  "=========================================================================="                                         \
+#define MEX_ERROR_MESSAGE                                                      \
+  "==========================================================================" \
+  "===========\n"                                                              \
+  "FiberMexWrapper: \n"                                                        \
+  "\n"                                                                         \
+  "USAGE:\n"                                                                   \
+  "  - Constructors:\n"                                                        \
+  "    OBJ = AABB_treeMexWrapper( 'new' );\n"                                  \
+  "\n"                                                                         \
+  "  On output:\n"                                                             \
+  "    OBJ = pointer to the internal object\n"                                 \
+  "   " MEX_ERROR_MESSAGE_1                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_2                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_3                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_4                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_5                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_6                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_7                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_8                                                    \
+  "\n"                                                                         \
+  "   " MEX_ERROR_MESSAGE_9                                                    \
+  "\n"                                                                         \
+  "==========================================================================" \
   "===========\n"
 
   extern "C" void

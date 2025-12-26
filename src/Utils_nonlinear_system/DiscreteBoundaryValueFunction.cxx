@@ -18,29 +18,30 @@ class DiscreteBoundaryValueFunction : public NonlinearSystem
 
 public:
   DiscreteBoundaryValueFunction( integer neq )
-    : NonlinearSystem( "Discrete boundary value function",
-                       "@article{More:1979,\n"
-                       "  author  = {Mor{\'e}, Jorge J. and Cosnard, Michel Y.},\n"
-                       "  title   = {Numerical Solution of Nonlinear Equations},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1979},\n"
-                       "  volume  = {5},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {64--85},\n"
-                       "  doi     = {10.1145/355815.355820},\n"
-                       "}\n\n"
-                       "@article{More:1981,\n"
-                       "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
-                       "Hillstrom, Kenneth E.},\n"
-                       "  title   = {Testing Unconstrained Optimization Software},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1981},\n"
-                       "  volume  = {7},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {17--41},\n"
-                       "  doi     = {10.1145/355934.355936},\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Discrete boundary value function",
+        "@article{More:1979,\n"
+        "  author  = {Mor{\'e}, Jorge J. and Cosnard, Michel Y.},\n"
+        "  title   = {Numerical Solution of Nonlinear Equations},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1979},\n"
+        "  volume  = {5},\n"
+        "  number  = {1},\n"
+        "  pages   = {64--85},\n"
+        "  doi     = {10.1145/355815.355820},\n"
+        "}\n\n"
+        "@article{More:1981,\n"
+        "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
+        "Hillstrom, Kenneth E.},\n"
+        "  title   = {Testing Unconstrained Optimization Software},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1981},\n"
+        "  volume  = {7},\n"
+        "  number  = {1},\n"
+        "  pages   = {17--41},\n"
+        "  doi     = {10.1145/355934.355936},\n"
+        "}\n",
+        neq )
     , h( 1 / real_type( n + 1 ) )
   {
     check_min_equations( n, 1 );

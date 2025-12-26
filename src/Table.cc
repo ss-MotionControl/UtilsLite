@@ -40,7 +40,6 @@
 
 \*/
 
-
 //
 // file: Table.cc
 //
@@ -166,15 +165,19 @@ namespace Utils::Table
 
   Row::Row( Table * table, vecstr const & cells ) : m_Table( table )
   {
-    for_each( cells.begin(), cells.end(),
-              bind( static_cast<void ( Row::* )( string_view )>( &Row::cell ), this, std::placeholders::_1 ) );
+    for_each(
+      cells.begin(),
+      cells.end(),
+      bind( static_cast<void ( Row::* )( string_view )>( &Row::cell ), this, std::placeholders::_1 ) );
   }
 
   void
   Row::cells( vecstr const & cells )
   {
-    for_each( cells.begin(), cells.end(),
-              bind( static_cast<void ( Row::* )( string_view )>( &Row::cell ), this, std::placeholders::_1 ) );
+    for_each(
+      cells.begin(),
+      cells.end(),
+      bind( static_cast<void ( Row::* )( string_view )>( &Row::cell ), this, std::placeholders::_1 ) );
   }
 
   integer
@@ -200,11 +203,13 @@ namespace Utils::Table
   Row::height() const
   {
     integer maxlen = 1;
-    for_each( m_Cells.begin(), m_Cells.end(),
-              [&maxlen]( Cell const & cell ) -> void
-              {
-                if ( cell.height() > maxlen ) maxlen = cell.height();
-              } );
+    for_each(
+      m_Cells.begin(),
+      m_Cells.end(),
+      [&maxlen]( Cell const & cell ) -> void
+      {
+        if ( cell.height() > maxlen ) maxlen = cell.height();
+      } );
     return maxlen;
   }
 
@@ -246,11 +251,13 @@ namespace Utils::Table
   {
     if ( n > this->num_columns() )
       throw out_of_range( "Table error: The table just has " + to_string( this->num_columns() ) + " columns." );
-    for_each( m_Rows.begin(), m_Rows.end(),
-              [n, align]( Row & row ) -> void
-              {
-                if ( n < row.num_cells() ) row[n].alignment( align );
-              } );
+    for_each(
+      m_Rows.begin(),
+      m_Rows.end(),
+      [n, align]( Row & row ) -> void
+      {
+        if ( n < row.num_cells() ) row[n].alignment( align );
+      } );
   }
 
   void
@@ -367,8 +374,11 @@ namespace Utils::Table
   Table::render() const
   {
     stringstream ss;
-    string       sep = this->render_separator( m_Style.border_left_mid(), m_Style.border_mid_mid(),
-                                               m_Style.border_right_mid(), m_Style.border_mid() );
+    string       sep = this->render_separator(
+      m_Style.border_left_mid(),
+      m_Style.border_mid_mid(),
+      m_Style.border_right_mid(),
+      m_Style.border_mid() );
 
     if ( !m_Title.empty() )
     {
@@ -385,24 +395,32 @@ namespace Utils::Table
     }
     else
     {
-      ss << render_separator( m_Style.border_top_left(), m_Style.border_top_mid(), m_Style.border_top_right(),
-                              m_Style.border_top() );
+      ss << render_separator(
+        m_Style.border_top_left(),
+        m_Style.border_top_mid(),
+        m_Style.border_top_right(),
+        m_Style.border_top() );
     }
 
     if ( m_Headings.num_cells() > 0 ) ss << m_Headings.render() << sep;
 
     if ( !m_Rows.empty() )
     {
-      for_each( m_Rows.begin(), --m_Rows.end(),
-                [&ss, sep]( Row const & row ) -> void
-                {
-                  if ( row.num_cells() > 0 ) ss << row.render() << sep;
-                } );
+      for_each(
+        m_Rows.begin(),
+        --m_Rows.end(),
+        [&ss, sep]( Row const & row ) -> void
+        {
+          if ( row.num_cells() > 0 ) ss << row.render() << sep;
+        } );
       ss << m_Rows.back().render();
     }
 
-    ss << this->render_separator( m_Style.border_bottom_left(), m_Style.border_bottom_mid(),
-                                  m_Style.border_bottom_right(), m_Style.border_bottom() );
+    ss << this->render_separator(
+      m_Style.border_bottom_left(),
+      m_Style.border_bottom_mid(),
+      m_Style.border_bottom_right(),
+      m_Style.border_bottom() );
     return ss.str();
   }
 }  // namespace Utils::Table

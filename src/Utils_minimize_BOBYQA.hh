@@ -192,11 +192,20 @@ namespace Utils
     integer       m_max_f_eval   = 10000;
     integer       n_num_f_saved  = 0;
     integer       n_num_f_rescue = 0;
-    
-    Status        m_status;
-    string        m_reason;
 
-    Scalar eval( Vector const & x );
+    Scalar
+    eval( Vector const & x )
+    {
+      ++m_num_f_eval;
+      Scalar f = m_fun( x );
+      if ( m_print_level == 3 )
+        fmt::print(
+          "    Function n.{} F(X) = {:15}   X: {}\n",
+          m_num_f_eval,
+          fmt::format( "{:.9}", f ),
+          print_vec( x, 6 ) );
+      return f;
+    }
 
     integer m_nv;
     integer m_npt;
@@ -249,7 +258,6 @@ namespace Utils
     Vector m_v_lag;
     Vector m_g_lag;
     Vector m_hcol;
-    Vector m_curv;
 
     Matrix m_xpt;
     Matrix m_B;
@@ -263,9 +271,6 @@ namespace Utils
     Vector m_hred;
 
     Vector m_WNPT;
-
-    Vector m_VN0;
-    Vector m_VN1;
 
     static Scalar
     power2( Scalar const x )
@@ -397,12 +402,13 @@ namespace Utils
       update();
     }
 
-    Status minimize( integer const n,
-                     integer const npt,
-                     bobyqa_objfun const &,
-                     Vector &       x,
-                     Vector const & xlower,
-                     Vector const & xupper );
+    Status minimize(
+      integer const n,
+      integer const npt,
+      bobyqa_objfun const &,
+      Vector &       x,
+      Vector const & xlower,
+      Vector const & xupper );
   };
 
 }  // namespace Utils

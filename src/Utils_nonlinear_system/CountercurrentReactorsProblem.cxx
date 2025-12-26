@@ -8,25 +8,25 @@
  |    email: enrico.bertolazzi@unitn.it
 \*/
 
-#define COUNTERCURRENT_BIBTEX                                                                                          \
-  "@article{Bogle:1990,\n"                                                                                             \
-  "  author  = {Bogle, I. and Perkins, J.},\n"                                                                         \
-  "  title   = {A New Sparsity Preserving Quasi-Newton Update\n"                                                       \
-  "             for Solving Nonlinear Equations},\n"                                                                   \
-  "  journal = {SIAM Journal on Scientific and Statistical Computing},\n"                                              \
-  "  year    = {1990},\n"                                                                                              \
-  "  volume  = {11},\n"                                                                                                \
-  "  number  = {4},\n"                                                                                                 \
-  "  pages   = {621-630},\n"                                                                                           \
-  "  doi     = {10.1137/0911036},\n"                                                                                   \
-  "}\n"                                                                                                                \
-  "@techreport{Bodon:1990,\n"                                                                                          \
-  "  author  = {Elena Bodon and Ladislav Luksan and Emilio Spedicato},\n"                                              \
-  "  title   = {Numerical performance of ABS codes for nonlinear least "                                               \
-  "squares},\n"                                                                                                        \
-  "  year    = {2001},\n"                                                                                              \
-  "  number  = {Tech. Rep. DMSIA 27/2001, Universita degli Studi di "                                                  \
-  "Bergamo}\n"                                                                                                         \
+#define COUNTERCURRENT_BIBTEX                                             \
+  "@article{Bogle:1990,\n"                                                \
+  "  author  = {Bogle, I. and Perkins, J.},\n"                            \
+  "  title   = {A New Sparsity Preserving Quasi-Newton Update\n"          \
+  "             for Solving Nonlinear Equations},\n"                      \
+  "  journal = {SIAM Journal on Scientific and Statistical Computing},\n" \
+  "  year    = {1990},\n"                                                 \
+  "  volume  = {11},\n"                                                   \
+  "  number  = {4},\n"                                                    \
+  "  pages   = {621-630},\n"                                              \
+  "  doi     = {10.1137/0911036},\n"                                      \
+  "}\n"                                                                   \
+  "@techreport{Bodon:1990,\n"                                             \
+  "  author  = {Elena Bodon and Ladislav Luksan and Emilio Spedicato},\n" \
+  "  title   = {Numerical performance of ABS codes for nonlinear least "  \
+  "squares},\n"                                                           \
+  "  year    = {2001},\n"                                                 \
+  "  number  = {Tech. Rep. DMSIA 27/2001, Universita degli Studi di "     \
+  "Bergamo}\n"                                                            \
   "}\n"
 
 //  Problem N.2
@@ -144,7 +144,6 @@ public:
     x_vec[2] = 100 * x0;
   }
 };
-
 
 class CountercurrentReactorsProblem2 : public NonlinearSystem
 {

@@ -12,23 +12,23 @@
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-#define Bohachevsky_BIBTEX                                                                                             \
-  "@book{Michalewicz:1996,\n"                                                                                          \
-  "  author = {Michalewicz, Zbigniew},\n"                                                                              \
-  "  title = {Genetic Algorithms + Data Structures = Evolution Programs (3rd "                                         \
-  "Ed.)},\n"                                                                                                           \
-  "  year = {1996},\n"                                                                                                 \
-  "  isbn = {3-540-60676-9},\n"                                                                                        \
-  "  publisher = {Springer-Verlag},\n"                                                                                 \
-  "  address = {Berlin, Heidelberg},\n"                                                                                \
-  "}\n\n"                                                                                                              \
-  "@book{brent2002algorithms,\n"                                                                                       \
-  "  author={Brent, R.P.},\n"                                                                                          \
-  "  title={Algorithms for Minimization Without Derivatives},\n"                                                       \
-  "  year={2002},\n"                                                                                                   \
-  "  isbn={9780486419985},\n"                                                                                          \
-  "  series={Dover Books on Mathematics},\n"                                                                           \
-  "  publisher={Dover Publications}\n"                                                                                 \
+#define Bohachevsky_BIBTEX                                                     \
+  "@book{Michalewicz:1996,\n"                                                  \
+  "  author = {Michalewicz, Zbigniew},\n"                                      \
+  "  title = {Genetic Algorithms + Data Structures = Evolution Programs (3rd " \
+  "Ed.)},\n"                                                                   \
+  "  year = {1996},\n"                                                         \
+  "  isbn = {3-540-60676-9},\n"                                                \
+  "  publisher = {Springer-Verlag},\n"                                         \
+  "  address = {Berlin, Heidelberg},\n"                                        \
+  "}\n\n"                                                                      \
+  "@book{brent2002algorithms,\n"                                               \
+  "  author={Brent, R.P.},\n"                                                  \
+  "  title={Algorithms for Minimization Without Derivatives},\n"               \
+  "  year={2002},\n"                                                           \
+  "  isbn={9780486419985},\n"                                                  \
+  "  series={Dover Books on Mathematics},\n"                                   \
+  "  publisher={Dover Publications}\n"                                         \
   "}\n"
 
 class BohachevskyN1 : public NonlinearSystem

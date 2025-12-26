@@ -53,15 +53,31 @@ test_exact_solutions()
   // ------------------------------------------------------------
   // Header con bordo esterno doppio e interno singolo
   // ------------------------------------------------------------
-  fmt::print( "╔{}╦{}╦{}╦{}╗\n", rep( Wname + 2, "═" ), rep( Wsol + 2, "═" ), rep( Wres + 2, "═" ),
-              rep( Wstat + 2, "═" ) );
+  fmt::print(
+    "╔{}╦{}╦{}╦{}╗\n",
+    rep( Wname + 2, "═" ),
+    rep( Wsol + 2, "═" ),
+    rep( Wres + 2, "═" ),
+    rep( Wstat + 2, "═" ) );
 
   // Header
-  fmt::print( "║ {:^{}} ║ {:^{}} ║ {:^{}} ║ {:^{}} ║\n", "Test", Wname, "Sol#", Wsol, "Residuo", Wres, "Status",
-              Wstat );
+  fmt::print(
+    "║ {:^{}} ║ {:^{}} ║ {:^{}} ║ {:^{}} ║\n",
+    "Test",
+    Wname,
+    "Sol#",
+    Wsol,
+    "Residuo",
+    Wres,
+    "Status",
+    Wstat );
 
-  fmt::print( "╠{}╬{}╬{}╬{}╣\n", rep( Wname + 2, "═" ), rep( Wsol + 2, "═" ), rep( Wres + 2, "═" ),
-              rep( Wstat + 2, "═" ) );
+  fmt::print(
+    "╠{}╬{}╬{}╬{}╣\n",
+    rep( Wname + 2, "═" ),
+    rep( Wsol + 2, "═" ),
+    rep( Wres + 2, "═" ),
+    rep( Wstat + 2, "═" ) );
 
   // ------------------------------------------------------------
   // Corpo tabella
@@ -130,8 +146,12 @@ test_exact_solutions()
   }
 
   // Footer
-  fmt::print( "╚{}╩{}╩{}╩{}╝\n", rep( Wname + 2, "═" ), rep( Wsol + 2, "═" ), rep( Wres + 2, "═" ),
-              rep( Wstat + 2, "═" ) );
+  fmt::print(
+    "╚{}╩{}╩{}╩{}╝\n",
+    rep( Wname + 2, "═" ),
+    rep( Wsol + 2, "═" ),
+    rep( Wres + 2, "═" ),
+    rep( Wstat + 2, "═" ) );
 
   fmt::print( "\n" );
 }

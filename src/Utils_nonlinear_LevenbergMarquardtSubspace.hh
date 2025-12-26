@@ -435,9 +435,11 @@ namespace Utils
           for ( integer i = 0; i < m; ++i ) { residuals_with_idx.emplace_back( std::abs( f( i ) ), i ); }
 
           // Ordina per residuo decrescente
-          std::partial_sort( residuals_with_idx.begin(), residuals_with_idx.begin() + actual_block_size,
-                             residuals_with_idx.end(),
-                             []( const auto & a, const auto & b ) { return a.first > b.first; } );
+          std::partial_sort(
+            residuals_with_idx.begin(),
+            residuals_with_idx.begin() + actual_block_size,
+            residuals_with_idx.end(),
+            []( const auto & a, const auto & b ) { return a.first > b.first; } );
 
           for ( integer i = 0; i < actual_block_size; ++i )
           {
@@ -474,12 +476,13 @@ namespace Utils
 
     //! Estrae il blocco di Jacobiano e residui
     void
-    extract_block( NonlinearSystem &            system,
-                   const Vector &               x,
-                   const Vector &               f_full,
-                   const std::vector<integer> & block_indices,
-                   Matrix &                     J_block,
-                   Vector &                     f_block )
+    extract_block(
+      NonlinearSystem &            system,
+      const Vector &               x,
+      const Vector &               f_full,
+      const std::vector<integer> & block_indices,
+      Matrix &                     J_block,
+      Vector &                     f_block )
     {
       integer m          = system.num_equations();
       integer block_size = block_indices.size();
@@ -528,13 +531,14 @@ namespace Utils
 
     //! Calcola il rapporto di riduzione (rho) per LM - VERSIONE CORRETTA
     real_type
-    compute_reduction_ratio( NonlinearSystem & system,
-                             const Vector &    x,
-                             real_type         norm_f_old,
-                             const Vector &    dx,
-                             const Matrix &    J_block,
-                             const Vector &    f_block,
-                             real_type         lambda )
+    compute_reduction_ratio(
+      NonlinearSystem & system,
+      const Vector &    x,
+      real_type         norm_f_old,
+      const Vector &    dx,
+      const Matrix &    J_block,
+      const Vector &    f_block,
+      real_type         lambda )
     {
       // Predicted reduction: phi(0) - phi(dx)
       // phi(dx) = ||f_block + J_block*dx||^2 + lambda*||dx||^2
@@ -567,12 +571,13 @@ namespace Utils
 
     //! Line search di Armijo per LM
     real_type
-    armijo_line_search( NonlinearSystem & system,
-                        const Vector &    x,
-                        real_type         norm_f_old,
-                        const Vector &    dx,
-                        const Matrix &    J_block,
-                        const Vector &    f_block )
+    armijo_line_search(
+      NonlinearSystem & system,
+      const Vector &    x,
+      real_type         norm_f_old,
+      const Vector &    dx,
+      const Matrix &    J_block,
+      const Vector &    f_block )
     {
       integer   n     = x.size();
       real_type alpha = 1.0;
@@ -633,12 +638,13 @@ namespace Utils
 
     //! Stampa informazioni sull'iterazione
     void
-    print_iteration_info( integer   iter,
-                          real_type norm_f,
-                          real_type initial_norm,
-                          real_type lambda,
-                          real_type rho,
-                          real_type dx_norm ) const
+    print_iteration_info(
+      integer   iter,
+      real_type norm_f,
+      real_type initial_norm,
+      real_type lambda,
+      real_type rho,
+      real_type dx_norm ) const
     {
       if ( m_verbose_level < 2 ) return;
       if ( iter % m_print_frequency != 0 ) return;
@@ -658,13 +664,15 @@ namespace Utils
       if ( m_verbose_level == 0 ) return;
 
       fmt::print( "\n" );
-      fmt::print( fmt::fg( fmt::color::light_blue ),
-                  "════════════════════════════════════════════════════════════"
-                  "═══════\n" );
+      fmt::print(
+        fmt::fg( fmt::color::light_blue ),
+        "════════════════════════════════════════════════════════════"
+        "═══════\n" );
       fmt::print( "Incremental Levenberg-Marquardt - Summary\n" );
-      fmt::print( fmt::fg( fmt::color::light_blue ),
-                  "════════════════════════════════════════════════════════════"
-                  "═══════\n" );
+      fmt::print(
+        fmt::fg( fmt::color::light_blue ),
+        "════════════════════════════════════════════════════════════"
+        "═══════\n" );
 
       if ( m_converged ) { fmt::print( fmt::fg( fmt::color::green ), "Status:             ✓ CONVERGED\n" ); }
       else
@@ -689,9 +697,10 @@ namespace Utils
         fmt::print( "Residual reduction: {:.3e} ({:.1f}%)\n", reduction, ( 1.0 - final_norm / initial_norm ) * 100.0 );
       }
 
-      fmt::print( fmt::fg( fmt::color::light_blue ),
-                  "════════════════════════════════════════════════════════════"
-                  "═══════\n\n" );
+      fmt::print(
+        fmt::fg( fmt::color::light_blue ),
+        "════════════════════════════════════════════════════════════"
+        "═══════\n\n" );
     }
 
   public:
@@ -723,17 +732,20 @@ namespace Utils
 
       if ( m_verbose_level > 0 )
       {
-        fmt::print( fmt::fg( fmt::color::light_blue ),
-                    "══════════════════════════════════════════════════════════"
-                    "═════════\n" );
+        fmt::print(
+          fmt::fg( fmt::color::light_blue ),
+          "══════════════════════════════════════════════════════════"
+          "═════════\n" );
         fmt::print( fmt::fg( fmt::color::light_blue ), "Starting Incremental Levenberg-Marquardt\n" );
         fmt::print( "Initial residual:   {:.2e}\n", norm_f );
+        fmt::print( "Num Equation:       {}\n", m );
         fmt::print( "Block size:         {}\n", m_block_size );
         fmt::print( "Strategy:           {}\n", strategy_name( m_strategy ) );
         fmt::print( "Initial lambda:     {:.2e}\n", m_lambda );
-        fmt::print( fmt::fg( fmt::color::light_blue ),
-                    "══════════════════════════════════════════════════════════"
-                    "═════════\n" );
+        fmt::print(
+          fmt::fg( fmt::color::light_blue ),
+          "══════════════════════════════════════════════════════════"
+          "═════════\n" );
       }
 
       // Buffer per permutazione se necessario
@@ -794,8 +806,11 @@ namespace Utils
 
           if ( m_verbose_level >= 3 )
           {
-            fmt::print( fmt::fg( fmt::color::yellow ), "  ⚠ Small step (‖dx‖={:.2e}), increasing λ to {:.2e}\n",
-                        dx_norm, m_lambda );
+            fmt::print(
+              fmt::fg( fmt::color::yellow ),
+              "  ⚠ Small step (‖dx‖={:.2e}), increasing λ to {:.2e}\n",
+              dx_norm,
+              m_lambda );
           }
           continue;
         }
@@ -849,10 +864,13 @@ namespace Utils
 
             if ( m_verbose_level >= 3 )
             {
-              fmt::print( fmt::fg( fmt::color::green ),
-                          "  ✓ Good reduction (ρ={:.3f}), decreasing λ: {:.2e} "
-                          "→ {:.2e}\n",
-                          rho, old_lambda, m_lambda );
+              fmt::print(
+                fmt::fg( fmt::color::green ),
+                "  ✓ Good reduction (ρ={:.3f}), decreasing λ: {:.2e} "
+                "→ {:.2e}\n",
+                rho,
+                old_lambda,
+                m_lambda );
             }
           }
           else if ( rho > m_bad_reduction )
@@ -864,8 +882,11 @@ namespace Utils
 
             if ( m_verbose_level >= 3 )
             {
-              fmt::print( fmt::fg( fmt::color::yellow ), "  ~ Moderate reduction (ρ={:.3f}), keeping λ={:.2e}\n", rho,
-                          m_lambda );
+              fmt::print(
+                fmt::fg( fmt::color::yellow ),
+                "  ~ Moderate reduction (ρ={:.3f}), keeping λ={:.2e}\n",
+                rho,
+                m_lambda );
             }
           }
           else
@@ -879,10 +900,13 @@ namespace Utils
 
             if ( m_verbose_level >= 2 )
             {
-              fmt::print( fmt::fg( fmt::color::red ),
-                          "  ✗ Bad reduction (ρ={:.3f}), increasing λ: {:.2e} "
-                          "→ {:.2e}\n",
-                          rho, old_lambda, m_lambda );
+              fmt::print(
+                fmt::fg( fmt::color::red ),
+                "  ✗ Bad reduction (ρ={:.3f}), increasing λ: {:.2e} "
+                "→ {:.2e}\n",
+                rho,
+                old_lambda,
+                m_lambda );
             }
           }
         }
@@ -933,8 +957,10 @@ namespace Utils
         {
           if ( m_verbose_level > 0 )
           {
-            fmt::print( fmt::fg( fmt::color::yellow ), "⚠ Lambda too large ({:.2e}), resetting to initial\n",
-                        m_lambda );
+            fmt::print(
+              fmt::fg( fmt::color::yellow ),
+              "⚠ Lambda too large ({:.2e}), resetting to initial\n",
+              m_lambda );
           }
           m_lambda          = 0.1;
           no_progress_count = 0;
@@ -959,17 +985,23 @@ namespace Utils
       {
         if ( m_converged )
         {
-          fmt::print( fmt::fg( fmt::color::green ),
-                      "✓ Finished: {} iterations, {} function evals, final "
-                      "residual: {:.2e}\n",
-                      m_num_iterations, m_num_function_evals, norm_f );
+          fmt::print(
+            fmt::fg( fmt::color::green ),
+            "✓ Finished: {} iterations, {} function evals, final "
+            "residual: {:.2e}\n",
+            m_num_iterations,
+            m_num_function_evals,
+            norm_f );
         }
         else
         {
-          fmt::print( fmt::fg( fmt::color::yellow ),
-                      "⚠ Finished: {} iterations, {} function evals, final "
-                      "residual: {:.2e}\n",
-                      m_num_iterations, m_num_function_evals, norm_f );
+          fmt::print(
+            fmt::fg( fmt::color::yellow ),
+            "⚠ Finished: {} iterations, {} function evals, final "
+            "residual: {:.2e}\n",
+            m_num_iterations,
+            m_num_function_evals,
+            norm_f );
         }
         print_summary( m_initial_residual, norm_f );
       }

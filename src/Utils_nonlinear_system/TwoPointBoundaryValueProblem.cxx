@@ -16,18 +16,19 @@ class TwoPointBoundaryValueProblem : public NonlinearSystem
 {
 public:
   TwoPointBoundaryValueProblem( integer neq )
-    : NonlinearSystem( "Two-Point Boundary Value Problem",
-                       "@article{More:1979,\n"
-                       "  author  = {Mor{\'e}, Jorge J. and Cosnard, Michel Y.},\n"
-                       "  title   = {Numerical Solution of Nonlinear Equations},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1979},\n"
-                       "  volume  = {5},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {64--85},\n"
-                       "  doi     = {10.1145/355815.355820},\n"
-                       "}\n\n",
-                       neq )
+    : NonlinearSystem(
+        "Two-Point Boundary Value Problem",
+        "@article{More:1979,\n"
+        "  author  = {Mor{\'e}, Jorge J. and Cosnard, Michel Y.},\n"
+        "  title   = {Numerical Solution of Nonlinear Equations},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1979},\n"
+        "  volume  = {5},\n"
+        "  number  = {1},\n"
+        "  pages   = {64--85},\n"
+        "  doi     = {10.1145/355815.355820},\n"
+        "}\n\n",
+        neq )
   {
   }
 

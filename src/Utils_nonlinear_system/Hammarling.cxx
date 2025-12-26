@@ -12,8 +12,8 @@
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-#define HAMMARLING_BIBTEX                                                                                              \
-  "n by n matrix square root problem (hammarling)"                                                                     \
+#define HAMMARLING_BIBTEX                          \
+  "n by n matrix square root problem (hammarling)" \
   "S. J. Hammarling, private communication to P. E. Gill.\n"
 
 class Hammarling2x2matrixSquareRoot : public NonlinearSystem
@@ -122,7 +122,6 @@ class Hammarling3x3matrixSquareRootProblem : public NonlinearSystem
     return x( 0 ) * x( 2 ) + x( 1 ) * x( 5 ) + x( 2 ) * x( 8 );
   }
 
-
   real_type
   f3( Vector const & x ) const
   {
@@ -140,7 +139,6 @@ class Hammarling3x3matrixSquareRootProblem : public NonlinearSystem
   {
     return x( 3 ) * x( 2 ) + x( 4 ) * x( 5 ) + x( 5 ) * x( 8 );
   }
-
 
   real_type
   f6( Vector const & x ) const
@@ -161,16 +159,17 @@ class Hammarling3x3matrixSquareRootProblem : public NonlinearSystem
   }
 
 public:
-  Hammarling3x3matrixSquareRootProblem( string const & n,
-                                        real_type      x0,
-                                        real_type      x1,
-                                        real_type      x2,
-                                        real_type      x3,
-                                        real_type      x4,
-                                        real_type      x5,
-                                        real_type      x6,
-                                        real_type      x7,
-                                        real_type      x8 )
+  Hammarling3x3matrixSquareRootProblem(
+    string const & n,
+    real_type      x0,
+    real_type      x1,
+    real_type      x2,
+    real_type      x3,
+    real_type      x4,
+    real_type      x5,
+    real_type      x6,
+    real_type      x7,
+    real_type      x8 )
     : NonlinearSystem( n, HAMMARLING_BIBTEX, 9 )
   {
     xe.resize( 9 );
@@ -300,16 +299,17 @@ class Hammarling3x3matrixSquareRootProblemN1 : public Hammarling3x3matrixSquareR
 {
 public:
   Hammarling3x3matrixSquareRootProblemN1()
-    : Hammarling3x3matrixSquareRootProblem( "Hammarling 3 by 3 matrix square root problem N.1",
-                                            0.01,
-                                            50,
-                                            0,
-                                            0,
-                                            0.01,
-                                            0,
-                                            0,
-                                            0,
-                                            0.01 )
+    : Hammarling3x3matrixSquareRootProblem(
+        "Hammarling 3 by 3 matrix square root problem N.1",
+        0.01,
+        50,
+        0,
+        0,
+        0.01,
+        0,
+        0,
+        0,
+        0.01 )
   {
   }
 };
@@ -322,16 +322,17 @@ class Hammarling3x3matrixSquareRootProblemN2 : public Hammarling3x3matrixSquareR
 {
 public:
   Hammarling3x3matrixSquareRootProblemN2()
-    : Hammarling3x3matrixSquareRootProblem( "Hammarling 3 by 3 matrix square root problem N.2",
-                                            0,
-                                            0,
-                                            1,
-                                            1,
-                                            1,
-                                            0,
-                                            0,
-                                            1,
-                                            0 )
+    : Hammarling3x3matrixSquareRootProblem(
+        "Hammarling 3 by 3 matrix square root problem N.2",
+        0,
+        0,
+        1,
+        1,
+        1,
+        0,
+        0,
+        1,
+        0 )
   {
   }
 };
@@ -344,16 +345,17 @@ class Hammarling3x3matrixSquareRootProblemN3 : public Hammarling3x3matrixSquareR
 {
 public:
   Hammarling3x3matrixSquareRootProblemN3()
-    : Hammarling3x3matrixSquareRootProblem( "Hammarling 3 by 3 matrix square root problem N.3",
-                                            1,
-                                            1,
-                                            1,
-                                            0,
-                                            0,
-                                            0,
-                                            0,
-                                            0,
-                                            0 )
+    : Hammarling3x3matrixSquareRootProblem(
+        "Hammarling 3 by 3 matrix square root problem N.3",
+        1,
+        1,
+        1,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0 )
   {
   }
 };

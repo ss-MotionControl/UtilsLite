@@ -130,10 +130,10 @@ namespace rang
     }
 
     template <typename T>
-    using enableStd = typename enable_if<is_same<T, rang::style>::value || is_same<T, rang::fg>::value ||
-                                             is_same<T, rang::bg>::value || is_same<T, rang::fgB>::value ||
-                                             is_same<T, rang::bgB>::value,
-                                         ostream &>::type;
+    using enableStd = typename enable_if<
+      is_same<T, rang::style>::value || is_same<T, rang::fg>::value || is_same<T, rang::bg>::value ||
+        is_same<T, rang::fgB>::value || is_same<T, rang::bgB>::value,
+      ostream &>::type;
 
     extern bool isTerminal( streambuf const * ) noexcept;
     extern bool supportsAnsi( streambuf const * ) noexcept;
@@ -192,8 +192,8 @@ namespace rang
     {
       case control::Auto:
         return rang_implementation::supportsColor() && rang_implementation::isTerminal( os.rdbuf() )
-                   ? rang_implementation::setColor( os, value )
-                   : os;
+                 ? rang_implementation::setColor( os, value )
+                 : os;
       case control::Force:
         return rang_implementation::setColor( os, value );
       default:

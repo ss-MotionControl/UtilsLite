@@ -16,30 +16,31 @@ class FreudensteinRothFunction : public NonlinearSystem
 {
 public:
   FreudensteinRothFunction()
-    : NonlinearSystem( "Freudenstein-Roth function",
-                       "@article{Freudenstein:1963,\n"
-                       "  author  = {Freudenstein, Ferdinand and Roth, Bernhard},\n"
-                       "  title   = {Numerical Solution of Systems of Nonlinear "
-                       "Equations},\n"
-                       "  journal = {J. ACM},\n"
-                       "  year    = {1963},\n"
-                       "  volume  = {10},\n"
-                       "  number  = {4},\n"
-                       "  pages   = {550--556},\n"
-                       "  doi     = {10.1145/321186.321200}\n"
-                       "}\n\n"
-                       "@article{More:1981,\n"
-                       "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
-                       "Hillstrom, Kenneth E.},\n"
-                       "  title   = {Testing Unconstrained Optimization Software},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1981},\n"
-                       "  volume  = {7},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {17--41},\n"
-                       "  doi     = {10.1145/355934.355936},\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Freudenstein-Roth function",
+        "@article{Freudenstein:1963,\n"
+        "  author  = {Freudenstein, Ferdinand and Roth, Bernhard},\n"
+        "  title   = {Numerical Solution of Systems of Nonlinear "
+        "Equations},\n"
+        "  journal = {J. ACM},\n"
+        "  year    = {1963},\n"
+        "  volume  = {10},\n"
+        "  number  = {4},\n"
+        "  pages   = {550--556},\n"
+        "  doi     = {10.1145/321186.321200}\n"
+        "}\n\n"
+        "@article{More:1981,\n"
+        "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
+        "Hillstrom, Kenneth E.},\n"
+        "  title   = {Testing Unconstrained Optimization Software},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1981},\n"
+        "  volume  = {7},\n"
+        "  number  = {1},\n"
+        "  pages   = {17--41},\n"
+        "  doi     = {10.1145/355934.355936},\n"
+        "}\n",
+        2 )
   {
   }
 

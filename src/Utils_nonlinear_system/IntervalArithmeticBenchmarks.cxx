@@ -19,32 +19,33 @@ class IntervalArithmeticBenchmarks : public NonlinearSystem
 
 public:
   IntervalArithmeticBenchmarks()
-    : NonlinearSystem( "Interval Arithmetic Benchmarks",
-                       "@article{Morgan:1987,\n"
-                       "  author  = {Alexander Morgan and Andrew Sommese},\n"
-                       "  title   = {Computing all solutions to polynomial\n"
-                       "             systems using homotopy continuation},\n"
-                       "  journal = {Applied Mathematics and Computation},\n"
-                       "  volume  = {24},\n"
-                       "  number  = {2},\n"
-                       "  pages   = {115--138},\n"
-                       "  year    = {1987},\n"
-                       "  issn    = {0096-3003},\n"
-                       "  doi     = {10.1016/0096-3003(87)90064-6}\n"
-                       "}\n\n"
-                       "@article{Hentenryck:1997,\n"
-                       "  author  = {Van Hentenryck, P. and McAllester, D. "
-                       "and Kapur, D.},\n"
-                       "  title   = {Solving Polynomial Systems Using a "
-                       "Branch and Prune Approach},\n"
-                       "  journal = {SIAM Journal on Numerical Analysis},\n"
-                       "  year    = {1997},\n"
-                       "  volume  = {34},\n"
-                       "  number  = {2},\n"
-                       "  pages   = {797-827},\n"
-                       "  doi = {10.1137/S0036142995281504}\n"
-                       "}\n",
-                       10 )
+    : NonlinearSystem(
+        "Interval Arithmetic Benchmarks",
+        "@article{Morgan:1987,\n"
+        "  author  = {Alexander Morgan and Andrew Sommese},\n"
+        "  title   = {Computing all solutions to polynomial\n"
+        "             systems using homotopy continuation},\n"
+        "  journal = {Applied Mathematics and Computation},\n"
+        "  volume  = {24},\n"
+        "  number  = {2},\n"
+        "  pages   = {115--138},\n"
+        "  year    = {1987},\n"
+        "  issn    = {0096-3003},\n"
+        "  doi     = {10.1016/0096-3003(87)90064-6}\n"
+        "}\n\n"
+        "@article{Hentenryck:1997,\n"
+        "  author  = {Van Hentenryck, P. and McAllester, D. "
+        "and Kapur, D.},\n"
+        "  title   = {Solving Polynomial Systems Using a "
+        "Branch and Prune Approach},\n"
+        "  journal = {SIAM Journal on Numerical Analysis},\n"
+        "  year    = {1997},\n"
+        "  volume  = {34},\n"
+        "  number  = {2},\n"
+        "  pages   = {797-827},\n"
+        "  doi = {10.1137/S0036142995281504}\n"
+        "}\n",
+        10 )
   {
     a1  = 0.25428722;
     a2  = 0.37842197;

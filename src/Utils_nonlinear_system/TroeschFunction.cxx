@@ -19,16 +19,17 @@ class TroeschFunction : public NonlinearSystem
 
 public:
   TroeschFunction( integer neq )
-    : NonlinearSystem( "Troesch Function",
-                       "@inproceedings{Varadhan2009,\n"
-                       "  author={R. Varadhan and Paul D. Gilbert},\n"
-                       "  title={{BB:} An {R} Package for Solving a Large System of\n"
-                       "         Nonlinear Equations and for Optimizing a "
-                       "High-Dimensional\n"
-                       "         Nonlinear Objective Function},\n"
-                       "  year={2009}\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Troesch Function",
+        "@inproceedings{Varadhan2009,\n"
+        "  author={R. Varadhan and Paul D. Gilbert},\n"
+        "  title={{BB:} An {R} Package for Solving a Large System of\n"
+        "         Nonlinear Equations and for Optimizing a "
+        "High-Dimensional\n"
+        "         Nonlinear Objective Function},\n"
+        "  year={2009}\n"
+        "}\n",
+        neq )
     , rho( 10 )
     , h( 1.0 / ( neq + 1 ) )
   {

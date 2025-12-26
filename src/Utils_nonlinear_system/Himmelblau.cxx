@@ -16,22 +16,23 @@ class Himmelblau : public NonlinearSystem
 {
 public:
   Himmelblau()
-    : NonlinearSystem( "Himmelblau function",
-                       "@book{himmelblau:1972,\n"
-                       "  author    = {Himmelblau, D.M.},\n"
-                       "  title     = {Applied nonlinear programming},\n"
-                       "  year      = {1972},\n"
-                       "  publisher = {McGraw-Hill}\n"
-                       "}\n\n"
-                       "@book{brent2013,\n"
-                       "  author    = {Brent, R.P.},\n"
-                       "  title     = {Algorithms for Minimization Without Derivatives},\n"
-                       "  isbn      = {9780486143682},\n"
-                       "  series    = {Dover Books on Mathematics},\n"
-                       "  year      = {2013},\n"
-                       "  publisher = {Dover Publications}\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Himmelblau function",
+        "@book{himmelblau:1972,\n"
+        "  author    = {Himmelblau, D.M.},\n"
+        "  title     = {Applied nonlinear programming},\n"
+        "  year      = {1972},\n"
+        "  publisher = {McGraw-Hill}\n"
+        "}\n\n"
+        "@book{brent2013,\n"
+        "  author    = {Brent, R.P.},\n"
+        "  title     = {Algorithms for Minimization Without Derivatives},\n"
+        "  isbn      = {9780486143682},\n"
+        "  series    = {Dover Books on Mathematics},\n"
+        "  year      = {2013},\n"
+        "  publisher = {Dover Publications}\n"
+        "}\n",
+        2 )
   {
   }
 

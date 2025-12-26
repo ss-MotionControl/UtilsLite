@@ -110,9 +110,11 @@ namespace Utils
     // Pad with 10*1 padding
     m_buffer_location[0] = 1;
     m_buffer_location++;
-    memset( m_buffer_location, 0,
-            static_cast<size_t>( reinterpret_cast<uint8_t *>( m_message_buffer_64 ) + ( m_sponge_rate >> 3 ) -
-                                 m_buffer_location ) );
+    memset(
+      m_buffer_location,
+      0,
+      static_cast<size_t>(
+        reinterpret_cast<uint8_t *>( m_message_buffer_64 ) + ( m_sponge_rate >> 3 ) - m_buffer_location ) );
     reinterpret_cast<uint8_t *>( m_message_buffer_64 )[( m_sponge_rate >> 3 ) - 1] |= 0x80;
     m_absorb_buffer();
 

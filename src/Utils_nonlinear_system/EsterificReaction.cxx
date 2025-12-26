@@ -16,16 +16,17 @@ class EsterificReaction : public NonlinearSystem
 {
 public:
   EsterificReaction()
-    : NonlinearSystem( "EsterificReaction (example 4)",
-                       "@book{Luus:2000,\n"
-                       "  author    = {Luus, Rein},\n"
-                       "  title     = {Iterative Dynamic Programming},\n"
-                       "  year      = {2000},\n"
-                       "  isbn      = {1584881488},\n"
-                       "  edition   = {1st},\n"
-                       "  publisher = {CRC Press, Inc.},\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "EsterificReaction (example 4)",
+        "@book{Luus:2000,\n"
+        "  author    = {Luus, Rein},\n"
+        "  title     = {Iterative Dynamic Programming},\n"
+        "  year      = {2000},\n"
+        "  isbn      = {1584881488},\n"
+        "  edition   = {1st},\n"
+        "  publisher = {CRC Press, Inc.},\n"
+        "}\n",
+        2 )
   {
   }
 
@@ -41,9 +42,9 @@ public:
     real_type t20 = pow( 0.11526E1 * t12 - t1 - t2, 2.0 );
     f( 0 )        = ( t1 + t2 - 0.1054E1 * t12 ) * t16 - 0.20564E4 * t20;
     f( 1 )        = 0.55E1 * ( -0.1433314531E3 * t12 + 0.2801659319E3 * Y + 0.7647126E2 + 0.1556548821E3 * X ) *
-                 ( -0.1043629412E3 * t12 + 0.2031305325E3 * Y + 0.1134099326E3 * X + 0.61177E2 ) -
+               ( -0.1043629412E3 * t12 + 0.2031305325E3 * Y + 0.1134099326E3 * X + 0.61177E2 ) -
              ( 0.1422774531E3 * t12 - 0.2789159319E3 * Y - 0.1544048821E3 * X - 0.7585949E2 ) *
-                 ( 0.11526E3 * t12 - 0.225E3 * Y - 0.125E3 * X - 0.61177E2 );
+               ( 0.11526E3 * t12 - 0.225E3 * Y - 0.125E3 * X - 0.61177E2 );
   }
 
   virtual void

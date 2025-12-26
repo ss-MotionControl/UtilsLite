@@ -100,9 +100,10 @@ namespace Utils
 #ifdef UTILS_OS_WINDOWS
   WinMutex::WinMutex() : m_mutex( NULL )
   {
-    m_mutex = CreateMutex( NULL,   // no security descriptor
-                           FALSE,  // mutex not owned
-                           NULL    // object name
+    m_mutex = CreateMutex(
+      NULL,   // no security descriptor
+      FALSE,  // mutex not owned
+      NULL    // object name
     );
     UTILS_ASSERT( m_mutex != NULL, "WinMutex(): error: {}.\n", GetLastError() );
   }

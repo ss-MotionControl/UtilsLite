@@ -62,8 +62,11 @@ main()
 
     for ( char const ** pp = files; *pp != nullptr; ++pp )
     {
-      fmt::print( "dir/file: {:5}/{:5}: \"{}\"\n", Utils::check_if_dir_exists( *pp ),
-                  Utils::check_if_file_exists( *pp ), *pp );
+      fmt::print(
+        "dir/file: {:5}/{:5}: \"{}\"\n",
+        Utils::check_if_dir_exists( *pp ),
+        Utils::check_if_file_exists( *pp ),
+        *pp );
     }
   }
   catch ( std::exception const & exc )

@@ -45,9 +45,15 @@ do_solve( string_view name, real_type a, real_type b, FUN f )
     real_type res  = solver.eval2( a, b, f );
     real_type fres = f( res );
     nfuneval[ialgo] += solver.num_fun_eval();
-    fmt::print( "{:<15} f:{:<3} it:{:<3} {} x = {:12} f(x) = {:15}  b-a={}\n", solver.algo(), solver.num_fun_eval(),
-                solver.used_iter(), solver.converged() ? "YES" : "NO ", fmt::format( "{:.6}", res ),
-                fmt::format( "{:.6}", fres ), fmt::format( "{:.6}", solver.b() - solver.a() ) );
+    fmt::print(
+      "{:<15} f:{:<3} it:{:<3} {} x = {:12} f(x) = {:15}  b-a={}\n",
+      solver.algo(),
+      solver.num_fun_eval(),
+      solver.used_iter(),
+      solver.converged() ? "YES" : "NO ",
+      fmt::format( "{:.6}", res ),
+      fmt::format( "{:.6}", fres ),
+      fmt::format( "{:.6}", solver.b() - solver.a() ) );
   }
 }
 
@@ -82,7 +88,6 @@ main()
   // [] ( real_type x ) { return fun_penalty(x,-10); } ); do_solve2(
   // -1, 1.1498547501802843, -100, 100, [] ( real_type x ) { return
   // fun_penalty(x,-229.970950036057); } );
-
 
   for ( unsigned const ialgo : { 0, 1, 2, 3, 4, 5, 6 } )
   {

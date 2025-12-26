@@ -88,10 +88,11 @@ namespace Utils
     struct ifaddrs *ifap, *ifaptr;
 
     int ier = getifaddrs( &ifap );
-    UTILS_ASSERT( ier >= 0,
-                  "No network interface found for licence managing, getifaddrs "
-                  "return = {}\n",
-                  ier );
+    UTILS_ASSERT(
+      ier >= 0,
+      "No network interface found for licence managing, getifaddrs "
+      "return = {}\n",
+      ier );
 
     addr.clear();
     for ( ifaptr = ifap; ifaptr != nullptr; ifaptr = ifaptr->ifa_next )

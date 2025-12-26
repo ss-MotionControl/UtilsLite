@@ -18,24 +18,19 @@
 \*--------------------------------------------------------------------------*/
 
 //
-// file: Utils_LBFGS.hh
+// file: Utils_minimize_LBFGS.hh
 //
 
 #pragma once
 
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
+#ifndef UTILS_MINIMIZE_LBFGS_dot_HH
+#define UTILS_MINIMIZE_LBFGS_dot_HH
 
-#ifndef UTILS_LBFGS_MINIMIZE_dot_HH
-#define UTILS_LBFGS_MINIMIZE_dot_HH
-
-#include <set>
-
+#include "Utils_minimize.hh"
 #include "Utils_LBFGS.hh"
-#include "Utils_fmt.hh"
-#include "Utils_nonlinear_linesearch.hh"
 
 /**
- * @file Utils_LBFGS.hh
+ * @file Utils_minimize_LBFGS.hh
  * @brief Complete header-only implementation of L-BFGS optimization algorithms
  *
  * This file provides a comprehensive implementation of the Limited-memory
@@ -200,8 +195,7 @@ namespace Utils
 {
 
   // ---------------------------------------------------------------------------
-  // LBFGSMinimizer: high-level optimizer with line-search and optional box
-  // bounds
+  // LBFGSMinimizer: high-level optimizer with line-search and box constraints
   // ---------------------------------------------------------------------------
 
   template <typename Scalar = double>
@@ -213,11 +207,11 @@ namespace Utils
 
     enum class Status
     {
-      CONVERGED          = 0,  // Convergenza raggiunta
-      MAX_ITERATIONS     = 1,  // Massimo numero di iterazioni raggiunto
-      LINE_SEARCH_FAILED = 2,  // Line search fallita
-      GRADIENT_TOO_SMALL = 3,  // Gradiente troppo piccolo
-      FAILED             = 4   // Fallimento generico
+      CONVERGED          = 0,  // Convergence achieved
+      MAX_ITERATIONS     = 1,  // Maximum number of iterations reached
+      LINE_SEARCH_FAILED = 2,  // Line search failed
+      GRADIENT_TOO_SMALL = 3,  // Gradient too small
+      FAILED             = 4   // Generic failure
     };
 
     static string
@@ -230,7 +224,7 @@ namespace Utils
         case Status::MAX_ITERATIONS:
           return "MAX_ITER";
         case Status::LINE_SEARCH_FAILED:
-          return "LINE_SEARCH_FAILED";
+          return "LS_FAILED";
         case Status::GRADIENT_TOO_SMALL:
           return "GRAD_SMALL";
         case Status::FAILED:
@@ -248,7 +242,7 @@ namespace Utils
       Scalar final_gradient_norm{ 0 };
       Scalar final_function_value{ 0 };
       Scalar initial_function_value{ 0 };
-      size_t line_search_evaluations{ 0 };  // Aggiunto per tracciare eval line search
+      size_t line_search_evaluations{ 0 };  // Added to track line search evaluations
     };
 
     struct Options
@@ -266,102 +260,17 @@ namespace Utils
       Scalar sty_min_factor{ 1e-12 };
       Scalar very_small_step{ 1e-8 };
 
-      bool use_projection{ false };
-
       // Verbosity system like NelderMead
       size_t verbosity_level{ 1 };         // 0: quiet, 1: outer stats, 2: inner progress, 3: detailed
-      bool   use_unicode_borders{ true };  // Usare bordi Unicode come NelderMead
+      bool   use_unicode_borders{ true };  // Use Unicode borders like NelderMead
     };
 
   private:
-    Scalar               m_epsi{ std::numeric_limits<Scalar>::epsilon() };
-    Options              m_options;
-    Utils::LBFGS<Scalar> m_LBFGS;
-    Vector               m_lower;
-    Vector               m_upper;
-    Vector               m_tol_lower;
-    Vector               m_tol_upper;
-
-    string m_indent{ "" };  // Per indentazione consistente
-
-    // Helper functions for bound checks with tolerances
-    bool
-    is_on_lower_bound( Scalar x_i, Scalar lower_i ) const
-    {
-      return ( x_i <= lower_i + m_epsi * ( 1 + std::abs( lower_i ) ) );
-    }
-
-    bool
-    is_on_upper_bound( Scalar x_i, Scalar upper_i ) const
-    {
-      return ( x_i >= upper_i - m_epsi * ( 1 + std::abs( upper_i ) ) );
-    }
-
-    void
-    check_bounds_consistency() const
-    {
-      if ( m_options.use_projection && ( m_lower.array() > m_upper.array() ).any() )
-      {
-        throw std::invalid_argument( "Lower bounds must be <= upper bounds" );
-      }
-    }
-
-    // Project x into bounds
-    void
-    project_inplace( Vector & x ) const
-    {
-      x = x.cwiseMax( m_lower ).cwiseMin( m_upper );
-    }
-
-    Vector
-    projected_gradient( Vector const & x, Vector const & g ) const
-    {
-      Vector result = g;
-      projected_gradient_inplace( x, result );
-      return result;
-    }
-    void
-    projected_gradient_inplace( const Vector & x, Vector & g ) const
-    {
-      const Scalar eps = Scalar( 10 ) * m_epsi;  // tolleranza più robusta
-
-      for ( int i = 0; i < x.size(); ++i )
-      {
-        bool on_lower = ( x[i] <= m_lower[i] + m_tol_lower[i] );
-        bool on_upper = ( x[i] >= m_upper[i] - m_tol_upper[i] );
-
-        // Gradiente numericamente significativo?
-        bool grad_neg = ( g[i] < -eps );  // spinge verso il basso
-        bool grad_pos = ( g[i] > eps );   // spinge verso l'alto
-
-        // Stato attivo robusto: solo se gradiente spinge fuori in modo
-        // significativo
-        if ( ( on_lower && grad_neg ) || ( on_upper && grad_pos ) ) { g[i] = Scalar( 0 ); }
-      }
-    }
-    void
-    projected_direction_inplace( const Vector & x, Vector & d ) const
-    {
-      const Scalar eps = Scalar( 10 ) * m_epsi;
-
-      for ( int i = 0; i < x.size(); ++i )
-      {
-        bool on_lower = ( x[i] <= m_lower[i] + m_tol_lower[i] );
-        bool on_upper = ( x[i] >= m_upper[i] - m_tol_upper[i] );
-
-        bool dir_neg = ( d[i] < -eps );
-        bool dir_pos = ( d[i] > eps );
-
-        // Annulla solo le componenti che violerebbero seriamente il bound
-        if ( ( on_lower && dir_neg ) || ( on_upper && dir_pos ) ) { d[i] = Scalar( 0 ); }
-      }
-    }
-
-    Scalar
-    projected_gradient_norm( Vector const & x, Vector const & g ) const
-    {
-      return projected_gradient( x, g ).template lpNorm<Eigen::Infinity>();
-    }
+    Scalar                       m_epsi{ std::numeric_limits<Scalar>::epsilon() };
+    Options                      m_options;
+    Utils::LBFGS<Scalar>         m_LBFGS;
+    BoxConstraintHandler<Scalar> m_box_handler;
+    string                       m_indent{ "" };  // For consistent indentation
 
     // Helper function for descent direction validation
     bool
@@ -381,26 +290,36 @@ namespace Utils
     {
       if ( m_options.verbosity_level < 1 ) return;
 
-      fmt::print( LBFGS_utils::PrintColors::HEADER,
-                  "{}"
-                  "╔════════════════════════════════════════════════════════════════╗\n"
-                  "{}║                       L-BFGS Optimization                      "
-                  "║\n"
-                  "{}"
-                  "╠════════════════════════════════════════════════════════════════╣\n"
-                  "{}║ {:62} ║\n"
-                  "{}║ {:62} ║\n"
-                  "{}║ {:62} ║\n"
-                  "{}║ {:62} ║\n"
-                  "{}║ {:62} ║\n"
-                  "{}"
-                  "╚════════════════════════════════════════════════════════════════╝"
-                  "\n",
-                  m_indent, m_indent, m_indent, m_indent, fmt::format( "Dimension: {:d}", n ), m_indent,
-                  fmt::format( "Max Iterations: {:d}", m_options.max_iter ), m_indent,
-                  fmt::format( "Memory (m): {:d}", m_options.m ), m_indent,
-                  fmt::format( "Gradient Tolerance: {:.2e}", m_options.g_tol ), m_indent,
-                  fmt::format( "Bounds: {}", ( m_options.use_projection ? "Active" : "None" ) ), m_indent );
+      fmt::print(
+        PrintColors::HEADER,
+        "{}"
+        "╔════════════════════════════════════════════════════════════════╗\n"
+        "{}║                       L-BFGS Optimization                      "
+        "║\n"
+        "{}"
+        "╠════════════════════════════════════════════════════════════════╣\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}║ {:62} ║\n"
+        "{}"
+        "╚════════════════════════════════════════════════════════════════╝"
+        "\n",
+        m_indent,
+        m_indent,
+        m_indent,
+        m_indent,
+        fmt::format( "Dimension: {:d}", n ),
+        m_indent,
+        fmt::format( "Max Iterations: {:d}", m_options.max_iter ),
+        m_indent,
+        fmt::format( "Memory (m): {:d}", m_options.m ),
+        m_indent,
+        fmt::format( "Gradient Tolerance: {:.2e}", m_options.g_tol ),
+        m_indent,
+        fmt::format( "Bounds: {}", ( m_box_handler.is_active() ? "Active" : "None" ) ),
+        m_indent );
       fmt::print( "{}Initial F = {:.6e}\n", m_indent, f0 );
     }
 
@@ -411,33 +330,46 @@ namespace Utils
 
       bool show_detailed = m_options.verbosity_level >= 3;
 
-      auto   color = improved ? LBFGS_utils::PrintColors::SUCCESS : LBFGS_utils::PrintColors::WARNING;
+      auto   color = improved ? PrintColors::SUCCESS : PrintColors::WARNING;
       string icon  = improved ? "↗" : "→";
 
       if ( show_detailed )
       {
-        // Versione dettagliata per livello 3+
-        fmt::print( color,
-                    "{}[{:4d}] {} F = {:<12.6e} | ‖pg‖ = {:<12.6e} | Step = "
-                    "{:<12.6e} | pg = {:<12.6e}\n",
-                    m_indent, iter, icon, f, gnorm, step, pg );
+        // Detailed version for level 3+
+        fmt::print(
+          color,
+          "{}[{:4d}] {} F = {:<12.6e} | ‖pg‖ = {:<12.6e} | Step = "
+          "{:<12.6e} | pg = {:<12.6e}\n",
+          m_indent,
+          iter,
+          icon,
+          f,
+          gnorm,
+          step,
+          pg );
       }
       else
       {
-        // Versione compatta per livello 2
-        fmt::print( color,
-                    "{}[{:4d}] {} F = {:<12.6e} | ‖pg‖ = {:<12.6e} | Step = "
-                    "{:<12.6e}\n",
-                    m_indent, iter, icon, f, gnorm, step );
+        // Compact version for level 2
+        fmt::print(
+          color,
+          "{}[{:4d}] {} F = {:<12.6e} | ‖pg‖ = {:<12.6e} | Step = "
+          "{:<12.6e}\n",
+          m_indent,
+          iter,
+          icon,
+          f,
+          gnorm,
+          step );
       }
     }
 
     void
-    print_line_search_result( size_t iter, Scalar step, size_t evals, bool success ) const
+    print_line_search_result( size_t /* iter */, Scalar step, size_t evals, bool success ) const
     {
       if ( m_options.verbosity_level < 3 ) return;
 
-      auto   color  = success ? LBFGS_utils::PrintColors::SUCCESS : LBFGS_utils::PrintColors::ERROR;
+      auto   color  = success ? PrintColors::SUCCESS : PrintColors::ERROR;
       string status = success ? "success" : "failure";
 
       fmt::print( color, "{}Line search: step = {:<12.6e}, evals = {}, {}\n", m_indent, step, evals, status );
@@ -448,7 +380,7 @@ namespace Utils
     {
       if ( m_options.verbosity_level < 3 ) return;
 
-      auto   color  = accepted ? LBFGS_utils::PrintColors::SUCCESS : LBFGS_utils::PrintColors::WARNING;
+      auto   color  = accepted ? PrintColors::SUCCESS : PrintColors::WARNING;
       string status = accepted ? "accepted" : "rejected";
 
       fmt::print( color, "{}L-BFGS update: sᵀy = {:<12.6e}, {}\n", m_indent, sty, status );
@@ -459,11 +391,16 @@ namespace Utils
     {
       if ( m_options.verbosity_level < 1 ) return;
 
-      auto color = LBFGS_utils::PrintColors::INFO;
-      fmt::print( color,
-                  "{}Convergence: status = {}, ‖pg‖ = {:.2e}, Δf = {:.2e}, Δx "
-                  "= {:.2e}\n",
-                  m_indent, static_cast<int>( status ), gnorm, f_change, x_change );
+      auto color = PrintColors::INFO;
+      fmt::print(
+        color,
+        "{}Convergence: status = {}, ‖pg‖ = {:.2e}, Δf = {:.2e}, Δx "
+        "= {:.2e}\n",
+        m_indent,
+        static_cast<int>( status ),
+        gnorm,
+        f_change,
+        x_change );
     }
 
     void
@@ -472,54 +409,70 @@ namespace Utils
       if ( m_options.verbosity_level < 1 ) return;
 
       string status_str;
-      auto   status_color = LBFGS_utils::PrintColors::INFO;
+      auto   status_color = PrintColors::INFO;
 
       status_str = to_string( data.status );
       switch ( data.status )
       {
         case Status::CONVERGED:
-          status_color = LBFGS_utils::PrintColors::SUCCESS;
+          status_color = PrintColors::SUCCESS;
           break;
         case Status::GRADIENT_TOO_SMALL:
-          status_color = LBFGS_utils::PrintColors::SUCCESS;
+          status_color = PrintColors::SUCCESS;
           break;
         case Status::MAX_ITERATIONS:
-          status_color = LBFGS_utils::PrintColors::WARNING;
+          status_color = PrintColors::WARNING;
           break;
         case Status::LINE_SEARCH_FAILED:
-          status_color = LBFGS_utils::PrintColors::ERROR;
+          status_color = PrintColors::ERROR;
           break;
         default:
-          status_color = LBFGS_utils::PrintColors::ERROR;
+          status_color = PrintColors::ERROR;
       }
 
-      fmt::print( LBFGS_utils::PrintColors::HEADER,
-                  "{}"
-                  "╔════════════════════════════════════════════════════════════════╗\n"
-                  "{}║                    Optimization Finished                       "
-                  "║\n"
-                  "{}"
-                  "╠════════════════════════════════════════════════════════════════╣\n"
-                  "{}║  Final Status       : {:<39}  ║\n"
-                  "{}║  Final Value        : {:<39.6e}  ║\n"
-                  "{}║  Initial Value      : {:<39.6e}  ║\n"
-                  "{}║  Total Iterations   : {:<39}  ║\n"
-                  "{}║  Total Evals        : {:<39}  ║\n"
-                  "{}║  Final ‖pg‖         : {:<39.6e}  ║\n"
-                  "{}║  L-BFGS Memory      : {:<39}  ║\n"
-                  "{}"
-                  "╚════════════════════════════════════════════════════════════════╝"
-                  "\n",
-                  m_indent, m_indent, m_indent, m_indent, status_str, m_indent, data.final_function_value, m_indent,
-                  data.initial_function_value, m_indent, data.total_iterations, m_indent, data.total_evaluations,
-                  m_indent, data.final_gradient_norm, m_indent, m_LBFGS.size(), m_indent );
+      fmt::print(
+        PrintColors::HEADER,
+        "{}"
+        "╔════════════════════════════════════════════════════════════════╗\n"
+        "{}║                    Optimization Finished                       "
+        "║\n"
+        "{}"
+        "╠════════════════════════════════════════════════════════════════╣\n"
+        "{}║  Final Status       : {:<39}  ║\n"
+        "{}║  Final Value        : {:<39.6e}  ║\n"
+        "{}║  Initial Value      : {:<39.6e}  ║\n"
+        "{}║  Total Iterations   : {:<39}  ║\n"
+        "{}║  Total Evals        : {:<39}  ║\n"
+        "{}║  Final ‖pg‖         : {:<39.6e}  ║\n"
+        "{}║  L-BFGS Memory      : {:<39}  ║\n"
+        "{}"
+        "╚════════════════════════════════════════════════════════════════╝"
+        "\n",
+        m_indent,
+        m_indent,
+        m_indent,
+        m_indent,
+        status_str,
+        m_indent,
+        data.final_function_value,
+        m_indent,
+        data.initial_function_value,
+        m_indent,
+        data.total_iterations,
+        m_indent,
+        data.total_evaluations,
+        m_indent,
+        data.final_gradient_norm,
+        m_indent,
+        m_LBFGS.size(),
+        m_indent );
     }
 
     // Mutable state variables
     mutable Vector m_x, m_g, m_p, m_x_new, m_g_new, m_s, m_y;
     mutable size_t m_iter_since_reset{ 0 };
     mutable size_t m_function_evaluations{ 0 };
-    mutable size_t m_line_search_evaluations{ 0 };  // Aggiunto per tracciare eval line search
+    mutable size_t m_line_search_evaluations{ 0 };
 
   public:
     LBFGS_minimizer( Options opts = Options() ) : m_options( opts ), m_LBFGS( opts.m ) {}
@@ -539,27 +492,15 @@ namespace Utils
     void
     set_bounds( size_t n, Scalar const lower[], Scalar const upper[] )
     {
-      m_lower.resize( n );
-      m_upper.resize( n );
-      std::copy_n( lower, n, m_lower.data() );
-      std::copy_n( upper, n, m_upper.data() );
-
-      m_tol_lower.resize( n );
-      m_tol_upper.resize( n );
-
-      // Calcola tolleranze vettoriali
-      m_tol_lower = m_epsi * ( Vector::Ones( n ).array() + m_lower.array().abs() );
-      m_tol_upper = m_epsi * ( Vector::Ones( n ).array() + m_upper.array().abs() );
-
-      m_options.use_projection = true;
-      check_bounds_consistency();
+      Vector lower_vec = Eigen::Map<const Vector>( lower, n );
+      Vector upper_vec = Eigen::Map<const Vector>( upper, n );
+      m_box_handler.set_bounds( lower_vec, upper_vec );
     }
 
     void
     set_bounds( Vector const & lower, Vector const & upper )
     {
-      assert( lower.size() == upper.size() );
-      set_bounds( lower.size(), lower.data(), upper.data() );
+      m_box_handler.set_bounds( lower, upper );
     }
 
     void
@@ -572,9 +513,10 @@ namespace Utils
 
     template <typename Linesearch>
     Result
-    minimize( Vector const &     x0,
-              Callback const &   callback,
-              Linesearch const & linesearch = MoreThuenteLineSearch<Scalar>() )
+    minimize(
+      Vector const &     x0,
+      Callback const &   callback,
+      Linesearch const & linesearch = MoreThuenteLineSearch<Scalar>() )
     {
       Status status{ Status::MAX_ITERATIONS };
       Scalar gnorm{ 0 };
@@ -592,16 +534,9 @@ namespace Utils
       m_s.resize( n );
       m_y.resize( n );
 
-      if ( m_options.use_projection )
-      {
-        assert( m_lower.size() == n );
-        assert( m_upper.size() == n );
-        check_bounds_consistency();
-      }
-
       // Initialize and project if needed
       m_x.noalias() = x0;
-      if ( m_options.use_projection ) project_inplace( m_x );
+      if ( m_box_handler.is_active() ) m_box_handler.project( m_x );
 
       // Initial evaluation
       Scalar f = callback( m_x, &m_g );
@@ -619,7 +554,7 @@ namespace Utils
         ++m_iter_since_reset;
 
         // Check gradient norm
-        gnorm = projected_gradient_norm( m_x, m_g );
+        gnorm = m_box_handler.projected_gradient_norm( m_x, m_g );
 
         if ( gnorm <= m_options.g_tol )
         {
@@ -635,10 +570,15 @@ namespace Utils
         m_p       = -m_LBFGS.two_loop_recursion( m_g, h0 );
 
         // Project direction if bounds are active
-        if ( m_options.use_projection )
+        if ( m_box_handler.is_active() )
         {
-          projected_direction_inplace( m_x, m_p );
-          if ( m_p.isZero( m_epsi ) ) m_p = -projected_gradient( m_x, m_g );
+          m_box_handler.project_direction( m_x, m_p );
+          if ( m_p.isZero( m_epsi ) )
+          {
+            Vector pg = m_g;
+            m_box_handler.project_gradient( m_x, pg );
+            m_p = -pg;
+          }
         }
 
         // Robust descent direction check with fallback strategies
@@ -647,7 +587,7 @@ namespace Utils
         {
           // Try gradient direction
           m_p = -m_g;
-          if ( m_options.use_projection ) projected_direction_inplace( m_x, m_p );
+          if ( m_box_handler.is_active() ) m_box_handler.project_direction( m_x, m_p );
           pg = m_p.dot( m_g );
           if ( !is_valid_descent_direction( pg ) )
           {
@@ -655,12 +595,11 @@ namespace Utils
             m_LBFGS.clear();
             h0  = m_LBFGS.compute_initial_h0( 1 );
             m_p = -m_LBFGS.two_loop_recursion( m_g, h0 );
-            if ( m_options.use_projection ) projected_direction_inplace( m_x, m_p );
+            if ( m_box_handler.is_active() ) { m_box_handler.project_direction( m_x, m_p ); }
             pg = m_p.dot( m_g );
             if ( m_options.verbosity_level >= 1 )
-              fmt::print( LBFGS_utils::PrintColors::ERROR, "{}[LBFGS] Cannot find descent direction, stopping\n",
-                          m_indent );
-            gnorm  = projected_gradient_norm( m_x, m_g );
+              fmt::print( PrintColors::ERROR, "{}[LBFGS] Cannot find descent direction, stopping\n", m_indent );
+            gnorm  = m_box_handler.projected_gradient_norm( m_x, m_g );
             status = Status::FAILED;
             goto exit_position;
           }
@@ -672,8 +611,7 @@ namespace Utils
         if ( !step_opt.has_value() )
         {
           if ( m_options.verbosity_level >= 1 )
-            fmt::print( LBFGS_utils::PrintColors::WARNING, "{}[LBFGS] line search failed, trying fallback steps\n",
-                        m_indent );
+            fmt::print( PrintColors::WARNING, "{}[LBFGS] line search failed, trying fallback steps\n", m_indent );
 
           m_LBFGS.clear();
 
@@ -686,7 +624,7 @@ namespace Utils
           for ( Scalar fallback_step : fallback_steps )
           {
             m_x_new.noalias() = m_x + fallback_step * m_p;
-            if ( m_options.use_projection ) project_inplace( m_x_new );
+            if ( m_box_handler.is_active() ) m_box_handler.project( m_x_new );
             Scalar f_test = callback( m_x_new, &m_g_new );
             m_function_evaluations++;
 
@@ -705,7 +643,7 @@ namespace Utils
 
           if ( !fallback_success )
           {
-            gnorm  = projected_gradient_norm( m_x, m_g );
+            gnorm  = m_box_handler.projected_gradient_norm( m_x, m_g );
             status = Status::LINE_SEARCH_FAILED;
             goto exit_position;
           }
@@ -720,7 +658,7 @@ namespace Utils
 
         // Evaluate new point
         m_x_new.noalias() = m_x + step * m_p;
-        if ( m_options.use_projection ) project_inplace( m_x_new );
+        if ( m_box_handler.is_active() ) m_box_handler.project( m_x_new );
         Scalar f_new = callback( m_x_new, &m_g_new );
         m_function_evaluations++;
 
@@ -739,10 +677,12 @@ namespace Utils
 
         if ( !update_accepted && m_options.verbosity_level >= 2 && m_LBFGS.size() > 0 )
         {
-          fmt::print( LBFGS_utils::PrintColors::WARNING,
-                      "{}[LBFGS] curvature condition failed (s^T y = {:.2e}), "
-                      "skipping update\n",
-                      m_indent, sty );
+          fmt::print(
+            PrintColors::WARNING,
+            "{}[LBFGS] curvature condition failed (s^T y = {:.2e}), "
+            "skipping update\n",
+            m_indent,
+            sty );
         }
 
         // Move to new point
@@ -755,13 +695,16 @@ namespace Utils
         Scalar f_change = std::abs( f - f_old );
         if ( f_change <= m_options.f_tol )
         {
-          gnorm = projected_gradient_norm( m_x, m_g );
+          gnorm = m_box_handler.projected_gradient_norm( m_x, m_g );
           if ( gnorm <= m_options.g_tol_weak )
           {
             if ( m_options.verbosity_level >= 1 )
-              fmt::print( LBFGS_utils::PrintColors::SUCCESS,
-                          "{}[LBFGS] Converged by function change: {:.2e} < {:.2e}\n", m_indent, f_change,
-                          m_options.f_tol );
+              fmt::print(
+                PrintColors::SUCCESS,
+                "{}[LBFGS] Converged by function change: {:.2e} < {:.2e}\n",
+                m_indent,
+                f_change,
+                m_options.f_tol );
             status = Status::CONVERGED;
             goto exit_position;
           }
@@ -772,12 +715,16 @@ namespace Utils
           Scalar x_change = m_s.template lpNorm<Eigen::Infinity>();
           if ( x_change < m_options.x_tol )
           {
-            gnorm = projected_gradient_norm( m_x, m_g );
+            gnorm = m_box_handler.projected_gradient_norm( m_x, m_g );
             if ( gnorm <= m_options.g_tol_weak )
             {
               if ( m_options.verbosity_level >= 1 )
-                fmt::print( LBFGS_utils::PrintColors::SUCCESS, "{}[LBFGS] Converged by x change: {:.2e} < {:.2e}\n",
-                            m_indent, x_change, m_options.x_tol );
+                fmt::print(
+                  PrintColors::SUCCESS,
+                  "{}[LBFGS] Converged by x change: {:.2e} < {:.2e}\n",
+                  m_indent,
+                  x_change,
+                  m_options.x_tol );
               status = Status::CONVERGED;
               goto exit_position;
             }
@@ -790,12 +737,10 @@ namespace Utils
       }
 
       // Final gradient norm if not converged
-      gnorm = projected_gradient_norm( m_x, m_g );
+      gnorm = m_box_handler.projected_gradient_norm( m_x, m_g );
 
     exit_position:
       Result result{ status, iteration, m_function_evaluations, gnorm, f, f_initial };
-
-      // Aggiungi informazioni line search al risultato
       result.line_search_evaluations = m_line_search_evaluations;
 
       print_optimization_statistics( result );
@@ -856,7 +801,7 @@ namespace Utils
         case Status::MAX_INNER_ITERATIONS:
           return "MAX_INNER_ITERATIONS";
         case Status::LINE_SEARCH_FAILED:
-          return "LINE_SEARCH_FAILED";
+          return "LS_FAILED";
         case Status::FAILED:
           return "FAILED";
         default:
@@ -917,11 +862,9 @@ namespace Utils
     };
 
   private:
-    Options m_options;
-    Vector  m_lower;
-    Vector  m_upper;
-    Vector  m_x;
-    bool    m_use_bounds{ false };
+    Options                      m_options;
+    BoxConstraintHandler<Scalar> m_box_handler;
+    Vector                       m_x;
 
     size_t m_outer_iteration_count{ 0 };
 
@@ -933,65 +876,67 @@ namespace Utils
     Scalar m_previous_best{ std::numeric_limits<Scalar>::max() };
     size_t m_stagnation_count{ 0 };
 
-    string m_indent{ "" };  // Per indentazione consistente
+    string m_indent{ "" };  // For consistent indentation
 
     // ===========================================================================
     // PRINTING METHODS for Block Coordinate
     // ===========================================================================
 
     void
-    print_outer_iteration_header( size_t                 outer_iter,
-                                  size_t                 total_cycles,
-                                  vector<size_t> const & block_indices,
-                                  size_t                 block_size ) const
+    print_outer_iteration_header(
+      size_t                 outer_iter,
+      size_t                 total_cycles,
+      vector<size_t> const & block_indices,
+      size_t                 block_size ) const
     {
       if ( m_options.verbosity_level < 1 ) return;
 
-      fmt::print( LBFGS_utils::PrintColors::HEADER,
-                  "\n"
-                  "    "
-                  "╔════════════════════════════════════════════════════════════════╗\n"
-                  "    ║ Outer Iteration {:3d} - Block {:2d}/{:2d}                     "
-                  "  "
-                  "       ║\n"
-                  "    "
-                  "╠════════════════════════════════════════════════════════════════╣\n"
-                  "    ║ Size: {:<5} Indices: {:<41} ║\n"
-                  "    "
-                  "╚════════════════════════════════════════════════════════════════╝"
-                  "\n",
-                  outer_iter, ( outer_iter % total_cycles ) + 1, total_cycles, block_size,
-                  LBFGS_utils::format_index_vector_compact<size_t>( block_indices, 7 ) );
+      fmt::print(
+        PrintColors::HEADER,
+        "\n"
+        "    ╔════════════════════════════════════════════════════════════════╗\n"
+        "    ║ Outer Iteration {:3d} - Block {:2d}/{:2d}                              ║\n"
+        "    ╠════════════════════════════════════════════════════════════════╣\n"
+        "    ║ Size: {:<5} Indices: {:<41} ║\n"
+        "    ╚════════════════════════════════════════════════════════════════╝"
+        "\n",
+        outer_iter,
+        ( outer_iter % total_cycles ) + 1,
+        total_cycles,
+        block_size,
+        format_index_vector_compact<size_t>( block_indices, 7 ) );
     }
 
     void
-    print_outer_statistics( size_t total_outer_iters,
-                            size_t total_inner_iters,
-                            size_t total_evals,
-                            Scalar best_value,
-                            bool   converged ) const
+    print_outer_statistics(
+      size_t total_outer_iters,
+      size_t total_inner_iters,
+      size_t total_evals,
+      Scalar best_value,
+      bool   converged ) const
     {
       if ( m_options.verbosity_level < 1 ) return;
 
-      fmt::print( LBFGS_utils::PrintColors::INFO,
-                  "\n"
-                  "  "
-                  "╔═══════════════════════════════════════════════════════════════╗\n"
-                  "  ║                      Outer Iteration Summary                  "
-                  "║\n"
-                  "  "
-                  "╠═══════════════════════════════════════════════════════════════╣\n"
-                  "  ║ Completed:        {:<43} ║\n"
-                  "  ║ Outer Iterations: {:<43} ║\n"
-                  "  ║ Inner Iterations: {:<43} ║\n"
-                  "  ║ Total Evals:      {:<43} ║\n"
-                  "  ║ Best Value:       {:<43.6e} ║\n"
-                  "  ║ Status:           {:<43} ║\n"
-                  "  "
-                  "╚═══════════════════════════════════════════════════════════════╝\n"
-                  "\n",
-                  fmt::format( "{}/{}", m_outer_iteration_count, total_outer_iters ), m_outer_iteration_count,
-                  total_inner_iters, total_evals, best_value, ( converged ? "CONVERGED" : "RUNNING" ) );
+      fmt::print(
+        PrintColors::INFO,
+        "\n"
+        "  ╔═══════════════════════════════════════════════════════════════╗\n"
+        "  ║                      Outer Iteration Summary                  ║\n"
+        "  ╠═══════════════════════════════════════════════════════════════╣\n"
+        "  ║ Completed:        {:<43} ║\n"
+        "  ║ Outer Iterations: {:<43} ║\n"
+        "  ║ Inner Iterations: {:<43} ║\n"
+        "  ║ Total Evals:      {:<43} ║\n"
+        "  ║ Best Value:       {:<43.6e} ║\n"
+        "  ║ Status:           {:<43} ║\n"
+        "  ╚═══════════════════════════════════════════════════════════════╝\n"
+        "\n",
+        fmt::format( "{}/{}", m_outer_iteration_count, total_outer_iters ),
+        m_outer_iteration_count,
+        total_inner_iters,
+        total_evals,
+        best_value,
+        ( converged ? "CONVERGED" : "RUNNING" ) );
     }
 
     void
@@ -999,24 +944,25 @@ namespace Utils
     {
       if ( m_options.verbosity_level < 1 ) return;
 
-      fmt::print( LBFGS_utils::PrintColors::HEADER,
-                  "╔════════════════════════════════════════════════════════════════╗\n"
-                  "║                   Block Coordinate L-BFGS                      ║\n"
-                  "╠════════════════════════════════════════════════════════════════╣\n"
-                  "║ {:62} ║\n"
-                  "║ {:62} ║\n"
-                  "║ {:62} ║\n"
-                  "║ {:62} ║\n"
-                  "║ {:62} ║\n"
-                  "║ {:62} ║\n"
-                  "╚════════════════════════════════════════════════════════════════╝"
-                  "\n",
-                  fmt::format( "Dimension:            {}", n ),
-                  fmt::format( "Block Size:           {}", m_options.block_size ),
-                  fmt::format( "Max Outer Iterations: {}", m_options.max_outer_iterations ),
-                  fmt::format( "Overlap Ratio:        {:.4e}", m_options.overlap_ratio ),
-                  fmt::format( "Initial f:            {:.6e}", f0 ),
-                  fmt::format( "‖g‖∞                  {:.6e}", g0 ) );
+      fmt::print(
+        PrintColors::HEADER,
+        "╔════════════════════════════════════════════════════════════════╗\n"
+        "║                   Block Coordinate L-BFGS                      ║\n"
+        "╠════════════════════════════════════════════════════════════════╣\n"
+        "║ {:62} ║\n"
+        "║ {:62} ║\n"
+        "║ {:62} ║\n"
+        "║ {:62} ║\n"
+        "║ {:62} ║\n"
+        "║ {:62} ║\n"
+        "╚════════════════════════════════════════════════════════════════╝"
+        "\n",
+        fmt::format( "Dimension:            {}", n ),
+        fmt::format( "Block Size:           {}", m_options.block_size ),
+        fmt::format( "Max Outer Iterations: {}", m_options.max_outer_iterations ),
+        fmt::format( "Overlap Ratio:        {:.4e}", m_options.overlap_ratio ),
+        fmt::format( "Initial f:            {:.6e}", f0 ),
+        fmt::format( "‖g‖∞                  {:.6e}", g0 ) );
     }
 
     // ===========================================================================
@@ -1028,15 +974,16 @@ namespace Utils
     {
       if ( m_options.verbosity_level < 1 ) return;
 
-      fmt::print( LBFGS_utils::PrintColors::HEADER,
-                  "\n"
-                  "    "
-                  "╔════════════════════════════════════════════════════════════════╗\n"
-                  "    ║ OUTER ITERATION {:3d} START F = {:<12.6e} ‖pg‖ = {:<12.6e} ║\n"
-                  "    "
-                  "╚════════════════════════════════════════════════════════════════╝"
-                  "\n",
-                  m_outer_iteration_count, f, gnorm );
+      fmt::print(
+        PrintColors::HEADER,
+        "\n"
+        "    ╔════════════════════════════════════════════════════════════════╗\n"
+        "    ║ OUTER ITERATION {:3d} START F = {:<12.6e} ‖pg‖ = {:<12.6e} ║\n"
+        "    ╚════════════════════════════════════════════════════════════════╝"
+        "\n",
+        m_outer_iteration_count,
+        f,
+        gnorm );
     }
 
     void
@@ -1044,18 +991,18 @@ namespace Utils
     {
       if ( m_options.verbosity_level < 1 ) return;
 
-      fmt::print( LBFGS_utils::PrintColors::HEADER,
-                  "\n"
-                  "    "
-                  "╔════════════════════════════════════════════════════════════════╗\n"
-                  "    ║ OUTER ITERATION {:3d} END                                     "
-                  "  "
-                  " ║\n"
-                  "    ║ F = {:<12.6e}    ‖pg‖ = {:<12.6e}    ΔF = {:<12.6e}   ║\n"
-                  "    "
-                  "╚════════════════════════════════════════════════════════════════╝"
-                  "\n",
-                  m_outer_iteration_count, f, gnorm, improvement );
+      fmt::print(
+        PrintColors::HEADER,
+        "\n"
+        "    ╔════════════════════════════════════════════════════════════════╗\n"
+        "    ║ OUTER ITERATION {:3d} END                                        ║\n"
+        "    ║ F = {:<12.6e}    ‖pg‖ = {:<12.6e}    ΔF = {:<12.6e}   ║\n"
+        "    ╚════════════════════════════════════════════════════════════════╝"
+        "\n",
+        m_outer_iteration_count,
+        f,
+        gnorm,
+        improvement );
     }
 
     void
@@ -1063,81 +1010,84 @@ namespace Utils
     {
       if ( m_options.verbosity_level < 3 ) return;
 
-      fmt::print( LBFGS_utils::PrintColors::INFO,
-                  "    "
-                  "┌────────────────────────────────────────────────────────────────┐\n"
-                  "    │                      BLOCKS FOR ITERATION {:3d}               "
-                  "  "
-                  " │\n"
-                  "    "
-                  "├────────────────────────────────────────────────────────────────┤"
-                  "\n",
-                  m_outer_iteration_count );
+      fmt::print(
+        PrintColors::INFO,
+        "    ┌────────────────────────────────────────────────────────────────┐\n"
+        "    │                      BLOCKS FOR ITERATION {:3d}                  │\n"
+        "    ├────────────────────────────────────────────────────────────────┤\n",
+        m_outer_iteration_count );
 
       for ( size_t i = 0; i < blocks.size(); ++i )
       {
-        fmt::print( LBFGS_utils::PrintColors::INFO, "    │ Block {:3d}: Size={:3d}  Indices: {:<32} │\n", i + 1,
-                    blocks[i].size(), LBFGS_utils::format_index_vector_compact<size_t>( blocks[i], 5 ) );
+        fmt::print(
+          PrintColors::INFO,
+          "    │ Block {:3d}: Size={:3d}  Indices: {:<32} │\n",
+          i + 1,
+          blocks[i].size(),
+          format_index_vector_compact<size_t>( blocks[i], 5 ) );
       }
 
-      fmt::print( LBFGS_utils::PrintColors::INFO,
-                  "    "
-                  "└───────────────────────────────────────────────────────────"
-                  "─────┘\n" );
+      fmt::print( PrintColors::INFO, "    └────────────────────────────────────────────────────────────────┘\n" );
     }
 
     void
-    print_block_result_detail( size_t block_idx,
-                               size_t total_blocks,
-                               Scalar f_before,
-                               Scalar f_after,
-                               size_t inner_iters,
-                               size_t inner_evals,
-                               bool   success ) const
+    print_block_result_detail(
+      size_t block_idx,
+      size_t total_blocks,
+      Scalar f_before,
+      Scalar f_after,
+      size_t inner_iters,
+      size_t inner_evals,
+      bool   success ) const
     {
       if ( m_options.verbosity_level < 2 ) return;
 
       Scalar improvement = f_before - f_after;
-      auto   color       = success && improvement > 0 ? LBFGS_utils::PrintColors::SUCCESS
-                           : success                  ? LBFGS_utils::PrintColors::WARNING
-                                                      : LBFGS_utils::PrintColors::ERROR;
+      auto   color       = success && improvement > 0 ? PrintColors::SUCCESS
+                           : success                  ? PrintColors::WARNING
+                                                      : PrintColors::ERROR;
 
       string status_icon = success ? ( improvement > 0 ? "✅" : "⚡" ) : "❌";
       string status_text = success ? ( improvement > 0 ? "IMPROVED" : "NO CHANGE" ) : "FAILED";
 
-      fmt::print( color,
-                  "      ┌────────────────────── BLOCK {:>2d}/{:<2d} RESULT "
-                  "──────────────────────┐\n"
-                  "      │ {} Status: {:<10}   Inner Iters: {:<6}   Evals: {:<6}    │\n"
-                  "      │ F: {:>16.8e} → {:<16.8e}  ΔF: {:<16.8e}   │\n"
-                  "      "
-                  "└────────────────────────────────────────────────────────────────┘"
-                  "\n",
-                  block_idx + 1, total_blocks, status_icon, status_text, inner_iters, inner_evals, f_before, f_after,
-                  improvement );
+      fmt::print(
+        color,
+        "      ┌────────────────────── BLOCK {:>2d}/{:<2d} RESULT ──────────────────────┐\n"
+        "      │ {} Status: {:<10}   Inner Iters: {:<6}   Evals: {:<6}    │\n"
+        "      │ F: {:>16.8e} → {:<16.8e}  ΔF: {:<16.8e}   │\n"
+        "      └────────────────────────────────────────────────────────────────┘\n",
+        block_idx + 1,
+        total_blocks,
+        status_icon,
+        status_text,
+        inner_iters,
+        inner_evals,
+        f_before,
+        f_after,
+        improvement );
     }
 
     void
-    print_block_header( size_t                      block_idx,
-                        size_t                      total_blocks,
-                        std::vector<size_t> const & block_indices,
-                        size_t                      block_size ) const
+    print_block_header(
+      size_t                      block_idx,
+      size_t                      total_blocks,
+      std::vector<size_t> const & block_indices,
+      size_t                      block_size ) const
     {
       if ( m_options.verbosity_level < 2 ) return;
 
-      fmt::print( LBFGS_utils::PrintColors::INFO,
-                  "\n"
-                  "      "
-                  "┌────────────────────────────────────────────────────────────────┐\n"
-                  "      │ Block: {:>4d}/{:<4d}    Iteration: {:<4d}                   "
-                  "  "
-                  "       │\n"
-                  "      │ Size: {:<4} Indices: {:<42} │\n"
-                  "      "
-                  "└────────────────────────────────────────────────────────────────┘"
-                  "\n",
-                  block_idx + 1, total_blocks, m_outer_iteration_count, block_size,
-                  LBFGS_utils::format_index_vector_compact<size_t>( block_indices, 5 ) );
+      fmt::print(
+        PrintColors::INFO,
+        "\n"
+        "      ┌────────────────────────────────────────────────────────────────┐\n"
+        "      │ Block: {:>4d}/{:<4d}    Iteration: {:<4d}                            │\n"
+        "      │ Size: {:<4} Indices: {:<42} │\n"
+        "      └────────────────────────────────────────────────────────────────┘\n",
+        block_idx + 1,
+        total_blocks,
+        m_outer_iteration_count,
+        block_size,
+        format_index_vector_compact<size_t>( block_indices, 5 ) );
     }
 
     // ===========================================================================
@@ -1163,8 +1113,8 @@ namespace Utils
 
       if ( n_total == 0 ) return blocks;
 
-      size_t block_size = std::clamp( m_options.block_size, m_options.min_block_size,
-                                      std::min( m_options.max_block_size, n_total ) );
+      size_t block_size =
+        std::clamp( m_options.block_size, m_options.min_block_size, std::min( m_options.max_block_size, n_total ) );
 
       // Calculate step size based on overlap ratio
       size_t step = static_cast<size_t>( block_size * ( 1.0 - m_options.overlap_ratio ) );
@@ -1236,8 +1186,8 @@ namespace Utils
       }
 
       // Clamp to valid range
-      m_options.block_size = std::clamp( m_options.block_size, m_options.min_block_size,
-                                         std::min( m_options.max_block_size, n_total ) );
+      m_options.block_size =
+        std::clamp( m_options.block_size, m_options.min_block_size, std::min( m_options.max_block_size, n_total ) );
 
       m_previous_best = improvement;
 
@@ -1264,39 +1214,40 @@ namespace Utils
     void
     extract_subbounds( std::vector<size_t> const & indices, Vector & sub_lower, Vector & sub_upper )
     {
+      if ( !m_box_handler.is_active() )
+      {
+        sub_lower.resize( indices.size() );
+        sub_upper.resize( indices.size() );
+        sub_lower.setConstant( -std::numeric_limits<Scalar>::infinity() );
+        sub_upper.setConstant( std::numeric_limits<Scalar>::infinity() );
+        return;
+      }
+
+      // Extract global bounds
+      Vector const & global_lower = m_box_handler.get_lower();
+      Vector const & global_upper = m_box_handler.get_upper();
+
       sub_lower.resize( indices.size() );
       sub_upper.resize( indices.size() );
 
       for ( size_t i = 0; i < indices.size(); ++i )
       {
-        sub_lower( i ) = m_lower( indices[i] );
-        sub_upper( i ) = m_upper( indices[i] );
+        sub_lower( i ) = global_lower( indices[i] );
+        sub_upper( i ) = global_upper( indices[i] );
       }
     }
 
     void
     project_point( Vector & x ) const
     {
-      if ( m_use_bounds ) { x = x.cwiseMax( m_lower ).cwiseMin( m_upper ); }
+      if ( m_box_handler.is_active() ) { m_box_handler.project( x ); }
     }
 
     Scalar
     projected_gradient_norm( Vector const & x, Vector const & g ) const
     {
-      if ( !m_use_bounds ) return g.template lpNorm<Eigen::Infinity>();
-
-      Vector pg = g;
-
-      // Zero gradient components for variables at bounds pointing outward
-      for ( Eigen::Index i = 0; i < x.size(); ++i )
-      {
-        if ( ( x( i ) <= m_lower( i ) + 1e-12 && g( i ) > 0 ) || ( x( i ) >= m_upper( i ) - 1e-12 && g( i ) < 0 ) )
-        {
-          pg( i ) = 0;
-        }
-      }
-
-      return pg.template lpNorm<Eigen::Infinity>();
+      if ( !m_box_handler.is_active() ) return g.template lpNorm<Eigen::Infinity>();
+      return m_box_handler.projected_gradient_norm( x, g );
     }
 
   public:
@@ -1305,23 +1256,23 @@ namespace Utils
     void
     set_bounds( Vector const & lower, Vector const & upper )
     {
-      UTILS_ASSERT( lower.size() == upper.size(),
-                    "BlockLBFGS::set_bounds: lower and upper bounds must have "
-                    "same dimension" );
+      UTILS_ASSERT(
+        lower.size() == upper.size(),
+        "BlockLBFGS::set_bounds: lower and upper bounds must have "
+        "same dimension" );
 
-      UTILS_ASSERT( ( lower.array() <= upper.array() ).all(),
-                    "BlockLBFGS::set_bounds: lower bounds must be <= upper bounds "
-                    "for all coordinates" );
+      UTILS_ASSERT(
+        ( lower.array() <= upper.array() ).all(),
+        "BlockLBFGS::set_bounds: lower bounds must be <= upper bounds "
+        "for all coordinates" );
 
-      m_lower      = lower;
-      m_upper      = upper;
-      m_use_bounds = true;
+      m_box_handler.set_bounds( lower, upper );
     }
 
     void
     clear_bounds()
     {
-      m_use_bounds = false;
+      m_box_handler.clear();
     }
 
     Vector const &
@@ -1335,9 +1286,10 @@ namespace Utils
      */
     template <typename Linesearch>
     Result
-    minimize( Vector const &     x0,
-              Callback const &   global_callback,
-              Linesearch const & linesearch = MoreThuenteLineSearch<Scalar>() )
+    minimize(
+      Vector const &     x0,
+      Callback const &   global_callback,
+      Linesearch const & linesearch = MoreThuenteLineSearch<Scalar>() )
     {
       Result result;
       size_t n = x0.size();
@@ -1348,9 +1300,10 @@ namespace Utils
         if ( m_options.verbosity_level >= 1 )
         {
           fmt::print(
-              "    [BlockLBFGS] Problem dimension {} <= block_size {}, "
-              "using standard LBFGS\n",
-              n, m_options.block_size );
+            "    [BlockLBFGS] Problem dimension {} <= block_size {}, "
+            "using standard LBFGS\n",
+            n,
+            m_options.block_size );
         }
 
         // Use standard LBFGS instead of block coordinate
@@ -1361,7 +1314,10 @@ namespace Utils
         opts.verbosity_level = m_options.verbosity_level;
 
         LBFGS_minimizer<Scalar> minimizer( opts );
-        if ( m_use_bounds ) { minimizer.set_bounds( m_lower, m_upper ); }
+        if ( m_box_handler.is_active() )
+        {
+          minimizer.set_bounds( m_box_handler.get_lower(), m_box_handler.get_upper() );
+        }
 
         auto standard_result = minimizer.minimize( x0, global_callback, linesearch );
 
@@ -1372,8 +1328,8 @@ namespace Utils
         result.initial_function_value = standard_result.initial_function_value;
         result.status                 = ( standard_result.status == LBFGS_minimizer<Scalar>::Status::CONVERGED ||
                           standard_result.status == LBFGS_minimizer<Scalar>::Status::GRADIENT_TOO_SMALL )
-                                            ? Status::CONVERGED
-                                            : Status::FAILED;
+                                          ? Status::CONVERGED
+                                          : Status::FAILED;
         result.outer_iterations       = 1;
         result.inner_iterations       = standard_result.total_iterations;
         result.total_iterations       = standard_result.total_iterations;
@@ -1387,7 +1343,7 @@ namespace Utils
       // Initialize solution
       m_x.resize( x0.size() );
       m_x = x0;
-      if ( m_use_bounds ) project_point( m_x );
+      project_point( m_x );
 
       // Initial evaluation
       Vector g( n );
@@ -1412,7 +1368,7 @@ namespace Utils
         ++m_outer_iteration_count;
         Scalar f_start_cycle = f;
 
-        // STAMPA INIZIO OUTER ITERATION
+        // PRINT OUTER ITERATION START
         print_outer_iteration_start( f, projected_gradient_norm( m_x, g ) );
 
         // Generate consecutive interval blocks for this iteration
@@ -1430,7 +1386,7 @@ namespace Utils
 
           if ( block_indices.empty() ) continue;
 
-          // STAMPA INIZIO BLOCCO
+          // PRINT BLOCK HEADER
           print_block_header( block_idx, all_blocks.size(), block_indices, block_indices.size() );
 
           // Extract block subproblem
@@ -1446,9 +1402,10 @@ namespace Utils
             if ( m_options.verbosity_level >= 2 )
             {
               fmt::print(
-                  "    [BlockLBFGS] Block gradient too small ({:.2e} < "
-                  "{:.2e}), skipping\n",
-                  block_gnorm, m_options.lbfgs_g_tol * 0.1 );
+                "    [BlockLBFGS] Block gradient too small ({:.2e} < "
+                "{:.2e}), skipping\n",
+                block_gnorm,
+                m_options.lbfgs_g_tol * 0.1 );
             }
             continue;
           }
@@ -1458,8 +1415,7 @@ namespace Utils
           {
             Vector x_full = m_x;
             update_full_vector( x_full, x_sub, block_indices );
-
-            if ( m_use_bounds ) project_point( x_full );
+            project_point( x_full );
 
             Vector g_full( n );
             Scalar f_val = global_callback( x_full, &g_full );
@@ -1470,7 +1426,7 @@ namespace Utils
             return f_val;
           };
 
-          // Scala le tolleranze in base al valore corrente
+          // Scale tolerances based on current value
           Scalar f_scale        = std::max( std::abs( f ), Scalar( 1.0 ) );
           Scalar adaptive_f_tol = std::max( m_options.lbfgs_f_tol, m_options.absolute_progress_threshold / f_scale );
 
@@ -1480,7 +1436,7 @@ namespace Utils
           typename LBFGS_minimizer<Scalar>::Options inner_opts;
           inner_opts.max_iter        = m_options.max_inner_iterations;
           inner_opts.g_tol           = std::max( m_options.lbfgs_g_tol,
-                                                 global_gnorm * Scalar( 0.1 ) );  // m_options.lbfgs_g_tol;
+                                       global_gnorm * Scalar( 0.1 ) );  // m_options.lbfgs_g_tol;
           inner_opts.f_tol           = m_options.lbfgs_f_tol;
           inner_opts.m               = m_options.lbfgs_m;
           inner_opts.verbosity_level = max( m_options.verbosity_level, static_cast<size_t>( 1 ) );
@@ -1496,17 +1452,18 @@ namespace Utils
           if ( m_options.verbosity_level >= 3 )
           {
             fmt::print(
-                "    [BlockLBFGS] Starting inner L-BFGS on block [{}] "
-                "(size: {}, ‖g‖∞: {:.2e})\n",
-                LBFGS_utils::format_index_vector_compact<size_t>( block_indices, 10 ), block_indices.size(),
-                g_block.template lpNorm<Eigen::Infinity>() );
+              "    [BlockLBFGS] Starting inner L-BFGS on block [{}] "
+              "(size: {}, ‖g‖∞: {:.2e})\n",
+              format_index_vector_compact<size_t>( block_indices, 10 ),
+              block_indices.size(),
+              g_block.template lpNorm<Eigen::Infinity>() );
           }
 
           LBFGS_minimizer<Scalar> inner_minimizer( inner_opts );
           inner_minimizer.set_indent( "      " );  // 6 spaces indentation
 
           // Set bounds for block if needed
-          if ( m_use_bounds )
+          if ( m_box_handler.is_active() )
           {
             Vector block_lower, block_upper;
             extract_subbounds( block_indices, block_lower, block_upper );
@@ -1525,7 +1482,7 @@ namespace Utils
 
           // Update solution
           update_full_vector( m_x, inner_minimizer.solution(), block_indices );
-          if ( m_use_bounds ) project_point( m_x );
+          project_point( m_x );
 
           // Re-evaluate at new point
           f = global_callback( m_x, &g );
@@ -1542,21 +1499,24 @@ namespace Utils
           bool block_made_progress = ( relative_improvement > m_options.progress_threshold ) ||
                                      ( absolute_improvement > m_options.absolute_progress_threshold );
 
-          // Check if this block made significant progress
-          // bool block_made_progress = (block_improvement >
-          // m_options.progress_threshold * std::abs(f_before_block));
           if ( block_made_progress )
           {
             made_progress_in_cycle    = true;
             best_improvement_in_cycle = std::max( best_improvement_in_cycle, block_improvement );
           }
 
-          // STAMPA RISULTATO DETTAGLIATO BLOCCO
-          print_block_result_detail( block_idx, all_blocks.size(), f_before_block, f, inner_result.total_iterations,
-                                     inner_result.total_evaluations, block_made_progress );
+          // PRINT DETAILED BLOCK RESULT
+          print_block_result_detail(
+            block_idx,
+            all_blocks.size(),
+            f_before_block,
+            f,
+            inner_result.total_iterations,
+            inner_result.total_evaluations,
+            block_made_progress );
         }
 
-        // STAMPA FINE OUTER ITERATION
+        // PRINT OUTER ITERATION END
         Scalar total_improvement = f_start_cycle - f;
         print_outer_iteration_end( f, projected_gradient_norm( m_x, g ), total_improvement );
 
@@ -1580,8 +1540,8 @@ namespace Utils
         }
 
         // Clamp to valid range
-        m_options.block_size = std::clamp( m_options.block_size, m_options.min_block_size,
-                                           std::min( m_options.max_block_size, n ) );
+        m_options.block_size =
+          std::clamp( m_options.block_size, m_options.min_block_size, std::min( m_options.max_block_size, n ) );
 
         if ( m_options.verbosity_level >= 2 && m_options.adaptive_block_size )
         {
@@ -1593,8 +1553,9 @@ namespace Utils
 
         // Calculate current coverage for display
         // Print outer statistics periodically
-        if ( m_options.verbosity_level >= 1 &&
-             ( m_outer_iteration_count % 5 == 0 || m_outer_iteration_count == m_options.max_outer_iterations - 1 ) )
+        if (
+          m_options.verbosity_level >= 1 &&
+          ( m_outer_iteration_count % 5 == 0 || m_outer_iteration_count == m_options.max_outer_iterations - 1 ) )
         {
           print_outer_statistics( m_options.max_outer_iterations, total_inner_iters, total_evals, f, false );
         }
@@ -1608,9 +1569,10 @@ namespace Utils
           if ( m_options.verbosity_level >= 1 )
           {
             fmt::print(
-                "    [BlockLBFGS] Converged by gradient norm: {:.2e} < "
-                "{:.2e}\n",
-                gnorm, m_options.outer_tolerance );
+              "    [BlockLBFGS] Converged by gradient norm: {:.2e} < "
+              "{:.2e}\n",
+              gnorm,
+              m_options.outer_tolerance );
           }
           result.status = Status::GRADIENT_TOO_SMALL;
           converged     = true;
@@ -1619,8 +1581,6 @@ namespace Utils
         // Check function value stagnation with improved criteria
         Scalar cycle_improvement   = f_start_cycle - f;
         Scalar relative_stagnation = cycle_improvement / ( std::abs( f_start_cycle ) + Scalar( 1e-16 ) );
-
-        // Scalar relative_stagnation_tol{1e-8};  // Tighter relative tolerance
 
         // Check function value stagnation
         Scalar relative_improvement = f_improvement / ( 1.0 + std::abs( f_start_cycle ) );
@@ -1633,9 +1593,10 @@ namespace Utils
             if ( m_options.verbosity_level >= 1 )
             {
               fmt::print(
-                  "    [BlockLBFGS] Converged by stagnation ({} "
-                  "iterations with Δf < {:.2e})\n",
-                  m_stagnation_count, m_options.progress_threshold );
+                "    [BlockLBFGS] Converged by stagnation ({} "
+                "iterations with Δf < {:.2e})\n",
+                m_stagnation_count,
+                m_options.progress_threshold );
             }
             result.status = Status::CONVERGED;
             converged     = true;
@@ -1673,9 +1634,11 @@ namespace Utils
         print_outer_statistics( m_options.max_outer_iterations, total_inner_iters, total_evals, f, true );
 
         fmt::print(
-            "    [BlockLBFGS] Finished: status={}, f_final={:.6e}, "
-            "total_evals={}\n",
-            static_cast<int>( result.status ), result.final_function_value, total_evals );
+          "    [BlockLBFGS] Finished: status={}, f_final={:.6e}, "
+          "total_evals={}\n",
+          static_cast<int>( result.status ),
+          result.final_function_value,
+          total_evals );
       }
 
       return result;
@@ -1686,8 +1649,6 @@ namespace Utils
 
 #endif
 
-#endif
-
 //
-// eof: Utils_LBFGS.hh
+// eof: Utils_minimize_LBFGS.hh
 //

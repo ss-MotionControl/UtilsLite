@@ -21,25 +21,26 @@ class Chandrasekhar : public NonlinearSystem
 
 public:
   Chandrasekhar( real_type c, integer neq )
-    : NonlinearSystem( "Chandrasekhar function",
-                       "@book{Kelley:1995,\n"
-                       "  author    = {Kelley, C.},\n"
-                       "  title     = {Iterative Methods for Linear and Nonlinear "
-                       "Equations},\n"
-                       "  publisher = {Society for Industrial and Applied Mathematics},\n"
-                       "  year      = {1995},\n"
-                       "  doi       = {10.1137/1.9781611970944},\n"
-                       "}\n\n"
-                       "@book{chandrasekhar1960,\n"
-                       "  author    = {Chandrasekhar, S.},\n"
-                       "  title     = {Radiative Transfer},\n"
-                       "  year      = {1960},\n"
-                       "  series    = {Dover Books on Intermediate and Advanced "
-                       "Mathematics},\n"
-                       "  publisher = {Dover Publications},\n"
-                       "  isbn      = {9780486605906}\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Chandrasekhar function",
+        "@book{Kelley:1995,\n"
+        "  author    = {Kelley, C.},\n"
+        "  title     = {Iterative Methods for Linear and Nonlinear "
+        "Equations},\n"
+        "  publisher = {Society for Industrial and Applied Mathematics},\n"
+        "  year      = {1995},\n"
+        "  doi       = {10.1137/1.9781611970944},\n"
+        "}\n\n"
+        "@book{chandrasekhar1960,\n"
+        "  author    = {Chandrasekhar, S.},\n"
+        "  title     = {Radiative Transfer},\n"
+        "  year      = {1960},\n"
+        "  series    = {Dover Books on Intermediate and Advanced "
+        "Mathematics},\n"
+        "  publisher = {Dover Publications},\n"
+        "  isbn      = {9780486605906}\n"
+        "}\n",
+        neq )
     , w( c / ( 2 * neq ) )
   {
     mu.resize( neq );

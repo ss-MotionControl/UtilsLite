@@ -16,25 +16,26 @@ class GoldsteinPrice : public NonlinearSystem
 {
 public:
   GoldsteinPrice()
-    : NonlinearSystem( "Goldstein Price Polynomial",
-                       "@book{Michalewicz:1996,\n"
-                       "  author = {Michalewicz, Zbigniew},\n"
-                       "  title = {Genetic Algorithms + Data Structures = Evolution "
-                       "Programs (3rd Ed.)},\n"
-                       "  year = {1996},\n"
-                       "  isbn = {3-540-60676-9},\n"
-                       "  publisher = {Springer-Verlag},\n"
-                       "  address = {Berlin, Heidelberg},\n"
-                       "}\n\n"
-                       "@book{brent2013,\n"
-                       "  author    = {Brent, R.P.},\n"
-                       "  title     = {Algorithms for Minimization Without Derivatives},\n"
-                       "  isbn      = {9780486143682},\n"
-                       "  series    = {Dover Books on Mathematics},\n"
-                       "  year      = {2013},\n"
-                       "  publisher = {Dover Publications}\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Goldstein Price Polynomial",
+        "@book{Michalewicz:1996,\n"
+        "  author = {Michalewicz, Zbigniew},\n"
+        "  title = {Genetic Algorithms + Data Structures = Evolution "
+        "Programs (3rd Ed.)},\n"
+        "  year = {1996},\n"
+        "  isbn = {3-540-60676-9},\n"
+        "  publisher = {Springer-Verlag},\n"
+        "  address = {Berlin, Heidelberg},\n"
+        "}\n\n"
+        "@book{brent2013,\n"
+        "  author    = {Brent, R.P.},\n"
+        "  title     = {Algorithms for Minimization Without Derivatives},\n"
+        "  isbn      = {9780486143682},\n"
+        "  series    = {Dover Books on Mathematics},\n"
+        "  year      = {2013},\n"
+        "  publisher = {Dover Publications}\n"
+        "}\n",
+        2 )
   {
   }
 

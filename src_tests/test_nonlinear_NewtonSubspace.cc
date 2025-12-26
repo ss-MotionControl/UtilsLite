@@ -126,11 +126,15 @@ print_summary_table( const vector<TestResult> & results )
   constexpr int total_width = 2 + col_idx + 3 + col_status + 3 + col_neq + 3 + col_oiter + 3 + col_titer + 3 +
                               col_feval + 3 + col_jeval + 3 + col_residual + 3 + col_time + 3 + col_name + 2;
 
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold,
-              "\n\n"
-              "┏{:━^{}}┓\n"
-              "┠{:─^{}}┨\n",
-              " TWO-LEVEL SUBSPACE NEWTON TEST RESULTS ", total_width - 2, "", total_width - 2 );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "\n\n"
+    "┏{:━^{}}┓\n"
+    "┠{:─^{}}┨\n",
+    " TWO-LEVEL SUBSPACE NEWTON TEST RESULTS ",
+    total_width - 2,
+    "",
+    total_width - 2 );
 
   fmt::print( fg( fmt::color::cyan ), "┃ " );
   fmt::print( "{:>{}} │ ", "#", col_idx );
@@ -224,8 +228,11 @@ print_statistics( const vector<TestResult> & results )
   constexpr int stat_total_width = stat_col_label + stat_col_value + 4;
 
   fmt::print( "\n" );
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold, "╭{:─^{}}╮\n", " STATISTICAL SUMMARY ",
-              stat_total_width - 2 );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "╭{:─^{}}╮\n",
+    " STATISTICAL SUMMARY ",
+    stat_total_width - 2 );
   fmt::print( fg( fmt::color::cyan ), "├{}┤\n", fmt::format( "{:─^{}}", "", stat_total_width - 2 ) );
   fmt::print( fg( fmt::color::cyan ), "│" );
   fmt::print( "{:^{}}", "", stat_total_width - 2 );
@@ -238,14 +245,20 @@ print_statistics( const vector<TestResult> & results )
 
   fmt::print( fg( fmt::color::cyan ), "│ " );
   fmt::print( "{:<{}}", "Converged Tests:", stat_col_label );
-  fmt::print( fg( fmt::color::green ), "{:>{}}",
-              fmt::format( "{} ({:.1f}%)", stats.converged_tests, stats.success_rate ), stat_col_value );
+  fmt::print(
+    fg( fmt::color::green ),
+    "{:>{}}",
+    fmt::format( "{} ({:.1f}%)", stats.converged_tests, stats.success_rate ),
+    stat_col_value );
   fmt::print( fg( fmt::color::cyan ), " │\n" );
 
   fmt::print( fg( fmt::color::cyan ), "│ " );
   fmt::print( "{:<{}}", "Failed Tests:", stat_col_label );
-  fmt::print( fg( fmt::color::red ), "{:>{}}",
-              fmt::format( "{} ({:.1f}%)", stats.failed_tests, 100.0 - stats.success_rate ), stat_col_value );
+  fmt::print(
+    fg( fmt::color::red ),
+    "{:>{}}",
+    fmt::format( "{} ({:.1f}%)", stats.failed_tests, 100.0 - stats.success_rate ),
+    stat_col_value );
   fmt::print( fg( fmt::color::cyan ), " │\n" );
 
   fmt::print( fg( fmt::color::cyan ), "├{}┤\n", fmt::format( "{:─^{}}", "", stat_total_width - 2 ) );
@@ -299,15 +312,16 @@ main( int argc, char * argv[] )
 {
   Utils::TicToc tm;
 
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold,
-              "\n\n"
-              "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-              "━━━━━━━━━━━┓\n"
-              "┃                  TWO-LEVEL SUBSPACE NEWTON TEST SUITE         "
-              "           ┃\n"
-              "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-              "━━━━━━━━━━━┛\n"
-              "\n" );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "\n\n"
+    "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    "━━━━━━━━━━━┓\n"
+    "┃                  TWO-LEVEL SUBSPACE NEWTON TEST SUITE         "
+    "           ┃\n"
+    "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    "━━━━━━━━━━━┛\n"
+    "\n" );
 
   init_nonlinear_system_tests();
 

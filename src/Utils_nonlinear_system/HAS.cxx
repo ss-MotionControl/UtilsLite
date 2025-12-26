@@ -12,17 +12,17 @@
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-#define HAS_BIBTEX                                                                                                     \
-  "@article{Grippo:1991,\n"                                                                                            \
-  "  author  = {Grippo, L. and Lampariello, F. and Lucidi, S.},\n"                                                     \
-  "  title   = {A Class of Nonmonotone Stabilization Methods\n"                                                        \
-  "             in Unconstrained Optimization},\n"                                                                     \
-  "  journal = {Numer. Math.},\n"                                                                                      \
-  "  year    = {1991},\n"                                                                                              \
-  "  volume  = {59},\n"                                                                                                \
-  "  number  = {1},\n"                                                                                                 \
-  "  pages   = {779--805},\n"                                                                                          \
-  "  doi     = {10.1007/BF01385810},\n"                                                                                \
+#define HAS_BIBTEX                                                 \
+  "@article{Grippo:1991,\n"                                        \
+  "  author  = {Grippo, L. and Lampariello, F. and Lucidi, S.},\n" \
+  "  title   = {A Class of Nonmonotone Stabilization Methods\n"    \
+  "             in Unconstrained Optimization},\n"                 \
+  "  journal = {Numer. Math.},\n"                                  \
+  "  year    = {1991},\n"                                          \
+  "  volume  = {59},\n"                                            \
+  "  number  = {1},\n"                                             \
+  "  pages   = {779--805},\n"                                      \
+  "  doi     = {10.1007/BF01385810},\n"                            \
   "}\n"
 
 static inline string
@@ -215,22 +215,22 @@ public:
     if ( tau == 1e2 )
     {
       x0 << 6.681814179997021692636660004601691302401, 9.074510495626874674434074592710482202822,
-          12.99535539607610906540018013075666371709, 0, 0, 0, 0;
+        12.99535539607610906540018013075666371709, 0, 0, 0, 0;
     }
     else if ( tau == 1e4 )
     {
       x0 << 3.900157915419476405557407980428199299310, 7.709248543842730875537744129799143332094,
-          11.96290763014932833437155935276448655442, 0, 0, 0, 0;
+        11.96290763014932833437155935276448655442, 0, 0, 0, 0;
     }
     else if ( tau == 1e6 )
     {
       x0 << 3.847831075410325147818365927952842675327, 7.694733977443614783484512361392494920171,
-          11.95451849301910537037961219270342443906, 0, 0, 0, 0;
+        11.95451849301910537037961219270342443906, 0, 0, 0, 0;
     }
     else if ( tau == 1e8 )
     {
       x0 << 3.847300847063338217370019344657353290973, 7.694589110936489763239095186897873067137,
-          11.95443542298989582053077640148919021918, 0, 0, 0, 0;
+        11.95443542298989582053077640148919021918, 0, 0, 0, 0;
     }
     else if ( tau == 1e10 )
     {
@@ -343,11 +343,11 @@ public:
     real_type t40 = x( 0 ) + x( 1 ) + x( 2 );
     f( 0 ) += ( 0.408E-1 * x( 0 ) + 0.1214 * x( 0 ) * t2 + 0.204E-1 * x( 1 ) + 0.607E-1 * x( 1 ) * t2 +
                 0.204E-1 * x( 2 ) + 0.607E-1 * x( 2 ) * t2 ) *
-                  x( 3 ) +
+                x( 3 ) +
               t17;
     f( 1 ) += ( 0.187E-1 * x( 0 ) + 0.437E-1 * x( 0 ) * t14 + 0.58718E-1 * x( 1 ) + 0.137218 * x( 1 ) * t14 +
                 0.187E-1 * x( 3 ) + 0.437E-1 * x( 3 ) * t14 ) *
-                  x( 2 ) +
+                x( 2 ) +
               t33;
     f( 2 ) += x( 1 ) * t36 * t16 + t33;
     f( 3 ) += x( 0 ) * t40 * t32 + t17;
@@ -488,7 +488,7 @@ public:
       J_full( 0, 0 ) = 0.2E-5 * t3 * t8 + 2.0 * t22 +
                        ( ( 0.15376E-5 * t24 * x( 0 ) + 0.14384E-5 * t28 ) * x( 1 ) + 0.15376E-5 * t24 * t32 +
                          0.15376E-5 * t24 * x( 2 ) * x( 0 ) ) *
-                           t4 +
+                         t4 +
                        0.248E-2 * ( -1.0 + 0.58E-3 * t18 * t40 + 0.9106E-3 * t1 * x( 2 ) * t7 + t46 ) * t5 * x( 3 ) +
                        2.0;
       J_full( 0, 1 ) = t89;
@@ -505,9 +505,9 @@ public:
                        ( 0.331676944E-5 * t1 * t182 +
                          ( 0.2112592E-5 * t182 * x( 0 ) + 0.2112592E-5 * t182 * x( 3 ) ) * x( 1 ) +
                          0.2258288E-5 * t40 * t11 ) *
-                           t2 +
+                         t2 +
                        0.36424E-2 * ( -1.0 + 0.62E-3 * x( 3 ) * t32 * t5 + 0.62E-3 * t15 * t5 * x( 1 ) + t46 ) * t7 *
-                           x( 2 ) +
+                         x( 2 ) +
                        2.0;
       J_full( 1, 2 ) = t220;
       J_full( 1, 3 ) = t231;
@@ -678,28 +678,27 @@ public:
   }
 };
 
-
 /*\
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-#define HAS111_BIBTEX                                                                                                  \
-  "@article{Shacham:1990,\n"                                                                                           \
-  "  author  = {Shacham, Orit and Schacham, Mordechai},\n"                                                             \
-  "  title   = {Finding Boundaries of the Domain of Definition\n"                                                      \
-  "             for Functions Along a One-dimensional Ray},\n"                                                         \
-  "  journal = {ACM Trans. Math. Softw.},\n"                                                                           \
-  "  year    = {1990},\n"                                                                                              \
-  "  volume  = {16},\n"                                                                                                \
-  "  number  = {3},\n"                                                                                                 \
-  "  pages   = {258--268},\n"                                                                                          \
-  "  doi     = {10.1145/79505.79511},\n"                                                                               \
-  "}\n\n"                                                                                                              \
-  "@book{himmelblau:1972,\n"                                                                                           \
-  "  author    = {Himmelblau, D.M.},\n"                                                                                \
-  "  title     = {Applied nonlinear programming},\n"                                                                   \
-  "  year      = {1972},\n"                                                                                            \
-  "  publisher = {McGraw-Hill}\n"                                                                                      \
+#define HAS111_BIBTEX                                             \
+  "@article{Shacham:1990,\n"                                      \
+  "  author  = {Shacham, Orit and Schacham, Mordechai},\n"        \
+  "  title   = {Finding Boundaries of the Domain of Definition\n" \
+  "             for Functions Along a One-dimensional Ray},\n"    \
+  "  journal = {ACM Trans. Math. Softw.},\n"                      \
+  "  year    = {1990},\n"                                         \
+  "  volume  = {16},\n"                                           \
+  "  number  = {3},\n"                                            \
+  "  pages   = {258--268},\n"                                     \
+  "  doi     = {10.1145/79505.79511},\n"                          \
+  "}\n\n"                                                         \
+  "@book{himmelblau:1972,\n"                                      \
+  "  author    = {Himmelblau, D.M.},\n"                           \
+  "  title     = {Applied nonlinear programming},\n"              \
+  "  year      = {1972},\n"                                       \
+  "  publisher = {McGraw-Hill}\n"                                 \
   "}\n"
 
 class HAS111 : public NonlinearSystem

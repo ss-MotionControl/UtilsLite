@@ -509,9 +509,11 @@ namespace Utils
       if ( m_opts.verbose )
       {
         fmt::print(
-            "[MADS] Starting optimization, dimension: {}, initial f: {}, "
-            "initial mesh: {}\n",
-            n, m_current_f, m_mesh_size );
+          "[MADS] Starting optimization, dimension: {}, initial f: {}, "
+          "initial mesh: {}\n",
+          n,
+          m_current_f,
+          m_mesh_size );
       }
 
       for ( size_t k{ 0 }; k < m_opts.max_iter; ++k )
@@ -540,8 +542,13 @@ namespace Utils
         // Verbose output
         if ( m_opts.verbose && ( k % m_opts.print_every ) == 0 )
         {
-          fmt::print( "[MADS] iter={:<4} f={:<10.4} mesh={:<10.4} improv={} evals={}\n", k, m_current_f, m_mesh_size,
-                      improvement, m_eval_count );
+          fmt::print(
+            "[MADS] iter={:<4} f={:<10.4} mesh={:<10.4} improv={} evals={}\n",
+            k,
+            m_current_f,
+            m_mesh_size,
+            improvement,
+            m_eval_count );
         }
 
         // Check convergence
@@ -623,8 +630,12 @@ namespace Utils
     string
     get_state_info() const
     {
-      return fmt::format( "MADS State: f={}, mesh_size={}, evaluations={}, visited_points={}", m_current_f, m_mesh_size,
-                          m_eval_count, m_visited_points.size() );
+      return fmt::format(
+        "MADS State: f={}, mesh_size={}, evaluations={}, visited_points={}",
+        m_current_f,
+        m_mesh_size,
+        m_eval_count,
+        m_visited_points.size() );
     }
 
     /**

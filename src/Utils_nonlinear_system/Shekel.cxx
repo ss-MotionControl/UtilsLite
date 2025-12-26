@@ -12,14 +12,14 @@
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-#define SHEKEL_BIBTEX                                                                                                  \
-  "@book{brent2013,\n"                                                                                                 \
-  "  author    = {Brent, R.P.},\n"                                                                                     \
-  "  title     = {Algorithms for Minimization Without Derivatives},\n"                                                 \
-  "  isbn      = {9780486143682},\n"                                                                                   \
-  "  series    = {Dover Books on Mathematics},\n"                                                                      \
-  "  year      = {2013},\n"                                                                                            \
-  "  publisher = {Dover Publications}\n"                                                                               \
+#define SHEKEL_BIBTEX                                                  \
+  "@book{brent2013,\n"                                                 \
+  "  author    = {Brent, R.P.},\n"                                     \
+  "  title     = {Algorithms for Minimization Without Derivatives},\n" \
+  "  isbn      = {9780486143682},\n"                                   \
+  "  series    = {Dover Books on Mathematics},\n"                      \
+  "  year      = {2013},\n"                                            \
+  "  publisher = {Dover Publications}\n"                               \
   "}\n"
 
 class ShekelSQRN5 : public NonlinearSystem

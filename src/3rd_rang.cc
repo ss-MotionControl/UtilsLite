@@ -53,8 +53,10 @@ namespace rang
                                  "linux", "msys",  "putty",   "rxvt",   "screen", "vt100",   "xterm" };
         char const * env_p   = getenv( "TERM" );
         if ( env_p == nullptr ) return false;
-        return any_of( begin( terms ), end( terms ),
-                       [&]( const char * term ) { return strstr( env_p, term ) != nullptr; } );
+        return any_of(
+          begin( terms ),
+          end( terms ),
+          [&]( const char * term ) { return strstr( env_p, term ) != nullptr; } );
       }();
 #elif defined( UTILS_OS_WINDOWS )
       // All windows versions support colors through native console methods
@@ -76,7 +78,7 @@ namespace rang
 #else
       // Dynamic load for binary compability with old Windows
       auto const ptrGetFileInformationByHandleEx = reinterpret_cast<decltype( &GetFileInformationByHandleEx )>(
-          GetProcAddress( GetModuleHandle( TEXT( "kernel32.dll" ) ), "GetFileInformationByHandleEx" ) );
+        GetProcAddress( GetModuleHandle( TEXT( "kernel32.dll" ) ), "GetFileInformationByHandleEx" ) );
 
       if ( !ptrGetFileInformationByHandleEx ) return false;
 
@@ -104,8 +106,9 @@ namespace rang
 
       wstring name( pNameInfo->FileName, pNameInfo->FileNameLength / sizeof( WCHAR ) );
 
-      if ( ( name.find( L"msys-" ) == wstring::npos && name.find( L"cygwin-" ) == wstring::npos ) ||
-           name.find( L"-pty" ) == wstring::npos )
+      if (
+        ( name.find( L"msys-" ) == wstring::npos && name.find( L"cygwin-" ) == wstring::npos ) ||
+        name.find( L"-pty" ) == wstring::npos )
         return false;
 
       return true;
@@ -218,8 +221,9 @@ namespace rang
       {
         CONSOLE_SCREEN_BUFFER_INFO info;
         WORD                       attrib = FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE;
-        if ( GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &info ) ||
-             GetConsoleScreenBufferInfo( GetStdHandle( STD_ERROR_HANDLE ), &info ) )
+        if (
+          GetConsoleScreenBufferInfo( GetStdHandle( STD_OUTPUT_HANDLE ), &info ) ||
+          GetConsoleScreenBufferInfo( GetStdHandle( STD_ERROR_HANDLE ), &info ) )
         {
           attrib = info.wAttributes;
         }
@@ -348,7 +352,7 @@ namespace rang
       }
     }
 
-#define DO_INSTANTIATION( A )                                                                                          \
+#define DO_INSTANTIATION( A ) \
   void setWinColorNative( ostream & os, A value ) { setWinColorNative_tmpl<A>( os, value ); }
 
     DO_INSTANTIATION( enum rang::style );

@@ -34,27 +34,27 @@
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-#define BIGGS_BIBTEX                                                                                                   \
-  "@Article{Biggs:1971,\n"                                                                                             \
-  "  author = {M. C. Biggs},\n"                                                                                        \
-  "  title  = { Minimization algorithms making use of non-quadratic\n"                                                 \
-  "             properties of the objective function},\n"                                                              \
-  "  volume = {8},\n"                                                                                                  \
-  "  pages  = {315--327},\n"                                                                                           \
-  "  year   = {1971},\n"                                                                                               \
-  "  journal = {Journal of the Institute of Mathematics and its "                                                      \
-  "Applications}\n"                                                                                                    \
-  "}\n\n"                                                                                                              \
-  "@article{More:1981,\n"                                                                                              \
-  "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and Hillstrom, "                                              \
-  "Kenneth E.},\n"                                                                                                     \
-  "  title   = {Testing Unconstrained Optimization Software},\n"                                                       \
-  "  journal = {ACM Trans. Math. Softw.},\n"                                                                           \
-  "  year    = {1981},\n"                                                                                              \
-  "  volume  = {7},\n"                                                                                                 \
-  "  number  = {1},\n"                                                                                                 \
-  "  pages   = {17--41},\n"                                                                                            \
-  "  doi     = {10.1145/355934.355936},\n"                                                                             \
+#define BIGGS_BIBTEX                                                      \
+  "@Article{Biggs:1971,\n"                                                \
+  "  author = {M. C. Biggs},\n"                                           \
+  "  title  = { Minimization algorithms making use of non-quadratic\n"    \
+  "             properties of the objective function},\n"                 \
+  "  volume = {8},\n"                                                     \
+  "  pages  = {315--327},\n"                                              \
+  "  year   = {1971},\n"                                                  \
+  "  journal = {Journal of the Institute of Mathematics and its "         \
+  "Applications}\n"                                                       \
+  "}\n\n"                                                                 \
+  "@article{More:1981,\n"                                                 \
+  "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and Hillstrom, " \
+  "Kenneth E.},\n"                                                        \
+  "  title   = {Testing Unconstrained Optimization Software},\n"          \
+  "  journal = {ACM Trans. Math. Softw.},\n"                              \
+  "  year    = {1981},\n"                                                 \
+  "  volume  = {7},\n"                                                    \
+  "  number  = {1},\n"                                                    \
+  "  pages   = {17--41},\n"                                               \
+  "  doi     = {10.1145/355934.355936},\n"                                \
   "}\n"
 
 class BiggsEXP2function : public NonlinearSystem
@@ -589,10 +589,10 @@ public:
   virtual void
   check_if_admissible( Vector const & x ) const override
   {
-    UTILS_ASSERT( x( 0 ) > xmin && x( 0 ) < xmax && x( 1 ) > xmin && x( 1 ) < xmax && x( 2 ) > xmin && x( 2 ) < xmax &&
-                      x( 3 ) > xmin && x( 3 ) < xmax && x( 4 ) > xmin && x( 4 ) < xmax && x( 5 ) > xmin &&
-                      x( 5 ) < xmax,
-                  "Bad Range" );
+    UTILS_ASSERT(
+      x( 0 ) > xmin && x( 0 ) < xmax && x( 1 ) > xmin && x( 1 ) < xmax && x( 2 ) > xmin && x( 2 ) < xmax &&
+        x( 3 ) > xmin && x( 3 ) < xmax && x( 4 ) > xmin && x( 4 ) < xmax && x( 5 ) > xmin && x( 5 ) < xmax,
+      "Bad Range" );
   }
 
   virtual void

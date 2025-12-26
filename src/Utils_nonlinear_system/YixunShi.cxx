@@ -16,19 +16,20 @@ class YixunShi1 : public NonlinearSystem
 {
 public:
   YixunShi1()
-    : NonlinearSystem( "Shi, Yixun Problem N.3",
-                       "@article{YixunShi,\n"
-                       "  Author  = {Shi, Yixun},\n"
-                       "  Title   = {A globalization procedure for solving "
-                       "nonlinear systems of equations},\n"
-                       "  Journal = {Numerical Algorithms},\n"
-                       "  Number  = {2},\n"
-                       "  Pages   = {273--286},\n"
-                       "  Volume  = {12},\n"
-                       "  Year    = {1996},\n"
-                       "  Doi     = {10.1007/BF02142807},\n"
-                       "}\n",
-                       3 )
+    : NonlinearSystem(
+        "Shi, Yixun Problem N.3",
+        "@article{YixunShi,\n"
+        "  Author  = {Shi, Yixun},\n"
+        "  Title   = {A globalization procedure for solving "
+        "nonlinear systems of equations},\n"
+        "  Journal = {Numerical Algorithms},\n"
+        "  Number  = {2},\n"
+        "  Pages   = {273--286},\n"
+        "  Volume  = {12},\n"
+        "  Year    = {1996},\n"
+        "  Doi     = {10.1007/BF02142807},\n"
+        "}\n",
+        3 )
   {
   }
 
@@ -96,19 +97,20 @@ class YixunShi2 : public NonlinearSystem
 {
 public:
   YixunShi2()
-    : NonlinearSystem( "Shi, Yixun Problem N.4",
-                       "@article{YixunShi,\n"
-                       "  Author  = {Shi, Yixun},\n"
-                       "  Title   = {A globalization procedure for solving "
-                       "nonlinear systems of equations},\n"
-                       "  Journal = {Numerical Algorithms},\n"
-                       "  Number  = {2},\n"
-                       "  Pages   = {273--286},\n"
-                       "  Volume  = {12},\n"
-                       "  Year    = {1996},\n"
-                       "  Doi     = {10.1007/BF02142807},\n"
-                       "}\n",
-                       100 )
+    : NonlinearSystem(
+        "Shi, Yixun Problem N.4",
+        "@article{YixunShi,\n"
+        "  Author  = {Shi, Yixun},\n"
+        "  Title   = {A globalization procedure for solving "
+        "nonlinear systems of equations},\n"
+        "  Journal = {Numerical Algorithms},\n"
+        "  Number  = {2},\n"
+        "  Pages   = {273--286},\n"
+        "  Volume  = {12},\n"
+        "  Year    = {1996},\n"
+        "  Doi     = {10.1007/BF02142807},\n"
+        "}\n",
+        100 )
   {
   }
 
@@ -187,19 +189,20 @@ class YixunShi3 : public NonlinearSystem
 {
 public:
   YixunShi3()
-    : NonlinearSystem( "Shi, Yixun Problem N.5",
-                       "@article{YixunShi,\n"
-                       "  Author  = {Shi, Yixun},\n"
-                       "  Title   = {A globalization procedure for solving "
-                       "nonlinear systems of equations},\n"
-                       "  Journal = {Numerical Algorithms},\n"
-                       "  Number  = {2},\n"
-                       "  Pages   = {273--286},\n"
-                       "  Volume  = {12},\n"
-                       "  Year    = {1996},\n"
-                       "  Doi     = {10.1007/BF02142807},\n"
-                       "}\n",
-                       100 )
+    : NonlinearSystem(
+        "Shi, Yixun Problem N.5",
+        "@article{YixunShi,\n"
+        "  Author  = {Shi, Yixun},\n"
+        "  Title   = {A globalization procedure for solving "
+        "nonlinear systems of equations},\n"
+        "  Journal = {Numerical Algorithms},\n"
+        "  Number  = {2},\n"
+        "  Pages   = {273--286},\n"
+        "  Volume  = {12},\n"
+        "  Year    = {1996},\n"
+        "  Doi     = {10.1007/BF02142807},\n"
+        "}\n",
+        100 )
   {
   }
 
@@ -308,19 +311,20 @@ class YixunShi4 : public NonlinearSystem
 
 public:
   YixunShi4()
-    : NonlinearSystem( "Shi, Yixun Problem N.6 (Singular Broyden)",
-                       "@article{YixunShi,\n"
-                       "  Author  = {Shi, Yixun},\n"
-                       "  Title   = {A globalization procedure for solving "
-                       "nonlinear systems of equations},\n"
-                       "  Journal = {Numerical Algorithms},\n"
-                       "  Number  = {2},\n"
-                       "  Pages   = {273--286},\n"
-                       "  Volume  = {12},\n"
-                       "  Year    = {1996},\n"
-                       "  Doi     = {10.1007/BF02142807},\n"
-                       "}\n",
-                       100 )
+    : NonlinearSystem(
+        "Shi, Yixun Problem N.6 (Singular Broyden)",
+        "@article{YixunShi,\n"
+        "  Author  = {Shi, Yixun},\n"
+        "  Title   = {A globalization procedure for solving "
+        "nonlinear systems of equations},\n"
+        "  Journal = {Numerical Algorithms},\n"
+        "  Number  = {2},\n"
+        "  Pages   = {273--286},\n"
+        "  Volume  = {12},\n"
+        "  Year    = {1996},\n"
+        "  Doi     = {10.1007/BF02142807},\n"
+        "}\n",
+        100 )
     , h( 0.5 )
   {
   }

@@ -53,12 +53,12 @@
 #endif
 
 #ifndef UTILS_ASSERT0
-#define UTILS_ASSERT0( COND, MSG )                                                                                     \
+#define UTILS_ASSERT0( COND, MSG ) \
   if ( !( COND ) ) UTILS_ERROR0( MSG )
 #endif
 
 #ifndef UTILS_WARNING0
-#define UTILS_WARNING0( COND, MSG )                                                                                    \
+#define UTILS_WARNING0( COND, MSG ) \
   if ( !( COND ) ) std::cerr << MSG
 #endif
 
@@ -67,12 +67,12 @@
 #endif
 
 #ifndef UTILS_ASSERT
-#define UTILS_ASSERT( COND, ... )                                                                                      \
+#define UTILS_ASSERT( COND, ... ) \
   if ( !( COND ) ) UTILS_ERROR( __VA_ARGS__ )
 #endif
 
 #ifndef UTILS_WARNING
-#define UTILS_WARNING( COND, ... )                                                                                     \
+#define UTILS_WARNING( COND, ... ) \
   if ( !( COND ) ) fmt::print( __VA_ARGS__ )
 #endif
 
@@ -228,19 +228,16 @@ namespace Utils
 
   using std::string_view;
 
-  string fmt_table_row( unsigned    width,
-                        string_view L,
-                        string_view R,
-                        string_view F,
-                        string_view title,
-                        string_view align );
-  string fmt_table_row( unsigned                           width,
-                        string_view                        L,
-                        string_view                        C,
-                        string_view                        R,
-                        string_view                        F,
-                        std::initializer_list<string_view> names,
-                        string_view                        align );
+  string
+  fmt_table_row( unsigned width, string_view L, string_view R, string_view F, string_view title, string_view align );
+  string fmt_table_row(
+    unsigned                           width,
+    string_view                        L,
+    string_view                        C,
+    string_view                        R,
+    string_view                        F,
+    std::initializer_list<string_view> names,
+    string_view                        align );
   string fmt_table_row( unsigned width, string_view L, string_view C, string_view R, string_view F, unsigned N );
 
   inline string
@@ -265,34 +262,38 @@ namespace Utils
   }
 
   inline string
-  fmt_table_row( unsigned                           width,
-                 std::initializer_list<string_view> names,
-                 string_view                        align = "<",
-                 string_view                        fill  = " " )
+  fmt_table_row(
+    unsigned                           width,
+    std::initializer_list<string_view> names,
+    string_view                        align = "<",
+    string_view                        fill  = " " )
   {
     return fmt_table_row( width, "│", "│", "│\n", fill, names, align );
   }
   inline string
-  fmt_table_top_row( unsigned                           width,
-                     std::initializer_list<string_view> names,
-                     string_view                        align = "<",
-                     string_view                        fill  = "─" )
+  fmt_table_top_row(
+    unsigned                           width,
+    std::initializer_list<string_view> names,
+    string_view                        align = "<",
+    string_view                        fill  = "─" )
   {
     return fmt_table_row( width, "┌", "─", "┐\n", fill, names, align );
   }
   inline string
-  fmt_table_middle_row( unsigned                           width,
-                        std::initializer_list<string_view> names,
-                        string_view                        align = "<",
-                        string_view                        fill  = "─" )
+  fmt_table_middle_row(
+    unsigned                           width,
+    std::initializer_list<string_view> names,
+    string_view                        align = "<",
+    string_view                        fill  = "─" )
   {
     return fmt_table_row( width, "├", "┼", "┤\n", fill, names, align );
   }
   inline string
-  fmt_table_bottom_row( unsigned                           width,
-                        std::initializer_list<string_view> names,
-                        string_view                        align = "<",
-                        string_view                        fill  = "─" )
+  fmt_table_bottom_row(
+    unsigned                           width,
+    std::initializer_list<string_view> names,
+    string_view                        align = "<",
+    string_view                        fill  = "─" )
   {
     return fmt_table_row( width, "└", "─", "┘\n", fill, names, align );
   }
@@ -341,6 +342,57 @@ namespace Utils
     tmp += "]";
     return tmp;
   }
+
+  /**
+   * @brief Format a vector of indices in a compact representation
+   *
+   * @tparam T Index type (typically size_t or int)
+   * @param indices Vector of indices to format
+   * @param max_display Maximum number of indices to display before truncating
+   * @return std::string Compact string representation
+   */
+  template <typename T>
+  std::string
+  format_index_vector_compact( std::vector<T> const & indices, size_t max_display = 5 )
+  {
+    if ( indices.empty() ) return "[]";
+
+    std::stringstream ss;
+    ss << "[";
+
+    if ( indices.size() <= max_display )
+    {
+      for ( size_t i = 0; i < indices.size(); ++i )
+      {
+        if ( i > 0 ) ss << ", ";
+        ss << indices[i];
+      }
+    }
+    else
+    {
+      for ( size_t i = 0; i < max_display - 1; ++i )
+      {
+        if ( i > 0 ) ss << ", ";
+        ss << indices[i];
+      }
+      ss << ", ..., " << indices.back();
+    }
+
+    ss << "]";
+    return ss.str();
+  }
+
+  namespace PrintColors
+  {
+    constexpr auto HEADER    = fmt::fg( fmt::color::light_blue );
+    constexpr auto SUCCESS   = fmt::fg( fmt::color::green );
+    constexpr auto WARNING   = fmt::fg( fmt::color::yellow );
+    constexpr auto ERROR     = fmt::fg( fmt::color::red );
+    constexpr auto INFO      = fmt::fg( fmt::color::cyan );
+    constexpr auto ITERATION = fmt::fg( fmt::color::white );
+    constexpr auto DETAIL    = fmt::fg( fmt::color::gray );
+  }  // namespace PrintColors
+
 }  // namespace Utils
 
 #endif

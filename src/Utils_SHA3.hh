@@ -115,7 +115,6 @@ namespace Utils
     //!
     string digest_in_hex();
 
-
     //!
     //! \brief Returns the size of the hash digest.
     //!

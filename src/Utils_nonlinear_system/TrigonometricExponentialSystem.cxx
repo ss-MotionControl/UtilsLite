@@ -12,21 +12,21 @@
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-#define TRIGONOMETRIC_EXPONENTIAL_BIBTEX                                                                               \
-  "Spedicato, E.\n"                                                                                                    \
-  "Computational experience with quasi-newton algoritms.\n"                                                            \
-  "for minimization problems of moderately large size.\n"                                                              \
-  "Rep. CISE-N-175, Segrate (Milano), 1975.\n\n"                                                                       \
-  "@article{More:1981,\n"                                                                                              \
-  "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and Hillstrom, "                                              \
-  "Kenneth E.},\n"                                                                                                     \
-  "  title   = {Testing Unconstrained Optimization Software},\n"                                                       \
-  "  journal = {ACM Trans. Math. Softw.},\n"                                                                           \
-  "  year    = {1981},\n"                                                                                              \
-  "  volume  = {7},\n"                                                                                                 \
-  "  number  = {1},\n"                                                                                                 \
-  "  pages   = {17--41},\n"                                                                                            \
-  "  doi     = {10.1145/355934.355936},\n"                                                                             \
+#define TRIGONOMETRIC_EXPONENTIAL_BIBTEX                                  \
+  "Spedicato, E.\n"                                                       \
+  "Computational experience with quasi-newton algoritms.\n"               \
+  "for minimization problems of moderately large size.\n"                 \
+  "Rep. CISE-N-175, Segrate (Milano), 1975.\n\n"                          \
+  "@article{More:1981,\n"                                                 \
+  "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and Hillstrom, " \
+  "Kenneth E.},\n"                                                        \
+  "  title   = {Testing Unconstrained Optimization Software},\n"          \
+  "  journal = {ACM Trans. Math. Softw.},\n"                              \
+  "  year    = {1981},\n"                                                 \
+  "  volume  = {7},\n"                                                    \
+  "  number  = {1},\n"                                                    \
+  "  pages   = {17--41},\n"                                               \
+  "  doi     = {10.1145/355934.355936},\n"                                \
   "}\n"
 
 class TrigonometricExponentialSystem1 : public NonlinearSystem
@@ -180,26 +180,26 @@ public:
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-
 class TrigExp : public NonlinearSystem
 {
 public:
   TrigExp( integer neq )
-    : NonlinearSystem( "TrigExp",
-                       "@article{Ruggiero:1992,\n"
-                       "  author  = {Gomes-Ruggiero, M. and Martínez, J. and Moretti, "
-                       "A.},\n"
-                       "  title   = {Comparing Algorithms for Solving Sparse Nonlinear\n"
-                       "             Systems of Equations},\n"
-                       "  journal = {SIAM Journal on Scientific and Statistical "
-                       "Computing},\n"
-                       "  volume  = {13},\n"
-                       "  number  = {2},\n"
-                       "  pages   = {459-483},\n"
-                       "  year    = {1992},\n"
-                       "  doi     = {10.1137/0913025},\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "TrigExp",
+        "@article{Ruggiero:1992,\n"
+        "  author  = {Gomes-Ruggiero, M. and Martínez, J. and Moretti, "
+        "A.},\n"
+        "  title   = {Comparing Algorithms for Solving Sparse Nonlinear\n"
+        "             Systems of Equations},\n"
+        "  journal = {SIAM Journal on Scientific and Statistical "
+        "Computing},\n"
+        "  volume  = {13},\n"
+        "  number  = {2},\n"
+        "  pages   = {459-483},\n"
+        "  year    = {1992},\n"
+        "  doi     = {10.1137/0913025},\n"
+        "}\n",
+        neq )
   {
     check_min_equations( n, 3 );
   }

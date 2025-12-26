@@ -81,11 +81,14 @@ namespace Utils
   void
   print_trace( int const line, string_view const file, string_view const msg, ostream_type & stream )
   {
-    fmt::print( stream,
-                "---------------------------------------------------------\n"
-                "file: {}:{}\n{}\n"
-                "---------------------------------------------------------\n",
-                file, line, msg );
+    fmt::print(
+      stream,
+      "---------------------------------------------------------\n"
+      "file: {}:{}\n{}\n"
+      "---------------------------------------------------------\n",
+      file,
+      line,
+      msg );
 #ifndef __MINGW32__
     ULONG const  framesToSkip    = 0;
     ULONG const  framesToCapture = 64;
@@ -148,10 +151,15 @@ namespace Utils
   void
   print_trace( int const line, string_view const file, string_view const reason, ostream_type & stream )
   {
-    fmt::print( stream,
-                "\n{}\nOn File:{}:{}\nprocess ID:{}, parent process "
-                "ID:{}\nstack trace:\n",
-                reason, Utils::get_basename( file ), line, getpid(), getppid() );
+    fmt::print(
+      stream,
+      "\n{}\nOn File:{}:{}\nprocess ID:{}, parent process "
+      "ID:{}\nstack trace:\n",
+      reason,
+      Utils::get_basename( file ),
+      line,
+      getpid(),
+      getppid() );
 
 #ifdef UTILS_OS_OSX
     int const max_frames{ 64 };

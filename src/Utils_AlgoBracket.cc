@@ -132,12 +132,18 @@ namespace Utils
     Real P1{ P0 + D01 * O1 };
     Real P2{ P1 + D012 * O2 };
 
-    UTILS_ASSERT( is_finite( P2 ),
-                  "AlgoBracket<Real>::pzero(), compute NaN or Inf at\n"
-                  "a={} f(a)={}\n"
-                  "b={} f(b)={}\n"
-                  "d={} f(d)={}\n",
-                  m_a, m_fa, m_b, m_fb, d, fd );
+    UTILS_ASSERT(
+      is_finite( P2 ),
+      "AlgoBracket<Real>::pzero(), compute NaN or Inf at\n"
+      "a={} f(a)={}\n"
+      "b={} f(b)={}\n"
+      "d={} f(d)={}\n",
+      m_a,
+      m_fa,
+      m_b,
+      m_fb,
+      d,
+      fd );
 
     // CALCULATE THE OUTPUT C.
     return P2;
@@ -182,13 +188,21 @@ namespace Utils
     Real P2{ P1 + D012 * O2 };
     Real P3{ P2 + D0123 * O3 };
 
-    UTILS_ASSERT( is_finite( P3 ),
-                  "AlgoBracket<Real>::pzero(), compute NaN or Inf at\n"
-                  "a={} f(a)={}\n"
-                  "b={} f(b)={}\n"
-                  "d={} f(d)={}\n"
-                  "e={} f(e)={}\n",
-                  m_a, m_fa, m_b, m_fb, d, fd, e, fe );
+    UTILS_ASSERT(
+      is_finite( P3 ),
+      "AlgoBracket<Real>::pzero(), compute NaN or Inf at\n"
+      "a={} f(a)={}\n"
+      "b={} f(b)={}\n"
+      "d={} f(d)={}\n"
+      "e={} f(e)={}\n",
+      m_a,
+      m_fa,
+      m_b,
+      m_fb,
+      d,
+      fd,
+      e,
+      fe );
 
     // CALCULATE THE OUTPUT C.
     return P3;
@@ -278,12 +292,18 @@ namespace Utils
   {
     auto check = [this]( Real c, Real fc ) -> void
     {
-      UTILS_ASSERT( is_finite( fc ),
-                    "AlgoBracket::eval() found Inf or NaN\n"
-                    "a={} fa={}\n"
-                    "b={} fb={}\n"
-                    "c={} fc={}\n",
-                    m_a, m_fa, m_b, m_fb, c, fc );
+      UTILS_ASSERT(
+        is_finite( fc ),
+        "AlgoBracket::eval() found Inf or NaN\n"
+        "a={} fa={}\n"
+        "b={} fb={}\n"
+        "c={} fc={}\n",
+        m_a,
+        m_fa,
+        m_b,
+        m_fb,
+        c,
+        fc );
     };
 
     {
@@ -292,11 +312,15 @@ namespace Utils
       Real & fa{ m_fa };
       Real & fb{ m_fb };
 
-      UTILS_ASSERT( !is_NaN( fa ) && !is_NaN( fb ),
-                    "AlgoBracket::eval() bad initial interval\n"
-                    "a = {}, fa = {}\n"
-                    "b = {}, fb = {}\n",
-                    a, fa, b, fb );
+      UTILS_ASSERT(
+        !is_NaN( fa ) && !is_NaN( fb ),
+        "AlgoBracket::eval() bad initial interval\n"
+        "a = {}, fa = {}\n"
+        "b = {}, fb = {}\n",
+        a,
+        fa,
+        b,
+        fb );
 
       // check for trivial solution
       m_converged = fa == 0;
@@ -310,11 +334,15 @@ namespace Utils
       bool ffa, ffb;
       while ( ( ffa = !is_finite( fa ) ) || ( ffb = !is_finite( fb ) ) )
       {
-        UTILS_ASSERT( ++m_iteration_count <= m_max_iteration,
-                      "AlgoBracket::eval() too many iteration\n"
-                      "a={} fa={}\n"
-                      "b={} fb={}\n",
-                      a, fa, b, fb );
+        UTILS_ASSERT(
+          ++m_iteration_count <= m_max_iteration,
+          "AlgoBracket::eval() too many iteration\n"
+          "a={} fa={}\n"
+          "b={} fb={}\n",
+          a,
+          fa,
+          b,
+          fb );
 
         // tale "mid-point" close to infinite point
         Real c;
@@ -961,14 +989,23 @@ namespace Utils
         Real tol{ Real( 0.7 ) * m_tolerance_x };
         if ( c <= a + tol || c >= b - tol ) c = ( a + b ) / 2;
 
-        UTILS_ASSERT( is_finite( c ),
-                      "AlgoBracket[748]::pzero(), compute NaN or Inf at\n"
-                      "a={} f(a)={}\n"
-                      "b={} f(b)={}\n"
-                      "c={}\n"
-                      "d={} f(d)={}\n"
-                      "e={} f(e)={}\n",
-                      a, fa, b, fb, c, d, fd, e, fe );
+        UTILS_ASSERT(
+          is_finite( c ),
+          "AlgoBracket[748]::pzero(), compute NaN or Inf at\n"
+          "a={} f(a)={}\n"
+          "b={} f(b)={}\n"
+          "c={}\n"
+          "d={} f(d)={}\n"
+          "e={} f(e)={}\n",
+          a,
+          fa,
+          b,
+          fb,
+          c,
+          d,
+          fd,
+          e,
+          fe );
 
         return c;
       };
@@ -984,26 +1021,41 @@ namespace Utils
         Real & b{ m_b };
         Real & fb{ m_fb };
 
-        UTILS_ASSERT( a < b && a != d && b != d,
-                      "AlgoBracket[748]::newton_quadratic() bad data\n"
-                      "a={} f(a)={}\n"
-                      "b={} f(b)={}\n"
-                      "d={} f(d)={}\n",
-                      a, fa, b, fb, d, fd );
+        UTILS_ASSERT(
+          a < b && a != d && b != d,
+          "AlgoBracket[748]::newton_quadratic() bad data\n"
+          "a={} f(a)={}\n"
+          "b={} f(b)={}\n"
+          "d={} f(d)={}\n",
+          a,
+          fa,
+          b,
+          fb,
+          d,
+          fd );
 
         Real A0{ fa };
         Real A1{ ( fb - fa ) / ( b - a ) };
         Real A2{ ( ( fd - fb ) / ( d - b ) - A1 ) / ( d - a ) };
 
-        UTILS_ASSERT( is_finite( A0 ) && is_finite( A1 ) && is_finite( A2 ),
-                      "AlgoBracket[748]::newton_quadratic(), compute NaN or Inf at\n"
-                      "a={} f(a)={}\n"
-                      "b={} f(b)={}\n"
-                      "d={} f(d)={}\n"
-                      "A0={}\n"
-                      "A1={}\n"
-                      "A2={}\n",
-                      a, fa, b, fb, d, fd, A0, A1, A2 );
+        UTILS_ASSERT(
+          is_finite( A0 ) && is_finite( A1 ) && is_finite( A2 ),
+          "AlgoBracket[748]::newton_quadratic(), compute NaN or Inf at\n"
+          "a={} f(a)={}\n"
+          "b={} f(b)={}\n"
+          "d={} f(d)={}\n"
+          "A0={}\n"
+          "A1={}\n"
+          "A2={}\n",
+          a,
+          fa,
+          b,
+          fb,
+          d,
+          fd,
+          A0,
+          A1,
+          A2 );
 
         // Safeguard to avoid overflow.
         if ( A2 == 0 ) { c = a - A0 / A1; }
@@ -1047,10 +1099,13 @@ namespace Utils
             c = m_b - tol;
         }
 
-        UTILS_ASSERT( is_finite( c ),
-                      "AlgoBracket[748]::bracketing(), unexpected\n"
-                      "c={} at [a,b] = [{},{}]\n",
-                      c, m_a, m_b );
+        UTILS_ASSERT(
+          is_finite( c ),
+          "AlgoBracket[748]::bracketing(), unexpected\n"
+          "c={} at [a,b] = [{},{}]\n",
+          c,
+          m_a,
+          m_b );
 
         fc = this->evaluate( c );
         check( c, fc );

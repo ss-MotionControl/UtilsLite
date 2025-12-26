@@ -18,21 +18,22 @@ class BrownAndConteFunction : public NonlinearSystem
 
 public:
   BrownAndConteFunction()
-    : NonlinearSystem( "Brown and Conte function",
-                       "@inproceedings{Brown:1967,\n"
-                       "  author    = {Brown, Kenneth M. and Conte, Samuel D.},\n"
-                       "  title     = {The Solution of Simultaneous Nonlinear "
-                       "Equations},\n"
-                       "  booktitle = {Proceedings of the 1967 22Nd National "
-                       "Conference},\n"
-                       "  series    = {ACM '67},\n"
-                       "  year      = {1967},\n"
-                       "  pages     = {111--114},\n"
-                       "  doi       = {10.1145/800196.805981},\n"
-                       "  acmid     = {805981},\n"
-                       "  publisher = {ACM},\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Brown and Conte function",
+        "@inproceedings{Brown:1967,\n"
+        "  author    = {Brown, Kenneth M. and Conte, Samuel D.},\n"
+        "  title     = {The Solution of Simultaneous Nonlinear "
+        "Equations},\n"
+        "  booktitle = {Proceedings of the 1967 22Nd National "
+        "Conference},\n"
+        "  series    = {ACM '67},\n"
+        "  year      = {1967},\n"
+        "  pages     = {111--114},\n"
+        "  doi       = {10.1145/800196.805981},\n"
+        "  acmid     = {805981},\n"
+        "  publisher = {ACM},\n"
+        "}\n",
+        2 )
     , cst( 1 - 1 / ( 4 * m_pi ) )
   {
   }

@@ -18,19 +18,20 @@ class McKinnon : public NonlinearSystem
 
 public:
   McKinnon()
-    : NonlinearSystem( "McKinnon function (stable)",
-                       "@article{McKinnon:1998,\n"
-                       "  author  = {McKinnon, K.},\n"
-                       "  title   = {Convergence of the Nelder--Mead Simplex\n"
-                       "             Method to a Nonstationary Point},\n"
-                       "  journal = {SIAM Journal on Optimization},\n"
-                       "  volume  = {9},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {148-158},\n"
-                       "  year    = {1998},\n"
-                       "  doi     = {10.1137/S1052623496303482},\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "McKinnon function (stable)",
+        "@article{McKinnon:1998,\n"
+        "  author  = {McKinnon, K.},\n"
+        "  title   = {Convergence of the Nelder--Mead Simplex\n"
+        "             Method to a Nonstationary Point},\n"
+        "  journal = {SIAM Journal on Optimization},\n"
+        "  volume  = {9},\n"
+        "  number  = {1},\n"
+        "  pages   = {148-158},\n"
+        "  year    = {1998},\n"
+        "  doi     = {10.1137/S1052623496303482},\n"
+        "}\n",
+        2 )
     , tau( 2.0 )
     , theta( 6.0 )
     , phi( 60.0 )

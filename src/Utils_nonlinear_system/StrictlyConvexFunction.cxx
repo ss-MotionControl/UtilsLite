@@ -8,29 +8,29 @@
  |    email: enrico.bertolazzi@unitn.it
 \*/
 
-#define STRICT_CONVEX_FUNCTION_BIBTEX                                                                                  \
-  "@article{Raydan:1997,\n"                                                                                            \
-  "  author  = {Raydan, M.},\n"                                                                                        \
-  "  title   = {The Barzilai and Borwein Gradient Method for\n"                                                        \
-  "             the Large Scale Unconstrained Minimization Problem},\n"                                                \
-  "  journal = {SIAM Journal on Optimization},\n"                                                                      \
-  "  volume  = {7},\n"                                                                                                 \
-  "  number  = {1},\n"                                                                                                 \
-  "  pages   = {26-33},\n"                                                                                             \
-  "  year    = {1997},\n"                                                                                              \
-  "  doi     = {10.1137/S1052623494266365},\n"                                                                         \
-  "}\n\n"                                                                                                              \
-  "@article{LaCruz:2003,\n"                                                                                            \
-  "  author    = {William {La Cruz}  and  Marcos Raydan},\n"                                                           \
-  "  title     = {Nonmonotone Spectral Methods for Large-Scale Nonlinear "                                             \
-  "Systems},\n"                                                                                                        \
-  "  journal   = {Optimization Methods and Software},\n"                                                               \
-  "  year      = {2003},\n"                                                                                            \
-  "  volume    = {18},\n"                                                                                              \
-  "  number    = {5},\n"                                                                                               \
-  "  pages     = {583--599},\n"                                                                                        \
-  "  publisher = {Taylor & Francis},\n"                                                                                \
-  "  doi       = {10.1080/10556780310001610493},\n"                                                                    \
+#define STRICT_CONVEX_FUNCTION_BIBTEX                                      \
+  "@article{Raydan:1997,\n"                                                \
+  "  author  = {Raydan, M.},\n"                                            \
+  "  title   = {The Barzilai and Borwein Gradient Method for\n"            \
+  "             the Large Scale Unconstrained Minimization Problem},\n"    \
+  "  journal = {SIAM Journal on Optimization},\n"                          \
+  "  volume  = {7},\n"                                                     \
+  "  number  = {1},\n"                                                     \
+  "  pages   = {26-33},\n"                                                 \
+  "  year    = {1997},\n"                                                  \
+  "  doi     = {10.1137/S1052623494266365},\n"                             \
+  "}\n\n"                                                                  \
+  "@article{LaCruz:2003,\n"                                                \
+  "  author    = {William {La Cruz}  and  Marcos Raydan},\n"               \
+  "  title     = {Nonmonotone Spectral Methods for Large-Scale Nonlinear " \
+  "Systems},\n"                                                            \
+  "  journal   = {Optimization Methods and Software},\n"                   \
+  "  year      = {2003},\n"                                                \
+  "  volume    = {18},\n"                                                  \
+  "  number    = {5},\n"                                                   \
+  "  pages     = {583--599},\n"                                            \
+  "  publisher = {Taylor & Francis},\n"                                    \
+  "  doi       = {10.1080/10556780310001610493},\n"                        \
   "}\n"
 
 /*\

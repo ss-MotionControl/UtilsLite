@@ -67,23 +67,6 @@ namespace Utils
     return result;
   }
 
-  template <typename Scalar>
-  Scalar
-  BOBYQA_minimizer<Scalar>::eval( Vector const & x ) {
-    ++m_num_f_eval;
-    // Controlla se sono state esaurite le valutazioni durante il rescue
-    if ( m_num_f_eval > m_max_f_eval ) {
-      m_status = Status::BOBYQA_TOO_MANY_EVALUATIONS;
-      m_reason = fmt::format( "BOBYQA_minimizer::eval( x ) has been called MAXFUN={} times", m_max_f_eval );
-      UTILS_ERROR( m_reason );
-    }
-    Scalar f = m_fun( x );
-    if ( m_print_level == 3 )
-      fmt::print( "    Function n.{} F(X) = {:15}   X: {}\n", m_num_f_eval, fmt::format( "{:.9}", f ),
-                  print_vec( x, 6 ) );
-    return f;
-  }
-
   /**
    * @brief Hessian-vector product for the model (linear-algebra view).
    *
@@ -106,28 +89,24 @@ namespace Utils
   void
   BOBYQA_minimizer<Scalar>::compute_hessian_product( Vector const & s, Vector & hs ) const
   {
+    // 1. Parte quadratica Hessiana H*s
+    hs = m_HQ.template selfadjointView<Eigen::Upper>() * s;
+
     // 2. Parte XPT/PQ
     // pb: PQ has NPT values, m_xpt is N × NPT (trasposta del Fortran)
-    auto HQ = m_HQ.template selfadjointView<Eigen::Upper>();
-    if ( m_npt <= m_num_f_eval ) {
-      hs.noalias() = HQ * s + m_xpt * (m_pq.array() * (m_xpt.transpose() * s).array()).matrix();
-    } else {
-      hs.noalias() = HQ * s;
-    }
+    if ( m_npt < m_num_f_eval ) { hs.noalias() += m_xpt * ( m_pq.asDiagonal() * ( m_xpt.transpose() * s ) ); }
   }
 
   template <typename Scalar>
   void
   BOBYQA_minimizer<Scalar>::add_hessian_product( Vector const & s, Vector & hs ) const
   {
+    // 1. Parte quadratica Hessiana H*s
+    hs += m_HQ.template selfadjointView<Eigen::Upper>() * s;
+
     // 2. Parte XPT/PQ
     // pb: PQ has NPT values, m_xpt is N × NPT (trasposta del Fortran)
-    auto HQ = m_HQ.template selfadjointView<Eigen::Upper>();
-    if ( m_npt <= m_num_f_eval ) {
-      hs.noalias() += HQ * s + m_xpt * (m_pq.array() * (m_xpt.transpose() * s).array()).matrix();
-    } else {
-      hs.noalias() += HQ * s;
-    }
+    if ( m_npt < m_num_f_eval ) { hs.noalias() += m_xpt * ( m_pq.asDiagonal() * ( m_xpt.transpose() * s ) ); }
   }
 
   /*---------------------------------------------------------------------------*/
@@ -160,12 +139,13 @@ namespace Utils
    */
   template <typename Scalar>
   typename BOBYQA_minimizer<Scalar>::Status
-  BOBYQA_minimizer<Scalar>::minimize( integer const         N,
-                                      integer const         NPT,
-                                      bobyqa_objfun const & fun,
-                                      Vector &              X,
-                                      Vector const &        XL,
-                                      Vector const &        XU )
+  BOBYQA_minimizer<Scalar>::minimize(
+    integer const         N,
+    integer const         NPT,
+    bobyqa_objfun const & fun,
+    Vector &              X,
+    Vector const &        XL,
+    Vector const &        XU )
   {
     // Call the core BOBYQB optimization routine with adjusted starting point
 
@@ -210,9 +190,7 @@ namespace Utils
     m_d.resize( m_nv );
     m_v_lag.resize( m_dim );
     m_g_lag.resize( m_nv );  // Used with size m_nv in other routines
-
     m_hcol.resize( m_npt );
-    m_curv.resize( m_nv );
 
     m_HQ.resize( m_nv, m_nv );
     m_xpt.resize( m_nv, m_npt );  // Matrix: N rows, NPT columns
@@ -232,10 +210,10 @@ namespace Utils
     m_WNPT.resize( m_npt );
 
     // Compute bound differences and check feasibility using vectorized operations
-    Scalar const min_diff = (m_x_upper - m_x_lower).minCoeff();  // XU - XL
+    Vector bounds_diff = m_x_upper - m_x_lower;  // XU - XL
 
     // Check if any bound difference is less than 2*RHOBEG
-    if ( min_diff < Scalar( 2 ) * m_rhobeg )
+    if ( ( bounds_diff.array() < Scalar( 2 ) * m_rhobeg ).any() )
     {
       print_error( "one of the differences XU(I)-XL(I) is less than 2*RHOBEG" );
       return Status::BOBYQA_TOO_CLOSE;
@@ -244,41 +222,37 @@ namespace Utils
     // Create per-component slack variables and adjust X according to the Fortran logic
     for ( integer j = 0; j < m_nv; ++j )
     {
-      auto const & L  = m_x_lower(j);
-      auto const & U  = m_x_upper(j);
-      auto       & Xj = X( j );
-
-      Scalar temp = U - L;
-      Scalar wsl  = L - Xj;  // xl - x
-      Scalar wsu  = U - Xj;  // xu - x
+      Scalar temp = m_x_upper( j ) - m_x_lower( j );
+      Scalar wsl  = m_x_lower( j ) - X( j );  // xl - x
+      Scalar wsu  = m_x_upper( j ) - X( j );  // xu - x
 
       if ( wsl >= -m_rhobeg )
       {
         if ( wsl >= Scalar( 0 ) )
         {
-          Xj  = L;
-          wsl = Scalar( 0 );
-          wsu = temp;
+          X( j ) = m_x_lower( j );
+          wsl    = Scalar( 0 );
+          wsu    = temp;
         }
         else
         {
-          Xj  = L + m_rhobeg;
-          wsl = -m_rhobeg;
-          wsu = std::max( U - Xj, m_rhobeg );
+          X( j ) = m_x_lower( j ) + m_rhobeg;
+          wsl    = -m_rhobeg;
+          wsu    = std::max( m_x_upper( j ) - X( j ), m_rhobeg );
         }
       }
       else if ( wsu <= m_rhobeg )
       {
         if ( wsu <= Scalar( 0 ) )
         {
-          X( j ) = U;
+          X( j ) = m_x_upper( j );
           wsl    = -temp;
           wsu    = Scalar( 0 );
         }
         else
         {
-          X( j ) = U - m_rhobeg;
-          wsl    = std::min( L - Xj, -m_rhobeg );
+          X( j ) = m_x_upper( j ) - m_rhobeg;
+          wsl    = std::min( m_x_lower( j ) - X( j ), -m_rhobeg );
           wsu    = m_rhobeg;
         }
       }
@@ -291,12 +265,13 @@ namespace Utils
     X = X.cwiseMax( m_x_lower ).cwiseMin( m_x_upper );
 
     // workspace
-    //Vector W1 = Vector::Zero( std::max( 5 * m_nv, 2 * m_npt ) );
+    // Vector W1 = Vector::Zero( std::max( 5 * m_nv, 2 * m_npt ) );
 
     // many scalars used by algorithm
     Scalar ratio = 0;
 
-    m_status = Status::BOBYQA_SUCCESS;
+    Status       status = Status::BOBYQA_SUCCESS;
+    const char * reason = nullptr;
 
     // INITIALIZATION (calls prelim which must fill m_xpt, m_f_val, etc.)
     prelim( X );
@@ -336,7 +311,7 @@ namespace Utils
 
     n_num_f_saved  = m_num_f_eval;
     n_num_f_rescue = m_num_f_eval;
-    
+
     m_s.setZero();
 
     // Main state-machine loop variables: we'll use an enum and switch
@@ -355,7 +330,8 @@ namespace Utils
       ERROR
     };
 
-    auto info = [&]( string const & name ) -> void {
+    auto info = [&]( string const & name ) -> void
+    {
       return;
       std::cout << "\n\n" << name << "\n";
       std::cout << "m_num_f_eval   = " << m_num_f_eval << '\n';
@@ -371,8 +347,8 @@ namespace Utils
       std::cout << "m_denom        = " << m_denom << '\n';
       std::cout << "m_x_opt_square = " << m_x_opt_square << '\n';
       std::cout << "m_distsq = " << m_distsq << '\n';
-      std::cout << "m_B =\n"     << m_B << '\n';
-      std::cout << "m_Z =\n"     << m_Z << '\n';
+      std::cout << "m_B =\n" << m_B << '\n';
+      std::cout << "m_Z =\n" << m_Z << '\n';
       std::cout << "m_x_new =\n" << m_x_new.transpose() << '\n';
       std::cout << "m_g_new =\n" << m_g_new.transpose() << '\n';
     };
@@ -428,23 +404,20 @@ namespace Utils
         bool         reduce   = true;
 
         // Precomputo curvatura diagonale HQ + Σ pq * xpt^2 (Eigen-optimizzato)
-        m_curv = m_HQ.diagonal();  // m_nv
-        m_curv.noalias() += ( m_xpt.array().square().rowwise() * m_pq.transpose().array() ).rowwise().sum().matrix();
+        Vector curv = m_HQ.diagonal();  // m_nv
+        curv.noalias() += ( m_xpt.array().square().rowwise() * m_pq.transpose().array() ).rowwise().sum().matrix();
         for ( integer j = 0; j < m_nv; ++j )
         {
-          auto const & xnj = m_x_new( j );
-          auto const & L   = m_s_lower( j );
-          auto const & U   = m_s_upper( j );
           Scalar bdtest = bdtol;
           // Direzione bloccata sul bound → use slack distances like Fortran
-          if ( xnj == L ) bdtest = L;
-          if ( xnj == U ) bdtest = -U;
+          if ( m_x_new( j ) == m_s_lower( j ) ) bdtest = m_s_lower( j );
+          if ( m_x_new( j ) == m_s_upper( j ) ) bdtest = -m_s_upper( j );
 
           // If slack indicates potential improvement then adjust by curvature
           if ( bdtest < bdtol )
           {
             // Aggiungi metà curvatura * rho
-            bdtest += half_rho * m_curv( j );
+            bdtest += half_rho * curv( j );
 
             if ( bdtest < bdtol )
             {
@@ -574,7 +547,7 @@ namespace Utils
       if ( m_num_f_eval >= m_max_f_eval )
       {
         m_num_f_eval = m_max_f_eval;
-        m_reason     = "CALFUN has been called MAXFUN times";
+        reason       = "CALFUN has been called MAXFUN times";
         return Phase::ERROR;
       }
 
@@ -628,12 +601,12 @@ namespace Utils
       // Fase 1: Calcola contributi base dai punti di interpolazione
       for ( integer k = 0; k < m_npt; ++k )
       {
-        Scalar suma    = m_xpt.col( k ).dot( m_d );               // Proiezione sulla direzione d
-        Scalar sumb    = m_xpt.col( k ).dot( m_x_opt );           // Proiezione sul punto ottimo
-        Scalar sum     = m_B.col( k ).dot( m_d );                 // Contributo di BMAT
-        W0( k )        = suma * ( Scalar( 0.5 ) * suma + sumb );  // Termine quadratico
-        m_v_lag( k )   = sum;                                     // Coefficiente di Lagrange
-        m_WNPT( k )    = suma;                                    // Salva per uso successivo
+        Scalar suma  = m_xpt.col( k ).dot( m_d );               // Proiezione sulla direzione d
+        Scalar sumb  = m_xpt.col( k ).dot( m_x_opt );           // Proiezione sul punto ottimo
+        Scalar sum   = m_B.col( k ).dot( m_d );                 // Contributo di BMAT
+        W0( k )      = suma * ( Scalar( 0.5 ) * suma + sumb );  // Termine quadratico
+        m_v_lag( k ) = sum;                                     // Coefficiente di Lagrange
+        m_WNPT( k )  = suma;                                    // Salva per uso successivo
       }
 
       // Fase 2: Calcola contributo da ZMAT (parte ortogonale)
@@ -652,13 +625,13 @@ namespace Utils
       Scalar dx = m_d.dot( m_x_opt );
 
       // m_v_lag(m_npt : m_npt+n-1) = m_B(0:n-1, 0:m_npt-1) * wn
-      m_v_lag.segment( m_npt, m_nv ) = m_B.topLeftCorner( m_nv, m_npt ) * W0;
+      m_v_lag.segment( m_npt, m_nv ) = m_B.block( 0, 0, m_nv, m_npt ) * W0;
 
       // bsum = dot(m_d, m_v_lag_tail)
       Scalar bsum = m_d.dot( m_v_lag.segment( m_npt, m_nv ) );
 
       // m_v_lag_tail += transpose(m_B(:, m_npt:m_npt+n-1)) * m_d
-      m_v_lag.segment( m_npt, m_nv ) += m_B.topRightCorner( m_nv, m_nv ).transpose() * m_d;
+      m_v_lag.segment( m_npt, m_nv ) += m_B.block( 0, m_npt, m_nv, m_nv ).transpose() * m_d;
 
       // bsum += dot(m_d, m_v_lag_tail)
       bsum += m_d.dot( m_v_lag.segment( m_npt, m_nv ) );
@@ -686,9 +659,15 @@ namespace Utils
         // Controlla cancellazione numerica nel denominatore
         if ( m_denom <= Scalar( 0.5 ) * power2( m_v_lag( m_knew ) ) )
         {
-          if ( m_num_f_eval > n_num_f_rescue ) return Phase::RESCUE;  // Richiede rescue per problemi numerici
-          m_reason = "of much cancellation in a denominator";
-          return Phase::ERROR;  // Errore irreparabile
+          if ( m_num_f_eval > n_num_f_rescue )
+          {
+            return Phase::RESCUE;  // Richiede rescue per problemi numerici
+          }
+          else
+          {
+            reason = "of much cancellation in a denominator";
+            return Phase::ERROR;  // Errore irreparabile
+          }
         }
       }
       else
@@ -713,7 +692,7 @@ namespace Utils
           // Calcola distanza normalizzata dal punto ottimo
           m_distsq    = ( m_xpt.col( k ) - m_x_opt ).squaredNorm();
           Scalar temp = m_distsq / delsq;
-          temp       *= temp;
+          temp        = temp * temp;
           if ( temp < 1 ) temp = 1;  // Evita valori troppo piccoli
 
           // Aggiorna scaden e biglsq
@@ -730,9 +709,15 @@ namespace Utils
         // Controlla se il denominatore è sufficientemente grande
         if ( scaden <= Scalar( 0.5 ) * biglsq )
         {
-          if ( m_num_f_eval > n_num_f_rescue ) return Phase::RESCUE;  // Problemi numerici, richiede rescue
-          m_reason = "of much cancellation in a denominator";
-          return Phase::ERROR;  // Errore irreparabile
+          if ( m_num_f_eval > n_num_f_rescue )
+          {
+            return Phase::RESCUE;  // Problemi numerici, richiede rescue
+          }
+          else
+          {
+            reason = "of much cancellation in a denominator";
+            return Phase::ERROR;  // Errore irreparabile
+          }
         }
       }
 
@@ -754,7 +739,7 @@ namespace Utils
       // Controllo limite massimo valutazioni
       if ( m_num_f_eval >= m_max_f_eval )
       {
-        m_reason = "CALFUN has been called MAXFUN times";
+        reason = "CALFUN has been called MAXFUN times";
         return Phase::ERROR;
       }
 
@@ -800,7 +785,7 @@ namespace Utils
         // Controlla se il modello predice correttamente
         if ( vquad >= 0 )
         {
-          m_reason = "a trust region step has failed to reduce Q";
+          reason = "a trust region step has failed to reduce Q";
           return Phase::ERROR;
         }
 
@@ -830,6 +815,7 @@ namespace Utils
           for ( integer k = 0; k < m_npt; ++k )
           {
             Scalar hdiag = m_Z.row( k ).squaredNorm();
+            // for ( integer jj = 0; jj < m_nptm; ++jj ) { hdiag += m_zmat( k, jj ) * m_zmat( k, jj ); }
             Scalar den = m_beta * hdiag + power2( m_v_lag( k ) );
 
             m_distsq    = ( m_xpt.col( k ) - m_x_new ).squaredNorm();
@@ -876,7 +862,7 @@ namespace Utils
       // Incorpora nuovo punto di interpolazione
       m_f_val( m_knew )   = f;
       m_xpt.col( m_knew ) = m_x_new;
-      Vector Bkn = m_B.col( m_knew );
+      Vector Bkn          = m_B.col( m_knew );
 
       // Aggiorna gradiente con nuovo punto
       for ( integer k = 0; k < m_npt; ++k )
@@ -895,6 +881,7 @@ namespace Utils
         m_kopt         = m_knew;
         m_x_opt        = m_x_new;
         m_x_opt_square = m_x_opt.squaredNorm();
+
         add_hessian_product( m_d, m_g_opt );
       }
 
@@ -965,10 +952,16 @@ namespace Utils
       }
 
       // Fase 8: Decisione fase successiva
-      if ( ntrits == 0 || f <= fopt + Scalar( 0.1 ) * vquad ) return Phase::TRUST_REGION;  // Continua con regione di fiducia
-      // Cerca punto lontano per migliorare geometria
-      m_distsq = max( power2( 2 * m_delta ), power2( Scalar( 10 ) * m_rho ) );
-      return Phase::FIND_FAR;
+      if ( ntrits == 0 || f <= fopt + Scalar( 0.1 ) * vquad )
+      {
+        return Phase::TRUST_REGION;  // Continua con regione di fiducia
+      }
+      else
+      {
+        // Cerca punto lontano per migliorare geometria
+        m_distsq = max( power2( 2 * m_delta ), power2( Scalar( 10 ) * m_rho ) );
+        return Phase::FIND_FAR;
+      }
     };
 
     /*---------------------------------------------------------------------------*/
@@ -1013,9 +1006,18 @@ namespace Utils
       else
       {
         // Nessun punto lontano trovato
-        if ( ntrits == -1 ) return Phase::REDUCE_RHO;  // Riduci rho se nessuna valutazione
-        if ( ratio > 0 || max( m_delta, dnorm ) > m_rho ) return Phase::TRUST_REGION;  // Continua con regione di fiducia
-        return Phase::REDUCE_RHO;  // Riduci rho
+        if ( ntrits == -1 )
+        {
+          return Phase::REDUCE_RHO;  // Riduci rho se nessuna valutazione
+        }
+        else if ( ratio > 0 || max( m_delta, dnorm ) > m_rho )
+        {
+          return Phase::TRUST_REGION;  // Continua con regione di fiducia
+        }
+        else
+        {
+          return Phase::REDUCE_RHO;  // Riduci rho
+        }
       }
     };
 
@@ -1049,12 +1051,15 @@ namespace Utils
         if ( m_print_level >= 2 )
         {
           fmt::print(
-              "\n"
-              "    New RHO                   = {}\n"
-              "    Number of function values = {}\n"
-              "    Least value of F          = {}\n"
-              "    The corresponding X is: {}\n",
-              m_rho, m_num_f_eval, m_f_val( m_kopt ), print_vec( m_x_base + m_x_opt, 6 ) );
+            "\n"
+            "    New RHO                   = {}\n"
+            "    Number of function values = {}\n"
+            "    Least value of F          = {}\n"
+            "    The corresponding X is: {}\n",
+            m_rho,
+            m_num_f_eval,
+            m_f_val( m_kopt ),
+            print_vec( m_x_base + m_x_opt, 6 ) );
         }
 
         // Reset parametri per nuova fase
@@ -1062,8 +1067,14 @@ namespace Utils
         n_num_f_saved = m_num_f_eval;
         return Phase::TRUST_REGION;  // Continua con nuovo rho
       }
-      if ( ntrits == -1 ) return Phase::EVALUATE;  // Caso speciale: nessuna valutazione
-      return Phase::DONE;  // Convergenza raggiunta
+      else if ( ntrits == -1 )
+      {
+        return Phase::EVALUATE;  // Caso speciale: nessuna valutazione
+      }
+      else
+      {
+        return Phase::DONE;  // Convergenza raggiunta
+      }
     };
 
     Phase phase      = Phase::UPDATE_GRADIENT;
@@ -1071,8 +1082,8 @@ namespace Utils
 
     if ( m_num_f_eval > m_max_f_eval )
     {
-      m_reason = "CALFUN has been called MAXFUN times";
-      m_status = Status::BOBYQA_TOO_MANY_EVALUATIONS;
+      reason = "CALFUN has been called MAXFUN times";
+      status = Status::BOBYQA_TOO_MANY_EVALUATIONS;
       // finalization at bottom
       goto FINALIZE;
     }
@@ -1082,62 +1093,62 @@ namespace Utils
       switch ( phase )
       {
         case Phase::UPDATE_GRADIENT:
-          info("UPDATE_GRADIENT");
+          info( "UPDATE_GRADIENT" );
           phase = phase_update_gradient();
           // std::cout << "m_knew = " << m_knew << '\n';
           break;
 
         case Phase::TRUST_REGION:
-          info("TRUST_REGION");
+          info( "TRUST_REGION" );
           phase = phase_trust_region();
           // std::cout << "m_knew = " << m_knew << '\n';
           break;
 
         case Phase::SHIFT_BASE:
-          info("SHIFT_BASE");
+          info( "SHIFT_BASE" );
           phase = phase_shift_base();
           // std::cout << "m_knew = " << m_knew << '\n';
           break;
 
         case Phase::RESCUE:
           std::cout << "\\n";
-          info("RESCUE");
+          info( "RESCUE" );
           phase = phase_rescue();
           // std::cout << "m_knew = " << m_knew << '\n';
           break;
 
         case Phase::ALTMOV:
-          info("ALTMOV");
+          info( "ALTMOV" );
           phase = phase_altmov();
           // std::cout << "m_knew = " << m_knew << '\n';
           break;
 
         case Phase::COMPUTE_VLAG:
-          info("COMPUTE_VLAG");
+          info( "COMPUTE_VLAG" );
           phase = phase_compute_vlag();
           // std::cout << "m_knew = " << m_knew << '\n';
           break;
 
         case Phase::EVALUATE:
-          info("EVALUATE");
+          info( "EVALUATE" );
           phase = phase_evaluate();
           // std::cout << "m_knew = " << m_knew << '\n';
           break;
 
         case Phase::FIND_FAR:
-          info("FIND_FAR");
+          info( "FIND_FAR" );
           phase = phase_find_far();
           // std::cout << "m_knew = " << m_knew << '\n';
           break;
 
         case Phase::REDUCE_RHO:
-          info("REDUCE_RHO");
+          info( "REDUCE_RHO" );
           phase = phase_reduce_rho();
           // std::cout << "m_knew = " << m_knew << '\n';
           break;
 
         case Phase::DONE:
-          info("DONE");
+          info( "DONE" );
           //  Termina l'esecuzione dell'algoritmo dopo aver raggiunto convergenza
           //  o dopo aver esaurito le risorse di calcolo.
           keep_going = false;
@@ -1147,7 +1158,7 @@ namespace Utils
           // std::cout << "ERROR m_knew = " << m_knew << '\n';
           //  Gestisce gli errori dell'algoritmo, impostando il messaggio di errore
           //  e lo stato appropriato.
-          if ( m_print_level > 0 && m_reason.length() > 0 ) print_error( m_reason );
+          if ( m_print_level > 0 && reason ) print_error( reason );
           keep_going = false;
           break;
 
@@ -1165,17 +1176,19 @@ namespace Utils
     if ( m_print_level >= 1 )
     {
       fmt::print(
-          "\n"
-          "    At the return from BOBYQA\n"
-          "    Number of function values = {}\n"
-          "    Least value of F          = {}\n"
-          "    The corresponding X is: {}\n",
-          m_num_f_eval, f, print_vec( X, 6 ) );
+        "\n"
+        "    At the return from BOBYQA\n"
+        "    Number of function values = {}\n"
+        "    Least value of F          = {}\n"
+        "    The corresponding X is: {}\n",
+        m_num_f_eval,
+        f,
+        print_vec( X, 6 ) );
     }
 
     // non ha senso lo rimuovo
     // if ( status == Status::BOBYQA_SUCCESS ) m_xbase( 0 ) = f;
-    return m_status;
+    return status;
   }
 
   /*----------------------------------------------------------------------------*/
@@ -1200,12 +1213,17 @@ namespace Utils
       if ( f < m_f_val( m_kopt ) ) m_kopt = ipos;
     };
 
+    // Scalar const half = 0.5;
+    // Scalar const one  = 1.0;
+    // Scalar const two  = 2.0;
+    // Scalar const zero = 0.0;
+
     integer const & n  = m_nv;
     auto const &    su = m_s_upper;
     auto const &    sl = m_s_lower;
 
     Scalar  rhosq = m_rhobeg * m_rhobeg;
-    Scalar  recip = Scalar(1) / rhosq;
+    Scalar  recip = Scalar( 1 ) / rhosq;
     integer np    = n + 1;
     Scalar  fbeg  = 0;
 
@@ -1253,9 +1271,9 @@ namespace Utils
 
       if ( m_npt < nf + n )
       {
-        m_B( coord_idx, 0 )                 = -Scalar(1) / step;
-        m_B( coord_idx, point_idx )         = Scalar(1) / step;
-        m_B( coord_idx, m_npt + point_idx ) = -Scalar(0.5) * rhosq;
+        m_B( coord_idx, 0 )                 = -Scalar( 1 ) / step;
+        m_B( coord_idx, point_idx )         = Scalar( 1 ) / step;
+        m_B( coord_idx, m_npt + point_idx ) = -Scalar( 0.5 ) * rhosq;
       }
     }
 
@@ -1274,8 +1292,8 @@ namespace Utils
       auto const & SL = sl( coord_idx );
 
       // Adatta stepb ai limiti
-      if ( abs( SL ) < m_eps ) step_neg = min( Scalar(2) * m_rhobeg, SU );
-      if ( abs( SU ) < m_eps ) step_neg = max( -Scalar(2) * m_rhobeg, SL );
+      if ( abs( SL ) < m_eps ) step_neg = min( Scalar( 2 ) * m_rhobeg, SU );
+      if ( abs( SU ) < m_eps ) step_neg = max( -Scalar( 2 ) * m_rhobeg, SL );
 
       if ( abs( step_neg - SL ) < m_eps ) step_neg = SL;
       if ( abs( step_neg - SU ) < m_eps ) step_neg = SU;
@@ -1293,8 +1311,8 @@ namespace Utils
       Scalar temp = ( f - fbeg ) / step_neg;
       Scalar diff = step_neg - step_pos;
 
-      auto & g                     = m_g_opt( coord_idx );
-      m_HQ( coord_idx, coord_idx ) = Scalar(2) * ( temp - g ) / diff;
+      Scalar & g                   = m_g_opt( coord_idx );
+      m_HQ( coord_idx, coord_idx ) = Scalar( 2 ) * ( temp - g ) / diff;
       g                            = ( g * step_neg - temp * step_pos ) / diff;
 
       // Scambia punti se migliora il modello
@@ -1310,13 +1328,13 @@ namespace Utils
 
       // Aggiorna B e Z matrices
       Scalar t1                         = ( step_pos + step_neg ) / ( step_pos * step_neg );
-      Scalar t2                         = Scalar(0.5) / step_pos;
+      Scalar t2                         = Scalar( 0.5 ) / step_pos;
       m_B( coord_idx, 0 )               = -t1;
       m_B( coord_idx, point_idx )       = -t2;
       m_B( coord_idx, other_point_idx ) = t1 + t2;
 
-      Scalar t3                         = sqrt( Scalar(2) ) / ( step_pos * step_neg );
-      Scalar t4                         = sqrt( Scalar(0.5) ) / rhosq;
+      Scalar t3                         = sqrt( Scalar( 2 ) ) / ( step_pos * step_neg );
+      Scalar t4                         = sqrt( Scalar( 0.5 ) ) / rhosq;
       m_Z( 0, coord_idx )               = t3;
       m_Z( point_idx, coord_idx )       = t4;
       m_Z( other_point_idx, coord_idx ) = -( t3 + t4 );
@@ -1352,13 +1370,14 @@ namespace Utils
       Scalar stepj = m_xpt( jpt, point_j );
 
       // Valuta la funzione nel nuovo punto
+      Scalar const rhobeg2 = Scalar( 2 ) * m_rhobeg;
       {
         auto const & SU = su( ipt );
         auto const & SL = sl( ipt );
 
         // Adatta stepb ai limiti
-        if ( abs( SL ) < m_eps ) stepi = min( Scalar(2) * m_rhobeg, SU );
-        if ( abs( SU ) < m_eps ) stepi = max( -Scalar(2) * m_rhobeg, SL );
+        if ( abs( SL ) < m_eps ) stepi = min( rhobeg2, SU );
+        if ( abs( SU ) < m_eps ) stepi = max( -rhobeg2, SL );
 
         if ( abs( stepi - SL ) < m_eps ) stepi = SL;
         if ( abs( stepi - SU ) < m_eps ) stepi = SU;
@@ -1368,8 +1387,8 @@ namespace Utils
         auto const & SL = sl( jpt );
 
         // Adatta stepb ai limiti
-        if ( abs( SL ) < m_eps ) stepj = min( Scalar(2) * m_rhobeg, SU );
-        if ( abs( SU ) < m_eps ) stepj = max( -Scalar(2) * m_rhobeg, SL );
+        if ( abs( SL ) < m_eps ) stepj = min( rhobeg2, SU );
+        if ( abs( SU ) < m_eps ) stepj = max( -rhobeg2, SL );
 
         if ( abs( stepj - SL ) < m_eps ) stepj = SL;
         if ( abs( stepj - SU ) < m_eps ) stepj = SU;
@@ -1416,7 +1435,7 @@ namespace Utils
   {
     const Scalar one_plus_sqrt2 = 1 + sqrt( Scalar( 2 ) );
 
-    //Vector W( 2 * m_nv );
+    // Vector W( 2 * m_nv );
 
     Scalar  csave  = 0;
     Scalar  stpsav = 0;
@@ -1447,7 +1466,7 @@ namespace Utils
     {
       if ( k == m_kopt ) continue;
 
-      Vector tmp = m_xpt.col( k ) - m_x_opt;
+      Vector tmp    = m_xpt.col( k ) - m_x_opt;
       Scalar dderiv = tmp.dot( m_g_lag.head( m_nv ) );
       m_distsq      = tmp.squaredNorm();
 
@@ -1705,15 +1724,15 @@ namespace Utils
     };
 
     // Evaluate downhill and uphill version
-    Scalar c1 = compute_cauchy_step( false );
+    Scalar c1         = compute_cauchy_step( false );
     Vector X_ALT_SAVE = m_x_alt;
-    csave = c1;
+    csave             = c1;
 
     Scalar c2 = compute_cauchy_step( true );
 
     if ( csave > c2 )
     {
-      m_x_alt = X_ALT_SAVE;
+      m_x_alt  = X_ALT_SAVE;
       m_cauchy = csave;
     }
     else
@@ -2152,7 +2171,10 @@ namespace Utils
       Scalar diff = f_value - vquad;
 
       // Aggiorna GOPT: GOPT(I) += DIFF * BMAT(KPT, I)
-      m_g_opt += diff * m_B.col( kpt );  // m_bmat(i, kpt) non m_bmat(kpt, i)!
+      for ( integer i = 0; i < m_nv; ++i )
+      {
+        m_g_opt( i ) += diff * m_B( i, kpt );  // m_bmat(i, kpt) non m_bmat(kpt, i)!
+      }
 
       // Aggiorna HQ e PQ
       for ( integer k = 0; k < m_npt; ++k )
@@ -2266,6 +2288,9 @@ namespace Utils
     // CONTESTO DATI (Variabili condivise tra gli stati)
     // ============================================================================
 
+    // Scalari e contatori
+    Scalar const onemin = -1;
+
     integer iterc = 0, nact = 0, itermax = 0, iact = 0, itcsav = 0;
     Scalar  delsq = 0, qred = 0;
     Scalar  beta = 0, ggsav = 0, gredsq = 0, sdec = 0;
@@ -2273,7 +2298,8 @@ namespace Utils
     Scalar  dredsq = 0, dredg = 0, sredg = 0;
     Scalar  dhd = 0, dhs = 0;
     Scalar  angbd = 0, tempa = 0, tempb = 0, ratio = 0;
-    integer isav = 0, iu = 0, xsav = 0;
+    integer xsav = 0;
+    integer isav = 0, iu = 0;
     Scalar  redmax = 0, redsav = 0, rdprev = 0, rdnext = 0, rednew = 0;
     Scalar  angt = 0, cth = 0, sth = 0;
 
@@ -2304,7 +2330,7 @@ namespace Utils
 
     delsq    = m_delta * m_delta;
     qred     = 0;
-    m_crvmin = Scalar(-1);
+    m_crvmin = onemin;
 
     // ============================================================================
     // MACCHINA A STATI PRINCIPALE
@@ -2351,7 +2377,7 @@ namespace Utils
               itermax = iterc + m_nv - nact;
             }
 
-            if ( gredsq * delsq <= Scalar(1.0e-4) * qred * qred )
+            if ( gredsq * delsq <= Scalar( 1.0e-4 ) * qred * qred )
             {
               current_state = State::Final;
               break;
@@ -2463,7 +2489,7 @@ namespace Utils
 
               if ( iact == 0 && temp > 0 )
               {
-                if ( m_crvmin == Scalar(-1) )
+                if ( m_crvmin == onemin )
                   m_crvmin = temp;
                 else
                   m_crvmin = std::min( m_crvmin, temp );
@@ -2492,8 +2518,8 @@ namespace Utils
               // Restart TCG: Fissa la variabile e ricomincia
               ++nact;
               integer idx   = iact - 1;
-              m_xbdi( idx ) = m_s( idx ) < 0 ? -1: 1;
-              delsq -= power2( m_d( idx ) );
+              m_xbdi( idx ) = ( m_s( idx ) < 0 ) ? -1 : 1;
+              delsq -= m_d( idx ) * m_d( idx );
 
               if ( delsq <= 0 ) { current_state = State::Boundary_Init; }
               else

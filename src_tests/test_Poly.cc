@@ -44,10 +44,10 @@ test1()
   if ( n_roots > 0 )
   {
     fmt::print(
-        "Roots to solve T\n"
-        "{}\n"
-        "Attempt to print roots\n",
-        mySturm.roots() );
+      "Roots to solve T\n"
+      "{}\n"
+      "Attempt to print roots\n",
+      mySturm.roots() );
 
     fmt::print( "roots = {}\n", mySturm.roots() );
 
@@ -77,15 +77,22 @@ test2()
   p1.integral( I_p1 );
 
   fmt::print(
-      "Il grado di p1: {}\n"
-      "Il grado di p2: {}\n\n"
-      "p1    = {}\n"
-      "p1(2) = {}\n"
-      "p2    = {}\n"
-      "p2(3) = {}\n\n"
-      "derivata di p1 = {}\n"
-      "integrale di p1 = {}\n",
-      p1.degree(), p2.degree(), p1, p1.eval( 2 ), p2, p2.eval( 3 ), D_p1, I_p1 );
+    "Il grado di p1: {}\n"
+    "Il grado di p2: {}\n\n"
+    "p1    = {}\n"
+    "p1(2) = {}\n"
+    "p2    = {}\n"
+    "p2(3) = {}\n\n"
+    "derivata di p1 = {}\n"
+    "integrale di p1 = {}\n",
+    p1.degree(),
+    p2.degree(),
+    p1,
+    p1.eval( 2 ),
+    p2,
+    p2.eval( 3 ),
+    D_p1,
+    I_p1 );
 
   p3 = p1 + p2;
   fmt::print( "sum of p1 and p2 = {}\n\n", p3 );
@@ -94,11 +101,12 @@ test2()
   fmt::print( "product of p1 and p2 = {}\n", p3 );
 
   fmt::print(
-      "product of\n"
-      "p3 = {}\n"
-      "with\n"
-      "p1 = {}\n",
-      p3, p1 );
+    "product of\n"
+    "p3 = {}\n"
+    "with\n"
+    "p1 = {}\n",
+    p3,
+    p1 );
 
   fmt::print( "p3 * p1 => {}\n\n", p3 * p1 );
   p3 *= p1;
@@ -112,19 +120,25 @@ test2()
   P = Q * S + R;
 
   fmt::print(
-      "P = {}\n"
-      "Q = {}\n"
-      "S = {}\n"
-      "R = {}\n\n",
-      P, Q, S, R );
+    "P = {}\n"
+    "Q = {}\n"
+    "S = {}\n"
+    "R = {}\n\n",
+    P,
+    Q,
+    S,
+    R );
 
   Utils::divide( P, Q, S, R );
   fmt::print(
-      "P = {}\n"
-      "Q = {}\n"
-      "S = {}\n"
-      "R = {}\n\n",
-      P, Q, S, R );
+    "P = {}\n"
+    "Q = {}\n"
+    "S = {}\n"
+    "R = {}\n\n",
+    P,
+    Q,
+    S,
+    R );
 
   P.set_degree( 4 );
   P << -3, -1, 0, 3, 1;
@@ -136,39 +150,50 @@ test2()
   G.make_monic();
 
   fmt::print(
-      "P   = {}\n"
-      "Q   = {}\n"
-      "GCD = {}\n\n",
-      P, Q, G );
+    "P   = {}\n"
+    "Q   = {}\n"
+    "GCD = {}\n\n",
+    P,
+    Q,
+    G );
 
   Utils::divide( P, G, S, R );
   fmt::print(
-      "TEST DIVIDE\n"
-      "P   = {}\n"
-      "G   = {}\n"
-      "P/G = {}\n"
-      "R   = {}\n\n",
-      P, G, S, R );
+    "TEST DIVIDE\n"
+    "P   = {}\n"
+    "G   = {}\n"
+    "P/G = {}\n"
+    "R   = {}\n\n",
+    P,
+    G,
+    S,
+    R );
 
   Utils::divide( Q, G, S, R );
 
   fmt::print(
-      "TEST DIVIDE\n"
-      "Q   = {}\n"
-      "G   = {}\n"
-      "Q/G = {}\n"
-      "R   = {}\n\n",
-      Q, G, S, R );
+    "TEST DIVIDE\n"
+    "Q   = {}\n"
+    "G   = {}\n"
+    "Q/G = {}\n"
+    "R   = {}\n\n",
+    Q,
+    G,
+    S,
+    R );
 
   Utils::divide( G, Q, S, R );
 
   fmt::print(
-      "TEST DIVIDE\n"
-      "Q   = {}\n"
-      "G   = {}\n"
-      "G/Q = {}\n"
-      "R   = {}\n\n",
-      Q, G, S, R );
+    "TEST DIVIDE\n"
+    "Q   = {}\n"
+    "G   = {}\n"
+    "G/Q = {}\n"
+    "R   = {}\n\n",
+    Q,
+    G,
+    S,
+    R );
 
   sturm STURM;
 
@@ -177,9 +202,8 @@ test2()
   // (x-1)^3*(x-2.5)*(x-1.345)^2*(x+5.4)^3*(x-Pi)^3
   //
   P << -22080.83411, 116727.3033385665948243520, -256946.0673316927782141151, 300144.5335915349392862061,
-      -191931.3045536365545769490, 55772.64332394731276079758, 3985.892468682997492135005, -6973.325399061096968788543,
-      1155.465698015199421043348, 210.0853813805896047708528, -63.97763326249465566375384, -1.414777960769379715387929,
-      1;
+    -191931.3045536365545769490, 55772.64332394731276079758, 3985.892468682997492135005, -6973.325399061096968788543,
+    1155.465698015199421043348, 210.0853813805896047708528, -63.97763326249465566375384, -1.414777960769379715387929, 1;
 
   /*
     Poly<double> DP;
@@ -223,7 +247,6 @@ test2()
 
   for ( auto const & xx : STURM.roots() ) { fmt::print( "P[sturm]({}) = {}\n", xx, SP.eval( xx ) ); }
 }
-
 
 int
 main()

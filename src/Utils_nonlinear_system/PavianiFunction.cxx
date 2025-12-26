@@ -17,14 +17,15 @@ class PavianiFunction : public NonlinearSystem
 public:
   // sum log(xi-2)^2+log(xi-10)^2 - prod( xi) ^(1/5)
   PavianiFunction()
-    : NonlinearSystem( "Paviani function",
-                       "@book{himmelblau:1972,\n"
-                       "  author    = {Himmelblau, D.M.},\n"
-                       "  title     = {Applied nonlinear programming},\n"
-                       "  year      = {1972},\n"
-                       "  publisher = {McGraw-Hill}\n"
-                       "}\n",
-                       10 )
+    : NonlinearSystem(
+        "Paviani function",
+        "@book{himmelblau:1972,\n"
+        "  author    = {Himmelblau, D.M.},\n"
+        "  title     = {Applied nonlinear programming},\n"
+        "  year      = {1972},\n"
+        "  publisher = {McGraw-Hill}\n"
+        "}\n",
+        10 )
   {
   }
 

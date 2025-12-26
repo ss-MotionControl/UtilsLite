@@ -12,15 +12,16 @@ class ArtificialTestOfNowakAndWeimann : public NonlinearSystem
 {
 public:
   ArtificialTestOfNowakAndWeimann()
-    : NonlinearSystem( "Artificial Test of Nowak and Weimann",
-                       "@techreport{Nowak1991,\n"
-                       "  author = {U. Nowak and L. Weimann},\n"
-                       "  title  = {A Family of Newton Codes for Systems of "
-                       "Highly Nonlinear Equations},\n"
-                       "  number = {Technical Report TR-91-10},\n"
-                       "  year   = {1991}\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Artificial Test of Nowak and Weimann",
+        "@techreport{Nowak1991,\n"
+        "  author = {U. Nowak and L. Weimann},\n"
+        "  title  = {A Family of Newton Codes for Systems of "
+        "Highly Nonlinear Equations},\n"
+        "  number = {Technical Report TR-91-10},\n"
+        "  year   = {1991}\n"
+        "}\n",
+        2 )
   {
   }
 

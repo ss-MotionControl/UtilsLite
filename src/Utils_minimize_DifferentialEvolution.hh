@@ -253,7 +253,7 @@ namespace Utils
             {
               // Transform to [-pi/2, pi/2] range
               real_type transformed = std::asin(
-                  2.0 * ( value - m_lower_bounds[j] ) / ( m_upper_bounds[j] - m_lower_bounds[j] ) - 1.0 );
+                2.0 * ( value - m_lower_bounds[j] ) / ( m_upper_bounds[j] - m_lower_bounds[j] ) - 1.0 );
               // Add small random perturbation
               transformed += ( m_uniform_dist( m_random_engine ) - 0.5 ) * 0.1;
               // Transform back
@@ -380,10 +380,10 @@ namespace Utils
 
       if ( m_current_iteration > m_max_iterations / 2 )
       {
-        integer new_size = std::max( m_min_population_size,
-                                     static_cast<integer>(
-                                         m_initial_population_size *
-                                         ( 1.0 - static_cast<real_type>( m_current_iteration ) / m_max_iterations ) ) );
+        integer new_size = std::max(
+          m_min_population_size,
+          static_cast<integer>(
+            m_initial_population_size * ( 1.0 - static_cast<real_type>( m_current_iteration ) / m_max_iterations ) ) );
 
         if ( new_size < m_population_size )
         {
@@ -391,8 +391,10 @@ namespace Utils
           std::vector<integer> indices( m_population_size );
           std::iota( indices.begin(), indices.end(), 0 );
 
-          std::sort( indices.begin(), indices.end(),
-                     [this]( integer a, integer b ) { return m_fitness[a] < m_fitness[b]; } );
+          std::sort(
+            indices.begin(),
+            indices.end(),
+            [this]( integer a, integer b ) { return m_fitness[a] < m_fitness[b]; } );
 
           Matrix new_population( m_dimension, new_size );
           Vector new_fitness( new_size );
@@ -794,8 +796,8 @@ namespace Utils
         }
 
         // Print progress
-        if ( m_verbose &&
-             ( m_current_iteration % m_print_interval == 0 || m_current_iteration == m_max_iterations - 1 ) )
+        if (
+          m_verbose && ( m_current_iteration % m_print_interval == 0 || m_current_iteration == m_max_iterations - 1 ) )
         {
           print_progress();
         }
@@ -1054,8 +1056,11 @@ namespace Utils
             integer              p = std::max<integer>( 2, m_population_size / 10 );
             std::vector<integer> indices( p );
             std::iota( indices.begin(), indices.end(), 0 );
-            std::partial_sort( indices.begin(), indices.begin() + p, indices.end(),
-                               [this]( integer a, integer b ) { return m_fitness[a] < m_fitness[b]; } );
+            std::partial_sort(
+              indices.begin(),
+              indices.begin() + p,
+              indices.end(),
+              [this]( integer a, integer b ) { return m_fitness[a] < m_fitness[b]; } );
 
             integer pbest_idx = indices[static_cast<integer>( m_uniform_dist( m_random_engine ) * p )];
             Vector  ind_pbest = m_population.col( pbest_idx );
@@ -1069,8 +1074,11 @@ namespace Utils
             integer              p = std::max<integer>( 2, m_population_size / 10 );
             std::vector<integer> indices( p );
             std::iota( indices.begin(), indices.end(), 0 );
-            std::partial_sort( indices.begin(), indices.begin() + p, indices.end(),
-                               [this]( integer a, integer b ) { return m_fitness[a] < m_fitness[b]; } );
+            std::partial_sort(
+              indices.begin(),
+              indices.begin() + p,
+              indices.end(),
+              [this]( integer a, integer b ) { return m_fitness[a] < m_fitness[b]; } );
 
             integer pbest_idx = indices[static_cast<integer>( m_uniform_dist( m_random_engine ) * p )];
             Vector  ind_pbest = m_population.col( pbest_idx );
@@ -1081,9 +1089,9 @@ namespace Utils
             {
               if ( m_uniform_dist( m_random_engine ) < 0.5 )
               {
-                integer archive_idx = static_cast<integer>( m_uniform_dist( m_random_engine ) *
-                                                            m_current_archive_size );
-                ind_r2_used         = m_archive.col( archive_idx );
+                integer archive_idx = static_cast<integer>(
+                  m_uniform_dist( m_random_engine ) * m_current_archive_size );
+                ind_r2_used = m_archive.col( archive_idx );
               }
             }
 
@@ -1219,9 +1227,14 @@ namespace Utils
       real_type diversity = calculate_diversity();
 
       fmt::print(
-          "DE Iteration {:5}: Best = {:.6e}, F = {:.3f}, CR = {:.3f}, NP = "
-          "{:3}, Div = {:.2e}\n",
-          m_current_iteration, m_best_fitness, m_weight, m_crossover_rate, m_population_size, diversity );
+        "DE Iteration {:5}: Best = {:.6e}, F = {:.3f}, CR = {:.3f}, NP = "
+        "{:3}, Div = {:.2e}\n",
+        m_current_iteration,
+        m_best_fitness,
+        m_weight,
+        m_crossover_rate,
+        m_population_size,
+        diversity );
 
       if ( m_verbose && m_current_iteration % ( m_print_interval * 5 ) == 0 )
       {

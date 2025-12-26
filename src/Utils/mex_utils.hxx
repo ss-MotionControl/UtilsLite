@@ -74,7 +74,7 @@
 #define arg_out_18 plhs[18]
 #define arg_out_19 plhs[19]
 
-#define UTILS_MEX_ASSERT0( COND, MSG )                                                                                 \
+#define UTILS_MEX_ASSERT0( COND, MSG ) \
   if ( !( COND ) ) Utils::mex_error_message( MSG )
 
 #define UTILS_MEX_ASSERT( COND, FMT, ... ) UTILS_MEX_ASSERT0( COND, fmt::format( FMT, __VA_ARGS__ ) )
@@ -230,8 +230,12 @@ namespace Utils
     mwSize number_of_dimensions = mxGetNumberOfDimensions( arg );
     UTILS_MEX_ASSERT0( number_of_dimensions == 2, msg );
     mwSize const * dims{ mxGetDimensions( arg ) };
-    UTILS_MEX_ASSERT( dims[0] == 1 || dims[1] == 1 || dims[0] * dims[1] == 0,
-                      "{}\nExpect (1 x n or n x 1 or empty) matrix, found {} x {}\n", msg, dims[0], dims[1] );
+    UTILS_MEX_ASSERT(
+      dims[0] == 1 || dims[1] == 1 || dims[0] * dims[1] == 0,
+      "{}\nExpect (1 x n or n x 1 or empty) matrix, found {} x {}\n",
+      msg,
+      dims[0],
+      dims[1] );
     sz = dims[0] * dims[1];
     return mxGetPr( arg );
   }
@@ -331,7 +335,6 @@ namespace Utils
     return static_cast<int32_t *>( mxGetData( arg ) );
   }
 
-
   //!
   //! \brief Creates a numeric matrix of type int64 and returns a pointer to its
   //! data.
@@ -353,7 +356,6 @@ namespace Utils
     arg = mxCreateNumericMatrix( nrow, ncol, mxINT64_CLASS, mxREAL );
     return static_cast<int64_t *>( mxGetData( arg ) );
   }
-
 
   //!
   //! \brief Creates a numeric matrix of type double and returns a pointer to
@@ -397,13 +399,14 @@ namespace Utils
   //!
   template <typename R, typename I>
   inline int
-  mex_create_sparse_matrix( size_t    nnz,
-                            size_t    nrows,
-                            size_t    ncols,
-                            I         i_rows[],
-                            I         j_cols[],
-                            R         vals[],
-                            mxArray * arg_out[] )
+  mex_create_sparse_matrix(
+    size_t    nnz,
+    size_t    nrows,
+    size_t    ncols,
+    I         i_rows[],
+    I         j_cols[],
+    R         vals[],
+    mxArray * arg_out[] )
   {
     mxArray * args[5];  // Array of arguments to be passed to MATLAB's sparse
                         // function.
@@ -427,7 +430,6 @@ namespace Utils
     // Call the MATLAB function 'sparse' to create the sparse matrix.
     return mexCallMATLAB( 1, arg_out, 5, args, "sparse" );
   }
-
 
   //!
   //! \brief Creates a MATLAB cell array and fills it with a vector of C++
@@ -523,7 +525,6 @@ namespace Utils
       return m_ptr;
     }
   };
-
 
   //!
   //! \brief Converts a C++ pointer into a MATLAB mxArray handle.

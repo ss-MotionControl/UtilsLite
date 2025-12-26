@@ -86,14 +86,15 @@ namespace Utils
      */
     template <class Scalar>
     inline Scalar
-    cubic_minimizer( Scalar a,
-                     Scalar fa,
-                     Scalar fpa,
-                     Scalar b,
-                     Scalar fb,
-                     Scalar fpb,
-                     Scalar delta = Scalar( 0.1 ),  // Hager–Zhang recommended
-                     Scalar sigma = Scalar( 0.9 )   // Hager–Zhang recommended
+    cubic_minimizer(
+      Scalar a,
+      Scalar fa,
+      Scalar fpa,
+      Scalar b,
+      Scalar fb,
+      Scalar fpb,
+      Scalar delta = Scalar( 0.1 ),  // Hager–Zhang recommended
+      Scalar sigma = Scalar( 0.9 )   // Hager–Zhang recommended
     )
     {
       Scalar eps{ std::numeric_limits<Scalar>::epsilon() };
@@ -171,18 +172,19 @@ namespace Utils
      */
     template <typename Scalar>
     Scalar
-    compute_step( Scalar                  a_lo,
-                  Scalar                  phi_lo,
-                  Scalar                  der_lo,
-                  Scalar                  a_hi,
-                  Scalar                  phi_hi,
-                  Scalar                  der_hi,
-                  [[maybe_unused]] Scalar a_prev,
-                  [[maybe_unused]] Scalar phi_prev,
-                  [[maybe_unused]] Scalar der_prev,
-                  Scalar                  alpha_max,
-                  Scalar                  step_max,
-                  bool                    is_bracketing )
+    compute_step(
+      Scalar                  a_lo,
+      Scalar                  phi_lo,
+      Scalar                  der_lo,
+      Scalar                  a_hi,
+      Scalar                  phi_hi,
+      Scalar                  der_hi,
+      [[maybe_unused]] Scalar a_prev,
+      [[maybe_unused]] Scalar phi_prev,
+      [[maybe_unused]] Scalar der_prev,
+      Scalar                  alpha_max,
+      Scalar                  step_max,
+      bool                    is_bracketing )
     {
       Scalar a_j = cubic_minimizer( a_lo, phi_lo, der_lo, a_hi, phi_hi, der_hi );
       if ( a_j <= a_lo || a_j >= a_hi )
@@ -196,7 +198,6 @@ namespace Utils
     }
 
   }  // namespace detail
-
 
   // ===========================================================================
   // Line Search Algorithms
@@ -286,7 +287,7 @@ namespace Utils
     template <typename Callback>
     std::optional<std::tuple<Scalar, size_t>>
     operator()( Scalar f0, Scalar Df0, Vector const & x, Vector const & d, Callback const & callback, Scalar step0 = 1 )
-        const
+      const
     {
       Scalar     step   = step0;
       Scalar     c1_Df0 = m_c1 * Df0;
@@ -403,16 +404,17 @@ namespace Utils
 
     template <typename EvalFunc>
     Scalar
-    zoom( Scalar           a_lo,
-          Scalar           f_lo,
-          Scalar           Df_lo,
-          Scalar           a_hi,
-          Scalar           f_hi,
-          Scalar           Df_hi,
-          Scalar           f0,
-          Scalar           c1_Df0,
-          Scalar           c2_Df0,
-          EvalFunc const & eval ) const
+    zoom(
+      Scalar           a_lo,
+      Scalar           f_lo,
+      Scalar           Df_lo,
+      Scalar           a_hi,
+      Scalar           f_hi,
+      Scalar           Df_hi,
+      Scalar           f0,
+      Scalar           c1_Df0,
+      Scalar           c2_Df0,
+      EvalFunc const & eval ) const
     {
       Scalar a_j, f_j, Df_j;
 
@@ -474,12 +476,13 @@ namespace Utils
 
     template <typename Callback>
     std::optional<std::tuple<Scalar, size_t>>
-    operator()( Scalar           f0,
-                Scalar           Df0,
-                Vector const &   x,
-                Vector const &   d,
-                Callback const & callback,
-                Scalar           alpha0 = Scalar( 1 ) ) const
+    operator()(
+      Scalar           f0,
+      Scalar           Df0,
+      Vector const &   x,
+      Vector const &   d,
+      Callback const & callback,
+      Scalar           alpha0 = Scalar( 1 ) ) const
     {
       if ( Df0 >= 0 ) return std::nullopt;
 
@@ -636,12 +639,13 @@ namespace Utils
      */
     template <typename Callback>
     std::optional<std::tuple<Scalar, size_t>>
-    operator()( Scalar           f0,
-                Scalar           Df0,
-                Vector const &   x,
-                Vector const &   d,
-                Callback const & callback,
-                Scalar           alpha0 = 1 ) const
+    operator()(
+      Scalar           f0,
+      Scalar           Df0,
+      Vector const &   x,
+      Vector const &   d,
+      Callback const & callback,
+      Scalar           alpha0 = 1 ) const
     {
       if ( !( Df0 < 0 ) ) return std::nullopt;
       m_g_new.resize( x.size() );
@@ -729,8 +733,8 @@ namespace Utils
       while ( n_evals < m_max_iters )
       {
         Scalar a_j = abs( alpha_hi - alpha_lo ) > m_epsi
-                         ? detail::cubic_minimizer<Scalar>( alpha_lo, phi_lo, der_lo, alpha_hi, phi_hi, der_hi )
-                         : ( alpha_lo + alpha_hi ) / 2;
+                       ? detail::cubic_minimizer<Scalar>( alpha_lo, phi_lo, der_lo, alpha_hi, phi_hi, der_hi )
+                       : ( alpha_lo + alpha_hi ) / 2;
 
         Scalar phi_j, der_j;
         eval( a_j, phi_j, der_j );
@@ -835,12 +839,13 @@ namespace Utils
   public:
     template <typename Callback>
     std::optional<std::tuple<Scalar, size_t>>
-    operator()( Scalar           f0,
-                Scalar           Df0,
-                Vector const &   x,
-                Vector const &   d,
-                Callback const & callback,
-                Scalar           alpha0 = 1 ) const
+    operator()(
+      Scalar           f0,
+      Scalar           Df0,
+      Vector const &   x,
+      Vector const &   d,
+      Callback const & callback,
+      Scalar           alpha0 = 1 ) const
     {
       // Controllo direzione di discesa
       if ( Df0 >= 0 ) return std::nullopt;
@@ -952,7 +957,7 @@ namespace Utils
     template <typename EvalFunc>
     Scalar
     zoom( Scalar a_lo, Scalar phi_lo, Scalar der_lo, Scalar a_hi, Scalar phi_hi, Scalar der_hi, EvalFunc const & eval )
-        const
+      const
     {
       // relative collapse tolerance
       const auto rel_tol = [&]( Scalar a, Scalar b ) { return abs( a - b ) <= m_epsi * ( Scalar( 1 ) + abs( a ) ); };
@@ -1052,12 +1057,13 @@ namespace Utils
      */
     template <typename Callback>
     std::optional<std::tuple<Scalar, size_t>>
-    operator()( Scalar           f0,
-                Scalar           Df0,
-                Vector const &   x,
-                Vector const &   d,
-                Callback const & callback,
-                Scalar           alpha0 = Scalar( 1 ) ) const
+    operator()(
+      Scalar           f0,
+      Scalar           Df0,
+      Vector const &   x,
+      Vector const &   d,
+      Callback const & callback,
+      Scalar           alpha0 = Scalar( 1 ) ) const
     {
       // require descent
       if ( !( Df0 < Scalar( 0 ) ) ) return std::nullopt;
@@ -1219,12 +1225,13 @@ namespace Utils
   public:
     template <typename Callback>
     std::optional<std::tuple<Scalar, size_t>>
-    operator()( Scalar           f0,
-                Scalar           Df0,
-                Vector const &   x,
-                Vector const &   d,
-                Callback const & callback,
-                Scalar           alpha0 = 1 ) const
+    operator()(
+      Scalar           f0,
+      Scalar           Df0,
+      Vector const &   x,
+      Vector const &   d,
+      Callback const & callback,
+      Scalar           alpha0 = 1 ) const
     {
       if ( !( Df0 < 0 ) ) return std::nullopt;
 
@@ -1271,7 +1278,8 @@ namespace Utils
       {
         // Check Strong Wolfe al passo corrente (MT è un raffinamento per SW)
         if ( phi_curr <= f0 + alpha_curr * c1_Df0 && abs( der_curr ) <= -c2_Df0 )
-          return std::tuple<Scalar, size_t>( alpha_curr, n_evals );  // Trovato passo accettabile
+          return std::tuple<Scalar, size_t>( alpha_curr,
+                                             n_evals );  // Trovato passo accettabile
 
         // --- Bracketing Logic (Aggiornamento dell'intervallo [alpha_lo,
         // alpha_hi]) ---
@@ -1310,11 +1318,20 @@ namespace Utils
         {
           // Zoom phase: usa interpolazione cubica/safeguard tra alpha_lo e
           // alpha_hi
-          alpha_new = detail::compute_step( alpha_lo, phi_lo, der_lo, alpha_hi, phi_curr,
-                                            der_curr,  // Nota: usa phi_curr e der_curr per alpha_hi (il passo
-                                                       // "cattivo")
-                                            alpha_prev, phi_prev, der_prev, m_alpha_max, m_alpha_max,
-                                            false  // is_bracketing = false
+          alpha_new = detail::compute_step(
+            alpha_lo,
+            phi_lo,
+            der_lo,
+            alpha_hi,
+            phi_curr,
+            der_curr,  // Nota: usa phi_curr e der_curr per
+                       // alpha_hi (il passo "cattivo")
+            alpha_prev,
+            phi_prev,
+            der_prev,
+            m_alpha_max,
+            m_alpha_max,
+            false  // is_bracketing = false
           );
         }
         else

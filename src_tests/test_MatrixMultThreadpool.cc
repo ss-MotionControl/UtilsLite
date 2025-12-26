@@ -30,7 +30,6 @@
 #include "Utils_eigen.hh"
 #include "Utils_fmt.hh"
 
-
 using mat     = Eigen::MatrixXd;
 using integer = Eigen::Index;
 
@@ -59,13 +58,14 @@ class BlockMult
 public:
   BlockMult() {}
 
-  bool multiply( integer                      ntp,
-                 mat const &                  A,
-                 mat const &                  B,
-                 mat &                        C,
-                 std::vector<integer> const & i_block,
-                 std::vector<integer> const & j_block,
-                 std::vector<integer> const & k_block );
+  bool multiply(
+    integer                      ntp,
+    mat const &                  A,
+    mat const &                  B,
+    mat &                        C,
+    std::vector<integer> const & i_block,
+    std::vector<integer> const & j_block,
+    std::vector<integer> const & k_block );
 
   ~BlockMult() = default;
 };
@@ -87,13 +87,14 @@ BlockMult::Compute_C_block( mat const & A, mat const & B, mat & C, integer const
 //-----------------------------------------------------
 
 bool
-BlockMult::multiply( integer const                ntp,
-                     mat const &                  A,
-                     mat const &                  B,
-                     mat &                        C,
-                     std::vector<integer> const & i_block,
-                     std::vector<integer> const & j_block,
-                     std::vector<integer> const & k_block )
+BlockMult::multiply(
+  integer const                ntp,
+  mat const &                  A,
+  mat const &                  B,
+  mat &                        C,
+  std::vector<integer> const & i_block,
+  std::vector<integer> const & j_block,
+  std::vector<integer> const & k_block )
 {
   if ( A.cols() != B.rows() )
   {
@@ -109,22 +110,20 @@ BlockMult::multiply( integer const                ntp,
 
   // #define USE_RUN
 
-
-#define THE_TASK( POOL )                                                                                               \
-  for ( integer i{ 1 }; i < integer( i_block.size() ); ++i )                                                           \
-  {                                                                                                                    \
-    for ( integer j{ 1 }; j < integer( j_block.size() ); ++j )                                                         \
-    {                                                                                                                  \
-      /*if ( false ) { */                                                                                              \
-      POOL.run( &BlockMult::Compute_C_block, this, std::ref( A ), std::ref( B ), std::ref( C ), i, j );                \
-      /*} else {                                                                                                       \
-        auto fun = [this, &A, &B, &C, i, j]() -> void { this->Compute_C_block(                                         \
-      A, B, C, i, j ); }; POOL.exec( fun );                                                                            \
-      } */                                                                                                             \
-    }                                                                                                                  \
-  }                                                                                                                    \
+#define THE_TASK( POOL )                                                                                \
+  for ( integer i{ 1 }; i < integer( i_block.size() ); ++i )                                            \
+  {                                                                                                     \
+    for ( integer j{ 1 }; j < integer( j_block.size() ); ++j )                                          \
+    {                                                                                                   \
+      /*if ( false ) { */                                                                               \
+      POOL.run( &BlockMult::Compute_C_block, this, std::ref( A ), std::ref( B ), std::ref( C ), i, j ); \
+      /*} else {                                                                                        \
+        auto fun = [this, &A, &B, &C, i, j]() -> void { this->Compute_C_block(                          \
+      A, B, C, i, j ); }; POOL.exec( fun );                                                             \
+      } */                                                                                              \
+    }                                                                                                   \
+  }                                                                                                     \
   POOL.wait()
-
 
   switch ( ntp )
   {
@@ -256,8 +255,12 @@ main()
     mean   = times.mean();
     stdDev = ( ( ( times.array() - mean ) * ( times.array() - mean ) ).sqrt() ).sum() /
              static_cast<double>( n_runs - 1 );
-    fmt::print( "time (#{:30}): {:8.4}ms {:8.4}ms (sdev) Check M3a - M3b: {:8.4}\n\n", name, mean, stdDev,
-                ( M3a - M3b ).norm() );
+    fmt::print(
+      "time (#{:30}): {:8.4}ms {:8.4}ms (sdev) Check M3a - M3b: {:8.4}\n\n",
+      name,
+      mean,
+      stdDev,
+      ( M3a - M3b ).norm() );
   }
 
   return 0;

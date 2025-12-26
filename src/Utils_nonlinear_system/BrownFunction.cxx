@@ -16,19 +16,20 @@ class BrownFunction : public NonlinearSystem
 {
 public:
   BrownFunction()
-    : NonlinearSystem( "Brown function",
-                       "@article{Qi:2006,\n"
-                       "  author  = {Qi, H. and Sun, D.},\n"
-                       "  title   = {A Quadratically Convergent Newton Method for\n"
-                       "             Computing the Nearest Correlation Matrix},\n"
-                       "  journal = {SIAM Journal on Matrix Analysis and Applications},\n"
-                       "  volume  = {28},\n"
-                       "  number  = {2},\n"
-                       "  pages   = {360--385},\n"
-                       "  year    = {2006},\n"
-                       "  doi     = {10.1137/050624509},\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Brown function",
+        "@article{Qi:2006,\n"
+        "  author  = {Qi, H. and Sun, D.},\n"
+        "  title   = {A Quadratically Convergent Newton Method for\n"
+        "             Computing the Nearest Correlation Matrix},\n"
+        "  journal = {SIAM Journal on Matrix Analysis and Applications},\n"
+        "  volume  = {28},\n"
+        "  number  = {2},\n"
+        "  pages   = {360--385},\n"
+        "  year    = {2006},\n"
+        "  doi     = {10.1137/050624509},\n"
+        "}\n",
+        2 )
   {
   }
 

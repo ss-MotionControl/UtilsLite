@@ -236,7 +236,6 @@ namespace Utils
     Real m_a{ 0 }, m_fa{ 0 };
     Real m_b{ 0 }, m_fb{ 0 };
     Real m_c{ 0 }, m_fc{ 0 };
-    Real m_d{ 0 }, m_fd{ 0 };
     Real m_ba{ 0 };
     Real m_kappa{ 0.05 };
 

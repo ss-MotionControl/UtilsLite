@@ -8,38 +8,38 @@
  |    email: enrico.bertolazzi@unitn.it
 \*/
 
-#define SHACHAM_BIBTEX                                                                                                 \
-  "@inbook{eden2014proceedings,\n"                                                                                     \
-  "  author    = {M. Shacham},\n"                                                                                      \
-  "  title     = {Recent developments in solution techniques for\n"                                                    \
-  "               systems of nonlinear equations},\n"                                                                  \
-  "  booktitle = {Proceedings of the 2nd International Conference\n"                                                   \
-  "               on Foundations of Computer-Aided Process Design},\n"                                                 \
-  "  editor    = {A.W. Westerberg, H.H. Chien},\n"                                                                     \
-  "  series    = {Computer Aided Chemical Engineering},\n"                                                             \
-  "  year      = {1983},\n"                                                                                            \
-  "}\n\n"                                                                                                              \
-  "@article{Meintjes:1990,\n"                                                                                          \
-  "  author  = {Meintjes, Keith and Morgan, Alexander P.},\n"                                                          \
-  "  title   = {Chemical Equilibrium Systems As Numerical Test Problems},\n"                                           \
-  "  journal = {ACM Trans. Math. Softw.},\n"                                                                           \
-  "  year    = {1990},\n"                                                                                              \
-  "  volume  = {16},\n"                                                                                                \
-  "  number  = {2},\n"                                                                                                 \
-  "  pages   = {143--151},\n"                                                                                          \
-  "  doi     = {10.1145/78928.78930},\n"                                                                               \
-  "}\n\n"                                                                                                              \
-  "@article{Shacham:1985,\n"                                                                                           \
-  "  author  = {Mordechai Shacham},\n"                                                                                 \
-  "  title   = {Comparing software for the solution of systems\n"                                                      \
-  "              of nonlinear algebraic equations arising in\n"                                                        \
-  "              chemical engineering},\n"                                                                             \
-  "  journal = {Computers \\& Chemical Engineering},\n"                                                                \
-  "  year    = {1985},\n"                                                                                              \
-  "  volume  = {9},\n"                                                                                                 \
-  "  number  = {2},\n"                                                                                                 \
-  "  pages   = {103--112},\n"                                                                                          \
-  "  doi     = {10.1016/0098-1354(85)85001-8}\n"                                                                       \
+#define SHACHAM_BIBTEX                                                       \
+  "@inbook{eden2014proceedings,\n"                                           \
+  "  author    = {M. Shacham},\n"                                            \
+  "  title     = {Recent developments in solution techniques for\n"          \
+  "               systems of nonlinear equations},\n"                        \
+  "  booktitle = {Proceedings of the 2nd International Conference\n"         \
+  "               on Foundations of Computer-Aided Process Design},\n"       \
+  "  editor    = {A.W. Westerberg, H.H. Chien},\n"                           \
+  "  series    = {Computer Aided Chemical Engineering},\n"                   \
+  "  year      = {1983},\n"                                                  \
+  "}\n\n"                                                                    \
+  "@article{Meintjes:1990,\n"                                                \
+  "  author  = {Meintjes, Keith and Morgan, Alexander P.},\n"                \
+  "  title   = {Chemical Equilibrium Systems As Numerical Test Problems},\n" \
+  "  journal = {ACM Trans. Math. Softw.},\n"                                 \
+  "  year    = {1990},\n"                                                    \
+  "  volume  = {16},\n"                                                      \
+  "  number  = {2},\n"                                                       \
+  "  pages   = {143--151},\n"                                                \
+  "  doi     = {10.1145/78928.78930},\n"                                     \
+  "}\n\n"                                                                    \
+  "@article{Shacham:1985,\n"                                                 \
+  "  author  = {Mordechai Shacham},\n"                                       \
+  "  title   = {Comparing software for the solution of systems\n"            \
+  "              of nonlinear algebraic equations arising in\n"              \
+  "              chemical engineering},\n"                                   \
+  "  journal = {Computers \\& Chemical Engineering},\n"                      \
+  "  year    = {1985},\n"                                                    \
+  "  volume  = {9},\n"                                                       \
+  "  number  = {2},\n"                                                       \
+  "  pages   = {103--112},\n"                                                \
+  "  doi     = {10.1016/0098-1354(85)85001-8}\n"                             \
   "}\n"
 
 /*\
@@ -168,27 +168,31 @@ public:
   {
     real_type _T = x( 0 );
     real_type _y = x( 1 );
-    UTILS_ASSERT( _y <= 1,
-                  "ChemicalReactorEquilibriumConversion::check_if_admissible "
-                  "found y > 1, y = {}",
-                  y );
-    UTILS_ASSERT( _T > 0,
-                  "ChemicalReactorEquilibriumConversion::check_if_admissible "
-                  "found T <= 0, T = {}",
-                  T );
+    UTILS_ASSERT(
+      _y <= 1,
+      "ChemicalReactorEquilibriumConversion::check_if_admissible "
+      "found y > 1, y = {}",
+      y );
+    UTILS_ASSERT(
+      _T > 0,
+      "ChemicalReactorEquilibriumConversion::check_if_admissible "
+      "found T <= 0, T = {}",
+      T );
     real_type bf1 = 149750.0 / _T;
     real_type bf2 = 192050.0 / _T;
 
     real_type k1 = 92.5 - bf1;
     real_type k2 = 116.7 - bf2 - 0.17 * log( _T );
-    UTILS_ASSERT( k1 <= 350,
-                  "ChemicalReactorEquilibriumConversion::check_if_admissible "
-                  "found k1 > 350, k1 = {}",
-                  k1 );
-    UTILS_ASSERT( k2 <= 350,
-                  "ChemicalReactorEquilibriumConversion::check_if_admissible "
-                  "found k2 > 350, k2 = {}",
-                  k2 );
+    UTILS_ASSERT(
+      k1 <= 350,
+      "ChemicalReactorEquilibriumConversion::check_if_admissible "
+      "found k1 > 350, k1 = {}",
+      k1 );
+    UTILS_ASSERT(
+      k2 <= 350,
+      "ChemicalReactorEquilibriumConversion::check_if_admissible "
+      "found k2 > 350, k2 = {}",
+      k2 );
   }
 
   virtual void
@@ -463,30 +467,31 @@ class CutlipsSteadyStateForReactionRateEquations : public NonlinearSystem
 
 public:
   CutlipsSteadyStateForReactionRateEquations( integer k_set_in )
-    : NonlinearSystem( ini_msg_CutlipsSteadyStateForReactionRateEquations( k_set_in ),
-                       "@inbook{eden2014proceedings,\n"
-                       "  author    = {M. Shacham},\n"
-                       "  title     = {Recent developments in solution techniques for\n"
-                       "               systems of nonlinear equations},\n"
-                       "  booktitle = {Proceedings of the 2nd International Conference\n"
-                       "               on Foundations of Computer-Aided Process Design},\n"
-                       "  editor    = {A.W. Westerberg, H.H. Chien},\n"
-                       "  series    = {Computer Aided Chemical Engineering},\n"
-                       "  year      = {1983},\n"
-                       "}\n\n"
-                       "@article{Mordechai:10.1002/nme.1620230805,\n"
-                       "  author  = {Shacham Mordechai},\n"
-                       "  title   = {Numerical solution of constrained non-linear "
-                       "algebraic equations},\n"
-                       "  journal = {International Journal for Numerical Methods in "
-                       "Engineering},\n"
-                       "  year    = {1986},\n"
-                       "  volume  = {23},\n"
-                       "  number  = {8},\n"
-                       "  pages   = {1455-1481},\n"
-                       "  doi     = {10.1002/nme.1620230805},\n"
-                       "}\n",
-                       6 )
+    : NonlinearSystem(
+        ini_msg_CutlipsSteadyStateForReactionRateEquations( k_set_in ),
+        "@inbook{eden2014proceedings,\n"
+        "  author    = {M. Shacham},\n"
+        "  title     = {Recent developments in solution techniques for\n"
+        "               systems of nonlinear equations},\n"
+        "  booktitle = {Proceedings of the 2nd International Conference\n"
+        "               on Foundations of Computer-Aided Process Design},\n"
+        "  editor    = {A.W. Westerberg, H.H. Chien},\n"
+        "  series    = {Computer Aided Chemical Engineering},\n"
+        "  year      = {1983},\n"
+        "}\n\n"
+        "@article{Mordechai:10.1002/nme.1620230805,\n"
+        "  author  = {Shacham Mordechai},\n"
+        "  title   = {Numerical solution of constrained non-linear "
+        "algebraic equations},\n"
+        "  journal = {International Journal for Numerical Methods in "
+        "Engineering},\n"
+        "  year    = {1986},\n"
+        "  volume  = {23},\n"
+        "  number  = {8},\n"
+        "  pages   = {1455-1481},\n"
+        "  doi     = {10.1002/nme.1620230805},\n"
+        "}\n",
+        6 )
     , k_set( k_set_in )
   {
     switch ( k_set )
@@ -605,20 +610,21 @@ class Hiebert3ChemicalEquilibriumProblem : public NonlinearSystem
 
 public:
   Hiebert3ChemicalEquilibriumProblem( real_type r_in )
-    : NonlinearSystem( ini_msg_Hiebert3ChemicalEquilibriumProblem( r_in ),
-                       "@article{Mordechai:10.1002/nme.1620230805,\n"
-                       "  author  = {Shacham Mordechai},\n"
-                       "  title   = {Numerical solution of constrained "
-                       "non-linear algebraic equations},\n"
-                       "  journal = {International Journal for Numerical "
-                       "Methods in Engineering},\n"
-                       "  year    = {1986},\n"
-                       "  volume  = {23},\n"
-                       "  number  = {8},\n"
-                       "  pages   = {1455-1481},\n"
-                       "  doi     = {10.1002/nme.1620230805},\n"
-                       "}\n",
-                       10 )
+    : NonlinearSystem(
+        ini_msg_Hiebert3ChemicalEquilibriumProblem( r_in ),
+        "@article{Mordechai:10.1002/nme.1620230805,\n"
+        "  author  = {Shacham Mordechai},\n"
+        "  title   = {Numerical solution of constrained "
+        "non-linear algebraic equations},\n"
+        "  journal = {International Journal for Numerical "
+        "Methods in Engineering},\n"
+        "  year    = {1986},\n"
+        "  volume  = {23},\n"
+        "  number  = {8},\n"
+        "  pages   = {1455-1481},\n"
+        "  doi     = {10.1002/nme.1620230805},\n"
+        "}\n",
+        10 )
     , R( r_in )
   {
   }
@@ -650,7 +656,7 @@ public:
     else
     {
       f( 0 ) = f( 1 ) = f( 2 ) = f( 3 ) = f( 4 ) = f( 5 ) = f( 6 ) = f( 7 ) = f( 8 ) = f( 9 ) = nan(
-          "Hiebert3ChemicalEquilibriumProblem" );
+        "Hiebert3ChemicalEquilibriumProblem" );
     }
   }
 
@@ -828,18 +834,18 @@ public:
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-#define SHACHAM1_BIBTEX                                                                                                \
-  "@article{Mordechai:10.1002/nme.1620230805,\n"                                                                       \
-  "  author  = {Shacham Mordechai},\n"                                                                                 \
-  "  title   = {Numerical solution of constrained non-linear algebraic "                                               \
-  "equations},\n"                                                                                                      \
-  "  journal = {International Journal for Numerical Methods in "                                                       \
-  "Engineering},\n"                                                                                                    \
-  "  year    = {1986},\n"                                                                                              \
-  "  volume  = {23},\n"                                                                                                \
-  "  number  = {8},\n"                                                                                                 \
-  "  pages   = {1455-1481},\n"                                                                                         \
-  "  doi     = {10.1002/nme.1620230805},\n"                                                                            \
+#define SHACHAM1_BIBTEX                                                  \
+  "@article{Mordechai:10.1002/nme.1620230805,\n"                         \
+  "  author  = {Shacham Mordechai},\n"                                   \
+  "  title   = {Numerical solution of constrained non-linear algebraic " \
+  "equations},\n"                                                        \
+  "  journal = {International Journal for Numerical Methods in "         \
+  "Engineering},\n"                                                      \
+  "  year    = {1986},\n"                                                \
+  "  volume  = {23},\n"                                                  \
+  "  number  = {8},\n"                                                   \
+  "  pages   = {1455-1481},\n"                                           \
+  "  doi     = {10.1002/nme.1620230805},\n"                              \
   "}\n"
 
 class FractionalConversionInAchemicalReactor : public NonlinearSystem
@@ -968,7 +974,7 @@ public:
     auto & x0{ x_vec[0] };
     x0.resize( n );
     x0 << 0.7573962462537538794596412979291452934280, 0.2426037537462461205403587020708547065720,
-        0.02130187687312306027017935103542735328602;
+      0.02130187687312306027017935103542735328602;
   }
 
   virtual void
@@ -1008,16 +1014,16 @@ public:
  | - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 \*/
 
-#define SHACHAM2_BIBTEX                                                                                                \
-  "@article{Mordechai,\n"                                                                                              \
-  "  author  = {Shacham Mordechai},\n"                                                                                 \
-  "  title   = {Decomposition of systems of nonlinear algebraic equations},\n"                                         \
-  "  journal = {AIChE Journal},\n"                                                                                     \
-  "  year    = {1984},\n"                                                                                              \
-  "  volume  = {30},\n"                                                                                                \
-  "  number  = {1},\n"                                                                                                 \
-  "  pages   = {92--99},\n"                                                                                            \
-  "  doi     = {10.1002/aic.690300114},\n"                                                                             \
+#define SHACHAM2_BIBTEX                                                        \
+  "@article{Mordechai,\n"                                                      \
+  "  author  = {Shacham Mordechai},\n"                                         \
+  "  title   = {Decomposition of systems of nonlinear algebraic equations},\n" \
+  "  journal = {AIChE Journal},\n"                                             \
+  "  year    = {1984},\n"                                                      \
+  "  volume  = {30},\n"                                                        \
+  "  number  = {1},\n"                                                         \
+  "  pages   = {92--99},\n"                                                    \
+  "  doi     = {10.1002/aic.690300114},\n"                                     \
   "}\n"
 
 class PipelineNetworkProblem : public NonlinearSystem
@@ -1122,7 +1128,7 @@ public:
     auto & x0{ x_vec[0] };
     x0.resize( n );
     x0 << 0.32287083947654068257, 0.92235435391875035348e-2, 0.46017090960632262350e-1, 0.61817167507082410985,
-        0.37168509528154416956e-2, 0.57671539593554916672, 2.9778634507911453048;
+      0.37168509528154416956e-2, 0.57671539593554916672, 2.9778634507911453048;
   }
 
   virtual void
@@ -1300,19 +1306,20 @@ class ModelEquationsForTheCSTR : public NonlinearSystem
 
 public:
   ModelEquationsForTheCSTR()
-    : NonlinearSystem( "Model equations for the CSTR",
-                       "@article{Shacham:2002,\n"
-                       "  author  = {Mordechai Shacham and Neima Brauner},\n"
-                       "  title   = {Numerical solution of non-linear algebraic\n"
-                       "             equations with discontinuities},\n"
-                       "  journal = {Computers \\& Chemical Engineering},\n"
-                       "  volume  = {26},\n"
-                       "  number  = {10},\n"
-                       "  pages   = {1449--1457},\n"
-                       "  year    = {2002},\n"
-                       "  doi     = {10.1016/S0098-1354(02)00122-9}\n"
-                       "}\n",
-                       15 )
+    : NonlinearSystem(
+        "Model equations for the CSTR",
+        "@article{Shacham:2002,\n"
+        "  author  = {Mordechai Shacham and Neima Brauner},\n"
+        "  title   = {Numerical solution of non-linear algebraic\n"
+        "             equations with discontinuities},\n"
+        "  journal = {Computers \\& Chemical Engineering},\n"
+        "  volume  = {26},\n"
+        "  number  = {10},\n"
+        "  pages   = {1449--1457},\n"
+        "  year    = {2002},\n"
+        "  doi     = {10.1016/S0098-1354(02)00122-9}\n"
+        "}\n",
+        15 )
   {
     R   = 1.987;
     V   = 500;
@@ -1546,8 +1553,9 @@ public:
     real_type k1B = x( 12 );
     real_type k2C = x( 13 );
     real_type k3E = x( 14 );
-    UTILS_ASSERT( T > 0 && CA > 0 && CB > 0 && CC > 0 && CD > 0 && CE > 0 && k1B > 0 && k2C > 0 && k3E > 0,
-                  "non positive" );
+    UTILS_ASSERT(
+      T > 0 && CA > 0 && CB > 0 && CC > 0 && CD > 0 && CE > 0 && k1B > 0 && k2C > 0 && k3E > 0,
+      "non positive" );
     // ASSERT( rA < 0, "T non positive" );
     // ASSERT( rB < 0, "T non positive" );
   }
@@ -1593,34 +1601,35 @@ class ModelEquationsForCombustionOfPropane : public NonlinearSystem
 
 public:
   ModelEquationsForCombustionOfPropane( real_type R_in )
-    : NonlinearSystem( "ModelEquationsForCombustionOfPropane",
-                       "Combustion of propane system from Shacham & Brauner (2002)\n\n"
-                       "This system models the combustion of propane (C3H8) with oxygen.\n"
-                       "The variables n1...n10 represent mole numbers of different "
-                       "species.\n\n"
-                       "@article{Shacham:2002,\n"
-                       "  author  = {Mordechai Shacham and Neima Brauner},\n"
-                       "  title   = {Numerical solution of non-linear algebraic\n"
-                       "             equations with discontinuities},\n"
-                       "  journal = {Computers \\& Chemical Engineering},\n"
-                       "  volume  = {26},\n"
-                       "  number  = {10},\n"
-                       "  pages   = {1449--1457},\n"
-                       "  year    = {2002},\n"
-                       "  doi     = {10.1016/S0098-1354(02)00122-9}\n"
-                       "}\n\n"
-                       "@article{Hiebert:1982,\n"
-                       "  author  = {Hiebert, K. L.},\n"
-                       "  title   = {An Evaluation of Mathematical Software That\n"
-                       "             Solves Systems of Nonlinear Equations},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1982},\n"
-                       "  volume  = {8},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {5--20},\n"
-                       "  doi     = {10.1145/355984.355986},\n"
-                       "}",
-                       10 )
+    : NonlinearSystem(
+        "ModelEquationsForCombustionOfPropane",
+        "Combustion of propane system from Shacham & Brauner (2002)\n\n"
+        "This system models the combustion of propane (C3H8) with oxygen.\n"
+        "The variables n1...n10 represent mole numbers of different "
+        "species.\n\n"
+        "@article{Shacham:2002,\n"
+        "  author  = {Mordechai Shacham and Neima Brauner},\n"
+        "  title   = {Numerical solution of non-linear algebraic\n"
+        "             equations with discontinuities},\n"
+        "  journal = {Computers \\& Chemical Engineering},\n"
+        "  volume  = {26},\n"
+        "  number  = {10},\n"
+        "  pages   = {1449--1457},\n"
+        "  year    = {2002},\n"
+        "  doi     = {10.1016/S0098-1354(02)00122-9}\n"
+        "}\n\n"
+        "@article{Hiebert:1982,\n"
+        "  author  = {Hiebert, K. L.},\n"
+        "  title   = {An Evaluation of Mathematical Software That\n"
+        "             Solves Systems of Nonlinear Equations},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1982},\n"
+        "  volume  = {8},\n"
+        "  number  = {1},\n"
+        "  pages   = {5--20},\n"
+        "  doi     = {10.1145/355984.355986},\n"
+        "}",
+        10 )
     , R( R_in )
   {
   }
@@ -1887,15 +1896,15 @@ public:
     // For propane combustion with oxygen
     x_vec[0].resize( n );
     x_vec[0] << 0.1,  // n1: small amount of unreacted fuel
-        1.0,          // n2: oxygen
-        2.0,          // n3: nitrogen (if air is used)
-        2.0,          // n4: water
-        1.0,          // n5: CO2
-        0.1,          // n6: CO
-        0.1,          // n7: H2
-        0.01,         // n8: CH4
-        0.01,         // n9: C2H4
-        0.01;         // n10: C2H2
+      1.0,            // n2: oxygen
+      2.0,            // n3: nitrogen (if air is used)
+      2.0,            // n4: water
+      1.0,            // n5: CO2
+      0.1,            // n6: CO
+      0.1,            // n7: H2
+      0.01,           // n8: CH4
+      0.01,           // n9: C2H4
+      0.01;           // n10: C2H2
     x_vec[1].resize( n );
     x_vec[1] << 1.5, 2, 35, 0.5, 0.05, 0.005, 0.04, 0.003, 0.02, 5;
 
@@ -1916,18 +1925,18 @@ public:
     if ( R == 5 )
     {
       x0 << 0.3559599245750028940279730558909830996301, 1.642881004256062705758024434229955541198,
-          9.999899747218013590855403541750759597903, 2.644040075424997105972026944109016900370,
-          2.355213838697166839205357709126128172422, 0.002753117723184878305195786386034944005309,
-          0.001057196370356031768039926901797628753538, 1.029441963879188481974370137023981334505e-6,
-          0.0001002527819864091445964582492404020974267, 2.962873140400564420751789431521697439618e-7;
+        9.999899747218013590855403541750759597903, 2.644040075424997105972026944109016900370,
+        2.355213838697166839205357709126128172422, 0.002753117723184878305195786386034944005309,
+        0.001057196370356031768039926901797628753538, 1.029441963879188481974370137023981334505e-6,
+        0.0001002527819864091445964582492404020974267, 2.962873140400564420751789431521697439618e-7;
     }
     else if ( R == 10 )
     {
       x0 << 2.919263696189521723108379722252553967701, 3.961582490687720316870121495020578447644,
-          19.98323454308129571358397763858877461630, 0.08073630381047827689162027774744603229942,
-          0.02114567481365013128155333837125051257291, 0.0006068394522716562366021600034848250442609,
-          0.03393682954498744746004817321285725452169, 0.0004399167312730170718469569851013066514717,
-          0.01676545691870428641602236141122538370263, 0.03400580496389660453679064555884181988976;
+        19.98323454308129571358397763858877461630, 0.08073630381047827689162027774744603229942,
+        0.02114567481365013128155333837125051257291, 0.0006068394522716562366021600034848250442609,
+        0.03393682954498744746004817321285725452169, 0.0004399167312730170718469569851013066514717,
+        0.01676545691870428641602236141122538370263, 0.03400580496389660453679064555884181988976;
     }
     else
     {

@@ -64,7 +64,8 @@ generate_random_sparse_matrix( int m, int n, double density = 0.3 )
   std::set<std::pair<int, int>> positions;
 
   // Nota: std::set è lento per matrici grandi, ma ok per test.
-  // Per performance migliori usare direttamente triplette con duplicati e sumup di Eigen.
+  // Per performance migliori usare direttamente triplette con duplicati e sumup
+  // di Eigen.
   while ( triplets.size() < nnz )
   {
     int i = row_dist( gen );
@@ -104,14 +105,16 @@ generate_random_vector( int n, Scalar min_val = 0.1, Scalar max_val = 10.0 )
 inline void
 header( std::string const & msg )
 {
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold,
-              "\n"
-              "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-              "━━━━━━━━━━━━━━━┓\n" );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "\n"
+    "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    "━━━━━━━━━━━━━━━┓\n" );
   fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold, "┃ {:^76} ┃\n", msg );
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold,
-              "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-              "━━━━━━━━━━━━━━━┛\n" );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    "━━━━━━━━━━━━━━━┛\n" );
 }
 
 inline std::string
@@ -292,24 +295,48 @@ run_test_standard( int m, int n, double lambda )
   fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_qr − x_kkt‖ (QR vs KKT dense)", sci( dx_qr_kkt ) );
   fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_qr − x_sp‖ (QR vs SP QR)", sci( dx_qr_sp ) );
   fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_qr − x_sp2‖ (QR vs SP KKT)", sci( dx_qr_sp2 ) );
-  fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_kkt − x_sp‖ (KKT dense vs SP QR)",
-              sci( dx_kkt_sp ) );
-  fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_kkt − x_sp2‖ (KKT dense vs SP KKT)",
-              sci( dx_kkt_sp2 ) );
+  fmt::print(
+    fg( fmt::color::violet ),
+    "{:<54} {:<25}\n",
+    "    ‖x_kkt − x_sp‖ (KKT dense vs SP QR)",
+    sci( dx_kkt_sp ) );
+  fmt::print(
+    fg( fmt::color::violet ),
+    "{:<54} {:<25}\n",
+    "    ‖x_kkt − x_sp2‖ (KKT dense vs SP KKT)",
+    sci( dx_kkt_sp2 ) );
   fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_sp − x_sp2‖ (SP QR vs SP KKT)", sci( dx_sp_sp2 ) );
 
-  fmt::print( fg( fmt::color::orange ), "{:<54} {:<25}\n", "    ‖y_qr − y_kkt‖ (Transpose QR vs KKT)",
-              sci( dy_qr_kkt ) );
-  fmt::print( fg( fmt::color::orange ), "{:<54} {:<25}\n", "    ‖y_qr − y_sp‖ (Transpose QR vs SP QR)",
-              sci( dy_qr_sp ) );
-  fmt::print( fg( fmt::color::orange ), "{:<54} {:<25}\n", "    ‖y_qr − y_sp2‖ (Transpose QR vs SP KKT)",
-              sci( dy_qr_sp2 ) );
-  fmt::print( fg( fmt::color::orange ), "{:<54} {:<25}\n", "    ‖y_kkt − y_sp‖ (Transpose KKT vs SP QR)",
-              sci( dy_kkt_sp ) );
-  fmt::print( fg( fmt::color::orange ), "{:<54} {:<25}\n", "    ‖y_kkt − y_sp2‖ (Transpose KKT vs SP KKT)",
-              sci( dy_kkt_sp2 ) );
-  fmt::print( fg( fmt::color::orange ), "{:<54} {:<25}\n", "    ‖y_sp − y_sp2‖ (Transpose SP QR vs SP KKT)",
-              sci( dy_sp_sp2 ) );
+  fmt::print(
+    fg( fmt::color::orange ),
+    "{:<54} {:<25}\n",
+    "    ‖y_qr − y_kkt‖ (Transpose QR vs KKT)",
+    sci( dy_qr_kkt ) );
+  fmt::print(
+    fg( fmt::color::orange ),
+    "{:<54} {:<25}\n",
+    "    ‖y_qr − y_sp‖ (Transpose QR vs SP QR)",
+    sci( dy_qr_sp ) );
+  fmt::print(
+    fg( fmt::color::orange ),
+    "{:<54} {:<25}\n",
+    "    ‖y_qr − y_sp2‖ (Transpose QR vs SP KKT)",
+    sci( dy_qr_sp2 ) );
+  fmt::print(
+    fg( fmt::color::orange ),
+    "{:<54} {:<25}\n",
+    "    ‖y_kkt − y_sp‖ (Transpose KKT vs SP QR)",
+    sci( dy_kkt_sp ) );
+  fmt::print(
+    fg( fmt::color::orange ),
+    "{:<54} {:<25}\n",
+    "    ‖y_kkt − y_sp2‖ (Transpose KKT vs SP KKT)",
+    sci( dy_kkt_sp2 ) );
+  fmt::print(
+    fg( fmt::color::orange ),
+    "{:<54} {:<25}\n",
+    "    ‖y_sp − y_sp2‖ (Transpose SP QR vs SP KKT)",
+    sci( dy_sp_sp2 ) );
 
   // Objective function values
   fmt::print( fg( fmt::color::yellow ) | fmt::emphasis::bold, "\n{:─^80}\n", " OBJECTIVE FUNCTION VALUES " );
@@ -338,9 +365,12 @@ run_test_standard( int m, int n, double lambda )
 
   for ( const auto & bt : build_times )
   {
-    fmt::print( fg( fmt::color::light_green ), "{:<26} {:<26} {:<26}\n", "    " + bt.second,
-                bt.first > 0 ? ms_format( bt.first ) : "    FAILED",
-                bt.first > 0 ? ratio_format( bt.first / min_build ) : "    N/A" );
+    fmt::print(
+      fg( fmt::color::light_green ),
+      "{:<26} {:<26} {:<26}\n",
+      "    " + bt.second,
+      bt.first > 0 ? ms_format( bt.first ) : "    FAILED",
+      bt.first > 0 ? ratio_format( bt.first / min_build ) : "    N/A" );
   }
 
   // Solve times table
@@ -364,8 +394,13 @@ run_test_standard( int m, int n, double lambda )
     double              time = std::get<0>( st );
     const std::string & name = std::get<1>( st );
 
-    fmt::print( fg( fmt::color::light_green ), "{:<29} {:<16} {:<16} {:<16}\n", "    " + name, ms_format( time ),
-                small_ms_format( time / NTEST ), ratio_format( time / min_solve ) );
+    fmt::print(
+      fg( fmt::color::light_green ),
+      "{:<29} {:<16} {:<16} {:<16}\n",
+      "    " + name,
+      ms_format( time ),
+      small_ms_format( time / NTEST ),
+      ratio_format( time / min_solve ) );
   }
 }
 
@@ -530,30 +565,52 @@ run_test_with_diagonal( int m, int n, double lambda )
   double min_D  = D.minCoeff();
   double max_D  = D.maxCoeff();
   double cond_D = max_D / min_D;
-  fmt::print( fg( fmt::color::light_blue ), "{:<20} {:<20} {:<20}\n", fmt::format( "{:.4e}", min_D ),
-              fmt::format( "{:.4e}", max_D ), fmt::format( "{:.4e}", cond_D ) );
+  fmt::print(
+    fg( fmt::color::light_blue ),
+    "{:<20} {:<20} {:<20}\n",
+    fmt::format( "{:.4e}", min_D ),
+    fmt::format( "{:.4e}", max_D ),
+    fmt::format( "{:.4e}", cond_D ) );
 
   // Accuracy table
   fmt::print( fg( fmt::color::yellow ) | fmt::emphasis::bold, "\n{:─^80}\n", " ACCURACY METRICS (with D) " );
   fmt::print( "{:<54} {:<25}\n", "    Metric", "    Value" );
   fmt::print( "{:─<54} {:─<25}\n", "─", "─" );
 
-  fmt::print( fg( fmt::color::light_blue ), "{:<54} {:<25}\n", "    ‖A x_qr − b‖ (QR Solver - Transformed)",
-              sci( r_qr ) );
-  fmt::print( fg( fmt::color::light_blue ), "{:<54} {:<25}\n", "    ‖A x_kkt − b‖ (KKT dense - Native)",
-              sci( r_kkt_dense ) );
-  fmt::print( fg( fmt::color::light_blue ), "{:<54} {:<25}\n", "    ‖A x_sp − b‖ (SP QR Solver - Transformed)",
-              sci( r_sp ) );
-  fmt::print( fg( fmt::color::light_blue ), "{:<54} {:<25}\n", "    ‖A x_sp2 − b‖ (SP KKT Solver - Native)",
-              sci( r_sp2 ) );
+  fmt::print(
+    fg( fmt::color::light_blue ),
+    "{:<54} {:<25}\n",
+    "    ‖A x_qr − b‖ (QR Solver - Transformed)",
+    sci( r_qr ) );
+  fmt::print(
+    fg( fmt::color::light_blue ),
+    "{:<54} {:<25}\n",
+    "    ‖A x_kkt − b‖ (KKT dense - Native)",
+    sci( r_kkt_dense ) );
+  fmt::print(
+    fg( fmt::color::light_blue ),
+    "{:<54} {:<25}\n",
+    "    ‖A x_sp − b‖ (SP QR Solver - Transformed)",
+    sci( r_sp ) );
+  fmt::print(
+    fg( fmt::color::light_blue ),
+    "{:<54} {:<25}\n",
+    "    ‖A x_sp2 − b‖ (SP KKT Solver - Native)",
+    sci( r_sp2 ) );
 
   fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_qr − x_kkt‖ (QR vs KKT dense)", sci( dx_qr_kkt ) );
   fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_qr − x_sp‖ (QR vs SP QR)", sci( dx_qr_sp ) );
   fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_qr − x_sp2‖ (QR vs SP KKT)", sci( dx_qr_sp2 ) );
-  fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_kkt − x_sp‖ (KKT dense vs SP QR)",
-              sci( dx_kkt_sp ) );
-  fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_kkt − x_sp2‖ (KKT dense vs SP KKT)",
-              sci( dx_kkt_sp2 ) );
+  fmt::print(
+    fg( fmt::color::violet ),
+    "{:<54} {:<25}\n",
+    "    ‖x_kkt − x_sp‖ (KKT dense vs SP QR)",
+    sci( dx_kkt_sp ) );
+  fmt::print(
+    fg( fmt::color::violet ),
+    "{:<54} {:<25}\n",
+    "    ‖x_kkt − x_sp2‖ (KKT dense vs SP KKT)",
+    sci( dx_kkt_sp2 ) );
   fmt::print( fg( fmt::color::violet ), "{:<54} {:<25}\n", "    ‖x_sp − x_sp2‖ (SP QR vs SP KKT)", sci( dx_sp_sp2 ) );
 
   // Objective function values
@@ -583,9 +640,12 @@ run_test_with_diagonal( int m, int n, double lambda )
 
   for ( const auto & bt : build_times )
   {
-    fmt::print( fg( fmt::color::light_green ), "{:<26} {:<26} {:<26}\n", "    " + bt.second,
-                bt.first > 0 ? ms_format( bt.first ) : "    FAILED",
-                bt.first > 0 ? ratio_format( bt.first / min_build ) : "    N/A" );
+    fmt::print(
+      fg( fmt::color::light_green ),
+      "{:<26} {:<26} {:<26}\n",
+      "    " + bt.second,
+      bt.first > 0 ? ms_format( bt.first ) : "    FAILED",
+      bt.first > 0 ? ratio_format( bt.first / min_build ) : "    N/A" );
   }
 
   // Solve times table (with transformation overhead)
@@ -609,8 +669,13 @@ run_test_with_diagonal( int m, int n, double lambda )
     double              time = std::get<0>( st );
     const std::string & name = std::get<1>( st );
 
-    fmt::print( fg( fmt::color::light_green ), "{:<29} {:<16} {:<16} {:<16}\n", "    " + name, ms_format( time ),
-                small_ms_format( time / NTEST ), ratio_format( time / min_solve ) );
+    fmt::print(
+      fg( fmt::color::light_green ),
+      "{:<29} {:<16} {:<16} {:<16}\n",
+      "    " + name,
+      ms_format( time ),
+      small_ms_format( time / NTEST ),
+      ratio_format( time / min_solve ) );
   }
 }
 
@@ -632,22 +697,28 @@ print_solver_legend()
   print( fg( color::lime_green ) | emphasis::bold, " 1. x_qr (Dense QR)\n" );
   print( "    • Metodo: Fattorizzazione QR su matrice 'stacked' (densità piena).\n" );
   print( "    • Trasforma il problema in minimi quadrati standard:\n" );
-  print( fg( color::yellow ),
-         "      min ‖ ⎡   A   ⎤     ⎡ b ⎤ ‖ 2\n"
-         "          ‖ ⎢       ⎥ x - ⎢   ⎥ ‖\n"
-         "          ‖ ⎣ √λ D  ⎦     ⎣ 0 ⎦ ‖\n" );
-  print( "    • Nota: Molto robusto (condizionamento √K), ma lento per grandi dimensioni.\n\n" );
+  print(
+    fg( color::yellow ),
+    "      min ‖ ⎡   A   ⎤     ⎡ b ⎤ ‖ 2\n"
+    "          ‖ ⎢       ⎥ x - ⎢   ⎥ ‖\n"
+    "          ‖ ⎣ √λ D  ⎦     ⎣ 0 ⎦ ‖\n" );
+  print(
+    "    • Nota: Molto robusto (condizionamento √K), ma lento per grandi "
+    "dimensioni.\n\n" );
 
   // -----------------------------------------------------------
   // 2. x_kkt (Dense KKT)
   // -----------------------------------------------------------
   print( fg( color::lime_green ) | emphasis::bold, " 2. x_kkt (Dense KKT / Normal Eq)\n" );
-  print( "    • Metodo: Risoluzione diretta delle Equazioni Normali (densità piena).\n" );
+  print(
+    "    • Metodo: Risoluzione diretta delle Equazioni Normali (densità "
+    "piena).\n" );
   print( "    • Risolve il sistema lineare simmetrico definito positivo:\n" );
   print( fg( color::yellow ), "      ( AᵀA + λ DᵀD ) x = Aᵀb\n" );
   print(
-      "    • Nota: Più veloce del QR (costruisce la matrice AᵀA), ma il condizionamento\n"
-      "      è al quadrato (K) rispetto al QR. Meno stabile numericamente.\n\n" );
+    "    • Nota: Più veloce del QR (costruisce la matrice AᵀA), ma il "
+    "condizionamento\n"
+    "      è al quadrato (K) rispetto al QR. Meno stabile numericamente.\n\n" );
 
   // -----------------------------------------------------------
   // 3. x_sp (Sparse QR)
@@ -655,19 +726,24 @@ print_solver_legend()
   print( fg( color::lime_green ) | emphasis::bold, " 3. x_sp (Sparse QR)\n" );
   print( "    • Metodo: Come x_qr, ma sfrutta la sparsità di A e D.\n" );
   print( "    • Usa Eigen::SPQR o Eigen::SparseQR sulla matrice impilata:\n" );
-  print( fg( color::yellow ),
-         "      min ‖ ⎡ A ⎤ x - ⎡ b ⎤ ‖\n"
-         "          ‖ ⎣ Γ ⎦     ⎣ 0 ⎦ ‖   (dove Γ = √λ D)\n" );
+  print(
+    fg( color::yellow ),
+    "      min ‖ ⎡ A ⎤ x - ⎡ b ⎤ ‖\n"
+    "          ‖ ⎣ Γ ⎦     ⎣ 0 ⎦ ‖   (dove Γ = √λ D)\n" );
   print( "    • Nota: Ottimo per matrici sparse mal condizionate.\n\n" );
 
   // -----------------------------------------------------------
   // 4. x_sp2 (Sparse KKT)
   // -----------------------------------------------------------
   print( fg( color::lime_green ) | emphasis::bold, " 4. x_sp2 (Sparse KKT / Cholesky)\n" );
-  print( "    • Metodo: Equazioni normali sparse con decomposizione di Cholesky (SimplicialLDLT).\n" );
+  print(
+    "    • Metodo: Equazioni normali sparse con decomposizione di Cholesky "
+    "(SimplicialLDLT).\n" );
   print( "    • Risolve:\n" );
   print( fg( color::yellow ), "      ( AᵀA + diag(λ dᵢ²) ) x = Aᵀb\n" );
-  print( "    • Nota: Generalmente il metodo più veloce per problemi sparsi ben condizionati.\n" );
+  print(
+    "    • Nota: Generalmente il metodo più veloce per problemi sparsi ben "
+    "condizionati.\n" );
 
   print( fg( color::white ) | emphasis::bold, "{:━^80}\n", "" );
 }
@@ -680,8 +756,10 @@ main()
 {
   print_solver_legend();
 
-  fmt::print( fg( fmt::color::lime_green ) | fmt::emphasis::bold, "\n{:━^80}\n",
-              " BENCHMARK TIKHONOV SOLVERS: QR vs KKT (dense) vs SP QR vs SP KKT " );
+  fmt::print(
+    fg( fmt::color::lime_green ) | fmt::emphasis::bold,
+    "\n{:━^80}\n",
+    " BENCHMARK TIKHONOV SOLVERS: QR vs KKT (dense) vs SP QR vs SP KKT " );
 
   // Test standard (D = I)
   fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold, "\n{:━^80}\n", " STANDARD TESTS (D = I) " );
@@ -694,8 +772,11 @@ main()
     for ( double lambda : lambda_values )
     {
       ++current_test;
-      fmt::print( fg( fmt::color::gray ) | fmt::emphasis::faint, "\n[{:2d}/{:2d}] ", static_cast<int>( current_test ),
-                  static_cast<int>( total_tests ) );
+      fmt::print(
+        fg( fmt::color::gray ) | fmt::emphasis::faint,
+        "\n[{:2d}/{:2d}] ",
+        static_cast<int>( current_test ),
+        static_cast<int>( total_tests ) );
       try
       {
         run_test_standard( sz.first, sz.second, lambda );
@@ -707,9 +788,12 @@ main()
     }
   }
 
-  // Test con matrice diagonale D (solo per lambda=0.1 per ridurre il numero di test)
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold, "\n{:━^80}\n",
-              " TESTS WITH DIAGONAL PENALTY MATRIX D (λ=0.1) " );
+  // Test con matrice diagonale D (solo per lambda=0.1 per ridurre il numero di
+  // test)
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "\n{:━^80}\n",
+    " TESTS WITH DIAGONAL PENALTY MATRIX D (λ=0.1) " );
 
   double lambda_diag      = 0.1;
   current_test            = 0;
@@ -718,16 +802,21 @@ main()
   for ( auto sz : sizes )
   {
     ++current_test;
-    fmt::print( fg( fmt::color::gray ) | fmt::emphasis::faint, "\n[DIAG {:2d}/{:2d}] ",
-                static_cast<int>( current_test ), static_cast<int>( total_diag_tests ) );
+    fmt::print(
+      fg( fmt::color::gray ) | fmt::emphasis::faint,
+      "\n[DIAG {:2d}/{:2d}] ",
+      static_cast<int>( current_test ),
+      static_cast<int>( total_diag_tests ) );
     try
     {
       run_test_with_diagonal( sz.first, sz.second, lambda_diag );
     }
     catch ( const std::exception & e )
     {
-      fmt::print( fg( fmt::color::red ) | fmt::emphasis::bold, "\nTest with diagonal failed with exception: {}\n",
-                  e.what() );
+      fmt::print(
+        fg( fmt::color::red ) | fmt::emphasis::bold,
+        "\nTest with diagonal failed with exception: {}\n",
+        e.what() );
     }
   }
 

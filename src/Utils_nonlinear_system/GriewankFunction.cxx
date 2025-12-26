@@ -16,18 +16,19 @@ class GriewankFunction : public NonlinearSystem
 {
 public:
   GriewankFunction( integer n )
-    : NonlinearSystem( "Griewank function",
-                       "@Article{Griewan:k1981,\n"
-                       "  author  = {Griewank, A. O.},\n"
-                       "  title   = {Generalized descent for global optimization},\n"
-                       "  journal = {Journal of Optimization Theory and Applications},\n"
-                       "  year    = {1981},\n"
-                       "  volume  = {34},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {11--39},\n"
-                       "  doi     = {10.1007/BF00933356}\n"
-                       "}\n",
-                       n )
+    : NonlinearSystem(
+        "Griewank function",
+        "@Article{Griewan:k1981,\n"
+        "  author  = {Griewank, A. O.},\n"
+        "  title   = {Generalized descent for global optimization},\n"
+        "  journal = {Journal of Optimization Theory and Applications},\n"
+        "  year    = {1981},\n"
+        "  volume  = {34},\n"
+        "  number  = {1},\n"
+        "  pages   = {11--39},\n"
+        "  doi     = {10.1007/BF00933356}\n"
+        "}\n",
+        n )
   {
     UTILS_ASSERT( n >= 2 && n <= 20, "GriewankFunction(n={}) must be in range [2..20]", n );
   }

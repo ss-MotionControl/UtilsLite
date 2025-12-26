@@ -83,8 +83,9 @@ namespace Utils
     IP_ADAPTER_INFO AdapterInfo[16];                   // Allocate information for up to 16 NICs
     DWORD           dwBufLen = sizeof( AdapterInfo );  // Save the memory size of buffer
 
-    DWORD dwStatus = GetAdaptersInfo( AdapterInfo,  // [out] buffer to receive data
-                                      &dwBufLen );  // [in] size of receive data buffer
+    DWORD dwStatus = GetAdaptersInfo(
+      AdapterInfo,  // [out] buffer to receive data
+      &dwBufLen );  // [in] size of receive data buffer
 
     assert( dwStatus == ERROR_SUCCESS );  // Verify return value is valid, no buffer overflow
 
@@ -174,8 +175,14 @@ namespace Utils
   {
     SYSTEMTIME st;
     GetSystemTime( &st );
-    return fmt::format( "date_{:04}-{:02}-{:02}_time_{:02}-{:02}-{:02}", st.wYear, st.wMonth, st.wDay, st.wHour,
-                        st.wMinute, st.wSecond );
+    return fmt::format(
+      "date_{:04}-{:02}-{:02}_time_{:02}-{:02}-{:02}",
+      st.wYear,
+      st.wMonth,
+      st.wDay,
+      st.wHour,
+      st.wMinute,
+      st.wSecond );
   }
 
   /*
@@ -186,8 +193,14 @@ namespace Utils
   {
     SYSTEMTIME st;
     GetSystemTime( &st );
-    return fmt::format( "{:02}-{:02}-{:02} {:04}-{:02}-{:02}", st.wHour, st.wMinute, st.wSecond, st.wYear, st.wMonth,
-                        st.wDay );
+    return fmt::format(
+      "{:02}-{:02}-{:02} {:04}-{:02}-{:02}",
+      st.wHour,
+      st.wMinute,
+      st.wSecond,
+      st.wYear,
+      st.wMonth,
+      st.wDay );
   }
 
   /*

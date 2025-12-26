@@ -16,20 +16,21 @@ class DiagonalFunctionMulQO : public NonlinearSystem
 {
 public:
   DiagonalFunctionMulQO( integer neq )
-    : NonlinearSystem( "Diagonal Functions Multiplied by quasi-orthogonal matrix",
-                       "@article{Gasparo:2000,\n"
-                       "  Author    = {Maria Grazia Gasparo},\n"
-                       "  Title     = {A nonmonotone hybrid method for nonlinear "
-                       "systems},\n"
-                       "  Journal   = {Optimization Methods and Software},\n"
-                       "  Number    = {2},\n"
-                       "  Pages     = {79--94},\n"
-                       "  Publisher = {Taylor & Francis},\n"
-                       "  Volume    = {13},\n"
-                       "  Year      = {2000},\n"
-                       "  Doi       = {10.1080/10556780008805776},\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Diagonal Functions Multiplied by quasi-orthogonal matrix",
+        "@article{Gasparo:2000,\n"
+        "  Author    = {Maria Grazia Gasparo},\n"
+        "  Title     = {A nonmonotone hybrid method for nonlinear "
+        "systems},\n"
+        "  Journal   = {Optimization Methods and Software},\n"
+        "  Number    = {2},\n"
+        "  Pages     = {79--94},\n"
+        "  Publisher = {Taylor & Francis},\n"
+        "  Volume    = {13},\n"
+        "  Year      = {2000},\n"
+        "  Doi       = {10.1080/10556780008805776},\n"
+        "}\n",
+        neq )
   {
     check_three( n, 3 );
   }

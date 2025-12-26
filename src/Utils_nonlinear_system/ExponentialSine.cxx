@@ -16,15 +16,16 @@ class ExponentialSine : public NonlinearSystem
 {
 public:
   ExponentialSine()
-    : NonlinearSystem( "Exponential sine",
-                       "@techreport{Nowak1991,\n"
-                       "  author = {U. Nowak and L. Weimann},\n"
-                       "  title  = {A Family of Newton Codes for Systems of "
-                       "Highly Nonlinear Equations},\n"
-                       "  number = {Technical Report TR-91-10},\n"
-                       "  year   = {1991}\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Exponential sine",
+        "@techreport{Nowak1991,\n"
+        "  author = {U. Nowak and L. Weimann},\n"
+        "  title  = {A Family of Newton Codes for Systems of "
+        "Highly Nonlinear Equations},\n"
+        "  number = {Technical Report TR-91-10},\n"
+        "  year   = {1991}\n"
+        "}\n",
+        2 )
   {
   }
 

@@ -16,15 +16,16 @@ class BurdenAndFaires : public NonlinearSystem
 {
 public:
   BurdenAndFaires()
-    : NonlinearSystem( "Burden and Faires example 1",
-                       "@book{burden2005,\n"
-                       "  author    = {Burden, R. and Faires, J.},\n"
-                       "  title     = {Numerical Analysis},\n"
-                       "  year      = {2005},\n"
-                       "  pages     = {597--640},\n"
-                       "  publisher = {Thomson Brooks/Cole}\n"
-                       "}\n",
-                       3 )
+    : NonlinearSystem(
+        "Burden and Faires example 1",
+        "@book{burden2005,\n"
+        "  author    = {Burden, R. and Faires, J.},\n"
+        "  title     = {Numerical Analysis},\n"
+        "  year      = {2005},\n"
+        "  pages     = {597--640},\n"
+        "  publisher = {Thomson Brooks/Cole}\n"
+        "}\n",
+        3 )
   {
   }
 

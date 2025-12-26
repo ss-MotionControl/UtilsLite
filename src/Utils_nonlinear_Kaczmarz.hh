@@ -319,13 +319,14 @@ namespace Utils
 
     //! Line search di Armijo per Kaczmarz
     real_type
-    armijo_line_search( NonlinearSystem & system,
-                        const Vector &    x,
-                        const Vector &    f,
-                        real_type         norm_f,
-                        integer           eq_idx,
-                        const Vector &    grad,
-                        real_type         lambda_init )
+    armijo_line_search(
+      NonlinearSystem & system,
+      const Vector &    x,
+      const Vector &    f,
+      real_type         norm_f,
+      integer           eq_idx,
+      const Vector &    grad,
+      real_type         lambda_init )
     {
       integer n = x.size();
 
@@ -459,16 +460,16 @@ namespace Utils
 
       if ( m_verbose_level > 0 )
       {
-        fmt::print( fmt::fg( fmt::color::light_blue ),
-                    "══════════════════════════════════════════════════════════"
-                    "═════════\n" );
+        fmt::print(
+          fmt::fg( fmt::color::light_blue ),
+          "═══════════════════════════════════════════════════════════════════\n" );
         fmt::print( fmt::fg( fmt::color::light_blue ), "Starting Nonlinear Kaczmarz\n" );
         fmt::print( "Initial residual: {:.6e}\n", initial_norm );
         fmt::print( "Strategy: {}\n", strategy_name( m_strategy ) );
         if ( m_use_line_search ) fmt::print( "Line search: Enabled\n" );
-        fmt::print( fmt::fg( fmt::color::light_blue ),
-                    "══════════════════════════════════════════════════════════"
-                    "═════════\n" );
+        fmt::print(
+          fmt::fg( fmt::color::light_blue ),
+          "═══════════════════════════════════════════════════════════════════\n" );
       }
 
       // Iterazioni principali
@@ -493,8 +494,11 @@ namespace Utils
         if ( m_verbose_level == 2 )
         {
           real_type reduction = initial_norm > EPSILON ? initial_norm / norm_f : 1.0;
-          fmt::print( fmt::fg( fmt::color::light_blue ), "[{:5}] ‖f‖ = {:.2e}",
-                      fmt::format( "{}", m_num_iterations + 1 ), norm_f );
+          fmt::print(
+            fmt::fg( fmt::color::light_blue ),
+            "[{:5}] ‖f‖ = {:.2e}",
+            fmt::format( "{}", m_num_iterations + 1 ),
+            norm_f );
           fmt::print( ", reduction = {:.3e}\n", reduction );
         }
 
@@ -511,8 +515,10 @@ namespace Utils
         {
           if ( m_verbose_level > 1 )
           {
-            fmt::print( fmt::fg( fmt::color::yellow ), "  ⚠ Near-zero gradient at iteration {}, skipping\n",
-                        m_num_iterations );
+            fmt::print(
+              fmt::fg( fmt::color::yellow ),
+              "  ⚠ Near-zero gradient at iteration {}, skipping\n",
+              m_num_iterations );
           }
           continue;
         }
@@ -569,8 +575,10 @@ namespace Utils
           {
             if ( m_verbose_level > 0 )
             {
-              fmt::print( fmt::fg( fmt::color::yellow ), "⚠ Stopping: insufficient progress (avg reduction: {:.4f})\n",
-                          avg_reduction );
+              fmt::print(
+                fmt::fg( fmt::color::yellow ),
+                "⚠ Stopping: insufficient progress (avg reduction: {:.4f})\n",
+                avg_reduction );
             }
             break;
           }
@@ -587,8 +595,10 @@ namespace Utils
         }
         else if ( m_num_function_evals >= m_max_function_evals )
         {
-          fmt::print( fmt::fg( fmt::color::yellow ), "⚠ Max function evaluations ({}) reached\n",
-                      m_max_function_evals );
+          fmt::print(
+            fmt::fg( fmt::color::yellow ),
+            "⚠ Max function evaluations ({}) reached\n",
+            m_max_function_evals );
         }
         print_summary( initial_norm, norm_f );
       }
@@ -639,15 +649,17 @@ namespace Utils
 
       if ( m_verbose_level > 0 )
       {
-        fmt::print( fmt::fg( fmt::color::light_blue ),
-                    "══════════════════════════════════════════════════════════"
-                    "═════════\n" );
+        fmt::print(
+          fmt::fg( fmt::color::light_blue ),
+          "══════════════════════════════════════════════════════════"
+          "═════════\n" );
         fmt::print( fmt::fg( fmt::color::light_blue ), "Starting Block Kaczmarz (block_size={})\n", block_size );
         fmt::print( "Initial residual: {:.6e}\n", initial_norm );
         fmt::print( "Strategy: {}\n", strategy_name( m_strategy ) );
-        fmt::print( fmt::fg( fmt::color::light_blue ),
-                    "══════════════════════════════════════════════════════════"
-                    "═════════\n" );
+        fmt::print(
+          fmt::fg( fmt::color::light_blue ),
+          "══════════════════════════════════════════════════════════"
+          "═════════\n" );
       }
 
       for ( m_num_iterations = 0; m_num_iterations < m_max_iterations; ++m_num_iterations )
@@ -669,8 +681,11 @@ namespace Utils
         if ( m_verbose_level == 2 )
         {
           real_type reduction = initial_norm > EPSILON ? initial_norm / norm_f : 1.0;
-          fmt::print( fmt::fg( fmt::color::light_blue ), "[{:5}] ‖f‖ = {:.2e}",
-                      fmt::format( "{}", m_num_iterations + 1 ), norm_f );
+          fmt::print(
+            fmt::fg( fmt::color::light_blue ),
+            "[{:5}] ‖f‖ = {:.2e}",
+            fmt::format( "{}", m_num_iterations + 1 ),
+            norm_f );
           fmt::print( ", reduction = {:.3e}\n", reduction );
         }
 
@@ -762,8 +777,11 @@ namespace Utils
           }
 
           // Ordina parzialmente per trovare i primi block_size elementi
-          std::partial_sort( sorted_indices.begin(), sorted_indices.begin() + block_size, sorted_indices.end(),
-                             [this]( integer i, integer j ) { return m_residuals[i] > m_residuals[j]; } );
+          std::partial_sort(
+            sorted_indices.begin(),
+            sorted_indices.begin() + block_size,
+            sorted_indices.end(),
+            [this]( integer i, integer j ) { return m_residuals[i] > m_residuals[j]; } );
 
           for ( integer i = 0; i < block_size; ++i ) { block_indices.push_back( sorted_indices[i] ); }
           break;
@@ -779,13 +797,15 @@ namespace Utils
     {
       if ( m_verbose_level == 0 ) return;
 
-      fmt::print( fmt::fg( fmt::color::light_blue ),
-                  "════════════════════════════════════════════════════════════"
-                  "═══════\n" );
+      fmt::print(
+        fmt::fg( fmt::color::light_blue ),
+        "════════════════════════════════════════════════════════════"
+        "═══════\n" );
       fmt::print( "Nonlinear Kaczmarz - Summary\n" );
-      fmt::print( fmt::fg( fmt::color::light_blue ),
-                  "════════════════════════════════════════════════════════════"
-                  "═══════\n" );
+      fmt::print(
+        fmt::fg( fmt::color::light_blue ),
+        "════════════════════════════════════════════════════════════"
+        "═══════\n" );
 
       if ( m_converged ) { fmt::print( fmt::fg( fmt::color::green ), "Status:             ✓ CONVERGED\n" ); }
       else
@@ -808,9 +828,10 @@ namespace Utils
         fmt::print( "Residual reduction: {:.3e} ({:.1f}%)\n", reduction, ( 1.0 - final_norm / initial_norm ) * 100.0 );
       }
 
-      fmt::print( fmt::fg( fmt::color::light_blue ),
-                  "════════════════════════════════════════════════════════════"
-                  "═══════\n\n" );
+      fmt::print(
+        fmt::fg( fmt::color::light_blue ),
+        "════════════════════════════════════════════════════════════"
+        "═══════\n\n" );
     }
 
     //! Stampa riepilogo per il metodo block
@@ -819,13 +840,15 @@ namespace Utils
     {
       if ( m_verbose_level == 0 ) return;
 
-      fmt::print( fmt::fg( fmt::color::light_blue ),
-                  "════════════════════════════════════════════════════════════"
-                  "═══════\n" );
+      fmt::print(
+        fmt::fg( fmt::color::light_blue ),
+        "════════════════════════════════════════════════════════════"
+        "═══════\n" );
       fmt::print( "Block Kaczmarz - Summary\n" );
-      fmt::print( fmt::fg( fmt::color::light_blue ),
-                  "════════════════════════════════════════════════════════════"
-                  "═══════\n" );
+      fmt::print(
+        fmt::fg( fmt::color::light_blue ),
+        "════════════════════════════════════════════════════════════"
+        "═══════\n" );
 
       if ( m_converged ) { fmt::print( fmt::fg( fmt::color::green ), "Status:             ✓ CONVERGED\n" ); }
       else
@@ -847,9 +870,10 @@ namespace Utils
         fmt::print( "Residual reduction: {:.3e} ({:.1f}%)\n", reduction, ( 1.0 - final_norm / initial_norm ) * 100.0 );
       }
 
-      fmt::print( fmt::fg( fmt::color::light_blue ),
-                  "════════════════════════════════════════════════════════════"
-                  "═══════\n\n" );
+      fmt::print(
+        fmt::fg( fmt::color::light_blue ),
+        "════════════════════════════════════════════════════════════"
+        "═══════\n\n" );
     }
   };
 

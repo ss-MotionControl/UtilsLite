@@ -24,7 +24,6 @@ using namespace std;
 using namespace autodiff;
 using namespace Utils;
 
-
 // The single-variable function for which derivatives are needed
 dual
 f( dual x )

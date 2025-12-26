@@ -80,7 +80,6 @@ do_test( int const n, int const sz )
   // c.print();
 }
 
-
 template <class TP>
 void
 test_TP( int const NN, int nt, int sz )
@@ -108,9 +107,14 @@ test_TP( int const NN, int nt, int sz )
   double t_delete{ tm.elapsed_mus() };
 
   fmt::print(
-      "[{:30}] result {} [LAUNCH (AVE): {:12.8} mus, WAIT {:12.8} mus, DELETE "
-      "{:12.8} mus] {:.8} mus\n",
-      TP::Name(), accumulator.load(), t_launch, t_wait, t_delete, t_launch * NN + t_wait );
+    "[{:30}] result {} [LAUNCH (AVE): {:12.8} mus, WAIT {:12.8} mus, DELETE "
+    "{:12.8} mus] {:.8} mus\n",
+    TP::Name(),
+    accumulator.load(),
+    t_launch,
+    t_wait,
+    t_delete,
+    t_launch * NN + t_wait );
 }
 
 int
@@ -132,8 +136,11 @@ main( int const argc, char * argv[] )
     tm.tic();
     for ( int i{ 0 }; i < NN; ++i ) do_test( i, sz );
     tm.toc();
-    fmt::print( "[No Thread]   result {} [{:.6} mus, AVE = {:.6} mus]\n", accumulator.load(), tm.elapsed_mus(),
-                tm.elapsed_mus() / NN );
+    fmt::print(
+      "[No Thread]   result {} [{:.6} mus, AVE = {:.6} mus]\n",
+      accumulator.load(),
+      tm.elapsed_mus(),
+      tm.elapsed_mus() / NN );
 
     fmt::print( "\n\nNN = {}\n\n", NN );
     test_TP<Utils::ThreadPool0>( NN, nt, sz );

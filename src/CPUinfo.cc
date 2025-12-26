@@ -41,7 +41,6 @@ http://www.codeproject.com/info/cpol10.aspx
 #include "Utils_CPU_info.hh"
 #include "Utils_fmt.hh"
 
-
 #ifdef __ARM_ARCH
 
 namespace Utils
@@ -51,18 +50,19 @@ namespace Utils
   using std::string;
 
   void
-  info( bool & m_bMMX,
-        bool & m_bMMXplus,
-        bool & m_bSSE,
-        bool & m_bSSE2,
-        bool & m_bSSE3,
-        bool & m_bSSSE3,
-        bool & m_bSSE41,
-        bool & m_bSSE42,
-        bool & m_bSSE4a,
-        bool & m_bSSE5,
-        bool & m_b3Dnow,
-        bool & m_b3DnowExt )
+  info(
+    bool & m_bMMX,
+    bool & m_bMMXplus,
+    bool & m_bSSE,
+    bool & m_bSSE2,
+    bool & m_bSSE3,
+    bool & m_bSSSE3,
+    bool & m_bSSE41,
+    bool & m_bSSE42,
+    bool & m_bSSE4a,
+    bool & m_bSSE5,
+    bool & m_b3Dnow,
+    bool & m_b3DnowExt )
   {
     m_bMMX      = false;
     m_bMMXplus  = false;
@@ -186,23 +186,23 @@ namespace Utils
 #if defined( __i386__ ) && defined( __PIC__ )
 /* %ebx may be the PIC register.  */
 #if __GNUC__ >= 3
-#define __cpuid( level, a, b, c, d )                                                                                   \
-  __asm__(                                                                                                             \
-      "xchg{l}\t{%%}ebx, %1\n\t"                                                                                       \
-      "cpuid\n\t"                                                                                                      \
-      "xchg{l}\t{%%}ebx, %1\n\t"                                                                                       \
-      : "=a"( a ), "=r"( b ), "=c"( c ), "=d"( d )                                                                     \
-      : "0"( level ) )
+#define __cpuid( level, a, b, c, d )             \
+  __asm__(                                       \
+    "xchg{l}\t{%%}ebx, %1\n\t"                   \
+    "cpuid\n\t"                                  \
+    "xchg{l}\t{%%}ebx, %1\n\t"                   \
+    : "=a"( a ), "=r"( b ), "=c"( c ), "=d"( d ) \
+    : "0"( level ) )
 #else
 /* Host GCCs older than 3.0 weren't supporting Intel asm syntax
    nor alternatives in i386 code.  */
-#define __cpuid( level, a, b, c, d )                                                                                   \
-  __asm__(                                                                                                             \
-      "xchgl\t%%ebx, %1\n\t"                                                                                           \
-      "cpuid\n\t"                                                                                                      \
-      "xchgl\t%%ebx, %1\n\t"                                                                                           \
-      : "=a"( a ), "=r"( b ), "=c"( c ), "=d"( d )                                                                     \
-      : "0"( level ) )
+#define __cpuid( level, a, b, c, d )             \
+  __asm__(                                       \
+    "xchgl\t%%ebx, %1\n\t"                       \
+    "cpuid\n\t"                                  \
+    "xchgl\t%%ebx, %1\n\t"                       \
+    : "=a"( a ), "=r"( b ), "=c"( c ), "=d"( d ) \
+    : "0"( level ) )
 #endif
 #else
 #define __cpuid( level, a, b, c, d ) __asm__( "cpuid\n\t" : "=a"( a ), "=b"( b ), "=c"( c ), "=d"( d ) : "0"( level ) )
@@ -233,18 +233,19 @@ namespace Utils
   }
 
   void
-  info( bool & m_bMMX,
-        bool & m_bMMXplus,
-        bool & m_bSSE,
-        bool & m_bSSE2,
-        bool & m_bSSE3,
-        bool & m_bSSSE3,
-        bool & m_bSSE41,
-        bool & m_bSSE42,
-        bool & m_bSSE4a,
-        bool & m_bSSE5,
-        bool & m_b3Dnow,
-        bool & m_b3DnowExt )
+  info(
+    bool & m_bMMX,
+    bool & m_bMMXplus,
+    bool & m_bSSE,
+    bool & m_bSSE2,
+    bool & m_bSSE3,
+    bool & m_bSSSE3,
+    bool & m_bSSE41,
+    bool & m_bSSE42,
+    bool & m_bSSE4a,
+    bool & m_bSSE5,
+    bool & m_b3Dnow,
+    bool & m_b3DnowExt )
   {
     m_bMMX      = false;
     m_bMMXplus  = false;
@@ -413,8 +414,11 @@ namespace Utils
     map<string, string>::iterator it         = vendorIdToName.find( vendorIDString );
     string                        vendorName = ( it == vendorIdToName.end() ) ? "Unknown" : it->second;
 
-    return fmt::format( "Max instruction ID: {} Vendor ID: {} Vendor name: {}", CPUInfo[0], vendorIDString,
-                        vendorName );
+    return fmt::format(
+      "Max instruction ID: {} Vendor ID: {} Vendor name: {}",
+      CPUInfo[0],
+      vendorIDString,
+      vendorName );
   }
 }  // namespace Utils
 

@@ -16,28 +16,29 @@ class Beale : public NonlinearSystem
 {
 public:
   Beale()
-    : NonlinearSystem( "Beale",
-                       "@book{beale1958,\n"
-                       "  title    = {On an Iterative Method for Finding a Local Minimum\n"
-                       "              of a Function of More Than One Variable},\n"
-                       "  author    = {Beale, E.M.L.},\n"
-                       "  series    = {Technical report\n"
-                       "               (Princeton University. Statistical Techniques "
-                       "Research Group)},\n"
-                       "  year      = {1958},\n"
-                       "  publisher = {Statistical Techniques Research Group,\n"
-                       "               Section of Mathematical Statistics,\n"
-                       "               Department of Mathematics, Princeton University}\n"
-                       "}\n\n"
-                       "@book{brent2013,\n"
-                       "  author    = {Brent, R.P.},\n"
-                       "  title     = {Algorithms for Minimization Without Derivatives},\n"
-                       "  isbn      = {9780486143682},\n"
-                       "  series    = {Dover Books on Mathematics},\n"
-                       "  year      = {2013},\n"
-                       "  publisher = {Dover Publications}\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Beale",
+        "@book{beale1958,\n"
+        "  title    = {On an Iterative Method for Finding a Local Minimum\n"
+        "              of a Function of More Than One Variable},\n"
+        "  author    = {Beale, E.M.L.},\n"
+        "  series    = {Technical report\n"
+        "               (Princeton University. Statistical Techniques "
+        "Research Group)},\n"
+        "  year      = {1958},\n"
+        "  publisher = {Statistical Techniques Research Group,\n"
+        "               Section of Mathematical Statistics,\n"
+        "               Department of Mathematics, Princeton University}\n"
+        "}\n\n"
+        "@book{brent2013,\n"
+        "  author    = {Brent, R.P.},\n"
+        "  title     = {Algorithms for Minimization Without Derivatives},\n"
+        "  isbn      = {9780486143682},\n"
+        "  series    = {Dover Books on Mathematics},\n"
+        "  year      = {2013},\n"
+        "  publisher = {Dover Publications}\n"
+        "}\n",
+        2 )
   {
   }
 

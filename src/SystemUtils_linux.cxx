@@ -114,18 +114,23 @@ namespace Utils
         /* Get the IP address*/
         UTILS_ASSERT0( ioctl( sck, SIOCGIFADDR, item ) >= 0, "get_MAC_address call of ioctl failed\n" );
 
-        UTILS_ASSERT0( inet_ntop( AF_INET, &( ( (struct sockaddr_in *) addr )->sin_addr ), ip, sizeof ip ) != nullptr,
-                       "get_MAC_address call of inet_ntop failed\n" );
+        UTILS_ASSERT0(
+          inet_ntop( AF_INET, &( ( (struct sockaddr_in *) addr )->sin_addr ), ip, sizeof ip ) != nullptr,
+          "get_MAC_address call of inet_ntop failed\n" );
 
         // Get the MAC address
         UTILS_ASSERT0( ioctl( sck, SIOCGIFHWADDR, item ) >= 0, "get_MAC_address call of ioctl failed\n" );
 
-        snprintf( macp, 19, "%02x:%02x:%02x:%02x:%02x:%02x", static_cast<unsigned char>( item->ifr_hwaddr.sa_data[0] ),
-                  static_cast<unsigned char>( item->ifr_hwaddr.sa_data[1] ),
-                  static_cast<unsigned char>( item->ifr_hwaddr.sa_data[2] ),
-                  static_cast<unsigned char>( item->ifr_hwaddr.sa_data[3] ),
-                  static_cast<unsigned char>( item->ifr_hwaddr.sa_data[4] ),
-                  static_cast<unsigned char>( item->ifr_hwaddr.sa_data[5] ) );
+        snprintf(
+          macp,
+          19,
+          "%02x:%02x:%02x:%02x:%02x:%02x",
+          static_cast<unsigned char>( item->ifr_hwaddr.sa_data[0] ),
+          static_cast<unsigned char>( item->ifr_hwaddr.sa_data[1] ),
+          static_cast<unsigned char>( item->ifr_hwaddr.sa_data[2] ),
+          static_cast<unsigned char>( item->ifr_hwaddr.sa_data[3] ),
+          static_cast<unsigned char>( item->ifr_hwaddr.sa_data[4] ),
+          static_cast<unsigned char>( item->ifr_hwaddr.sa_data[5] ) );
 
         mac_addr[item->ifr_name] = macp;
       }

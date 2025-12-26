@@ -140,8 +140,8 @@ namespace Utils
     std::vector<Worker> m_workers;
 
   public:
-    explicit ThreadPool1( unsigned nthread = std::max( unsigned( 1 ),
-                                                       unsigned( std::thread::hardware_concurrency() - 1 ) ) )
+    explicit ThreadPool1(
+      unsigned nthread = std::max( unsigned( 1 ), unsigned( std::thread::hardware_concurrency() - 1 ) ) )
       : ThreadPoolBase(), m_workers( size_t( nthread ) )
     {
     }

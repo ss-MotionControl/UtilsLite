@@ -16,19 +16,20 @@ class SIRtest : public NonlinearSystem
 {
 public:
   SIRtest( integer neq_in )
-    : NonlinearSystem( "Semi-implicit approach Example 5",
-                       "@article{Scheffel:2009,\n"
-                       "  author  = {Jan Scheffel and Cristian Håkansson},\n"
-                       "  title   = {Solution of systems of nonlinear equations\n"
-                       "              – a semi-implicit approach},\n"
-                       "  journal = {Applied Numerical Mathematics},\n"
-                       "  volume  = {59},\n"
-                       "  number  = {10},\n"
-                       "  pages   = {2430--2443},\n"
-                       "  year    = {2009},\n"
-                       "  doi     = {10.1016/j.apnum.2009.05.002},\n"
-                       "}\n",
-                       neq_in )
+    : NonlinearSystem(
+        "Semi-implicit approach Example 5",
+        "@article{Scheffel:2009,\n"
+        "  author  = {Jan Scheffel and Cristian Håkansson},\n"
+        "  title   = {Solution of systems of nonlinear equations\n"
+        "              – a semi-implicit approach},\n"
+        "  journal = {Applied Numerical Mathematics},\n"
+        "  volume  = {59},\n"
+        "  number  = {10},\n"
+        "  pages   = {2430--2443},\n"
+        "  year    = {2009},\n"
+        "  doi     = {10.1016/j.apnum.2009.05.002},\n"
+        "}\n",
+        neq_in )
   {
   }
 

@@ -18,20 +18,21 @@ class HanSunHan : public NonlinearSystem
 
 public:
   HanSunHan()
-    : NonlinearSystem( "Han-Sun-Han-SAMPAJO 2005 function test",
-                       "@article{Han:2005,\n"
-                       "  author  = {Qiaoming Han and Wenyu Sun and Jiye Han "
-                       "and Raimudo J. B. Sampaio},\n"
-                       "  title   = {An adaptive conic trust-region method "
-                       "for unconstrained optimization},\n"
-                       "  journal = {Optimization Methods and Software},\n"
-                       "  year    = {2005},\n"
-                       "  volume  = {20},\n"
-                       "  number  = {6},\n"
-                       "  pages   = {665--677},\n"
-                       "  doi = {10.1080/10556780410001697677}\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Han-Sun-Han-SAMPAJO 2005 function test",
+        "@article{Han:2005,\n"
+        "  author  = {Qiaoming Han and Wenyu Sun and Jiye Han "
+        "and Raimudo J. B. Sampaio},\n"
+        "  title   = {An adaptive conic trust-region method "
+        "for unconstrained optimization},\n"
+        "  journal = {Optimization Methods and Software},\n"
+        "  year    = {2005},\n"
+        "  volume  = {20},\n"
+        "  number  = {6},\n"
+        "  pages   = {665--677},\n"
+        "  doi = {10.1080/10556780410001697677}\n"
+        "}\n",
+        2 )
   {
     for ( integer i = 0; i < 99; ++i )
     {

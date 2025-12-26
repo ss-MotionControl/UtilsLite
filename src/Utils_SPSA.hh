@@ -410,14 +410,15 @@ namespace Utils
      * @return True if backtracking found a better point
      */
     bool
-    backtracking_line_search( Vector const &   x,
-                              Vector const &   g,
-                              Scalar           a_k,
-                              Scalar           f,
-                              Callback const & fun,
-                              Vector &         x_new,
-                              Scalar &         f_new,
-                              size_t &         eval_count ) const
+    backtracking_line_search(
+      Vector const &   x,
+      Vector const &   g,
+      Scalar           a_k,
+      Scalar           f,
+      Callback const & fun,
+      Vector &         x_new,
+      Scalar &         f_new,
+      size_t &         eval_count ) const
     {
       if ( !m_opts.use_backtracking ) return false;
 
@@ -518,9 +519,14 @@ namespace Utils
         if ( m_opts.verbose && ( k % m_opts.print_every ) == 0 )
         {
           fmt::print(
-              "[SPSA] iter={:<4} f={:<10.4} |g|={:<10.4} a_k={:<8.2} "
-              "c_k={:<8.2} improv_count={}\n",
-              k, f, gnorm, a_k, c_k, no_improvement_count );
+            "[SPSA] iter={:<4} f={:<10.4} |g|={:<10.4} a_k={:<8.2} "
+            "c_k={:<8.2} improv_count={}\n",
+            k,
+            f,
+            gnorm,
+            a_k,
+            c_k,
+            no_improvement_count );
         }
 
         // CONVERGENCE CRITERIA
@@ -575,9 +581,14 @@ namespace Utils
         {
           if ( m_opts.verbose )
           {
-            fmt::print( "[SPSA] Converged at iteration {}: {}\n",
-                        "Final f: {}, gradient norm: {}, function evaluations: {}\n", k, convergence_message, best_f,
-                        gnorm, f_eval_count );
+            fmt::print(
+              "[SPSA] Converged at iteration {}: {}\n",
+              "Final f: {}, gradient norm: {}, function evaluations: {}\n",
+              k,
+              convergence_message,
+              best_f,
+              gnorm,
+              f_eval_count );
           }
           return { best_f, gnorm, k, best_x, true, f_eval_count, convergence_message };
         }
@@ -627,9 +638,10 @@ namespace Utils
           if ( m_opts.verbose )
           {
             fmt::print(
-                "[SPSA] Restarting from best point at iteration {} (no "
-                "improvement for {} iterations)\n",
-                k, no_improvement_count );
+              "[SPSA] Restarting from best point at iteration {} (no "
+              "improvement for {} iterations)\n",
+              k,
+              no_improvement_count );
           }
           x                    = best_x;
           f                    = best_f;
@@ -647,11 +659,13 @@ namespace Utils
       if ( m_opts.verbose )
       {
         fmt::print(
-            "[SPSA] Optimization finished:\n"
-            "best f:               {}\n"
-            "function evaluations: {}\n"
-            "backtrack successes:  {}\n",
-            best_f, f_eval_count, total_backtrack_success );
+          "[SPSA] Optimization finished:\n"
+          "best f:               {}\n"
+          "function evaluations: {}\n"
+          "backtrack successes:  {}\n",
+          best_f,
+          f_eval_count,
+          total_backtrack_success );
       }
 
       return { best_f, 0, m_opts.max_iter, best_x, false, f_eval_count, "Maximum iterations reached" };

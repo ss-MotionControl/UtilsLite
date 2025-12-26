@@ -372,8 +372,9 @@ namespace Utils
     bool
     intersects( Box2D<Real> const & other ) const noexcept
     {
-      return !( m_Pmax.x() < other.m_Pmin.x() || m_Pmin.x() > other.m_Pmax.x() || m_Pmax.y() < other.m_Pmin.y() ||
-                m_Pmin.y() > other.m_Pmax.y() );
+      return !(
+        m_Pmax.x() < other.m_Pmin.x() || m_Pmin.x() > other.m_Pmax.x() || m_Pmax.y() < other.m_Pmin.y() ||
+        m_Pmin.y() > other.m_Pmax.y() );
     }
 
     //! Expand box to include point
@@ -1157,8 +1158,9 @@ namespace Utils
     Point2D<Real>
     centroid() const noexcept
     {
-      return Point2D<Real>( ( m_Pa.x() + m_Pb.x() + m_Pc.x() ) / Real( 3 ),
-                            ( m_Pa.y() + m_Pb.y() + m_Pc.y() ) / Real( 3 ) );
+      return Point2D<Real>(
+        ( m_Pa.x() + m_Pb.x() + m_Pc.x() ) / Real( 3 ),
+        ( m_Pa.y() + m_Pb.y() + m_Pc.y() ) / Real( 3 ) );
     }
 
     //! Compute perimeter

@@ -16,19 +16,20 @@ class InfRefluxFunction : public NonlinearSystem
 {
 public:
   InfRefluxFunction()
-    : NonlinearSystem( "InfReflux function",
-                       "@article{Paterson:1986,\n"
-                       "  author  = {W.R. Paterson},\n"
-                       "  title   = {A new method for solving a class of "
-                       "nonlinear equations},\n"
-                       "  journal = {Chemical Engineering Science},\n"
-                       "  year    = {1986},\n"
-                       "  volume  = {41},\n"
-                       "  number  = {7},\n"
-                       "  pages   = {1935--1937},\n"
-                       "  doi     = {10.1016/0009-2509(86)87077-4}\n"
-                       "}\n",
-                       1 )
+    : NonlinearSystem(
+        "InfReflux function",
+        "@article{Paterson:1986,\n"
+        "  author  = {W.R. Paterson},\n"
+        "  title   = {A new method for solving a class of "
+        "nonlinear equations},\n"
+        "  journal = {Chemical Engineering Science},\n"
+        "  year    = {1986},\n"
+        "  volume  = {41},\n"
+        "  number  = {7},\n"
+        "  pages   = {1935--1937},\n"
+        "  doi     = {10.1016/0009-2509(86)87077-4}\n"
+        "}\n",
+        1 )
   {
   }
 

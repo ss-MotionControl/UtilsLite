@@ -18,16 +18,17 @@ class BrownAndDennis : public NonlinearSystem
 
 public:
   BrownAndDennis()
-    : NonlinearSystem( "Brown and Dennis Function",
-                       "@book{brent2013,\n"
-                       "  author    = {Brent, R.P.},\n"
-                       "  title     = {Algorithms for Minimization Without Derivatives},\n"
-                       "  isbn      = {9780486143682},\n"
-                       "  series    = {Dover Books on Mathematics},\n"
-                       "  year      = {2013},\n"
-                       "  publisher = {Dover Publications}\n"
-                       "}\n",
-                       4 )
+    : NonlinearSystem(
+        "Brown and Dennis Function",
+        "@book{brent2013,\n"
+        "  author    = {Brent, R.P.},\n"
+        "  title     = {Algorithms for Minimization Without Derivatives},\n"
+        "  isbn      = {9780486143682},\n"
+        "  series    = {Dover Books on Mathematics},\n"
+        "  year      = {2013},\n"
+        "  publisher = {Dover Publications}\n"
+        "}\n",
+        4 )
   {
   }
 
@@ -136,7 +137,7 @@ public:
     auto & x0{ x_vec[0] };
     x0.resize( n );
     x0 << -11.59443990476216538261421860886232167047, 13.20363005120720382131746247754292259854,
-        -0.4034394881768595196441977938137369661485, 0.2367787744557362991471155778176237456915;
+      -0.4034394881768595196441977938137369661485, 0.2367787744557362991471155778176237456915;
   }
 
   virtual void

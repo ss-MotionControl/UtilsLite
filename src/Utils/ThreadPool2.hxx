@@ -103,8 +103,8 @@ namespace Utils
     //! \param nthread Number of threads to create (default: hardware
     //! concurrency - 1).
     //!
-    explicit ThreadPool2( unsigned nthread = std::max( unsigned( 1 ),
-                                                       unsigned( std::thread::hardware_concurrency() - 1 ) ) )
+    explicit ThreadPool2(
+      unsigned nthread = std::max( unsigned( 1 ), unsigned( std::thread::hardware_concurrency() - 1 ) ) )
     {
       m_threads.clear();
       m_threads.reserve( nthread );

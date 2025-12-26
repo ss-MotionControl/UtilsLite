@@ -46,10 +46,11 @@ namespace Utils
   void
   Console::change_level( int new_level )
   {
-    UTILS_ASSERT( new_level >= -1 && new_level <= 4,
-                  "Console::change_level( new_level = {})\n"
-                  "new_level must be in the range [-1,4]\n",
-                  new_level );
+    UTILS_ASSERT(
+      new_level >= -1 && new_level <= 4,
+      "Console::change_level( new_level = {})\n"
+      "new_level must be in the range [-1,4]\n",
+      new_level );
     m_level = new_level;
   }
 
@@ -205,7 +206,10 @@ namespace Utils
   Console::colors( unsigned const c, string_view const msg, int const msg_level ) const
   {
     lock_guard const          lock_access( m_message_mutex );
-    static constexpr rang::fg rvg_color[5]{ rang::fg::red, rang::fg::magenta, rang::fg::yellow, rang::fg::cyan,
+    static constexpr rang::fg rvg_color[5]{ rang::fg::red,
+                                            rang::fg::magenta,
+                                            rang::fg::yellow,
+                                            rang::fg::cyan,
                                             rang::fg::green };
     if ( msg_level <= m_level )
       ( *m_stream ) << rang::style::reset << rang::bg::reset << rvg_color[c % 5] << msg << rang::fg::reset;

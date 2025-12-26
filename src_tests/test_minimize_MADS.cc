@@ -96,11 +96,16 @@ print_line_search_statistics()
   {
     double success_rate   = ( stats.total_tests > 0 ) ? 100.0 * stats.successful_tests / stats.total_tests : 0.0;
     double avg_iterations = ( stats.successful_tests > 0 )
-                                ? static_cast<double>( stats.total_iterations ) / stats.successful_tests
-                                : 0.0;
+                              ? static_cast<double>( stats.total_iterations ) / stats.successful_tests
+                              : 0.0;
 
-    fmt::print( "{:<15} {:<8} {:<8} {:<12.1f} {:<10.1f}\n", stats.name, stats.total_tests, stats.successful_tests,
-                success_rate, avg_iterations );
+    fmt::print(
+      "{:<15} {:<8} {:<8} {:<12.1f} {:<10.1f}\n",
+      stats.name,
+      stats.total_tests,
+      stats.successful_tests,
+      success_rate,
+      avg_iterations );
   }
   fmt::print( "{:=^80}\n", "" );
 }
@@ -119,8 +124,13 @@ print_summary_table()
   {
     std::string status_str = result.converged ? "CONVERGED" : "MAX_ITER";
 
-    fmt::print( "{:<25} {:<8} {:<12} {:<15.6e} {:<10}\n", result.test_name, result.dimension, result.iterations,
-                result.final_f, status_str );
+    fmt::print(
+      "{:<25} {:<8} {:<12} {:<15.6e} {:<10}\n",
+      result.test_name,
+      result.dimension,
+      result.iterations,
+      result.final_f,
+      status_str );
   }
 
   fmt::print( "{:=^80}\n", "" );
@@ -167,9 +177,13 @@ test( Problem & prob, std::string const & problem_name )
   update_line_search_statistics( result );
 
   fmt::print(
-      "{}: initial f = {:.6e}, final f = {:.6e}, iterations = {}, evaluations "
-      "= {}\n",
-      problem_name, initial_f, result_data.final_f, result_data.iterations, result_data.f_eval_count );
+    "{}: initial f = {:.6e}, final f = {:.6e}, iterations = {}, evaluations "
+    "= {}\n",
+    problem_name,
+    initial_f,
+    result_data.final_f,
+    result_data.iterations,
+    result_data.f_eval_count );
 
   if ( x0.size() <= 10 ) { fmt::print( "Final solution: {}\n", result_data.final_x.transpose() ); }
 
@@ -183,7 +197,6 @@ int
 main()
 {
   fmt::print( "Esecuzione test MADS_minimizer...\n" );
-
 
   // Test originali
   Rosenbrock2D<Scalar> rosen;
@@ -237,7 +250,6 @@ main()
 
   RastriginN<Scalar, 15> Rastrigin;
   test( Rastrigin, "RastriginN15D" );
-
 
   print_summary_table();
   print_line_search_statistics();

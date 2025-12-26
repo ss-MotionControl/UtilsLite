@@ -16,32 +16,33 @@ class BoxAndBettsExponentialQuadraticSum : public NonlinearSystem
 {
 public:
   BoxAndBettsExponentialQuadraticSum()
-    : NonlinearSystem( "Box and Betts exponential quadratic sum",
-                       "@article{Box:1966,\n"
-                       "  author  = {Box, M. J.},\n"
-                       "  title   = {A Comparison of Several Current Optimization "
-                       "Methods,\n"
-                       "             and the use of Transformations in Constrained "
-                       "Problems},\n"
-                       "  journal = {The Computer Journal},\n"
-                       "  volume  = {9},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {67--77},\n"
-                       "  year    = {1966},\n"
-                       "  doi     = {10.1093/comjnl/9.1.67},\n"
-                       "}\n\n"
-                       "@article{More:1981,\n"
-                       "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
-                       "Hillstrom, Kenneth E.},\n"
-                       "  title   = {Testing Unconstrained Optimization Software},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1981},\n"
-                       "  volume  = {7},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {17--41},\n"
-                       "  doi     = {10.1145/355934.355936},\n"
-                       "}\n",
-                       3 )
+    : NonlinearSystem(
+        "Box and Betts exponential quadratic sum",
+        "@article{Box:1966,\n"
+        "  author  = {Box, M. J.},\n"
+        "  title   = {A Comparison of Several Current Optimization "
+        "Methods,\n"
+        "             and the use of Transformations in Constrained "
+        "Problems},\n"
+        "  journal = {The Computer Journal},\n"
+        "  volume  = {9},\n"
+        "  number  = {1},\n"
+        "  pages   = {67--77},\n"
+        "  year    = {1966},\n"
+        "  doi     = {10.1093/comjnl/9.1.67},\n"
+        "}\n\n"
+        "@article{More:1981,\n"
+        "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
+        "Hillstrom, Kenneth E.},\n"
+        "  title   = {Testing Unconstrained Optimization Software},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1981},\n"
+        "  volume  = {7},\n"
+        "  number  = {1},\n"
+        "  pages   = {17--41},\n"
+        "  doi     = {10.1145/355934.355936},\n"
+        "}\n",
+        3 )
   {
   }
 

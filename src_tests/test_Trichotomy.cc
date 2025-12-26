@@ -43,9 +43,14 @@ do_solve( real_type a, real_type b, FUN f )
   Trichotomy<real_type> solver;
   real_type             res = solver.eval2( a, b, f );
   ++ntest;
-  fmt::print( "#{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} f(x) = {}\n", ntest, solver.used_iter(),
-              solver.num_fun_eval(), solver.converged(), fmt::format( "{:.6}", res ),
-              fmt::format( "{:.3}", f( res ) ) );
+  fmt::print(
+    "#{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} f(x) = {}\n",
+    ntest,
+    solver.used_iter(),
+    solver.num_fun_eval(),
+    solver.converged(),
+    fmt::format( "{:.6}", res ),
+    fmt::format( "{:.3}", f( res ) ) );
 }
 
 template <typename FUN>
@@ -55,9 +60,14 @@ do_solve1( real_type x0, real_type h, FUN f )
   Trichotomy<real_type> solver;
   real_type             res = solver.search2( x0, h, f );
   ++ntest;
-  fmt::print( "#{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} f(x) = {}\n", ntest, solver.used_iter(),
-              solver.num_fun_eval(), solver.converged(), fmt::format( "{:.6}", res ),
-              fmt::format( "{:.3}", f( res ) ) );
+  fmt::print(
+    "#{:<3} iter = {:<3} #nfun = {:<3} converged={} x = {:12} f(x) = {}\n",
+    ntest,
+    solver.used_iter(),
+    solver.num_fun_eval(),
+    solver.converged(),
+    fmt::format( "{:.6}", res ),
+    fmt::format( "{:.3}", f( res ) ) );
 }
 
 int

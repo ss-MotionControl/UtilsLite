@@ -16,19 +16,20 @@ class BoggsFunction : public NonlinearSystem
 {
 public:
   BoggsFunction()
-    : NonlinearSystem( "Boggs function",
-                       "@article{Boggs:1971,\n"
-                       "  author = {Boggs, P.},\n"
-                       "  title  = {The Solution of Nonlinear Systems of Equations\n"
-                       "            by A-Stable Integration Techniques},\n"
-                       "  journal = {SIAM Journal on Numerical Analysis},\n"
-                       "  volume  = {8},\n"
-                       "  number  = {4},\n"
-                       "  pages   = {767--785},\n"
-                       "  year    = {1971},\n"
-                       "  doi     = {10.1137/0708071},\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Boggs function",
+        "@article{Boggs:1971,\n"
+        "  author = {Boggs, P.},\n"
+        "  title  = {The Solution of Nonlinear Systems of Equations\n"
+        "            by A-Stable Integration Techniques},\n"
+        "  journal = {SIAM Journal on Numerical Analysis},\n"
+        "  volume  = {8},\n"
+        "  number  = {4},\n"
+        "  pages   = {767--785},\n"
+        "  year    = {1971},\n"
+        "  doi     = {10.1137/0708071},\n"
+        "}\n",
+        2 )
   {
   }
 

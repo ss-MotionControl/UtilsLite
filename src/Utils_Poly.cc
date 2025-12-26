@@ -29,23 +29,23 @@
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-#define UTILS_POLY_INTANTIATE( REAL )                                                                                  \
-  namespace Utils                                                                                                      \
-  {                                                                                                                    \
-    template class Poly<REAL>;                                                                                         \
-    template class Sturm<REAL>;                                                                                        \
-                                                                                                                       \
-    template Poly<REAL> operator+( Poly<REAL> const & a, Poly<REAL> const & b );                                       \
-    template Poly<REAL> operator+( Poly<REAL> const & a, REAL b );                                                     \
-    template Poly<REAL> operator+( REAL a, Poly<REAL> const & b );                                                     \
-    template Poly<REAL> operator-( Poly<REAL> const & a, Poly<REAL> const & b );                                       \
-    template Poly<REAL> operator-( Poly<REAL> const & a, REAL b );                                                     \
-    template Poly<REAL> operator-( REAL a, Poly<REAL> const & b );                                                     \
-    template Poly<REAL> operator*( Poly<REAL> const & a, Poly<REAL> const & b );                                       \
-    template Poly<REAL> operator*( REAL a, Poly<REAL> const & b );                                                     \
-    template Poly<REAL> operator*( Poly<REAL> const & a, REAL b );                                                     \
-    template void       divide( Poly<REAL> const & p, Poly<REAL> const & q, Poly<REAL> & M, Poly<REAL> & R );          \
-    template void       GCD( Poly<REAL> const & p, Poly<REAL> const & q, Poly<REAL> & g, REAL epsi );                  \
+#define UTILS_POLY_INTANTIATE( REAL )                                                                         \
+  namespace Utils                                                                                             \
+  {                                                                                                           \
+    template class Poly<REAL>;                                                                                \
+    template class Sturm<REAL>;                                                                               \
+                                                                                                              \
+    template Poly<REAL> operator+( Poly<REAL> const & a, Poly<REAL> const & b );                              \
+    template Poly<REAL> operator+( Poly<REAL> const & a, REAL b );                                            \
+    template Poly<REAL> operator+( REAL a, Poly<REAL> const & b );                                            \
+    template Poly<REAL> operator-( Poly<REAL> const & a, Poly<REAL> const & b );                              \
+    template Poly<REAL> operator-( Poly<REAL> const & a, REAL b );                                            \
+    template Poly<REAL> operator-( REAL a, Poly<REAL> const & b );                                            \
+    template Poly<REAL> operator*( Poly<REAL> const & a, Poly<REAL> const & b );                              \
+    template Poly<REAL> operator*( REAL a, Poly<REAL> const & b );                                            \
+    template Poly<REAL> operator*( Poly<REAL> const & a, REAL b );                                            \
+    template void       divide( Poly<REAL> const & p, Poly<REAL> const & q, Poly<REAL> & M, Poly<REAL> & R ); \
+    template void       GCD( Poly<REAL> const & p, Poly<REAL> const & q, Poly<REAL> & g, REAL epsi );         \
   }
 
 namespace Utils
@@ -832,8 +832,10 @@ namespace Utils
       }
     }
     // sort intervals
-    std::sort( m_intervals.begin(), m_intervals.end(),
-               []( Interval const & Sa, Interval const & Sb ) { return Sa.a < Sb.a; } );
+    std::sort(
+      m_intervals.begin(),
+      m_intervals.end(),
+      []( Interval const & Sa, Interval const & Sb ) { return Sa.a < Sb.a; } );
     return static_cast<Integer>( m_intervals.size() );
   }
 

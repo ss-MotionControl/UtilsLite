@@ -17,38 +17,39 @@ class CombustionApplication : public NonlinearSystem
 public:
   // sum log(xi-2)^2+log(xi-10)^2 - prod( xi) ^(1/5)
   CombustionApplication()
-    : NonlinearSystem( "Combustion Application",
-                       "@article{Grosan:2012,\n"
-                       "  title   = {SOLVING POLYNOMIAL SYSTEMS USING A MODIFIED LINE "
-                       "SEARCH APPROACH},\n"
-                       "  author  = {Crina Grosan and Ajith Abraham and Vaclav Snasel},\n"
-                       "  journal = {International Journal of Innovative Computing, "
-                       "Information and Control},\n"
-                       "  volume  = {8},\n"
-                       "  number  = {1},\n"
-                       "  year    = {2012}\n"
-                       "}\n\n"
-                       "@book{Morgan:2009,\n"
-                       "  author = {Morgan, A.},\n"
-                       "  title  = {Solving Polynomial Systems Using Continuation for\n"
-                       "            Engineering and Scientific Problems},\n"
-                       "  publisher = {Society for Industrial and Applied Mathematics},\n"
-                       "  year = {2009},\n"
-                       "  doi = {10.1137/1.9780898719031},\n"
-                       "}\n\n"
-                       "@article{Hentenryck:1997,\n"
-                       "  author  = {Van Hentenryck, P. and McAllester, D. and Kapur, "
-                       "D.},\n"
-                       "  title   = {Solving Polynomial Systems Using a Branch and Prune "
-                       "Approach},\n"
-                       "  journal = {SIAM Journal on Numerical Analysis},\n"
-                       "  year    = {1997},\n"
-                       "  volume  = {34},\n"
-                       "  number  = {2},\n"
-                       "  pages   = {797-827},\n"
-                       "  doi     = {10.1137/S0036142995281504}\n"
-                       "}\n",
-                       10 )
+    : NonlinearSystem(
+        "Combustion Application",
+        "@article{Grosan:2012,\n"
+        "  title   = {SOLVING POLYNOMIAL SYSTEMS USING A MODIFIED LINE "
+        "SEARCH APPROACH},\n"
+        "  author  = {Crina Grosan and Ajith Abraham and Vaclav Snasel},\n"
+        "  journal = {International Journal of Innovative Computing, "
+        "Information and Control},\n"
+        "  volume  = {8},\n"
+        "  number  = {1},\n"
+        "  year    = {2012}\n"
+        "}\n\n"
+        "@book{Morgan:2009,\n"
+        "  author = {Morgan, A.},\n"
+        "  title  = {Solving Polynomial Systems Using Continuation for\n"
+        "            Engineering and Scientific Problems},\n"
+        "  publisher = {Society for Industrial and Applied Mathematics},\n"
+        "  year = {2009},\n"
+        "  doi = {10.1137/1.9780898719031},\n"
+        "}\n\n"
+        "@article{Hentenryck:1997,\n"
+        "  author  = {Van Hentenryck, P. and McAllester, D. and Kapur, "
+        "D.},\n"
+        "  title   = {Solving Polynomial Systems Using a Branch and Prune "
+        "Approach},\n"
+        "  journal = {SIAM Journal on Numerical Analysis},\n"
+        "  year    = {1997},\n"
+        "  volume  = {34},\n"
+        "  number  = {2},\n"
+        "  pages   = {797-827},\n"
+        "  doi     = {10.1137/S0036142995281504}\n"
+        "}\n",
+        10 )
   {
   }
 

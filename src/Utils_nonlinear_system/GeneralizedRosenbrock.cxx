@@ -18,31 +18,32 @@ class GeneralizedRosenbrock : public NonlinearSystem
 
 public:
   GeneralizedRosenbrock( integer neq )
-    : NonlinearSystem( "Generalized Rosenbrock function",
-                       "@article{Rosenbrock:1960,\n"
-                       "  author  = {Rosenbrock, H. H.},\n"
-                       "  title   = {An Automatic Method for Finding the Greatest\n"
-                       "             or Least Value of a Function},\n"
-                       "  journal = {The Computer Journal},\n"
-                       "  year    = {1960},\n"
-                       "  volume  = {3},\n"
-                       "  number  = {3},\n"
-                       "  pages   = {175--184},\n"
-                       "  doi = {10.1093/comjnl/3.3.175},\n"
-                       "}\n\n"
-                       "@article{More:1981,\n"
-                       "  author = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
-                       "Hillstrom, Kenneth E.},\n"
-                       "  title = {Testing Unconstrained Optimization Software},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  volume = {7},\n"
-                       "  number = {1},\n"
-                       "  month = mar,\n"
-                       "  year = {1981},\n"
-                       "  pages = {17--41},\n"
-                       "  doi = {10.1145/355934.355936},\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Generalized Rosenbrock function",
+        "@article{Rosenbrock:1960,\n"
+        "  author  = {Rosenbrock, H. H.},\n"
+        "  title   = {An Automatic Method for Finding the Greatest\n"
+        "             or Least Value of a Function},\n"
+        "  journal = {The Computer Journal},\n"
+        "  year    = {1960},\n"
+        "  volume  = {3},\n"
+        "  number  = {3},\n"
+        "  pages   = {175--184},\n"
+        "  doi = {10.1093/comjnl/3.3.175},\n"
+        "}\n\n"
+        "@article{More:1981,\n"
+        "  author = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
+        "Hillstrom, Kenneth E.},\n"
+        "  title = {Testing Unconstrained Optimization Software},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  volume = {7},\n"
+        "  number = {1},\n"
+        "  month = mar,\n"
+        "  year = {1981},\n"
+        "  pages = {17--41},\n"
+        "  doi = {10.1145/355934.355936},\n"
+        "}\n",
+        neq )
     , N( 100 )
   {
     check_even( n, 2 );

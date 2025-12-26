@@ -288,23 +288,25 @@ print_summary_table( const vector<TestResult> & results )
   // Dimensioni delle colonne
   constexpr int col_idx      = 5;   // # (indice)
   constexpr int col_status   = 8;   // Status (incluso spazio per i colori)
-  constexpr int col_neq      = 7;   // NEQ
+  constexpr int col_neq      = 4;   // NEQ
   constexpr int col_iter     = 5;   // Iter
-  constexpr int col_feval    = 8;   // F-Eval
-  constexpr int col_jeval    = 8;   // J-Eval
-  constexpr int col_residual = 12;  // Residual
+  constexpr int col_feval    = 5;   // F-Eval
+  constexpr int col_jeval    = 5;   // J-Eval
+  constexpr int col_residual = 10;  // Residual
   constexpr int col_time     = 10;  // Time(ms)
-  constexpr int col_name     = 45;  // Test Name
+  constexpr int col_name     = 35;  // Test Name
 
   // Calcola la larghezza totale della tabella
   constexpr int total_width = 2 + col_idx + 3 + col_status + 3 + col_neq + 3 + col_iter + 3 + col_feval + 3 +
                               col_jeval + 3 + col_residual + 3 + col_time + 3 + col_name + 2;
 
   // Intestazione della tabella
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold,
-              "\n\n"
-              "╔{:═^{}}╗\n",
-              " NEWTON METHOD TEST RESULTS ", total_width - 2 );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "\n\n"
+    "╔{:═^{}}╗\n",
+    " NEWTON METHOD TEST RESULTS ",
+    total_width - 2 );
 
   // Linea divisoria
   fmt::print( fg( fmt::color::cyan ), "╠{:═^{}}╣\n", "", total_width - 2 );
@@ -430,8 +432,11 @@ print_statistics( const vector<TestResult> & results )
 
   // Stampa delle statistiche
   fmt::print( "\n" );
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold, "╭{:─^{}}╮\n", " STATISTICAL SUMMARY ",
-              stat_total_width - 2 );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "╭{:─^{}}╮\n",
+    " STATISTICAL SUMMARY ",
+    stat_total_width - 2 );
   fmt::print( fg( fmt::color::cyan ), "├{:─^{}}┤\n", "", stat_total_width - 2 );
   fmt::print( fg( fmt::color::cyan ), "│" );
   fmt::print( "{:^{}}", "", stat_total_width - 2 );
@@ -446,15 +451,21 @@ print_statistics( const vector<TestResult> & results )
   // Converged Tests
   fmt::print( fg( fmt::color::cyan ), "│ " );
   fmt::print( "{:<{}}", "Converged Tests:", stat_col_label );
-  fmt::print( fg( fmt::color::green ), "{:>{}}",
-              fmt::format( "{} ({:.1f}%)", stats.converged_tests, stats.success_rate ), stat_col_value );
+  fmt::print(
+    fg( fmt::color::green ),
+    "{:>{}}",
+    fmt::format( "{} ({:.1f}%)", stats.converged_tests, stats.success_rate ),
+    stat_col_value );
   fmt::print( fg( fmt::color::cyan ), " │\n" );
 
   // Failed Tests
   fmt::print( fg( fmt::color::cyan ), "│ " );
   fmt::print( "{:<{}}", "Failed Tests:", stat_col_label );
-  fmt::print( fg( fmt::color::red ), "{:>{}}",
-              fmt::format( "{} ({:.1f}%)", stats.failed_tests, 100.0 - stats.success_rate ), stat_col_value );
+  fmt::print(
+    fg( fmt::color::red ),
+    "{:>{}}",
+    fmt::format( "{} ({:.1f}%)", stats.failed_tests, 100.0 - stats.success_rate ),
+    stat_col_value );
   fmt::print( fg( fmt::color::cyan ), " │\n" );
 
   // Linea divisoria
@@ -523,10 +534,12 @@ print_strategy_comparison_table( const vector<StrategyStatistics> & strategy_sta
                               3 + col_feval + 3 + col_jeval + 3 + col_time + 3 + col_rank + 2;
 
   // Intestazione della tabella
-  fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold,
-              "\n\n"
-              "╔{:═^{}}╗\n",
-              " STRATEGY COMPARISON ", total_width - 2 );
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "\n\n"
+    "╔{:═^{}}╗\n",
+    " STRATEGY COMPARISON ",
+    total_width - 2 );
 
   // Linea divisoria
   fmt::print( fg( fmt::color::cyan ), "╠{:═^{}}╣\n", "", total_width - 2 );
@@ -570,8 +583,10 @@ print_strategy_comparison_table( const vector<StrategyStatistics> & strategy_sta
   }
 
   // Ordina per score decrescente
-  sort( rankings.begin(), rankings.end(),
-        []( const pair<double, size_t> & a, const pair<double, size_t> & b ) { return a.first > b.first; } );
+  sort(
+    rankings.begin(),
+    rankings.end(),
+    []( const pair<double, size_t> & a, const pair<double, size_t> & b ) { return a.first > b.first; } );
 
   // Assegna rank
   vector<int> ranks( strategy_stats.size(), 0 );
@@ -715,8 +730,10 @@ print_strategy_comparison_table( const vector<StrategyStatistics> & strategy_sta
   fmt::print( fg( fmt::color::cyan ), "│\n" );
 
   fmt::print( fg( fmt::color::cyan ), "│" );
-  fmt::print( fg( fmt::color::white ), "{:^50}",
-              fmt::format( "Average Time per Test: {:.1f} ms", overall.avg_time_ms ) );
+  fmt::print(
+    fg( fmt::color::white ),
+    "{:^50}",
+    fmt::format( "Average Time per Test: {:.1f} ms", overall.avg_time_ms ) );
   fmt::print( fg( fmt::color::cyan ), "│\n" );
 
   fmt::print( fg( fmt::color::cyan ), "╰{:─^{}}╯\n", "", 50 );
@@ -724,11 +741,12 @@ print_strategy_comparison_table( const vector<StrategyStatistics> & strategy_sta
 
 // Funzione per eseguire i test per una specifica strategia
 StrategyStatistics
-run_tests_for_strategy( const string &                    strategy_name,
-                        NewtonDumped::DampingStrategy     strategy,
-                        const vector<NonlinearSystem *> & selected_tests,
-                        const Config &                    config,
-                        bool                              quiet_mode )
+run_tests_for_strategy(
+  const string &                    strategy_name,
+  NewtonDumped::DampingStrategy     strategy,
+  const vector<NonlinearSystem *> & selected_tests,
+  const Config &                    config,
+  bool                              quiet_mode )
 {
   StrategyStatistics stats;
   stats.strategy_name = strategy_name;
@@ -936,14 +954,17 @@ main( int argc, char * argv[] )
 
   // Basic options
   app.add_option( "-t,--tolerance", config.tolerance, "Stopping tolerance on ||f|| (default: 1e-8)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   app.add_option( "-i,--max-iterations", config.max_iterations, "Maximum Newton iterations (default: 100)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
-  app.add_option( "-d,--max-damping-iterations", config.max_damping_iterations,
-                  "Maximum damping iterations per step (default: 20)" )
-      ->check( CLI::PositiveNumber );
+  app
+    .add_option(
+      "-d,--max-damping-iterations",
+      config.max_damping_iterations,
+      "Maximum damping iterations per step (default: 20)" )
+    ->check( CLI::PositiveNumber );
 
   app.add_flag( "-v,--verbose", config.verbose, "Enable verbose output during solving" );
 
@@ -958,229 +979,234 @@ main( int argc, char * argv[] )
                                       "dogleg",    "wolfe",      "cubic",       "quadratic",
                                       "bank_rose", "griewank",   "filter",      "cubic_trust_region" };
   app.add_option( "-s,--strategy", config.strategy, "Damping strategy (default: deuflhard)" )
-      ->check( CLI::IsMember( strategy_choices ) )
-      ->ignore_case();
+    ->check( CLI::IsMember( strategy_choices ) )
+    ->ignore_case();
 
   // Deuflhard parameters
   auto deuflhard_group = app.add_option_group( "Deuflhard Parameters", "Parameters for Deuflhard damping strategy" );
   deuflhard_group->add_option( "--min-lambda", config.min_lambda, "Minimum allowed damping factor (default: 1e-6)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   // L2 parameters
   auto l2_group = app.add_option_group( "L2 Damping Parameters", "Parameters for L2 damping strategies" );
   l2_group->add_option( "--mu-init", config.mu_init, "Initial damping parameter mu (default: 0.01)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   l2_group->add_option( "--mu-min", config.mu_min, "Minimum mu value (default: 1e-8)" )->check( CLI::PositiveNumber );
 
   l2_group->add_option( "--mu-max", config.mu_max, "Maximum mu value (default: 1e4)" )->check( CLI::PositiveNumber );
 
   l2_group->add_option( "--mu-increase", config.mu_increase_factor, "Factor to increase mu (default: 10.0)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   l2_group->add_option( "--mu-decrease", config.mu_decrease_factor, "Factor to decrease mu (default: 0.1)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   // Adaptive L2 parameters
   auto adaptive_group = app.add_option_group( "Adaptive L2 Parameters", "Parameters for adaptive L2 strategy" );
   adaptive_group
-      ->add_option( "--trust-radius", config.trust_region_radius, "Initial trust region radius (default: 1.0)" )
-      ->check( CLI::PositiveNumber );
+    ->add_option( "--trust-radius", config.trust_region_radius, "Initial trust region radius (default: 1.0)" )
+    ->check( CLI::PositiveNumber );
 
   adaptive_group->add_option( "--trust-min", config.trust_region_min, "Minimum trust region radius (default: 1e-6)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   adaptive_group->add_option( "--trust-max", config.trust_region_max, "Maximum trust region radius (default: 100.0)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   adaptive_group->add_option( "--accept-good", config.acceptance_ratio_good, "Good acceptance ratio (default: 0.75)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   adaptive_group->add_option( "--accept-bad", config.acceptance_ratio_bad, "Bad acceptance ratio (default: 0.25)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   // Dogleg parameters
   auto dogleg_group = app.add_option_group( "Dogleg Parameters", "Parameters for Dogleg trust region strategy" );
   dogleg_group->add_option( "--dogleg-delta", config.dogleg_delta, "Initial trust region radius (default: 1.0)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   dogleg_group
-      ->add_option( "--dogleg-delta-min", config.dogleg_delta_min, "Minimum trust region radius (default: 1e-6)" )
-      ->check( CLI::PositiveNumber );
+    ->add_option( "--dogleg-delta-min", config.dogleg_delta_min, "Minimum trust region radius (default: 1e-6)" )
+    ->check( CLI::PositiveNumber );
 
   dogleg_group
-      ->add_option( "--dogleg-delta-max", config.dogleg_delta_max, "Maximum trust region radius (default: 100.0)" )
-      ->check( CLI::PositiveNumber );
+    ->add_option( "--dogleg-delta-max", config.dogleg_delta_max, "Maximum trust region radius (default: 100.0)" )
+    ->check( CLI::PositiveNumber );
 
   dogleg_group->add_option( "--dogleg-eta1", config.dogleg_eta1, "Shrink threshold (default: 0.1)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   dogleg_group->add_option( "--dogleg-eta2", config.dogleg_eta2, "Expand threshold (default: 0.75)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   dogleg_group->add_option( "--dogleg-gamma1", config.dogleg_gamma1, "Shrink factor (default: 0.5)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   dogleg_group->add_option( "--dogleg-gamma2", config.dogleg_gamma2, "Expand factor (default: 2.0)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   // Wolfe parameters
-  auto wolfe_group = app.add_option_group( "Wolfe Line Search Parameters",
-                                           "Parameters for Wolfe line search strategy" );
+  auto wolfe_group = app.add_option_group(
+    "Wolfe Line Search Parameters",
+    "Parameters for Wolfe line search strategy" );
   wolfe_group->add_option( "--wolfe-c1", config.wolfe_c1, "Armijo constant (default: 1e-4)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   wolfe_group->add_option( "--wolfe-c2", config.wolfe_c2, "Curvature constant (default: 0.9)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   wolfe_group->add_option( "--wolfe-alpha-init", config.wolfe_alpha_init, "Initial step length (default: 1.0)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   wolfe_group->add_option( "--wolfe-alpha-min", config.wolfe_alpha_min, "Minimum step length (default: 1e-10)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   wolfe_group->add_option( "--wolfe-alpha-max", config.wolfe_alpha_max, "Maximum step length (default: 1e10)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   wolfe_group->add_option( "--wolfe-rho", config.wolfe_rho, "Backtracking factor (default: 0.5)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   // Cubic regularization parameters
-  auto cubic_group = app.add_option_group( "Cubic Regularization Parameters",
-                                           "Parameters for adaptive cubic regularization" );
+  auto cubic_group = app.add_option_group(
+    "Cubic Regularization Parameters",
+    "Parameters for adaptive cubic regularization" );
   cubic_group->add_option( "--cubic-sigma", config.cubic_sigma, "Initial regularization parameter (default: 0.1)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   cubic_group->add_option( "--cubic-sigma-min", config.cubic_sigma_min, "Minimum sigma (default: 1e-8)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   cubic_group->add_option( "--cubic-sigma-max", config.cubic_sigma_max, "Maximum sigma (default: 1e8)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   cubic_group->add_option( "--cubic-gamma-decrease", config.cubic_gamma_decrease, "Decrease factor (default: 0.5)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   cubic_group->add_option( "--cubic-gamma-increase", config.cubic_gamma_increase, "Increase factor (default: 2.0)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   cubic_group->add_option( "--cubic-eta1", config.cubic_eta1, "Successful step threshold (default: 0.1)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   cubic_group->add_option( "--cubic-eta2", config.cubic_eta2, "Very successful step threshold (default: 0.75)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   // Quadratic backtracking parameters
-  auto quadratic_group = app.add_option_group( "Quadratic Backtracking Parameters",
-                                               "Parameters for quadratic/cubic backtracking" );
+  auto quadratic_group = app.add_option_group(
+    "Quadratic Backtracking Parameters",
+    "Parameters for quadratic/cubic backtracking" );
   quadratic_group->add_option( "--quadratic-c1", config.quadratic_c1, "Armijo constant (default: 1e-4)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   quadratic_group->add_option( "--quadratic-c2", config.quadratic_c2, "Backtracking factor (default: 0.5)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   quadratic_group
-      ->add_option( "--quadratic-max-interp", config.quadratic_max_interp,
-                    "Maximum interpolation attempts (default: 5)" )
-      ->check( CLI::PositiveNumber );
+    ->add_option( "--quadratic-max-interp", config.quadratic_max_interp, "Maximum interpolation attempts (default: 5)" )
+    ->check( CLI::PositiveNumber );
 
   // Bank & Rose parameters (NUOVO GRUPPO)
   auto bank_rose_group = app.add_option_group( "Bank & Rose Parameters", "Parameters for Bank & Rose (1981) strategy" );
   bank_rose_group->add_option( "--bank-rose-alpha", config.bank_rose_alpha, "Damping reduction factor (default: 0.5)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   bank_rose_group
-      ->add_option( "--bank-rose-beta", config.bank_rose_beta, "Sufficient decrease constant (default: 0.1)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->add_option( "--bank-rose-beta", config.bank_rose_beta, "Sufficient decrease constant (default: 0.1)" )
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   bank_rose_group->add_option( "--bank-rose-gamma", config.bank_rose_gamma, "Contraction factor (default: 0.9)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   bank_rose_group
-      ->add_option( "--bank-rose-theta-min", config.bank_rose_theta_min, "Minimum damping factor (default: 1e-4)" )
-      ->check( CLI::PositiveNumber );
+    ->add_option( "--bank-rose-theta-min", config.bank_rose_theta_min, "Minimum damping factor (default: 1e-4)" )
+    ->check( CLI::PositiveNumber );
 
   bank_rose_group
-      ->add_option( "--bank-rose-theta-max", config.bank_rose_theta_max, "Maximum damping factor (default: 1.0)" )
-      ->check( CLI::PositiveNumber );
+    ->add_option( "--bank-rose-theta-max", config.bank_rose_theta_max, "Maximum damping factor (default: 1.0)" )
+    ->check( CLI::PositiveNumber );
 
   // Griewank parameters (NUOVO GRUPPO)
   auto griewank_group = app.add_option_group( "Griewank Parameters", "Parameters for Griewank (1980) strategy" );
   griewank_group->add_option( "--griewank-eta", config.griewank_eta, "Acceptance threshold (default: 0.1)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   griewank_group->add_option( "--griewank-omega", config.griewank_omega, "Reduction factor (default: 0.5)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   griewank_group->add_option( "--griewank-tau", config.griewank_tau, "Minimum step size (default: 1e-4)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   griewank_group->add_option( "--griewank-zeta", config.griewank_zeta, "Contraction factor (default: 0.9)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   // Filter method parameters (NUOVO GRUPPO)
   auto filter_group = app.add_option_group( "Filter Method Parameters", "Parameters for Filter Methods strategy" );
   filter_group
-      ->add_option( "--filter-theta-min", config.filter_theta_min, "Minimum constraint violation (default: 1e-6)" )
-      ->check( CLI::PositiveNumber );
+    ->add_option( "--filter-theta-min", config.filter_theta_min, "Minimum constraint violation (default: 1e-6)" )
+    ->check( CLI::PositiveNumber );
 
   filter_group
-      ->add_option( "--filter-gamma-theta", config.filter_gamma_theta, "Filter parameter for theta (default: 0.01)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->add_option( "--filter-gamma-theta", config.filter_gamma_theta, "Filter parameter for theta (default: 0.01)" )
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   filter_group->add_option( "--filter-gamma-f", config.filter_gamma_f, "Filter parameter for f (default: 0.01)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   filter_group->add_option( "--filter-alpha", config.filter_alpha, "Armijo constant (default: 0.5)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   filter_group->add_option( "--filter-beta", config.filter_beta, "Backtracking factor (default: 0.8)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   // Cubic trust region parameters (NUOVO GRUPPO)
-  auto ctr_group = app.add_option_group( "Cubic Trust Region Parameters",
-                                         "Parameters for Cubic Trust Region strategy" );
+  auto ctr_group = app.add_option_group(
+    "Cubic Trust Region Parameters",
+    "Parameters for Cubic Trust Region strategy" );
   ctr_group->add_option( "--ctr-delta", config.ctr_delta, "Initial trust region radius (default: 1.0)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   ctr_group->add_option( "--ctr-delta-min", config.ctr_delta_min, "Minimum trust region radius (default: 1e-6)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   ctr_group->add_option( "--ctr-delta-max", config.ctr_delta_max, "Maximum trust region radius (default: 100.0)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   ctr_group->add_option( "--ctr-eta1", config.ctr_eta1, "Unsuccessful step threshold (default: 0.1)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   ctr_group->add_option( "--ctr-eta2", config.ctr_eta2, "Very successful step threshold (default: 0.75)" )
-      ->check( CLI::Range( 0.0, 1.0 ) );
+    ->check( CLI::Range( 0.0, 1.0 ) );
 
   ctr_group->add_option( "--ctr-gamma1", config.ctr_gamma1, "Shrink factor (default: 0.5)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   ctr_group->add_option( "--ctr-gamma2", config.ctr_gamma2, "Expand factor (default: 2.0)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   ctr_group->add_option( "--ctr-sigma", config.ctr_sigma, "Cubic regularization parameter (default: 0.1)" )
-      ->check( CLI::PositiveNumber );
+    ->check( CLI::PositiveNumber );
 
   // Test selection options
   auto test_group = app.add_option_group( "Test Selection", "Control which tests to run" );
 
   test_group
-      ->add_option( "--test-indices", config.test_indices, "Run specific test indices (comma-separated or range)" )
-      ->expected( -1 );
+    ->add_option( "--test-indices", config.test_indices, "Run specific test indices (comma-separated or range)" )
+    ->expected( -1 );
 
   test_group->add_option( "--test-name", config.test_name_filter, "Filter tests by name (substring match)" );
 
   test_group->add_option( "--max-tests", config.max_tests, "Maximum number of tests to run (0 = all)" )
-      ->check( CLI::NonNegativeNumber );
+    ->check( CLI::NonNegativeNumber );
 
-  test_group->add_flag( "--single-initial-point", config.run_single_initial_point,
-                        "Run only the first initial point for each test" );
+  test_group->add_flag(
+    "--single-initial-point",
+    config.run_single_initial_point,
+    "Run only the first initial point for each test" );
 
   test_group
-      ->add_option( "--initial-point", config.initial_point_index, "Specific initial point index to use (default: 0)" )
-      ->check( CLI::NonNegativeNumber );
+    ->add_option( "--initial-point", config.initial_point_index, "Specific initial point index to use (default: 0)" )
+    ->check( CLI::NonNegativeNumber );
 
   // Parse command line
   try
@@ -1198,15 +1224,16 @@ main( int argc, char * argv[] )
   // Banner (solo se non in modalità quiet)
   if ( !config.quiet )
   {
-    fmt::print( fg( fmt::color::cyan ) | fmt::emphasis::bold,
-                "\n\n"
-                "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-                "━━━━━━━━━━━━━┓\n"
-                "┃         NEWTON METHOD WITH DAMPING - COMPREHENSIVE TEST "
-                "SUITE            ┃\n"
-                "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-                "━━━━━━━━━━━━━┛\n"
-                "\n" );
+    fmt::print(
+      fg( fmt::color::cyan ) | fmt::emphasis::bold,
+      "\n\n"
+      "┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      "━━━━━━━━━━━━━┓\n"
+      "┃         NEWTON METHOD WITH DAMPING - COMPREHENSIVE TEST "
+      "SUITE            ┃\n"
+      "┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+      "━━━━━━━━━━━━━┛\n"
+      "\n" );
 
     fmt::print( fg( fmt::color::yellow ), "Total number of test problems: " );
     fmt::print( fg( fmt::color::white ), "{}\n", nonlinear_system_tests.size() );
@@ -1319,8 +1346,12 @@ main( int argc, char * argv[] )
       }
 
       // Esegui i test per questa strategia
-      StrategyStatistics stats = run_tests_for_strategy( strat_name, strategy, selected_tests, config,
-                                                         true  // true = quiet mode per singola strategia
+      StrategyStatistics stats = run_tests_for_strategy(
+        strat_name,
+        strategy,
+        selected_tests,
+        config,
+        true  // true = quiet mode per singola strategia
       );
 
       all_strategy_stats.push_back( stats );
@@ -1330,8 +1361,13 @@ main( int argc, char * argv[] )
         if ( stats.converged_tests > 0 )
         {
           fmt::print( fg( fmt::color::green ), "✓ " );
-          fmt::print( fg( fmt::color::white ), "({}/{}, {:.1f}% success, avg {:.1f} ms)\n", stats.converged_tests,
-                      stats.total_tests, stats.success_rate, stats.avg_time_ms );
+          fmt::print(
+            fg( fmt::color::white ),
+            "({}/{}, {:.1f}% success, avg {:.1f} ms)\n",
+            stats.converged_tests,
+            stats.total_tests,
+            stats.success_rate,
+            stats.avg_time_ms );
         }
         else
         {
@@ -1377,8 +1413,8 @@ main( int argc, char * argv[] )
     if ( it != damping_strategy_map.end() )
     {
       // Esegui i test per la strategia selezionata
-      StrategyStatistics stats = run_tests_for_strategy( config.strategy, it->second, selected_tests, config,
-                                                         config.quiet );
+      StrategyStatistics stats =
+        run_tests_for_strategy( config.strategy, it->second, selected_tests, config, config.quiet );
 
       // Output dei risultati
       ofstream out_file;
@@ -1400,8 +1436,11 @@ main( int argc, char * argv[] )
         print_statistics( stats.detailed_results );
 
         // Stampa un riepilogo finale
-        auto msg = fmt::format( " FINAL SUMMARY: {}/{} tests converged ({:.1f}%) ", stats.converged_tests,
-                                stats.total_tests, stats.success_rate );
+        auto msg = fmt::format(
+          " FINAL SUMMARY: {}/{} tests converged ({:.1f}%) ",
+          stats.converged_tests,
+          stats.total_tests,
+          stats.success_rate );
 
         fmt::print( fg( fmt::color::cyan ), "\n╭{:─^{}}╮\n", "", 58 );
         fmt::print( fg( fmt::color::cyan ), "│" );

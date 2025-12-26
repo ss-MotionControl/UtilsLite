@@ -21,15 +21,16 @@ class Semiconductor2D : public NonlinearSystem
 
 public:
   Semiconductor2D()
-    : NonlinearSystem( "2D semiconductor",
-                       "@techreport{Nowak:1991,\n"
-                       "  author = {U. Nowak and L. Weimann},\n"
-                       "  title  = {A Family of Newton Co des for Systems of Highly "
-                       "Nonlinear Equations},\n"
-                       "  number = {Technical Report TR-91-10 (December 1991)},\n"
-                       "  year   = {1991}\n"
-                       "}\n",
-                       6 )
+    : NonlinearSystem(
+        "2D semiconductor",
+        "@techreport{Nowak:1991,\n"
+        "  author = {U. Nowak and L. Weimann},\n"
+        "  title  = {A Family of Newton Co des for Systems of Highly "
+        "Nonlinear Equations},\n"
+        "  number = {Technical Report TR-91-10 (December 1991)},\n"
+        "  year   = {1991}\n"
+        "}\n",
+        6 )
     , alpha( 38.683 )
     , ni( 1.22E10 )
     , V( 100 )

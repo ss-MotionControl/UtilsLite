@@ -16,12 +16,13 @@ class McCormicFunction : public NonlinearSystem
 {
 public:
   McCormicFunction()
-    : NonlinearSystem( "McCormic function",
-                       "MVF - Multivariate Test Functions Library in C for Unconstrained "
-                       "Global Optimization\n"
-                       "Ernesto P. Adorio Department of Mathematics U.P. Diliman\n"
-                       "ernesto.adorio@gmail.com eadorio@yahoo.com, 2005\n",
-                       2 )
+    : NonlinearSystem(
+        "McCormic function",
+        "MVF - Multivariate Test Functions Library in C for Unconstrained "
+        "Global Optimization\n"
+        "Ernesto P. Adorio Department of Mathematics U.P. Diliman\n"
+        "ernesto.adorio@gmail.com eadorio@yahoo.com, 2005\n",
+        2 )
   {
   }
 

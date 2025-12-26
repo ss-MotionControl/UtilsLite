@@ -21,32 +21,35 @@ class ChebyquadFunction : public NonlinearSystem
 public:
   // Only the values N = 1, 2, 3, 4, 5, 6, 7 and 9 may be used.
   ChebyquadFunction( integer dim )
-    : NonlinearSystem( "Chebyquad function",
-                       "@article {Fletcher:1965,\n"
-                       "  author  = {Fletcher, R.},\n"
-                       "  title   = {Function minimization without evaluating derivatives "
-                       "-- {A} review},\n"
-                       "  journal = {The Computer Journal},\n"
-                       "  year    = {1965},\n"
-                       "  volume  = {8},\n"
-                       "  pages   = {33--41},\n"
-                       "  doi     = {10.1093/comjnl/8.1.33},\n"
-                       "}\n\n"
-                       "@article{More:1981,\n"
-                       "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
-                       "Hillstrom, Kenneth E.},\n"
-                       "  title   = {Testing Unconstrained Optimization Software},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1981},\n"
-                       "  volume  = {7},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {17--41},\n"
-                       "  doi     = {10.1145/355934.355936},\n"
-                       "}\n",
-                       dim )
+    : NonlinearSystem(
+        "Chebyquad function",
+        "@article {Fletcher:1965,\n"
+        "  author  = {Fletcher, R.},\n"
+        "  title   = {Function minimization without evaluating derivatives "
+        "-- {A} review},\n"
+        "  journal = {The Computer Journal},\n"
+        "  year    = {1965},\n"
+        "  volume  = {8},\n"
+        "  pages   = {33--41},\n"
+        "  doi     = {10.1093/comjnl/8.1.33},\n"
+        "}\n\n"
+        "@article{More:1981,\n"
+        "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
+        "Hillstrom, Kenneth E.},\n"
+        "  title   = {Testing Unconstrained Optimization Software},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1981},\n"
+        "  volume  = {7},\n"
+        "  number  = {1},\n"
+        "  pages   = {17--41},\n"
+        "  doi     = {10.1145/355934.355936},\n"
+        "}\n",
+        dim )
   {
-    UTILS_ASSERT( dim > 0 && dim < 10 && dim != 8, "ChebyquadFunction:: dimension n = {} must be on [1,2,3,4,5,6,7,9]",
-                  dim );
+    UTILS_ASSERT(
+      dim > 0 && dim < 10 && dim != 8,
+      "ChebyquadFunction:: dimension n = {} must be on [1,2,3,4,5,6,7,9]",
+      dim );
 
     // Precompute integrals of shifted Chebyshev polynomials T_i^*(x) =
     // T_i(2x-1) ∫[0,1] T_i^*(x) dx = 0 for odd i, 1/(1-i^2) for even i (i > 0)
@@ -182,25 +185,25 @@ public:
         break;
       case 4:
         x << 0.10267276385411693852223453573602, 0.40620376295746005006993032654600, 0.59379623704253994993006967345400,
-            0.89732723614588306147776546426398;
+          0.89732723614588306147776546426398;
         break;
       case 5:
         x << 0.08375125649950906205370820817751, 0.31272929522320946720697781214099, 0.50000000000000000000000000000000,
-            0.68727070477679053279302218785901, 0.91624874350049093794629179182249;
+          0.68727070477679053279302218785901, 0.91624874350049093794629179182249;
         break;
       case 6:
         x << 0.06687659094608970430820097297488, 0.28874067311944423544072680139424, 0.36668229924164763983423273308575,
-            0.63331770075835236016576726691425, 0.71125932688055576455927319860576, 0.93312340905391029569179902702512;
+          0.63331770075835236016576726691425, 0.71125932688055576455927319860576, 0.93312340905391029569179902702512;
         break;
       case 7:
         x << 0.05806914962097548214788795460948, 0.23517161235742159430747623331967, 0.33804409474004618124016345382358,
-            0.50000000000000000000000000000000, 0.66195590525995381875983654617642, 0.76482838764257840569252376668033,
-            0.94193085037902451785211204539052;
+          0.50000000000000000000000000000000, 0.66195590525995381875983654617642, 0.76482838764257840569252376668033,
+          0.94193085037902451785211204539052;
         break;
       case 9:
         x << 0.04420534613578276316752571608378, 0.19949067230988096428593603393306, 0.23561910847106000336990918932266,
-            0.41604690789259802846598405087299, 0.50000000000000000000000000000000, 0.58395309210740197153401594912701,
-            0.76438089152893999663009081067734, 0.80050932769011903571406396606694, 0.95579465386421723683247428391622;
+          0.41604690789259802846598405087299, 0.50000000000000000000000000000000, 0.58395309210740197153401594912701,
+          0.76438089152893999663009081067734, 0.80050932769011903571406396606694, 0.95579465386421723683247428391622;
         break;
       default:
         // Per n=8 non esiste soluzione standard - usa punti equispaziati

@@ -49,18 +49,19 @@ namespace Utils
    * \param[out] b3Dnow    booelan, support 3Dnow instruction set
    * \param[out] b3DnowExt booelan, support 3DnowExt instruction set
    */
-  void info( bool & bMMX,
-             bool & bMMXplus,
-             bool & bSSE,
-             bool & bSSE2,
-             bool & bSSE3,
-             bool & bSSSE3,
-             bool & bSSE41,
-             bool & bSSE42,
-             bool & bSSE4a,
-             bool & bSSE5,
-             bool & b3Dnow,
-             bool & b3DnowExt );
+  void info(
+    bool & bMMX,
+    bool & bMMXplus,
+    bool & bSSE,
+    bool & bSSE2,
+    bool & bSSE3,
+    bool & bSSSE3,
+    bool & bSSE41,
+    bool & bSSE42,
+    bool & bSSE4a,
+    bool & bSSE5,
+    bool & b3Dnow,
+    bool & b3DnowExt );
 
   bool has_MMX();       //!< check if CPU support MMX instruction set
   bool has_MMXplus();   //!< check if CPU support MMXplus instruction set

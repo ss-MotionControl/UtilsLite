@@ -18,24 +18,24 @@ class BrownAndGearhartFunction : public NonlinearSystem
 
 public:
   BrownAndGearhartFunction()
-    : NonlinearSystem( "Brown and Gearhart function",
-                       "@Article{Brow1971,\n"
-                       "  author  = {Brow, Kenneth M. and Gearhart, William B.},\n"
-                       "  title   = {Deflation techniques for the calculation of further "
-                       "solutions\n"
-                       "             of a nonlinear system},\n"
-                       "  journal = {Numerische Mathematik},\n"
-                       "  year    = {1971},\n"
-                       "  volume  = {16},\n"
-                       "  number  = {4},\n"
-                       "  pages   = {334--342},\n"
-                       "  doi     = \"10.1007/BF02165004\",\n"
-                       "}\n",
-                       3 )
+    : NonlinearSystem(
+        "Brown and Gearhart function",
+        "@Article{Brow1971,\n"
+        "  author  = {Brow, Kenneth M. and Gearhart, William B.},\n"
+        "  title   = {Deflation techniques for the calculation of further "
+        "solutions\n"
+        "             of a nonlinear system},\n"
+        "  journal = {Numerische Mathematik},\n"
+        "  year    = {1971},\n"
+        "  volume  = {16},\n"
+        "  number  = {4},\n"
+        "  pages   = {334--342},\n"
+        "  doi     = \"10.1007/BF02165004\",\n"
+        "}\n",
+        3 )
     , sqrt2( sqrt( 2.0 ) )
   {
   }
-
 
   virtual void
   evaluate( Vector const & x, Vector & f ) const override

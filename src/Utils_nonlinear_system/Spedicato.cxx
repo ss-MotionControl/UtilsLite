@@ -18,28 +18,29 @@ class SpedicatoFunction17 : public NonlinearSystem
 {
 public:
   SpedicatoFunction17( integer neq )
-    : NonlinearSystem( "Spedicato N.17",
-                       "@Article{Spedicato1997,\n"
-                       "  author  = {Spedicato, E. and Huang, Z.},\n"
-                       "  title   = {Numerical experience with newton-like methods\n"
-                       "             for nonlinear algebraic systems},\n"
-                       "  journal = {Computing},\n"
-                       "  year    = {1997},\n"
-                       "  volume  = {58},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {69--89},\n"
-                       "  doi     = {10.1007/BF02684472},\n"
-                       "}\n\n"
-                       "@book{meresoo:1990,\n"
-                       "  title     = {Test Examples of Systems of Nonlinear Equations: "
-                       "Version 3-90},\n"
-                       "  author    = {Meresoo, T. and Roose, A. and Kulla,\n"
-                       "               V. and Estonian Software and Computer Service "
-                       "Company},\n"
-                       "  year      = 1990,\n"
-                       "  publisher = {Estonian Software and Computer Service Company}\n"
-                       "}\n",
-                       neq )
+    : NonlinearSystem(
+        "Spedicato N.17",
+        "@Article{Spedicato1997,\n"
+        "  author  = {Spedicato, E. and Huang, Z.},\n"
+        "  title   = {Numerical experience with newton-like methods\n"
+        "             for nonlinear algebraic systems},\n"
+        "  journal = {Computing},\n"
+        "  year    = {1997},\n"
+        "  volume  = {58},\n"
+        "  number  = {1},\n"
+        "  pages   = {69--89},\n"
+        "  doi     = {10.1007/BF02684472},\n"
+        "}\n\n"
+        "@book{meresoo:1990,\n"
+        "  title     = {Test Examples of Systems of Nonlinear Equations: "
+        "Version 3-90},\n"
+        "  author    = {Meresoo, T. and Roose, A. and Kulla,\n"
+        "               V. and Estonian Software and Computer Service "
+        "Company},\n"
+        "  year      = 1990,\n"
+        "  publisher = {Estonian Software and Computer Service Company}\n"
+        "}\n",
+        neq )
   {
   }
 

@@ -20,32 +20,33 @@ class PowellBadlyScaledFunction : public NonlinearSystem
 
 public:
   PowellBadlyScaledFunction()
-    : NonlinearSystem( "Powell badly scaled function",
-                       "@inbook{Powell:1970,\n"
-                       "  title     = {Numerical methods for nonlinear algebraic "
-                       "equations},\n"
-                       "  booktitle = {Proceedings of a {C}onference, {U}niversity of "
-                       "{E}ssex,\n"
-                       "              {C}olchester, 6--7 {J}anuary 1969},\n"
-                       "  chapter   = {An hybrid method for non linear equations},\n"
-                       "  editor    = {Rabinowitz, Philip},\n"
-                       "  publisher = {Gordon and Breach Science Publishers, London-New "
-                       "York-Paris},\n"
-                       "  year      = {1970},\n"
-                       "  pages     = {87--114},\n"
-                       "}\n\n"
-                       "@article{More:1981,\n"
-                       "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
-                       "Hillstrom, Kenneth E.},\n"
-                       "  title   = {Testing Unconstrained Optimization Software},\n"
-                       "  journal = {ACM Trans. Math. Softw.},\n"
-                       "  year    = {1981},\n"
-                       "  volume  = {7},\n"
-                       "  number  = {1},\n"
-                       "  pages   = {17--41},\n"
-                       "  doi     = {10.1145/355934.355936},\n"
-                       "}\n",
-                       2 )
+    : NonlinearSystem(
+        "Powell badly scaled function",
+        "@inbook{Powell:1970,\n"
+        "  title     = {Numerical methods for nonlinear algebraic "
+        "equations},\n"
+        "  booktitle = {Proceedings of a {C}onference, {U}niversity of "
+        "{E}ssex,\n"
+        "              {C}olchester, 6--7 {J}anuary 1969},\n"
+        "  chapter   = {An hybrid method for non linear equations},\n"
+        "  editor    = {Rabinowitz, Philip},\n"
+        "  publisher = {Gordon and Breach Science Publishers, London-New "
+        "York-Paris},\n"
+        "  year      = {1970},\n"
+        "  pages     = {87--114},\n"
+        "}\n\n"
+        "@article{More:1981,\n"
+        "  author  = {Mor{\'e}, Jorge J. and Garbow, Burton S. and "
+        "Hillstrom, Kenneth E.},\n"
+        "  title   = {Testing Unconstrained Optimization Software},\n"
+        "  journal = {ACM Trans. Math. Softw.},\n"
+        "  year    = {1981},\n"
+        "  volume  = {7},\n"
+        "  number  = {1},\n"
+        "  pages   = {17--41},\n"
+        "  doi     = {10.1145/355934.355936},\n"
+        "}\n",
+        2 )
     //, x0e(1e-6)
     //, x1e(1e6)
     //, scale(1)
