@@ -94,14 +94,23 @@ file(
   GLOB S CONFIGURE_DEPENDS
   ${SOURCE_DIR}/*.h*
   ${SOURCE_DIR}/Utils/*.h*
-  #${SOURCE_DIR}/Utils/3rd/*
-  #${SOURCE_DIR}/Utils/3rd/*/*
-  #${SOURCE_DIR}/Utils/3rd/*/*/*
-  #${SOURCE_DIR}/Utils/3rd/*/*/*/*
+  ${SOURCE_DIR}/Utils_nonlinear_system/*.cxx
 )
 foreach (F ${S})
-  file( RELATIVE_PATH RF "${SOURCE_DIR}" "${F}" )
-  list( APPEND PUBLIC_HEADERS ${RF} )
+  if (NOT IS_DIRECTORY ${F})
+    file( RELATIVE_PATH RF "${SOURCE_DIR}" "${F}" )
+    list( APPEND PUBLIC_HEADERS ${RF} )
+  endif()
+endforeach()
+file(
+  GLOB_RECURSE S CONFIGURE_DEPENDS
+  ${SOURCE_DIR}/Utils/3rd/*
+)
+foreach (F ${S})
+  if (NOT IS_DIRECTORY ${F})
+    file( RELATIVE_PATH RF "${SOURCE_DIR}" "${F}" )
+    list( APPEND PUBLIC_HEADERS ${RF} )
+  endif()
 endforeach()
 
 # ================

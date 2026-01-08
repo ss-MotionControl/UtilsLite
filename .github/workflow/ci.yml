@@ -1,0 +1,49 @@
+name: CI (Rake Cross-Platform)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Ruby + caching gems
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.1'
+          bundler-cache: true
+
+      # 3️⃣ Install CMake & Ninja (cross-platform)
+      - name: Install build tools
+        run: |
+          if [ "${{ runner.os }}" == "Linux" ]; then
+            sudo apt-get update && sudo apt-get install -y cmake ninja-build g++
+          elif [ "${{ runner.os }}" == "Windows" ]; then
+            choco install -y cmake ninja
+          fi
+
+      # 4️⃣ Setup MSVC environment on Windows (solo se serve)
+      - name: Setup MSVC
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      # 5️⃣ Build project
+      - name: Build with Rake
+        run: rake
+
+      # 6️⃣ (Opzionale) Run tests
+      #- name: Run tests
+      #  run: rake test
