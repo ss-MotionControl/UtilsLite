@@ -26,11 +26,11 @@ struct TestResult
   std::string problem_name;
   std::string linesearch_name;
   bool        converged;
-  size_t      iterations;
-  size_t      function_evals;
+  integer     iterations;
+  integer     function_evals;
   Scalar      final_f;
   Vector      final_x;
-  size_t      dimension;
+  integer     dimension;
   Scalar      estimated_gradient_norm{ 0.0 };  // NUOVO: stima norma gradiente
 };
 
@@ -38,10 +38,10 @@ struct TestResult
 struct LineSearchStats
 {
   std::string name;
-  size_t      total_tests{ 0 };
-  size_t      successful_tests{ 0 };
-  size_t      total_iterations{ 0 };
-  size_t      total_function_evals{ 0 };
+  integer     total_tests{ 0 };
+  integer     successful_tests{ 0 };
+  integer     total_iterations{ 0 };
+  integer     total_function_evals{ 0 };
   Scalar      avg_gradient_norm{ 0.0 };  // NUOVO: media norma gradiente stimata
 };
 
@@ -100,7 +100,7 @@ void update_line_search_statistics( const TestResult & result )
 // ===========================================================================
 // Funzione per formattare il vettore
 // ===========================================================================
-inline std::string format_reduced_vector( Vector const & v, size_t max_size = 10 )
+inline std::string format_reduced_vector( Vector const & v, integer max_size = 10 )
 {
   std::string tmp{ "[" };
   integer     v_size = v.size();
@@ -150,8 +150,8 @@ template <typename Problem> void test( Problem & prob, std::string const & probl
   if ( npt > npt_max ) npt = npt_max;
 
   // Wrapper per la funzione obiettivo che conta le valutazioni
-  size_t nfev   = 0;
-  auto   objfun = [&prob, &nfev]( Vector const & x ) -> Scalar
+  integer nfev   = 0;
+  auto    objfun = [&prob, &nfev]( Vector const & x ) -> Scalar
   {
     ++nfev;
     return prob( x );
@@ -185,7 +185,7 @@ template <typename Problem> void test( Problem & prob, std::string const & probl
   result.function_evals          = nfev;
   result.final_f                 = final_f;
   result.final_x                 = x0;
-  result.dimension               = static_cast<size_t>( n );
+  result.dimension               = static_cast<integer>( n );
   result.estimated_gradient_norm = estimated_grad_norm;
 
   global_test_results.push_back( result );
@@ -308,15 +308,15 @@ void print_line_search_statistics()
     "╚═══════════════════╧══════════╧═════════════╧════════════╧══════════════╝\n" );
 
   // Statistiche globali
-  size_t total_tests     = global_test_results.size();
-  size_t converged_tests = std::count_if(
+  integer total_tests     = static_cast<integer>( global_test_results.size() );
+  integer converged_tests = std::count_if(
     global_test_results.begin(),
     global_test_results.end(),
     []( const TestResult & r ) { return r.converged; } );
 
-  size_t accumulated_evals{ 0 };
-  Scalar total_grad_norm{ 0.0 };
-  size_t grad_count{ 0 };
+  integer accumulated_evals = 0;
+  Scalar  total_grad_norm   = 0;
+  integer grad_count        = 0;
 
   for ( auto const & r : global_test_results )
   {

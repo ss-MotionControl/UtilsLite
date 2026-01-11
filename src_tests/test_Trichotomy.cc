@@ -20,13 +20,28 @@
 #include "Utils_Trichotomy.hh"
 #include "Utils_fmt.hh"
 
+#if defined(__clang__)
+#pragma clang diagnostic ignored "-Wunused-variable"
+#pragma clang diagnostic ignored "-Wunused-parameter"
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#pragma clang diagnostic ignored "-Wsign-compare"
+#pragma clang diagnostic ignored "-Wunused-macros"
+#elif defined(__llvm__) || defined(__GNUC__)
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#pragma GCC diagnostic ignored "-Wsign-compare"
+#pragma GCC diagnostic ignored "-Wunused-macros"
+#elif defined(_MSC_VER)
+#pragma warning( disable : 4100 )
+#pragma warning( disable : 4101 )
+#pragma warning( disable : 4189 )
+#endif
+
 using namespace std;
 using Utils::Trichotomy;
 using real_type = double;
-
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
+using Utils::m_pi;
 
 // ============================================================================
 // Test functions for minimization
@@ -73,8 +88,8 @@ vector<TestFunction> test_functions = {
   { "Wide parabola", "2x² - 4x + 3", 1.0, 1.0, -5.0, 5.0, "unimodal", true },
 
   // Trigonometric functions
-  { "Cosine", "cos(x)", M_PI, -1.0, 0.0, 2 * M_PI, "unimodal", true },
-  { "Sine + quadratic", "sin(x) + 0.1*(x-2)²", 1.757, -0.710, -M_PI, M_PI, "multimodal", false },
+  { "Cosine", "cos(x)", m_pi, -1.0, 0.0, 2 * m_pi, "unimodal", true },
+  { "Sine + quadratic", "sin(x) + 0.1*(x-2)²", 1.757, -0.710, -m_pi, m_pi, "multimodal", false },
 
   // Exponential functions
   { "Double exponential", "exp(x) + exp(-x)", 0.0, 2.0, -2.0, 2.0, "unimodal", true },
@@ -315,14 +330,14 @@ function<real_type( real_type )> define_function( const TestFunction & tf )
   }
   else if ( tf.name == "Rastrigin 1D" )
   {
-    return []( real_type x ) { return x * x - 10 * cos( 2 * M_PI * x ) + 10; };
+    return []( real_type x ) { return x * x - 10 * cos( 2 * m_pi * x ) + 10; };
   }
   else if ( tf.name == "Ackley 1D" )
   {
     return []( real_type x )
     {
       real_type x2 = x * x;
-      return -20 * exp( -0.2 * sqrt( x2 ) ) - exp( cos( 2 * M_PI * x ) ) + 20 + exp( 1.0 );
+      return -20 * exp( -0.2 * sqrt( x2 ) ) - exp( cos( 2 * m_pi * x ) ) + 20 + exp( 1.0 );
     };
   }
   else if ( tf.name == "Narrow valley" )
@@ -580,7 +595,7 @@ void run_benchmark()
         real_type                                        t          = x * x - x;
         return 100 * t * t + 15 * ( 1 - x );
       } },
-    { "Rastrigin", []( real_type x ) { return x * x - 10 * cos( 2 * M_PI * x ) + 10; } }
+    { "Rastrigin", []( real_type x ) { return x * x - 10 * cos( 2 * m_pi * x ) + 10; } }
   };
 
   fmt::print(

@@ -26,3 +26,5 @@ cmake-build-debug
 *.nav
 *.snm
 .cache
+tvd_test_results
+line_search_results.csv
