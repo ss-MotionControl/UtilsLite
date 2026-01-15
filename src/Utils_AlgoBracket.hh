@@ -47,7 +47,9 @@
 #include <limits>
 
 #include "Utils.hh"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wsign-conversion"

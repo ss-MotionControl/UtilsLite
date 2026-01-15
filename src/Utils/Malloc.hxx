@@ -36,18 +36,23 @@
 
 namespace Utils
 {
-
+#ifndef UTILS_MINIMAL_BUILD
   using std::cerr;
+#endif
+#ifndef UTILS_NO_EXCEPTIONS
   using std::exception;
+#endif
   using std::exit;
   using std::int64_t;
-  using std::lock_guard;
 #ifndef UTILS_MINIMAL_BUILD
+  using std::lock_guard;
   using std::mutex;
 #endif
   using std::size_t;
   using std::string;
+#ifndef UTILS_NO_STRING_VIEW
   using std::string_view;
+#endif
 
 #ifndef UTILS_MINIMAL_BUILD
   //! Global mutex for thread-safe memory operations.
@@ -122,11 +127,15 @@ namespace Utils
     //! Internal method to allocate memory for a specified number of objects.
     void allocate_internal( size_t n )
     {
+#ifndef UTILS_NO_EXCEPTIONS
       try
+#endif
       {
         size_t nb;
         {
+#ifndef UTILS_MINIMAL_BUILD
           lock_guard lock( Utils::MallocMutex );
+#endif
           nb = m_num_total_reserved * sizeof( T );
           ++CountFreed;
           AllocatedBytes -= nb;
@@ -138,28 +147,42 @@ namespace Utils
         m_p_memory           = new T[m_num_total_reserved];
 
         {
+#ifndef UTILS_MINIMAL_BUILD
           lock_guard lock( Utils::MallocMutex );
+#endif
           ++CountAlloc;
           nb = m_num_total_reserved * sizeof( T );
           AllocatedBytes += nb;
           if ( MaximumAllocatedBytes < AllocatedBytes ) MaximumAllocatedBytes = AllocatedBytes;
         }
 
+#ifndef UTILS_MINIMAL_BUILD
         if ( MallocDebug ) fmt::print( "Allocating {} for {}\n", out_bytes( nb ), m_name );
+#endif
       }
+#ifndef UTILS_NO_EXCEPTIONS
       catch ( exception const & exc )
       {
+#ifndef UTILS_MINIMAL_BUILD
         string const reason =
           fmt::format( "Memory allocation failed: {}\nTry to allocate {} bytes for {}\n", exc.what(), n, m_name );
         std::cerr << reason;
         exit( 0 );
+#else
+        std::terminate();
+#endif
       }
       catch ( ... )
       {
+#ifndef UTILS_MINIMAL_BUILD
         string const reason = fmt::format( "Memory allocation failed for {}: memory exausted\n", m_name );
         std::cerr << reason;
         exit( 0 );
+#else
+        std::terminate();
+#endif
       }
+#endif
       m_num_total_values = n;
       m_num_allocated    = 0;
     }
@@ -167,17 +190,25 @@ namespace Utils
     //! Handle memory exhaustion errors.
     void memory_exausted( size_t sz )
     {
+#ifndef UTILS_MINIMAL_BUILD
       string const reason = fmt::format( "Malloc<{}>::operator () ({}) -- Memory EXAUSTED\n", m_name, sz );
       std::cerr << reason;
       exit( 0 );
+#else
+      std::terminate();
+#endif
     }
 
     //! Handle errors when attempting to pop more than allocated.
     void pop_exausted( size_t sz )
     {
+#ifndef UTILS_MINIMAL_BUILD
       string const reason = fmt::format( "Malloc<{}>::pop({}) -- Not enough element on Stack\n", m_name, sz );
       std::cerr << reason;
       exit( 0 );
+#else
+      std::terminate();
+#endif
     }
 
   public:
@@ -207,8 +238,12 @@ namespace Utils
     {
       if ( m_num_allocated != 0 )
       {
+#ifndef UTILS_MINIMAL_BUILD
         fmt::print( "Malloc[{}]::allocate( {} ), try to allocate already allocated memory!\n", m_name, n );
         exit( 0 );
+#else
+        std::terminate();
+#endif
       }
       if ( n > m_num_total_reserved ) allocate_internal( n );
       m_num_total_values = n;
@@ -247,13 +282,17 @@ namespace Utils
       {
         size_t nb;
         {
+#ifndef UTILS_MINIMAL_BUILD
           lock_guard lock( Utils::MallocMutex );
+#endif
           nb = m_num_total_reserved * sizeof( T );
           ++CountFreed;
           AllocatedBytes -= nb;
         }
 
+#ifndef UTILS_MINIMAL_BUILD
         if ( MallocDebug ) fmt::print( "Freeing {} for {}\n", out_bytes( nb ), m_name );
+#endif
 
         delete[] m_p_memory;
         m_p_memory           = nullptr;
@@ -313,8 +352,12 @@ namespace Utils
     {
       if ( m_num_allocated != 0 )
       {
+#ifndef UTILS_MINIMAL_BUILD
         fmt::print( "Malloc[{}]::malloc( {} ), try to allocate already allocated memory!\n", m_name, n );
         exit( 0 );
+#else
+        std::terminate();
+#endif
       }
       if ( n > m_num_total_reserved ) allocate_internal( n );
       m_num_total_values = n;
@@ -361,21 +404,25 @@ namespace Utils
     {
       if ( m_num_allocated < m_num_total_values )
       {
+#ifndef UTILS_MINIMAL_BUILD
         string const tmp = fmt::format(
           "in {} {}: not fully used!\nUnused: {} values\n",
           m_name,
           where,
           m_num_total_values - m_num_allocated );
         std::cerr << tmp;
+#endif
       }
       if ( m_num_allocated > m_num_total_values )
       {
+#ifndef UTILS_MINIMAL_BUILD
         string const tmp = fmt::format(
           "in {} {}: too much used!\nMore used: {} values\n",
           m_name,
           where,
           m_num_allocated - m_num_total_values );
         std::cerr << tmp;
+#endif
       }
     }
 
@@ -432,17 +479,25 @@ namespace Utils
     //! Handle memory exhaustion errors for fixed allocator.
     void memory_exausted( size_t sz )
     {
+#ifndef UTILS_MINIMAL_BUILD
       string const reason = fmt::format( "MallocFixed<{}>::operator () ({}) -- Memory EXAUSTED\n", m_name, sz );
       std::cerr << reason;
       exit( 0 );
+#else
+      std::terminate();
+#endif
     }
 
     //! Handle errors when attempting to pop more than allocated for fixed allocator.
     void pop_exausted( size_t sz )
     {
+#ifndef UTILS_MINIMAL_BUILD
       string const reason = fmt::format( "MallocFixed<{}>::pop({}) -- Not enough element on Stack\n", m_name, sz );
       std::cerr << reason;
       exit( 0 );
+#else
+      std::terminate();
+#endif
     }
 
   public:

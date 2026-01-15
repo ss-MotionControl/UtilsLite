@@ -312,6 +312,7 @@ namespace Utils
     {
       if ( is_infinite( pv[i] ) )
       {
+#ifndef UTILS_MINIMAL_BUILD
         UTILS_ERROR(
           fmt::runtime("{:─{}}\n({}):{}) found Infinity at {}[{}]\n{:─{}}\n"),
           78,
@@ -322,9 +323,13 @@ namespace Utils
           i,
           78,
           "" );
+#else
+        UTILS_ERROR( v_name, line, file );
+#endif
       }
       if ( is_NaN( pv[i] ) )
       {
+#ifndef UTILS_MINIMAL_BUILD
         UTILS_ERROR(
           fmt::runtime("{:─{}}\n({}):{}) found NaN at {}[{}]\n{:─{}}\n"),
           78,
@@ -335,10 +340,12 @@ namespace Utils
           i,
           78,
           "" );
+#else
+        UTILS_ERROR( v_name, line, file );
+#endif
       }
     }
   }
-#endif
 
   static inline void check_NaN(
     float const       pv[],
@@ -351,6 +358,7 @@ namespace Utils
     {
       if ( is_infinite( pv[i] ) )
       {
+#ifndef UTILS_MINIMAL_BUILD
         UTILS_ERROR(
           fmt::runtime("{:─{}}\n({}):{}) found Infinity at {}[{}]\n{:─{}}\n"),
           78,
@@ -361,9 +369,13 @@ namespace Utils
           i,
           78,
           "" );
+#else
+        UTILS_ERROR( v_name, line, file );
+#endif
       }
       if ( is_NaN( pv[i] ) )
       {
+#ifndef UTILS_MINIMAL_BUILD
         UTILS_ERROR(
           fmt::runtime("{:─{}}\n({}):{}) found NaN at {}[{}]\n{:─{}}\n"),
           78,
@@ -374,6 +386,9 @@ namespace Utils
           i,
           78,
           "" );
+#else
+        UTILS_ERROR( v_name, line, file );
+#endif
       }
     }
   }

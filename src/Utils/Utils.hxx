@@ -63,12 +63,12 @@
 #ifndef UTILS_MINIMAL_BUILD
 #include <Iphlpapi.h>
 #include <Windows.h>
-  #include <Winsock2.h>
-  #include <Ws2tcpip.h>
-  #include <iptypes.h>
+#include <Winsock2.h>
+#include <Ws2tcpip.h>
+#include <iptypes.h>
   // --------------------
 #include <stdio.h>
-  #include <tchar.h>
+#include <tchar.h>
 #endif
 #else
   #error "unsupported OS!"
@@ -93,32 +93,40 @@
 // ============================================================================
 
 #include <algorithm>
-#ifndef UTILS_MINIMAL_BUILD
 #include <cassert>
 #include <cctype>
+#ifndef UTILS_MINIMAL_BUILD
 #include <chrono>
+#endif
 #include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
+#ifndef UTILS_MINIMAL_BUILD
 #include <filesystem>
 #include <fstream>
+#endif
 #include <functional>
+#ifndef UTILS_MINIMAL_BUILD
 #include <iomanip>
 #include <iostream>
+#endif
 #include <iterator>
 #include <limits>
 #include <list>
 #include <map>
-#include <map>
 #include <memory>
 #include <numeric>
+#ifndef UTILS_MINIMAL_BUILD
 #include <random>
 #include <sstream>
 #endif
 #ifndef UTILS_NO_EXCEPTIONS
 #include <stdexcept>
+#endif
+#ifndef UTILS_NO_STRING_VIEW
 #include <string_view>
+#endif
 #include <string>
 #include <type_traits>
 #include <utility>
@@ -178,8 +186,10 @@ namespace Utils
 #ifndef UTILS_MINIMAL_BUILD
   using ostream_type = std::basic_ostream<char>;
   using istream_type = std::basic_istream<char>;
+#endif
 }  // namespace Utils
 
+#ifndef UTILS_MINIMAL_BUILD
 #include "3rd/spdlog/spdlog.h"
 #include "3rd/spdlog/fmt/bundled/std.h"
 #include "3rd/spdlog/fmt/bundled/chrono.h"
@@ -190,6 +200,7 @@ namespace Utils
 
 namespace Utils
 {
+#ifndef UTILS_NO_EXCEPTIONS
   using std::runtime_error;
 
   //!
@@ -225,9 +236,12 @@ namespace Utils
     //! \param line The line number in the file where the error occurred.
     //!
     explicit Runtime_Error( string_view reason, string_view file, int line )
-      : std::runtime_error( fmt::format( "\n{}\nOn File:{}:{}\n", reason, file, line ) )
-    {
-  }
+#ifndef UTILS_MINIMAL_BUILD
+      : std::runtime_error( fmt::format( "\n{}\nOn File:{}:{}\n", reason, file, line ) ) {}
+#else
+      : std::runtime_error( std::string( reason ) + std::string( "On File:" ) +
+              std::string( file ) + string( ":" ) + std::to_string( line ) ) {}
+#endif
 
     //!
     //! \brief Returns a C-style string describing the error.
@@ -240,10 +254,20 @@ namespace Utils
     //!
     char const * what() const noexcept override { return runtime_error::what(); }
   };
+#endif
 }  // namespace Utils
 
 #ifndef __FILENAME__
 #define __FILENAME__ ( strrchr( __FILE__, '/' ) ? strrchr( "/" __FILE__, '/' ) + 1 : __FILE__ )
+#endif
+
+#ifdef UTILS_NO_EXCEPTIONS
+#define UTILS_ERROR0( MSG )         MSG
+#define UTILS_ERROR( ... )          __VA_ARGS__
+#endif
+#ifdef UTILS_MINIMAL_BUILD
+#define UTILS_WARNING0( COND, MSG )
+#define UTILS_WARNING( COND, ... )
 #endif
 
 #ifndef UTILS_ERROR0
@@ -261,7 +285,11 @@ namespace Utils
 #endif
 
 #ifndef UTILS_ERROR
+#ifndef UTILS_MINIMAL_BUILD
 #define UTILS_ERROR( ... ) throw Utils::Runtime_Error( fmt::format( __VA_ARGS__ ), __FILENAME__, __LINE__ )
+#else
+#define UTILS_ERROR( ... ) { __VA_ARGS__; throw Utils::Runtime_Error( "", __FILENAME__, __LINE__ ); }
+#endif
 #endif
 
 #ifndef UTILS_ASSERT
@@ -291,10 +319,13 @@ namespace Utils
 #endif
 
 #include "Malloc.hxx"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Console.hxx"
+#endif
 #include "Numbers.hxx"
 
 // order must be preserved
+#ifndef UTILS_MINIMAL_BUILD
 #include "ThreadPoolBase.hxx"
 #include "ThreadUtils.hxx"
 #include "ThreadPool0.hxx"
@@ -304,6 +335,7 @@ namespace Utils
 #include "ThreadPool4.hxx"
 #include "ThreadPool5.hxx"
 #include "ThreadPoolEigen.hxx"
+#endif
 // -----------------------
 
 // ============================================================================
@@ -342,7 +374,6 @@ namespace Utils
   }
 
 }  // namespace Utils
-#endif
 
 //
 // eof: Utils.hxx
