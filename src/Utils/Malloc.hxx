@@ -42,7 +42,9 @@ namespace Utils
 #ifndef UTILS_NO_EXCEPTIONS
   using std::exception;
 #endif
+#ifndef UTILS_MINIMAL_BUILD
   using std::exit;
+#endif
   using std::int64_t;
 #ifndef UTILS_MINIMAL_BUILD
   using std::lock_guard;
