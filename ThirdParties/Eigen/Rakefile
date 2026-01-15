@@ -9,7 +9,7 @@ end
 
 CLEAN.clear_exclude.exclude { |fn| fn.pathmap("%f").downcase == "core" }
 
-VER = "3.4.0"
+VER = "5.0.0"
 
 desc "install Eigen3"
 task :install_common do
@@ -22,7 +22,8 @@ task :install_common do
   else
     extract_zip("eigen-#{VER}.zip");
   end
-  FileUtils.cp_r "eigen-#{VER}/Eigen", '../../src/Utils/3rd'
+  FileUtils.mkdir_p('../../src/Utils/3rd')
+  FileUtils.cp_r "eigen-#{VER}/Eigen/.", '../../src/Utils/3rd/Eigen', remove_destination: true
 end
 
 task :install       => :install_common do end

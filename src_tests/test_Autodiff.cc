@@ -1,6 +1,6 @@
 /*--------------------------------------------------------------------------*\
  |                                                                          |
- |  Copyright (C) 2022                                                      |
+ |  Copyright (C) 2025                                                      |
  |                                                                          |
  |         , __                 , __                                        |
  |        /|/  \               /|/  \                                       |
@@ -19,306 +19,1481 @@
 
 #include "Utils.hh"
 #include "Utils_autodiff.hh"
+#include <array>
+#include <vector>
+#include <functional>
+#include <iomanip>
+#include <cmath>
+#include <limits>
 
 using namespace std;
 using namespace autodiff;
 using namespace Utils;
 
+// ============================================================================
+// SECTION: Utility Functions for Testing
+// ============================================================================
 
-// The single-variable function for which derivatives are needed
-dual f(dual x)
+namespace TestUtils
 {
-    return 1 + x + x*x + 1/x + log(x);
+
+  // Unicode symbols
+  constexpr const char * CHECKMARK = "✓";
+  constexpr const char * XMARK     = "✗";
+  constexpr const char * WARNING   = "⚠";
+  constexpr const char * INFO      = "ℹ";
+
+  // Print a colored header
+  void print_header( const string & title, char fill_char = '=', int width = 80 )
+  {
+    string fill_str( 5, fill_char );
+    int    padding = ( width - static_cast<int>( title.length() ) - 10 ) / 2;
+    if ( padding < 0 ) padding = 0;
+
+    fmt::print(
+      fg( fmt::color::cyan ) | fmt::emphasis::bold,
+      "\n{}{: <{}} {} {: <{}}{}\n",
+      fill_str,
+      "",
+      padding,
+      title,
+      "",
+      padding,
+      fill_str );
+  }
+
+  void print_subheader( const string & title, char fill_char = '-', int width = 60 )
+  {
+    string fill_str( 5, fill_char );
+    int    padding = ( width - static_cast<int>( title.length() ) - 10 ) / 2;
+    if ( padding < 0 ) padding = 0;
+
+    fmt::print(
+      fg( fmt::color::cyan ) | fmt::emphasis::bold,
+      "\n{}{: <{}} {} {: <{}}{}\n",
+      fill_str,
+      "",
+      padding,
+      title,
+      "",
+      padding,
+      fill_str );
+  }
+
+  // Print success/fail message
+  template <typename T>
+  bool check_result( const string & test_name, const T & computed, const T & expected, double tolerance = 1e-10 )
+  {
+    double error   = abs( computed - expected );
+    bool   success = ( error <= tolerance );
+
+    // Test name
+    fmt::print( "  {:<45}", test_name );
+
+    // Status with color
+    if ( success ) { fmt::print( fg( fmt::color::green ) | fmt::emphasis::bold, "{} PASS ", CHECKMARK ); }
+    else
+    {
+      fmt::print( fg( fmt::color::red ) | fmt::emphasis::bold, "{} FAIL ", XMARK );
+    }
+
+    // Values
+    fmt::print( "computed: {:>12.6f}, expected: {:>12.6f}, error: {:>8.2e}\n", computed, expected, error );
+
+    return success;
+  }
+
+  bool check_approx( double computed, double expected, double tolerance = 1e-10 )
+  {
+    return abs( computed - expected ) <= tolerance;
+  }
+
+}  // namespace TestUtils
+
+// ============================================================================
+// SECTION: Test Functions
+// ============================================================================
+
+// Basic function tests
+dual f1( dual x )
+{
+  return 1 + x + x * x + 1 / x + log( x );
 }
 
-// Specialize isArithmetic for complex to make it compatible with dual
-namespace autodiff::detail {
-
-template<typename T>
-struct ArithmeticTraits<complex<T>> : ArithmeticTraits<T> {};
-
-} // autodiff::detail
-
-using cxdual = Dual<complex<double>, complex<double>>;
-
-// The single-variable function for which derivatives are needed
-cxdual f2(cxdual x)
+dual f2( dual x )
 {
-    return 1 + x + x*x + 1/x + log(x);
+  return sin( x ) * cos( x ) + exp( x );
 }
 
-// The multi-variable function for which derivatives are needed
-dual f3(dual x, dual y, dual z)
+dual f3( dual x )
 {
-    return 1 + x + y + z + x*y + y*z + x*z + x*y*z + exp(x/y + y/z);
+  return tan( x ) - asin( x ) + acos( x );
 }
 
-// A type defining parameters for a function of interest
-struct Params
+// Multi-variable functions
+dual g1( dual x, dual y )
 {
-    dual a;
-    dual b;
-    dual c;
-};
-
-// The function that depends on parameters for which derivatives are needed
-dual f4(dual x, const Params& params)
-{
-    return params.a * sin(x) + params.b * cos(x) + params.c * sin(x)*cos(x);
+  return x * x + y * y + x * y;
 }
 
-// Define functions A, Ax, Ay using double; analytical derivatives are available.
-double  A(double x, double y) { return x*y; }
-double Ax(double x, double y) { return y; }
-double Ay(double x, double y) { return x; }
-
-// Define functions B, Bx, By using double; analytical derivatives are available.
-double  B(double x, double y) { return x + y; }
-double Bx(double x, double y) { return 1.0; }
-double By(double x, double y) { return 1.0; }
-
-// Wrap A into Adual function so that it can be used within autodiff-enabled codes.
-dual Adual(dual const& x, dual const& y)
+dual g2( dual x, dual y )
 {
-    dual res = A(x.val, y.val);
-
-    if(x.grad != 0.0)
-        res.grad += x.grad * Ax(x.val, y.val);
-
-    if(y.grad != 0.0)
-        res.grad += y.grad * Ay(x.val, y.val);
-
-    return res;
+  return sin( x * y ) + cos( x / y );
 }
 
-// Wrap B into Bdual function so that it can be used within autodiff-enabled codes.
-dual Bdual(dual const& x, dual const& y)
+dual g3( dual x, dual y, dual z )
 {
-    dual res = B(x.val, y.val);
-
-    if(x.grad != 0.0)
-        res.grad += x.grad * Bx(x.val, y.val);
-
-    if(y.grad != 0.0)
-        res.grad += y.grad * By(x.val, y.val);
-
-    return res;
+  return exp( x * y * z ) + log( x + y + z );
 }
 
-// Define autodiff-enabled C function that relies on Adual and Bdual
-dual C(dual const& x, dual const& y)
+// Higher order derivatives
+dual2nd f_second( dual2nd x )
 {
-    const auto A = Adual(x, y);
-    const auto B = Bdual(x, y);
-    return A*A + B;
+  return x * x * x + sin( x ) * cos( x );
 }
 
-int
-main() {
+// ============================================================================
+// SECTION: Analytical Derivatives (for verification)
+// ============================================================================
+
+double df1_analytical( double x )
+{
+  return 1 + 2 * x - 1 / ( x * x ) + 1 / x;
+}
+
+double df2_analytical( double x )
+{
+  return cos( x ) * cos( x ) - sin( x ) * sin( x ) + exp( x );
+}
+
+double d2f2_analytical( double x )
+{
+  return -4 * sin( x ) * cos( x ) + exp( x );
+}
+
+// Gradient for multi-variable functions
+array<double, 2> dg1_analytical( double x, double y )
+{
+  return { 2 * x + y, 2 * y + x };
+}
+
+// ============================================================================
+// SECTION: Comprehensive Math Function Tests
+// ============================================================================
+// Replace the test_all_math_functions() function with this corrected version:
+
+void test_all_math_functions()
+{
+  using namespace TestUtils;
+
+  print_header( "COMPREHENSIVE MATH FUNCTION TESTS" );
+
+  int passed = 0, total = 0;
+
+  // Test points for different ranges
+  vector<double> test_points_positive = { 0.5, 1.0, 2.0, M_PI / 4 };
+  vector<double> test_points_all      = { -2.0, -1.0, 0.5, 1.0, 2.0 };
+
+  // ========================================================================
+  // TRIGONOMETRIC FUNCTIONS
+  // ========================================================================
+
+  print_subheader( "TRIGONOMETRIC FUNCTIONS" );
+
+  for ( double x_val : test_points_all )
   {
-    dual x = 2.0;                                 // the input variable x
-    dual u = f(x);                                // the output variable u
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
 
-    double dudx = derivative(f, wrt(x), at(x));   // evaluate the derivative du/dx
-
-    std::cout << "u = " << u << std::endl;        // print the evaluated output u
-    std::cout << "du/dx = " << dudx << std::endl; // print the evaluated derivative du/dx
-  }
-  
-  {
-    cxdual x = 2.0;   // the input variable x
-    cxdual u = f2(x);  // the output variable u
-
-    cxdual dudx = derivative(f2, wrt(x), at(x));  // evaluate the derivative du/dx
-
-    cout << "u = " << u << endl;         // print the evaluated output u
-    cout << "du/dx = " << dudx << endl;  // print the evaluated derivative du/dx
-  }
-  
-  {
-    dual x = 1.0;
-    dual y = 2.0;
-    dual z = 3.0;
-
-    dual u = f3(x, y, z);
-
-    double dudx = derivative(f3, wrt(x), at(x, y, z));
-    double dudy = derivative(f3, wrt(y), at(x, y, z));
-    double dudz = derivative(f3, wrt(z), at(x, y, z));
-
-    std::cout << "u = " << u << std::endl;         // print the evaluated output u = f(x, y, z)
-    std::cout << "du/dx = " << dudx << std::endl;  // print the evaluated derivative du/dx
-    std::cout << "du/dy = " << dudy << std::endl;  // print the evaluated derivative du/dy
-    std::cout << "du/dz = " << dudz << std::endl;  // print the evaluated derivative du/dz
-  }
-  {
-    Params params;   // initialize the parameter variables
-    params.a = 1.0;  // the parameter a of type dual, not double!
-    params.b = 2.0;  // the parameter b of type dual, not double!
-    params.c = 3.0;  // the parameter c of type dual, not double!
-
-    dual x = 0.5;  // the input variable x
-
-    dual u = f4(x, params);  // the output variable u
-
-    double dudx = derivative(f4, wrt(x), at(x, params));        // evaluate the derivative du/dx
-    double duda = derivative(f4, wrt(params.a), at(x, params)); // evaluate the derivative du/da
-    double dudb = derivative(f4, wrt(params.b), at(x, params)); // evaluate the derivative du/db
-    double dudc = derivative(f4, wrt(params.c), at(x, params)); // evaluate the derivative du/dc
-
-    std::cout << "u = " << u << std::endl;         // print the evaluated output u
-    std::cout << "du/dx = " << dudx << std::endl;  // print the evaluated derivative du/dx
-    std::cout << "du/da = " << duda << std::endl;  // print the evaluated derivative du/da
-    std::cout << "du/db = " << dudb << std::endl;  // print the evaluated derivative du/db
-    std::cout << "du/dc = " << dudc << std::endl;  // print the evaluated derivative du/dc
-  }
-  {
-    dual x = 1.0;
-    dual y = 2.0;
-
-    auto C0 = C(x, y);
-
-    // Compute derivatives of C with respect to x and y using autodiff!
-    auto Cx = derivative(C, wrt(x), at(x, y));
-    auto Cy = derivative(C, wrt(y), at(x, y));
-
-    // Compute expected analytical derivatives of C with respect to x and y
-    auto x0 = x.val;
-    auto y0 = y.val;
-    auto expectedCx = 2.0*A(x0, y0)*Ax(x0, y0) + Bx(x0, y0);
-    auto expectedCy = 2.0*A(x0, y0)*Ay(x0, y0) + By(x0, y0);
-
-    std::cout << "C0 = " << C0 << "\n";
-
-    std::cout << "Cx(computed) = " << Cx << "\n";
-    std::cout << "Cx(expected) = " << expectedCx << "\n";
-
-    std::cout << "Cy(computed) = " << Cy << "\n";
-    std::cout << "Cy(expected) = " << expectedCy << "\n";
-  }
-
-  {
-    dual x = 1.0;
-    dual y = 2.0;
-
-    auto fun = []( dual x, dual y) -> dual {
-      return hypot( x, x+y, x-y ) * x * y;
-    };
-
-    auto Cx = derivative(fun, wrt(x), at(x, y));
-    auto Cy = derivative(fun, wrt(y), at(x, y));
-
-    std::cout << "Cx(computed) = " << Cx << "\n";
-    std::cout << "Cy(computed) = " << Cy << "\n";
-
-  }
-
-  {
-    dual2nd x = 1.0;
-    dual2nd y = 2.0;
-
-    auto fun = []( dual2nd x, dual2nd y) -> dual2nd {
-      return hypot( x, x+y, x-y ) * x * y;
-    };
-
+    // sin(x) -> derivative is cos(x)
     {
-      auto [C, Cx, Cxx] = derivatives(fun, wrt(x, x), at(x, y));
-      std::cout << "C (computed) = " << C << "\n";
-      std::cout << "Cx (computed) = " << Cx << "\n";
-      std::cout << "Cxx (computed) = " << Cxx << "\n";
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return sin( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = cos( x_val );
+      bool   ok       = check_result( "d/dx[sin(x)] = cos(x)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
     }
+
+    // cos(x) -> derivative is -sin(x)
     {
-      auto [C, Cx, Cxy] = derivatives(fun, wrt(x, y), at(x, y));
-      std::cout << "C (computed) = " << C << "\n";
-      std::cout << "Cx (computed) = " << Cx << "\n";
-      std::cout << "Cxy (computed) = " << Cxy << "\n";
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return cos( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = -sin( x_val );
+      bool   ok       = check_result( "d/dx[cos(x)] = -sin(x)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
     }
-    {
-      auto [C, Cy, Cyy] = derivatives(fun, wrt(y, y), at(x, y));
-      std::cout << "C (computed) = " << C << "\n";
-      std::cout << "Cy (computed) = " << Cy << "\n";
-      std::cout << "Cyy (computed) = " << Cyy << "\n";
+
+    // tan(x) -> derivative is 1/cos²(x)
+    if ( abs( cos( x_val ) ) > 0.01 )
+    {  // Avoid singularities
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return tan( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 1.0 / ( cos( x_val ) * cos( x_val ) );
+      bool   ok       = check_result( "d/dx[tan(x)] = 1/cos²(x)", deriv, expected, 1e-9 );
+      passed += ok;
+      total += 1;
     }
   }
 
+  // ========================================================================
+  // INVERSE TRIGONOMETRIC FUNCTIONS
+  // ========================================================================
+
+  print_subheader( "INVERSE TRIGONOMETRIC FUNCTIONS" );
+
+  vector<double> test_points_inverse = { -0.5, 0.0, 0.5, 0.8 };
+
+  for ( double x_val : test_points_inverse )
   {
-    dual2nd x = 1.0;
-    dual2nd y = 2.0;
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
 
-    auto fun = []( dual2nd x, dual2nd y) -> dual2nd {
-      return log( 1 + x + y*y ) - log1p( x + y*y );
-    };
+    // asin(x) -> derivative is 1/sqrt(1-x²)
+    if ( abs( x_val ) < 0.99 )
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return asin( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 1.0 / sqrt( 1.0 - x_val * x_val );
+      bool   ok       = check_result( "d/dx[asin(x)] = 1/√(1-x²)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
 
+    // acos(x) -> derivative is -1/sqrt(1-x²)
+    if ( abs( x_val ) < 0.99 )
     {
-      auto [C, Cx, Cxx] = derivatives(fun, wrt(x, x), at(x, y));
-      std::cout << "C (computed) = " << C << "\n";
-      std::cout << "Cx (computed) = " << Cx << "\n";
-      std::cout << "Cxx (computed) = " << Cxx << "\n";
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return acos( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = -1.0 / sqrt( 1.0 - x_val * x_val );
+      bool   ok       = check_result( "d/dx[acos(x)] = -1/√(1-x²)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
     }
+
+    // atan(x) -> derivative is 1/(1+x²)
     {
-      auto [C, Cx, Cxy] = derivatives(fun, wrt(x, y), at(x, y));
-      std::cout << "C (computed) = " << C << "\n";
-      std::cout << "Cx (computed) = " << Cx << "\n";
-      std::cout << "Cxy (computed) = " << Cxy << "\n";
-    }
-    {
-      auto [C, Cy, Cyy] = derivatives(fun, wrt(y, y), at(x, y));
-      std::cout << "C (computed) = " << C << "\n";
-      std::cout << "Cy (computed) = " << Cy << "\n";
-      std::cout << "Cyy (computed) = " << Cyy << "\n";
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return atan( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 1.0 / ( 1.0 + x_val * x_val );
+      bool   ok       = check_result( "d/dx[atan(x)] = 1/(1+x²)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
     }
   }
 
+  // ========================================================================
+  // HYPERBOLIC FUNCTIONS
+  // ========================================================================
+
+  print_subheader( "HYPERBOLIC FUNCTIONS" );
+
+  for ( double x_val : test_points_all )
   {
-    dual2nd x = 1.1;
-    double z = {4.5};
-    double pz = power6(z);
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
 
-    auto fun = []( dual2nd x) -> dual2nd {
-      return power6(log1p( x )*x);
-    };
-
+    // sinh(x) -> derivative is cosh(x)
     {
-      auto [C, Cx, Cxx] = derivatives(fun, wrt(x, x), at(x));
-      std::cout << "x*log1p(x)   (computed) = " << C << "\n";
-      std::cout << "x*log1p(x)'  (computed) = " << Cx << "\n";
-      std::cout << "x*log1p(x)'' (computed) = " << Cxx << "\n";
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return sinh( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = cosh( x_val );
+      bool   ok       = check_result( "d/dx[sinh(x)] = cosh(x)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+
+    // cosh(x) -> derivative is sinh(x)
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return cosh( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = sinh( x_val );
+      bool   ok       = check_result( "d/dx[cosh(x)] = sinh(x)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+
+    // tanh(x) -> derivative is 1/cosh²(x)
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return tanh( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double cosh_val = cosh( x_val );
+      double expected = 1.0 / ( cosh_val * cosh_val );
+      bool   ok       = check_result( "d/dx[tanh(x)] = 1/cosh²(x)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
     }
   }
+
+  // ========================================================================
+  // INVERSE HYPERBOLIC FUNCTIONS
+  // ========================================================================
+
+  print_subheader( "INVERSE HYPERBOLIC FUNCTIONS" );
+
+  for ( double x_val : test_points_positive )
   {
-    dual2nd x = 1.1;
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
 
-    auto fun = []( dual2nd x) -> dual2nd {
-      return power3(cbrt(x));
-      //return power4(sqrt(sqrt(x)));
-    };
-    auto fun2 = []( dual2nd x) -> dual2nd {
-      return erf(x)+erfc(x);
-    };
-
+    // asinh(x) -> derivative is 1/sqrt(1+x²)
     {
-      auto [C, Cx, Cxx] = derivatives(fun, wrt(x, x), at(x));
-      std::cout << "cbrt(x)^3     (computed) = " << C   << "\n";
-      std::cout << "(cbrt(x)^3)'  (computed) = " << Cx  << "\n";
-      std::cout << "(cbrt(x)^3)'' (computed) = " << Cxx << "\n";
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return asinh( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 1.0 / sqrt( 1.0 + x_val * x_val );
+      bool   ok       = check_result( "d/dx[asinh(x)] = 1/√(1+x²)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
     }
+
+    // acosh(x) -> derivative is 1/sqrt(x²-1), valid for x > 1
+    if ( x_val > 1.01 )
     {
-      auto [C, Cx, Cxx] = derivatives(fun2, wrt(x, x), at(x));
-      std::cout << "(erfc(x)+erf(x)) (computed) = " << C   << "\n";
-      std::cout << "(erfc(x)+erf(x))' (computed) = " << Cx  << "\n";
-      std::cout << "(erfc(x)+erf(x))'' (computed) = " << Cxx << "\n";
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return acosh( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 1.0 / sqrt( x_val * x_val - 1 );
+      bool   ok       = check_result( "d/dx[acosh(x)] = 1/√(x²-1)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+
+    // atanh(x) -> derivative is 1/(1-x²), valid for |x| < 1
+    if ( abs( x_val ) < 0.99 )
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return atanh( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 1.0 / ( 1.0 - x_val * x_val );
+      bool   ok       = check_result( "d/dx[atanh(x)] = 1/(1-x²)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
     }
   }
+
+  // ========================================================================
+  // EXPONENTIAL AND LOGARITHMIC FUNCTIONS
+  // ========================================================================
+
+  print_subheader( "EXPONENTIAL AND LOGARITHMIC FUNCTIONS" );
+
+  for ( double x_val : test_points_positive )
   {
-    double kappa{ 3800.2011672501994 };
-    autodiff::dual2nd x{0.62608392663111712};
-    x.val.grad  = 0.43333335406161871;
-    x.grad.val  = 0.43333335406161871;
-    x.grad.grad = 0;
-    autodiff::dual2nd X{kappa * x };
-    autodiff::dual2nd res{ tanh( X ) };
-    std::cout << res << "\n";
-    std::cout << res.grad << "\n";
-    std::cout << res.grad.grad << "\n";
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    // exp(x) -> derivative is exp(x)
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return exp( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = exp( x_val );
+      bool   ok       = check_result( "d/dx[exp(x)] = exp(x)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+
+    // log(x) -> derivative is 1/x
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return log( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 1.0 / x_val;
+      bool   ok       = check_result( "d/dx[log(x)] = 1/x", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
   }
+
+  // ========================================================================
+  // POWER FUNCTIONS
+  // ========================================================================
+
+  print_subheader( "POWER FUNCTIONS" );
+
+  for ( double x_val : test_points_positive )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    // sqrt(x) -> derivative is 1/(2*sqrt(x))
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return sqrt( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 1.0 / ( 2.0 * sqrt( x_val ) );
+      bool   ok       = check_result( "d/dx[√x] = 1/(2√x)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+
+    // cbrt(x) -> derivative is 1/(3 * cbrt(x)^2)
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return cbrt( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 1.0 / ( 3.0 * pow( x_val, 2.0 / 3.0 ) );  // equivalente a 1/(3 * cbrt(x)^2)
+      bool   ok       = check_result( "d/dx[cbrt(x)] = 1/(3*cbrt(x)^2)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+
+    // pow(x, 3) -> derivative is 3*x²
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return pow( x, 3.0 ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 3.0 * x_val * x_val;
+      bool   ok       = check_result( "d/dx[x³] = 3x²", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+
+    // pow(x, 0.5) -> derivative is 0.5*x^(-0.5)
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return pow( x, 0.5 ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 0.5 * pow( x_val, -0.5 );
+      bool   ok       = check_result( "d/dx[x^0.5] = 0.5·x^(-0.5)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+  }
+
+  // ========================================================================
+  // ABSOLUTE VALUE AND SIGN FUNCTIONS
+  // ========================================================================
+
+  print_subheader( "ABSOLUTE VALUE AND RELATED FUNCTIONS" );
+
+  vector<double> test_points_sign = { -2.0, -0.5, 0.5, 2.0 };
+
+  for ( double x_val : test_points_sign )
+  {
+    if ( abs( x_val ) < 0.01 ) continue;  // Skip near-zero for abs
+
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    // abs(x) -> derivative is sign(x) for x != 0
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return abs( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = ( x_val > 0 ) ? 1.0 : -1.0;
+      bool   ok       = check_result( "d/dx[|x|] = sign(x)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+  }
+
+  // ========================================================================
+  // SPECIAL FUNCTIONS
+  // ========================================================================
+
+  print_subheader( "SPECIAL FUNCTIONS" );
+
+  for ( double x_val : { 0.3, 1.5, 2.7 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    // erf(x) -> derivative is (2/√π)*exp(-x²)
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return erf( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = ( 2.0 / sqrt( M_PI ) ) * exp( -x_val * x_val );
+      bool   ok       = check_result( "d/dx[erf(x)] = (2/√π)·exp(-x²)", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+  }
+
+  // ========================================================================
+  // COMBINED OPERATIONS
+  // ========================================================================
+
+  print_subheader( "COMBINED OPERATIONS" );
+
+  for ( double x_val : { 0.5, 1.0, 2.0 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    // sin(x) + cos(x) -> derivative is cos(x) - sin(x)
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return sin( x ) + cos( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = cos( x_val ) - sin( x_val );
+      bool   ok       = check_result( "d/dx[sin(x)+cos(x)]", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+
+    // exp(x) * sin(x) -> derivative is exp(x)*(sin(x) + cos(x))
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return exp( x ) * sin( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = exp( x_val ) * ( sin( x_val ) + cos( x_val ) );
+      bool   ok       = check_result( "d/dx[exp(x)·sin(x)]", deriv, expected, 1e-10 );
+      passed += ok;
+      total += 1;
+    }
+
+    // log(sin(x)) for x > 0 -> derivative is cot(x)
+    if ( sin( x_val ) > 0.01 )
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return log( sin( x ) ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = cos( x_val ) / sin( x_val );
+      bool   ok       = check_result( "d/dx[log(sin(x))] = cot(x)", deriv, expected, 1e-9 );
+      passed += ok;
+      total += 1;
+    }
+  }
+
+  // Print summary
+  fmt::print( "\n" );
+  fmt::print( "{}\n", string( 80, '-' ) );
+  if ( passed == total )
+  {
+    fmt::print(
+      fg( fmt::color::green ) | fmt::emphasis::bold,
+      "Math Functions: {}/{} tests passed ✓\n",
+      passed,
+      total );
+  }
+  else
+  {
+    fmt::print( fg( fmt::color::orange ) | fmt::emphasis::bold, "Math Functions: {}/{} tests passed\n", passed, total );
+  }
+  fmt::print( "{}\n", string( 80, '-' ) );
+}
+
+
+// ============================================================================
+// SECTION: Original Test Functions
+// ============================================================================
+
+void test_basic_functions()
+{
+  using namespace TestUtils;
+
+  print_header( "BASIC FUNCTION TESTS" );
+
+  vector<double> test_points = { 0.5, 1.0, 2.0, 3.0, 5.0 };
+  int            passed = 0, total = 0;
+
+  for ( double x_val : test_points )
+  {
+    print_subheader( "Test point: x = " + to_string( x_val ) );
+
+    // Test f1
+    dual   x    = x_val;
+    dual   u    = f1( x );
+    double dudx = derivative( f1, wrt( x ), at( x ) );
+    bool   ok1  = check_result( "f(x)=1+x+x²+1/x+ln(x)", dudx, df1_analytical( x_val ), 1e-9 );
+
+    // Test f2
+    x        = x_val;
+    u        = f2( x );
+    dudx     = derivative( f2, wrt( x ), at( x ) );
+    bool ok2 = check_result( "f(x)=sin(x)cos(x)+exp(x)", dudx, df2_analytical( x_val ), 1e-9 );
+
+    passed += ok1 + ok2;
+    total += 2;
+
+    // Test composition of functions
+    auto f_composite = []( dual x ) -> dual { return sin( exp( x ) ) * cos( log( 1 + x ) ); };
+
+    // Finite difference for verification
+    double h       = 1e-7;
+    double f_plus  = sin( exp( x_val + h ) ) * cos( log( 1 + x_val + h ) );
+    double f_minus = sin( exp( x_val - h ) ) * cos( log( 1 + x_val - h ) );
+    double df_fd   = ( f_plus - f_minus ) / ( 2 * h );
+
+    x            = x_val;
+    double df_ad = derivative( f_composite, wrt( x ), at( x ) );
+    bool   ok3   = check_result( "Composite: sin(exp(x))*cos(log(1+x))", df_ad, df_fd, 1e-6 );
+
+    passed += ok3;
+    total += 1;
+  }
+
+  fmt::print( "\n" );
+  if ( passed == total )
+  {
+    fmt::print( fg( fmt::color::green ) | fmt::emphasis::bold, "Basic Functions: {}/{} tests passed\n", passed, total );
+  }
+  else
+  {
+    fmt::print( fg( fmt::color::red ) | fmt::emphasis::bold, "Basic Functions: {}/{} tests passed\n", passed, total );
+  }
+}
+
+void test_multi_variable()
+{
+  using namespace TestUtils;
+
+  print_header( "MULTI-VARIABLE FUNCTION TESTS" );
+
+  vector<array<double, 2>> test_points = { { 1.0, 2.0 }, { 0.5, 3.0 }, { 2.0, 1.0 }, { 3.0, 0.5 } };
+
+  int passed = 0, total = 0;
+
+  for ( const auto & point : test_points )
+  {
+    double x_val = point[0], y_val = point[1];
+
+    print_subheader( fmt::format( "Test point: (x,y) = ({}, {})", x_val, y_val ) );
+
+    // Test g1
+    dual x = x_val, y = y_val;
+    dual u = g1( x, y );
+
+    double dudx = derivative( g1, wrt( x ), at( x, y ) );
+    double dudy = derivative( g1, wrt( y ), at( x, y ) );
+
+    auto grad_analytical = dg1_analytical( x_val, y_val );
+
+    bool ok1 = check_result( "∂g/∂x for x²+y²+xy", dudx, grad_analytical[0], 1e-9 );
+    bool ok2 = check_result( "∂g/∂y for x²+y²+xy", dudy, grad_analytical[1], 1e-9 );
+
+    passed += ok1 + ok2;
+    total += 2;
+
+    // Test g3 (three variables)
+    double z_val = 0.5;
+    dual   z     = z_val;
+    x            = x_val;
+    y            = y_val;
+    u            = g3( x, y, z );
+
+    dudx = derivative( g3, wrt( x ), at( x, y, z ) );
+    dudy = derivative( g3, wrt( y ), at( x, y, z ) );
+    // double dudz = derivative( g3, wrt( z ), at( x, y, z ) );
+
+    // Finite difference check for dudx
+    double h       = 1e-7;
+    double f_plus  = exp( ( x_val + h ) * y_val * z_val ) + log( ( x_val + h ) + y_val + z_val );
+    double f_minus = exp( ( x_val - h ) * y_val * z_val ) + log( ( x_val - h ) + y_val + z_val );
+    double dudx_fd = ( f_plus - f_minus ) / ( 2 * h );
+
+    bool ok3 = check_result( "∂g/∂x for exp(xyz)+ln(x+y+z)", dudx, dudx_fd, 1e-6 );
+
+    passed += ok3;
+    total += 1;
+  }
+
+  fmt::print( "\n" );
+  if ( passed == total )
+  {
+    fmt::print( fg( fmt::color::green ) | fmt::emphasis::bold, "Multi-variable: {}/{} tests passed\n", passed, total );
+  }
+  else
+  {
+    fmt::print( fg( fmt::color::red ) | fmt::emphasis::bold, "Multi-variable: {}/{} tests passed\n", passed, total );
+  }
+}
+
+void test_higher_order()
+{
+  using namespace TestUtils;
+
+  print_header( "HIGHER ORDER DERIVATIVE TESTS" );
+
+  vector<double> test_points = { 0.5, 1.0, 2.0, 3.14159 / 4 };
+  int            passed = 0, total = 0;
+
+  for ( double x_val : test_points )
+  {
+    print_subheader( "Test point: x = " + to_string( x_val ) );
+
+    // First and second derivatives using dual2nd
+    dual2nd x = x_val;
+
+    // Test f_second
+    auto   result_f = derivatives( f_second, wrt( x, x ), at( x ) );
+    double fx       = result_f[1];
+    double fxx      = result_f[2];
+
+    // Analytical first derivative
+    double fx_analytical = 3 * x_val * x_val + cos( x_val ) * cos( x_val ) - sin( x_val ) * sin( x_val );
+
+    // Analytical second derivative
+    double fxx_analytical = 6 * x_val - 4 * sin( x_val ) * cos( x_val );
+
+    bool ok1 = check_result( "f'(x) for x³+sin(x)cos(x)", fx, fx_analytical, 1e-9 );
+    bool ok2 = check_result( "f''(x) for x³+sin(x)cos(x)", fxx, fxx_analytical, 1e-9 );
+
+    // Test second derivative for f2
+    dual2nd x2 = x_val;
+    auto    result_f2 =
+      derivatives( []( dual2nd x ) -> dual2nd { return sin( x ) * cos( x ) + exp( x ); }, wrt( x2, x2 ), at( x2 ) );
+
+    double f2_xx = result_f2[2];
+    bool   ok3   = check_result( "f''(x) for sin(x)cos(x)+exp(x)", f2_xx, d2f2_analytical( x_val ), 1e-9 );
+
+    passed += ok1 + ok2 + ok3;
+    total += 3;
+  }
+
+  fmt::print( "\n" );
+  if ( passed == total )
+  {
+    fmt::print( fg( fmt::color::green ) | fmt::emphasis::bold, "Higher Order: {}/{} tests passed\n", passed, total );
+  }
+  else
+  {
+    fmt::print( fg( fmt::color::red ) | fmt::emphasis::bold, "Higher Order: {}/{} tests passed\n", passed, total );
+  }
+}
+
+void test_edge_cases()
+{
+  using namespace TestUtils;
+
+  print_header( "EDGE CASE TESTS" );
+
+  int passed = 0, total = 0;
+
+  vector<double> edge_points = { 1e-10, 1e-5, 1.0, 10.0 };
+
+  for ( double x_val : edge_points )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTesting at x = {}\n", x_val );
+
+    // Test near zero
+    dual x = x_val;
+
+    // Test function with division - derivata analitica: (x*cos(x) - sin(x) - 1)/x²
+    if ( abs( x_val ) > 1e-15 )
+    {  // Avoid division by zero
+      auto   div_func = []( dual x ) -> dual { return 1 / x + sin( x ) / x; };
+      double ddiv_ad  = derivative( div_func, wrt( x ), at( x ) );
+
+      // Derivata analitica: d/dx[1/x + sin(x)/x] = -1/x² + (x*cos(x) - sin(x))/x²
+      // = (x*cos(x) - sin(x) - 1)/x²
+      double ddiv_analytical = ( x_val * cos( x_val ) - sin( x_val ) - 1 ) / ( x_val * x_val );
+
+      bool ok1 = check_result( "d/dx[1/x + sin(x)/x]", ddiv_ad, ddiv_analytical, 1e-9 );
+      passed += ok1;
+      total += 1;
+    }
+
+    // Test exponential for large values
+    auto   exp_func        = []( dual x ) -> dual { return exp( x ) + exp( -x ); };
+    double dexp_ad         = derivative( exp_func, wrt( x ), at( x ) );
+    double dexp_analytical = exp( x_val ) - exp( -x_val );
+
+    bool ok2 = check_result( "d/dx[exp(x)+exp(-x)]", dexp_ad, dexp_analytical, 1e-9 );
+
+    // Test log
+    if ( x_val > 0 )
+    {
+      auto   log_func        = []( dual x ) -> dual { return log( 1 + x ) + log( x ); };
+      double dlog_ad         = derivative( log_func, wrt( x ), at( x ) );
+      double dlog_analytical = 1 / ( 1 + x_val ) + 1 / x_val;
+
+      bool ok3 = check_result( "d/dx[ln(1+x)+ln(x)]", dlog_ad, dlog_analytical, 1e-9 );
+      passed += ok3;
+      total += 1;
+    }
+
+    passed += ok2;
+    total += 1;
+
+    // Test aggiuntivo: funzione complessa con composizione
+    auto   complex_func = []( dual x ) -> dual { return exp( sin( x ) ) * cos( x ) / sqrt( 1 + x * x ); };
+    double dcomplex_ad  = derivative( complex_func, wrt( x ), at( x ) );
+
+    // Derivata analitica: d/dx[exp(sin(x)) * cos(x) / sqrt(1+x²)]
+    // = exp(sin(x)) * [cos²(x) - sin(x)*cos(x)/sqrt(1+x²) - x*cos(x)/(1+x²)^(3/2)]
+    double sinx                = sin( x_val );
+    double cosx                = cos( x_val );
+    double denom               = sqrt( 1 + x_val * x_val );
+    double dcomplex_analytical = exp( sinx ) *
+                                 ( cosx * cosx - sinx * cosx / denom - x_val * cosx / pow( 1 + x_val * x_val, 1.5 ) );
+
+    bool ok4 = check_result( "d/dx[exp(sin(x))*cos(x)/sqrt(1+x²)]", dcomplex_ad, dcomplex_analytical, 1e-8 );
+    passed += ok4;
+    total += 1;
+  }
+
+  // Test su punti critici particolari
+  fmt::print( fg( fmt::color::yellow ), "\nTesting special points\n" );
+
+  vector<pair<double, string>> special_points = { { 0.0, "zero" },
+                                                  { M_PI, "pi" },
+                                                  { M_PI / 2, "pi/2" },
+                                                  { 2 * M_PI, "2pi" } };
+
+  for ( auto & [x_val, name] : special_points )
+  {
+    if ( x_val == 0.0 ) continue;  // già gestito sopra
+
+    fmt::print( fg( fmt::color::yellow ), "\n  Testing at x = {} ({})\n", x_val, name );
+    dual x = x_val;
+
+    // Test funzione tangente
+    auto   tan_func        = []( dual x ) -> dual { return tan( x ); };
+    double dtan_ad         = derivative( tan_func, wrt( x ), at( x ) );
+    double dtan_analytical = 1.0 / ( cos( x_val ) * cos( x_val ) );
+
+    bool ok = check_result( "d/dx[tan(x)]", dtan_ad, dtan_analytical, 1e-9 );
+    passed += ok;
+    total += 1;
+  }
+
+  // Test NaN e Inf handling
+  fmt::print( fg( fmt::color::yellow ), "\nTesting special values\n" );
+
+  dual x = numeric_limits<double>::quiet_NaN();
+  dual u = sin( x );
+  fmt::print( fg( fmt::color::yellow ), "  {} sin(NaN) = {}\n", WARNING, u.val );
+
+  x = numeric_limits<double>::infinity();
+  u = exp( x );
+  fmt::print( fg( fmt::color::yellow ), "  {} exp(Inf) = {}\n", WARNING, u.val );
+
+  // Test asintotici
+  x = 1e-6;
+  u = sin( 1 / x );
+  fmt::print( fg( fmt::color::yellow ), "  {} sin(1/1e-6) = {}\n", INFO, u.val );
+
+  fmt::print( "\n" );
+  if ( passed == total )
+  {
+    fmt::print( fg( fmt::color::green ) | fmt::emphasis::bold, "Edge Cases: {}/{} tests passed\n", passed, total );
+  }
+  else
+  {
+    fmt::print( fg( fmt::color::red ) | fmt::emphasis::bold, "Edge Cases: {}/{} tests passed\n", passed, total );
+  }
+}
+
+
+void test_performance()
+{
+  using namespace TestUtils;
+
+  print_header( "PERFORMANCE TESTS" );
+
+  const int N = 100000;
+
+  // Time autodiff
+  auto start = chrono::high_resolution_clock::now();
+
+  double sum_ad = 0.0;
+  for ( int i = 0; i < N; ++i )
+  {
+    double x_val = 1.0 + i * 0.0001;
+    dual   x     = x_val;
+
+    auto func = []( dual x ) -> dual { return sin( x ) * cos( x ) + exp( x ) + log( 1 + x ); };
+
+    sum_ad += derivative( func, wrt( x ), at( x ) );
+  }
+
+  auto end         = chrono::high_resolution_clock::now();
+  auto duration_ad = chrono::duration<double>( end - start ).count();
+
+  // Time finite differences (for comparison)
+  start = chrono::high_resolution_clock::now();
+
+  double sum_fd = 0.0;
+  double h      = 1e-7;
+  for ( int i = 0; i < N; ++i )
+  {
+    double x_val = 1.0 + i * 0.0001;
+
+    auto func = []( double x ) -> double { return sin( x ) * cos( x ) + exp( x ) + log( 1 + x ); };
+
+    double df_fd = ( func( x_val + h ) - func( x_val - h ) ) / ( 2 * h );
+    sum_fd += df_fd;
+  }
+
+  end              = chrono::high_resolution_clock::now();
+  auto duration_fd = chrono::duration<double>( end - start ).count();
+
+  fmt::print( "\nPerformance comparison ({} evaluations):\n", N );
+  fmt::print( "  Autodiff:    {:.6f} seconds\n", duration_ad );
+  fmt::print( "  Finite diff: {:.6f} seconds\n", duration_fd );
+  fmt::print( "  Speed ratio: {:.2f}x\n", duration_fd / duration_ad );
+  fmt::print( "  Result diff: {:.2e}\n", abs( sum_ad - sum_fd ) );
+}
+
+// ============================================================================
+// SECTION: Test Functions Defined in Utils_autodiff.hh
+// ============================================================================
+
+void test_utils_functions()
+{
+  using namespace TestUtils;
+
+  print_header( "UTILS_AUTODIFF.HH FUNCTIONS TESTS" );
+
+  vector<double> test_points_positive = { 0.5, 1.0, 2.0, 3.0, 5.0 };
+  vector<double> test_points_all      = { -2.0, -0.5, 0.0, 0.5, 2.0 };
+
+  int passed = 0, total = 0;
+
+  // ========================================================================
+  // TEST CBRT (cubic root)
+  // ========================================================================
+  print_subheader( "CBRT FUNCTION (cubic root)" );
+
+  for ( double x_val : test_points_all )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    dual   x     = x_val;
+    auto   func  = []( dual x ) -> dual { return cbrt( x ); };
+    double deriv = derivative( func, wrt( x ), at( x ) );
+
+    // Analytical derivative: d/dx[cbrt(x)] = 1/(3 * cbrt(x)^2)
+    double expected = 1.0 / ( 3.0 * pow( abs( x_val ), 2.0 / 3.0 ) );
+
+    bool ok = check_result( "d/dx[cbrt(x)]", deriv, expected, 1e-9 );
+    passed += ok;
+    total += 1;
+  }
+
+  // ========================================================================
+  // TEST ERFC (complementary error function)
+  // ========================================================================
+  print_subheader( "ERFC FUNCTION (complementary error)" );
+
+  for ( double x_val : { -2.0, -1.0, 0.0, 1.0, 2.0 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    dual   x     = x_val;
+    auto   func  = []( dual x ) -> dual { return erfc( x ); };
+    double deriv = derivative( func, wrt( x ), at( x ) );
+
+    // Analytical derivative: d/dx[erfc(x)] = -2/√π * exp(-x²)
+    double expected = -2.0 / sqrt( M_PI ) * exp( -x_val * x_val );
+
+    bool ok = check_result( "d/dx[erfc(x)]", deriv, expected, 1e-9 );
+    passed += ok;
+    total += 1;
+  }
+
+  // ========================================================================
+  // TEST ROUND, FLOOR, CEIL (should have zero derivative)
+  // ========================================================================
+  print_subheader( "ROUND, FLOOR, CEIL FUNCTIONS" );
+
+  for ( double x_val : { 0.3, 0.7, 1.2, 2.8 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    // Test round
+    {
+      dual   x     = x_val;
+      auto   func  = []( dual x ) -> dual { return round( x ); };
+      double deriv = derivative( func, wrt( x ), at( x ) );
+      bool   ok    = check_result( "d/dx[round(x)] (should be 0)", deriv, 0.0, 1e-9 );
+      passed += ok;
+      total += 1;
+    }
+
+    // Test floor
+    {
+      dual   x     = x_val;
+      auto   func  = []( dual x ) -> dual { return floor( x ); };
+      double deriv = derivative( func, wrt( x ), at( x ) );
+      bool   ok    = check_result( "d/dx[floor(x)] (should be 0)", deriv, 0.0, 1e-9 );
+      passed += ok;
+      total += 1;
+    }
+
+    // Test ceil
+    {
+      dual   x     = x_val;
+      auto   func  = []( dual x ) -> dual { return ceil( x ); };
+      double deriv = derivative( func, wrt( x ), at( x ) );
+      bool   ok    = check_result( "d/dx[ceil(x)] (should be 0)", deriv, 0.0, 1e-9 );
+      passed += ok;
+      total += 1;
+    }
+  }
+
+  // ========================================================================
+  // TEST LOG1P (log(1 + x))
+  // ========================================================================
+  print_subheader( "LOG1P FUNCTION (log(1 + x))" );
+
+  for ( double x_val : { -0.5, 0.0, 0.5, 1.0, 2.0 } )
+  {
+    if ( x_val <= -1.0 ) continue;  // Domain restriction
+
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    dual   x     = x_val;
+    auto   func  = []( dual x ) -> dual { return log1p( x ); };
+    double deriv = derivative( func, wrt( x ), at( x ) );
+
+    // Analytical derivative: d/dx[log(1 + x)] = 1/(1 + x)
+    double expected = 1.0 / ( 1.0 + x_val );
+
+    bool ok = check_result( "d/dx[log1p(x)]", deriv, expected, 1e-9 );
+    passed += ok;
+    total += 1;
+  }
+
+  // ========================================================================
+  // TEST ATANH, ASINH, ACOSH
+  // ========================================================================
+  print_subheader( "INVERSE HYPERBOLIC FUNCTIONS" );
+
+  // ATANH
+  for ( double x_val : { -0.8, -0.5, 0.0, 0.5, 0.8 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point for atanh: x = {:.4f}\n", x_val );
+
+    dual   x     = x_val;
+    auto   func  = []( dual x ) -> dual { return atanh( x ); };
+    double deriv = derivative( func, wrt( x ), at( x ) );
+
+    // Analytical derivative: d/dx[atanh(x)] = 1/(1 - x²)
+    double expected = 1.0 / ( 1.0 - x_val * x_val );
+
+    bool ok = check_result( "d/dx[atanh(x)]", deriv, expected, 1e-9 );
+    passed += ok;
+    total += 1;
+  }
+
+  // ASINH
+  for ( double x_val : { -2.0, -1.0, 0.0, 1.0, 2.0 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point for asinh: x = {:.4f}\n", x_val );
+
+    dual   x     = x_val;
+    auto   func  = []( dual x ) -> dual { return asinh( x ); };
+    double deriv = derivative( func, wrt( x ), at( x ) );
+
+    // Analytical derivative: d/dx[asinh(x)] = 1/√(1 + x²)
+    double expected = 1.0 / sqrt( 1.0 + x_val * x_val );
+
+    bool ok = check_result( "d/dx[asinh(x)]", deriv, expected, 1e-9 );
+    passed += ok;
+    total += 1;
+  }
+
+  // ACOSH (domain: x >= 1)
+  for ( double x_val : { 1.1, 1.5, 2.0, 3.0 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point for acosh: x = {:.4f}\n", x_val );
+
+    dual   x     = x_val;
+    auto   func  = []( dual x ) -> dual { return acosh( x ); };
+    double deriv = derivative( func, wrt( x ), at( x ) );
+
+    // Analytical derivative: d/dx[acosh(x)] = 1/√(x² - 1)
+    double expected = 1.0 / sqrt( x_val * x_val - 1.0 );
+
+    bool ok = check_result( "d/dx[acosh(x)]", deriv, expected, 1e-9 );
+    passed += ok;
+    total += 1;
+  }
+
+  // ========================================================================
+  // TEST POWER FUNCTIONS (power2 to power8, rpower2 to rpower8)
+  // ========================================================================
+  print_subheader( "POWER FUNCTIONS" );
+
+  for ( double x_val : { 0.5, 1.0, 1.5, 2.0 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    // Test power2
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return power2( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 2.0 * x_val;
+      bool   ok       = check_result( "d/dx[x²] via power2", deriv, expected, 1e-9 );
+      passed += ok;
+      total += 1;
+    }
+
+    // Test power3
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return power3( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 3.0 * x_val * x_val;
+      bool   ok       = check_result( "d/dx[x³] via power3", deriv, expected, 1e-9 );
+      passed += ok;
+      total += 1;
+    }
+
+    // Test power4
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return power4( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = 4.0 * pow( x_val, 3.0 );
+      bool   ok       = check_result( "d/dx[x⁴] via power4", deriv, expected, 1e-9 );
+      passed += ok;
+      total += 1;
+    }
+
+    // Test rpower2
+    if ( abs( x_val ) > 1e-6 )
+    {
+      dual   x        = x_val;
+      auto   func     = []( dual x ) -> dual { return rpower2( x ); };
+      double deriv    = derivative( func, wrt( x ), at( x ) );
+      double expected = -2.0 / ( x_val * x_val * x_val );  // d/dx[1/x²] = -2/x³
+      bool   ok       = check_result( "d/dx[1/x²] via rpower2", deriv, expected, 1e-9 );
+      passed += ok;
+      total += 1;
+    }
+  }
+
+  // Print summary
+  fmt::print( "\n" );
+  fmt::print( "{}\n", string( 80, '-' ) );
+  if ( passed == total )
+  {
+    fmt::print(
+      fg( fmt::color::green ) | fmt::emphasis::bold,
+      "Utils Functions: {}/{} tests passed ✓\n",
+      passed,
+      total );
+  }
+  else
+  {
+    fmt::print(
+      fg( fmt::color::orange ) | fmt::emphasis::bold,
+      "Utils Functions: {}/{} tests passed\n",
+      passed,
+      total );
+  }
+  fmt::print( "{}\n", string( 80, '-' ) );
+}
+
+// ============================================================================
+// SECTION: Complex Combinations and Conditional Functions
+// ============================================================================
+
+void test_complex_combinations()
+{
+  using namespace TestUtils;
+
+  print_header( "COMPLEX COMBINATIONS AND CONDITIONAL FUNCTIONS" );
+
+  int passed = 0, total = 0;
+
+  // ========================================================================
+  // TEST 1: Complex combination of multiple functions
+  // ========================================================================
+  print_subheader( "Complex Combination 1: sin(exp(x)) * cos(log1p(x))" );
+
+  for ( double x_val : { 0.1, 0.5, 1.0, 2.0 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    auto complex_func = []( dual x ) -> dual { return sin( exp( x ) ) * cos( log1p( x ) ); };
+
+    dual   x        = x_val;
+    double deriv_ad = derivative( complex_func, wrt( x ), at( x ) );
+
+    // Finite difference for verification
+    double h        = 1e-7;
+    double f_plus   = sin( exp( x_val + h ) ) * cos( log1p( x_val + h ) );
+    double f_minus  = sin( exp( x_val - h ) ) * cos( log1p( x_val - h ) );
+    double deriv_fd = ( f_plus - f_minus ) / ( 2 * h );
+
+    bool ok = check_result( "Complex combo 1", deriv_ad, deriv_fd, 1e-6 );
+    passed += ok;
+    total += 1;
+  }
+
+  // ========================================================================
+  // TEST 2: Nested power functions with hyperbolic functions
+  // ========================================================================
+  print_subheader( "Complex Combination 2: tanh(x) * power3(sin(x)) + asinh(x)" );
+
+  for ( double x_val : { 0.2, 0.5, 0.8 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    auto complex_func = []( dual x ) -> dual { return tanh( x ) * power3( sin( x ) ) + asinh( x ); };
+
+    dual   x        = x_val;
+    double deriv_ad = derivative( complex_func, wrt( x ), at( x ) );
+
+    // Finite difference for verification
+    double h        = 1e-7;
+    double f_plus   = tanh( x_val + h ) * pow( sin( x_val + h ), 3 ) + asinh( x_val + h );
+    double f_minus  = tanh( x_val - h ) * pow( sin( x_val - h ), 3 ) + asinh( x_val - h );
+    double deriv_fd = ( f_plus - f_minus ) / ( 2 * h );
+
+    bool ok = check_result( "Complex combo 2", deriv_ad, deriv_fd, 1e-6 );
+    passed += ok;
+    total += 1;
+  }
+
+  // ========================================================================
+  // TEST 3: Function with conditional (if) - Piecewise function
+  // ========================================================================
+  print_subheader( "Conditional Function: Piecewise (ReLU-like)" );
+
+  // Define a piecewise function: f(x) = { x² if x < 1, exp(x) if x >= 1 }
+  auto piecewise_func = []( dual x ) -> dual
+  {
+    // Note: This is a test - in real autodiff, branching can cause issues
+    // We'll use a smooth approximation instead
+    dual threshold = 1.0;
+
+    // Smooth approximation of step function
+    dual k      = 50.0;  // Smoothing factor
+    dual weight = 1.0 / ( 1.0 + exp( -k * ( x - threshold ) ) );
+
+    // Piecewise components
+    dual part1 = power2( x );  // x² for x < 1
+    dual part2 = exp( x );     // exp(x) for x >= 1
+
+    // Smooth blend
+    return ( 1.0 - weight ) * part1 + weight * part2;
+  };
+
+  for ( double x_val : { 0.0, 0.5, 1.0, 1.5, 2.0 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    dual   x        = x_val;
+    double deriv_ad = derivative( piecewise_func, wrt( x ), at( x ) );
+
+    // Finite difference for verification
+    double h = 1e-7;
+    // Re-evaluate function at shifted points
+    double x_plus      = x_val + h;
+    double weight_plus = 1.0 / ( 1.0 + exp( -50.0 * ( x_plus - 1.0 ) ) );
+    double f_plus      = ( 1.0 - weight_plus ) * ( x_plus * x_plus ) + weight_plus * exp( x_plus );
+
+    double x_minus      = x_val - h;
+    double weight_minus = 1.0 / ( 1.0 + exp( -50.0 * ( x_minus - 1.0 ) ) );
+    double f_minus      = ( 1.0 - weight_minus ) * ( x_minus * x_minus ) + weight_minus * exp( x_minus );
+
+    double deriv_fd = ( f_plus - f_minus ) / ( 2 * h );
+
+    bool ok = check_result( "Piecewise function (smooth)", deriv_ad, deriv_fd, 1e-5 );
+    passed += ok;
+    total += 1;
+  }
+
+  // ========================================================================
+  // TEST 4: Complex multi-variable conditional
+  // ========================================================================
+  print_subheader( "Multi-variable Conditional Function" );
+
+  auto multi_conditional = []( dual x, dual y ) -> dual
+  {
+    // Smooth conditional: f(x,y) = if x > y then sin(x)*cos(y) else cos(x)*sin(y)
+    dual k      = 50.0;
+    dual weight = 1.0 / ( 1.0 + exp( -k * ( x - y ) ) );
+
+    dual part1 = sin( x ) * cos( y );  // when x > y
+    dual part2 = cos( x ) * sin( y );  // when x <= y
+
+    return weight * part1 + ( 1.0 - weight ) * part2;
+  };
+
+  vector<array<double, 2>> test_points = { { 0.5, 1.0 }, { 1.0, 0.5 }, { 1.0, 1.0 }, { 1.5, 0.8 }, { 0.8, 1.5 } };
+
+  for ( const auto & point : test_points )
+  {
+    double x_val = point[0], y_val = point[1];
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: (x,y) = ({:.4f}, {:.4f})\n", x_val, y_val );
+
+    dual x = x_val, y = y_val;
+
+    // Test derivative with respect to x
+    double deriv_x_ad = derivative( multi_conditional, wrt( x ), at( x, y ) );
+
+    // Finite difference for ∂f/∂x
+    double h      = 1e-7;
+    double f_plus = [&]( double x, double y )
+    {
+      dual xd = x, yd = y;
+      return multi_conditional( xd, yd ).val;
+    }( x_val + h, y_val );
+
+    double f_minus = [&]( double x, double y )
+    {
+      dual xd = x, yd = y;
+      return multi_conditional( xd, yd ).val;
+    }( x_val - h, y_val );
+
+    double deriv_x_fd = ( f_plus - f_minus ) / ( 2 * h );
+
+    bool ok_x = check_result( "∂f/∂x for multi-conditional", deriv_x_ad, deriv_x_fd, 1e-5 );
+
+    // Test derivative with respect to y
+    double deriv_y_ad = derivative( multi_conditional, wrt( y ), at( x, y ) );
+
+    f_plus = [&]( double x, double y )
+    {
+      dual xd = x, yd = y;
+      return multi_conditional( xd, yd ).val;
+    }( x_val, y_val + h );
+
+    f_minus = [&]( double x, double y )
+    {
+      dual xd = x, yd = y;
+      return multi_conditional( xd, yd ).val;
+    }( x_val, y_val - h );
+
+    double deriv_y_fd = ( f_plus - f_minus ) / ( 2 * h );
+
+    bool ok_y = check_result( "∂f/∂y for multi-conditional", deriv_y_ad, deriv_y_fd, 1e-5 );
+
+    passed += ok_x + ok_y;
+    total += 2;
+  }
+
+  // ========================================================================
+  // TEST 5: Higher-order derivatives of complex combinations
+  // ========================================================================
+  print_subheader( "Higher-order Derivatives of Complex Functions" );
+
+  for ( double x_val : { 0.5, 1.0 } )
+  {
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: x = {:.4f}\n", x_val );
+
+    // Complex function: f(x) = exp(sin(x)) * cbrt(1 + x²)
+    auto complex_func_higher = []( dual2nd x ) -> dual2nd { return exp( sin( x ) ) * cbrt( 1.0 + power2( x ) ); };
+
+    dual2nd x      = x_val;
+    auto    result = derivatives( complex_func_higher, wrt( x, x ), at( x ) );
+    double  deriv1 = result[1];  // First derivative
+    double  deriv2 = result[2];  // Second derivative
+
+    // Finite difference for first derivative
+    double h        = 1e-6;
+    auto   func_val = []( double x ) -> double { return exp( sin( x ) ) * pow( 1.0 + x * x, 1.0 / 3.0 ); };
+
+    double f_plus    = func_val( x_val + h );
+    double f_minus   = func_val( x_val - h );
+    double deriv1_fd = ( f_plus - f_minus ) / ( 2 * h );
+
+    // Finite difference for second derivative
+    double f0        = func_val( x_val );
+    double deriv2_fd = ( f_plus - 2 * f0 + f_minus ) / ( h * h );
+
+    bool ok1 = check_result( "f'(x) for complex higher-order", deriv1, deriv1_fd, 1e-4 );
+    bool ok2 = check_result( "f''(x) for complex higher-order", deriv2, deriv2_fd, 1e-3 );
+
+    passed += ok1 + ok2;
+    total += 2;
+  }
+
+  // ========================================================================
+  // TEST 6: Function with multiple conditionals (smooth max/min)
+  // ========================================================================
+  print_subheader( "Smooth Maximum and Minimum Functions" );
+
+  // Smooth maximum: log(exp(k*x) + exp(k*y))/k
+  auto smooth_max = []( dual x, dual y ) -> dual
+  {
+    dual k = 10.0;
+    return log( exp( k * x ) + exp( k * y ) ) / k;
+  };
+
+  for ( const auto & point : vector<array<double, 2>>{ { 0.0, 1.0 }, { 1.0, 0.5 }, { 2.0, 2.0 } } )
+  {
+    double x_val = point[0], y_val = point[1];
+    fmt::print( fg( fmt::color::yellow ), "\nTest point: (x,y) = ({:.4f}, {:.4f})\n", x_val, y_val );
+
+    dual x = x_val, y = y_val;
+
+    // Derivative with respect to x
+    double deriv_x_ad = derivative( smooth_max, wrt( x ), at( x, y ) );
+
+    // Analytical derivative: ∂/∂x smooth_max = exp(k*x) / (exp(k*x) + exp(k*y))
+    double k                  = 10.0;
+    double deriv_x_analytical = exp( k * x_val ) / ( exp( k * x_val ) + exp( k * y_val ) );
+
+    bool ok_x = check_result( "∂/∂x smooth_max(x,y)", deriv_x_ad, deriv_x_analytical, 1e-6 );
+
+    // Derivative with respect to y
+    double deriv_y_ad         = derivative( smooth_max, wrt( y ), at( x, y ) );
+    double deriv_y_analytical = exp( k * y_val ) / ( exp( k * x_val ) + exp( k * y_val ) );
+
+    bool ok_y = check_result( "∂/∂y smooth_max(x,y)", deriv_y_ad, deriv_y_analytical, 1e-6 );
+
+    passed += ok_x + ok_y;
+    total += 2;
+  }
+
+  // Print summary
+  fmt::print( "\n" );
+  fmt::print( "{}\n", string( 80, '-' ) );
+  if ( passed == total )
+  {
+    fmt::print(
+      fg( fmt::color::green ) | fmt::emphasis::bold,
+      "Complex Combinations: {}/{} tests passed ✓\n",
+      passed,
+      total );
+  }
+  else
+  {
+    fmt::print(
+      fg( fmt::color::orange ) | fmt::emphasis::bold,
+      "Complex Combinations: {}/{} tests passed\n",
+      passed,
+      total );
+  }
+  fmt::print( "{}\n", string( 80, '-' ) );
+}
+
+// ============================================================================
+// SECTION: Main Function
+// ============================================================================
+
+int main()
+{
+  using namespace TestUtils;
+
+  fmt::print(
+    fg( fmt::color::cyan ) | fmt::emphasis::bold,
+    "\n================================ AUTODIFF LIBRARY TEST SUITE ================================\n" );
+  fmt::print( "Testing autodiff implementation with comprehensive math function coverage...\n" );
+
+  try
+  {
+    // Run all test suites
+    test_all_math_functions();    // Comprehensive math tests
+    test_utils_functions();       // NEW: Test functions from Utils_autodiff.hh
+    test_complex_combinations();  // NEW: Test complex combinations and conditionals
+    test_basic_functions();
+    test_multi_variable();
+    test_higher_order();
+    test_edge_cases();
+    test_performance();
+  }
+  catch ( const exception & e )
+  {
+    fmt::print( stderr, fg( fmt::color::red ) | fmt::emphasis::bold, "\nException during testing: {}\n", e.what() );
+    return 1;
+  }
+
+  fmt::print( "\n{}\n", string( 80, '=' ) );
+  fmt::print( fg( fmt::color::green ) | fmt::emphasis::bold, "✓ Test suite completed successfully!\n" );
+  fmt::print( "{}\n", string( 80, '=' ) );
+
+  return 0;
 }

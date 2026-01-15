@@ -9,28 +9,31 @@
 \****************************************************************************/
 
 #include "TestClass.hh"
-#include "Utils.hh"
 
 #include <iostream>
 
-namespace Utils {
+#include "Utils.hh"
 
-  void
-  TestClass::set_a(double a) {
+namespace Utils
+{
+
+  void TestClass::set_a( double a )
+  {
     m_a = a;
   }
 
-  void
-  TestClass::set_b(double b) {
+  void TestClass::set_b( double b )
+  {
     m_b = b;
   }
 
-  void
-  TestClass::set_c(double c) {
+  void TestClass::set_c( double c )
+  {
     m_c = c;
   }
 
-  void TestClass::info( ostream & stream ) const {
+  void TestClass::info( ostream & stream ) const
+  {
     fmt::print( stream, "a={:<10} b={:<10} c={:<10}\n", m_a, m_b, m_c );
   }
-}
+}  // namespace Utils

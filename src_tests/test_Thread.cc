@@ -22,61 +22,65 @@
 
 using std::cout;
 
-class Counter {
+class Counter
+{
   Utils::BinarySearch<int> bs;
+
 public:
-  Counter() {
-    bool ok ;
+  Counter()
+  {
+    bool  ok;
     int * pdata = bs.search( std::this_thread::get_id(), ok );
-    *pdata = 0;
+    *pdata      = 0;
   }
 
-  void
-  inc() const {
-    bool ok;
+  void inc() const
+  {
+    bool  ok;
     int * pdata{ bs.search( std::this_thread::get_id(), ok ) };
     if ( !ok ) std::cerr << "Counter::inc failed thread\n";
-    ++(*pdata);
+    ++( *pdata );
   }
 
-  void
-  print() const {
-    bool ok;
+  void print() const
+  {
+    bool  ok;
     int * pdata{ bs.search( std::this_thread::get_id(), ok ) };
     if ( !ok ) std::cerr << "Counter::inc failed thread\n";
     fmt::print( "thread {}, counter = {}\n", std::this_thread::get_id(), *pdata );
   }
 };
 
-static
-void
-do_test() {
+static void do_test()
+{
   Counter c;
-  for ( int i = 0; i < 10000000; ++i ) {
-    //Utils::sleep_for_milliseconds(1);
+  for ( int i = 0; i < 10000000; ++i )
+  {
+    // Utils::sleep_for_milliseconds(1);
     c.inc();
   }
   c.print();
 }
 
-static
-void
-do_passa( int const ii ) {
+static void do_passa( int const ii )
+{
   cout << "passa ii=" << ii << '\n';
 }
 
-int
-main() {
+int main()
+{
   std::vector<std::thread> threads_tab;
-  for ( int i = 0; i < 100; ++i ) {
-    //Utils::sleep_for_milliseconds(1);
-    threads_tab.emplace_back(do_test);
+  for ( int i = 0; i < 100; ++i )
+  {
+    // Utils::sleep_for_milliseconds(1);
+    threads_tab.emplace_back( do_test );
   }
   for ( auto & t : threads_tab ) t.join();
   cout << "Test WorkerLoop\n\n";
 
   Utils::WorkerLoop wl;
-  for ( int i = 0; i < 100; ++i ) {
+  for ( int i = 0; i < 100; ++i )
+  {
     std::function<void()> exe = [i]() -> void { cout << "passing i=" << i << '\n'; };
     wl.exec( exe );
     wl.run( do_passa, i );

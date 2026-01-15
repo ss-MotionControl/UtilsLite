@@ -17,28 +17,24 @@
  |                                                                          |
 \*--------------------------------------------------------------------------*/
 
-#include "Utils.hh"
-
 #include <string>
+
+#include "Utils.hh"
+#include "Utils_rang.hh"
 
 using namespace std;
 using namespace rang;
 
-static
-void
-printHeading( string_view const heading ) {
-  cout
-    << '\n'
-    << style::reset << heading << style::reset << bg::reset << fg::reset
-    << endl;
+static void printHeading( string_view const heading )
+{
+  cout << '\n' << style::reset << heading << style::reset << bg::reset << fg::reset << endl;
 }
 
-static
-void
-test_colors( ostream & os, winTerm const opt ) {
-  setWinTermMode(opt);
+static void test_colors( ostream & os, winTerm const opt )
+{
+  setWinTermMode( opt );
 
-  printHeading("Text Style Test:");
+  printHeading( "Text Style Test:" );
   os << style::bold << " Bold " << style::reset;
   os << style::italic << " Italic " << style::reset;
   os << style::underline << " Underlined " << style::reset;
@@ -49,7 +45,7 @@ test_colors( ostream & os, winTerm const opt ) {
   os << style::rblink << " rBlink " << style::reset;
   os << style::crossed << " Crossed " << style::reset << endl;
 
-  printHeading("Background Test:");
+  printHeading( "Background Test:" );
   os << bg::green << " Green " << bg::reset;
   os << bg::red << " Red " << bg::reset;
   os << bg::black << " Black " << bg::reset;
@@ -59,7 +55,7 @@ test_colors( ostream & os, winTerm const opt ) {
   os << bg::cyan << " Cyan " << bg::reset;
   os << bg::gray << " Grey " << bg::reset << endl;
 
-  printHeading("Foreground Test:");
+  printHeading( "Foreground Test:" );
   os << fg::green << " Green " << fg::reset;
   os << fg::red << " Red " << fg::reset;
   os << fg::black << " Black " << fg::reset;
@@ -69,7 +65,7 @@ test_colors( ostream & os, winTerm const opt ) {
   os << fg::cyan << " Cyan " << fg::reset;
   os << fg::gray << " Grey " << fg::reset << endl;
 
-  printHeading("Bright Background Test:");
+  printHeading( "Bright Background Test:" );
   os << bgB::green << " Green " << bg::reset;
   os << bgB::red << " Red " << bg::reset;
   os << bgB::black << " Black " << bg::reset;
@@ -79,7 +75,7 @@ test_colors( ostream & os, winTerm const opt ) {
   os << bgB::cyan << " Cyan " << bg::reset;
   os << bgB::gray << " Grey " << bg::reset << endl;
 
-  printHeading("Bright Foreground Test:");
+  printHeading( "Bright Foreground Test:" );
   os << fgB::green << " Green " << fg::reset;
   os << fgB::red << " Red " << fg::reset;
   os << fgB::black << " Black " << fg::reset;
@@ -90,62 +86,60 @@ test_colors( ostream & os, winTerm const opt ) {
   os << fgB::gray << " Grey " << fg::reset << endl;
 }
 
-static
-void
-enumerateWinTerms() {
+static void enumerateWinTerms()
+{
   cout << endl;
   cout << "_________________________________________________________________";
   cout << "\n\n"
-       << style::reset << style::bold << "Printing for WinTerm = Auto"
-       << style::reset << bg::reset << fg::reset << '\n';
+       << style::reset << style::bold << "Printing for WinTerm = Auto" << style::reset << bg::reset << fg::reset
+       << '\n';
   cout << "_________________________________________________________________";
-  test_colors(cout, winTerm::Auto);
-  test_colors(clog, winTerm::Auto);
-  test_colors(cerr, winTerm::Auto);
+  test_colors( cout, winTerm::Auto );
+  test_colors( clog, winTerm::Auto );
+  test_colors( cerr, winTerm::Auto );
   cout << "-------------------------------------------------------------\n\n";
 
   cout << endl;
   cout << "_________________________________________________________________";
   cout << "\n\n"
-       << style::reset << style::bold << "Printing for WinTerm = Ansi"
-       << style::reset << bg::reset << fg::reset << '\n';
+       << style::reset << style::bold << "Printing for WinTerm = Ansi" << style::reset << bg::reset << fg::reset
+       << '\n';
   cout << "_________________________________________________________________";
-  test_colors(cout, winTerm::Ansi);
-  test_colors(clog, winTerm::Ansi);
-  test_colors(cerr, winTerm::Ansi);
+  test_colors( cout, winTerm::Ansi );
+  test_colors( clog, winTerm::Ansi );
+  test_colors( cerr, winTerm::Ansi );
   cout << "-------------------------------------------------------------\n\n";
 
   cout << endl;
   cout << "_________________________________________________________________";
   cout << "\n\n"
-       << style::reset << style::bold << "Printing for WinTerm = Native"
-       << style::reset << bg::reset << fg::reset << '\n';
+       << style::reset << style::bold << "Printing for WinTerm = Native" << style::reset << bg::reset << fg::reset
+       << '\n';
   cout << "_________________________________________________________________";
-  test_colors(cout, winTerm::Native);
-  test_colors(clog, winTerm::Native);
-  test_colors(cerr, winTerm::Native);
+  test_colors( cout, winTerm::Native );
+  test_colors( clog, winTerm::Native );
+  test_colors( cerr, winTerm::Native );
   cout << "-------------------------------------------------------------\n\n";
 }
 
-int
-main() {
+int main()
+{
   cout << "\n\n\n"
-       << style::reset << style::underline << style::bold << "Control = Auto"
-       << style::reset << bg::reset << fg::reset << endl;
-  setControlMode(control::Auto);
-  enumerateWinTerms();
-
-  cout << "\n\n\n"
-       << style::reset << style::underline << style::bold
-       << "Control = Force " << style::reset << bg::reset << fg::reset
+       << style::reset << style::underline << style::bold << "Control = Auto" << style::reset << bg::reset << fg::reset
        << endl;
-  setControlMode(control::Force);
+  setControlMode( control::Auto );
   enumerateWinTerms();
 
   cout << "\n\n\n"
-       << style::reset << style::underline << style::bold << "Control = Off "
-       << style::reset << bg::reset << fg::reset << endl;
-  setControlMode(control::Off);
+       << style::reset << style::underline << style::bold << "Control = Force " << style::reset << bg::reset
+       << fg::reset << endl;
+  setControlMode( control::Force );
+  enumerateWinTerms();
+
+  cout << "\n\n\n"
+       << style::reset << style::underline << style::bold << "Control = Off " << style::reset << bg::reset << fg::reset
+       << endl;
+  setControlMode( control::Off );
   enumerateWinTerms();
 
   cout << "\nAll Done Folks!\n";

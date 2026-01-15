@@ -10,14 +10,17 @@
 
 #include <iostream>
 
-namespace Utils {
+namespace Utils
+{
 
-  class TestClass {
+  class TestClass
+  {
     double m_a;
     double m_b;
     double m_c;
+
   public:
-    explicit TestClass() : m_a(0), m_b(0), m_c(0) {}
+    explicit TestClass() : m_a( 0 ), m_b( 0 ), m_c( 0 ) {}
     ~TestClass() = default;
 
     void set_a( double a );
@@ -30,4 +33,4 @@ namespace Utils {
 
     void info( std::ostream & ) const;
   };
-}
+}  // namespace Utils

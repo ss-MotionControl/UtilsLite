@@ -75,10 +75,10 @@
  *
  * \brief A collection of utility functions and classes.
  *
- * This module provides various helper functions and classes designed to facilitate
- * common programming tasks. The utilities included in this group aim to improve
- * code reusability and maintainability by providing generic and widely applicable
- * functionalities.
+ * This module provides various helper functions and classes designed to
+ * facilitate common programming tasks. The utilities included in this group aim
+ * to improve code reusability and maintainability by providing generic and
+ * widely applicable functionalities.
  */
 
 /*!
@@ -86,8 +86,9 @@
  *
  * \brief A collection of utilities for threading.
  *
- * This module provides various utilities for managing threads and executing tasks concurrently.
- * It includes functionalities such as thread pools, task management, and synchronization mechanisms.
+ * This module provides various utilities for managing threads and executing
+ * tasks concurrently. It includes functionalities such as thread pools, task
+ * management, and synchronization mechanisms.
  */
 
 /*!
@@ -110,7 +111,8 @@
   - Università degli Studi di Trento
   - [personal homepage](https://e.bertolazzi.dii.unitn.it)
 
-  \copyright [The 2-Clause BSD License](https://opensource.org/license/bsd-2-clause)
+  \copyright [The 2-Clause BSD
+  License](https://opensource.org/license/bsd-2-clause)
 */
 
 /*!
@@ -118,7 +120,8 @@
 
   - [{fmt}](https://fmt.dev/latest/index.html)
   - [Eigen](https://eigen.tuxfamily.org)
-  - [rang](https://github.com/agauniyal/rang) (local documentation \subpage Rang)
+  - [rang](https://github.com/agauniyal/rang) (local documentation \subpage
+  Rang)
   - [thread_pool](https://github.com/bshoshany/thread-pool)
 
 */
@@ -138,7 +141,8 @@
   rake
   \endcode
 
-  This will compile the source files and generate the library files in the following structure:
+  This will compile the source files and generate the library files in the
+  following structure:
 
   \code{.text}
   lib/
@@ -148,19 +152,22 @@
 
   ### Integrate into Your Project
 
-  - **Include Headers**: Add the `include/` directory to your project's include path.
+  - **Include Headers**: Add the `include/` directory to your project's include
+  path.
     \code{.bash}
     g++ -I/path/to/lib/include your_project.cpp -o your_project
     \endcode
 
-  - **Link the Library**: Use the `-L` and `-l` flags to link against the library:
+  - **Link the Library**: Use the `-L` and `-l` flags to link against the
+  library:
     \code{.bash}
     g++ -L/path/to/lib/lib -lyourlibrary your_project.cpp -o your_project
     \endcode
 
   ### Verify the Installation
 
-  Compile and run your project to verify that it works with the newly linked library.
+  Compile and run your project to verify that it works with the newly linked
+  library.
 */
 
 /*!
