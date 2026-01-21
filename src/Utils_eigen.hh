@@ -28,7 +28,9 @@
 #define UTILS_EIGEN_dot_HH
 
 #include "Utils.hh"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 
 #ifdef __clang__
 #pragma clang diagnostic ignored "-Wdeprecated-copy-with-dtor"
@@ -56,13 +58,21 @@
 
 #include <type_traits>
 
+#ifdef UTILS_EIGEN_INTERNAL
 #include "Utils/3rd/Eigen/Core"
 #include "Utils/3rd/Eigen/Dense"
 #include "Utils/3rd/Eigen/QR"
 #include "Utils/3rd/Eigen/Sparse"
+#else
+#include <Eigen/Core>
+#include <Eigen/Dense>
+#include <Eigen/QR>
+#include <Eigen/Sparse>
+#endif
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
+#ifndef UTILS_MINIMAL_BUILD
 namespace fmt
 {
   template <typename TYPE, int ROW, int COL> struct formatter<Eigen::Matrix<TYPE, ROW, COL>> : ostream_formatter
@@ -82,6 +92,7 @@ namespace fmt
   {
   };
 }  // namespace fmt
+#endif
 
 namespace Utils
 {

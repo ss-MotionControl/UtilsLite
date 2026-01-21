@@ -31,9 +31,13 @@
 #define UTILS_MINIMIZE_dot_HH
 
 #include <set>
+#ifndef UTILS_MINIMAL_BUILD
 #include <optional>
+#endif
 #include <limits>
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 #include "Utils_Linesearch.hh"
 
 namespace Utils
@@ -691,7 +695,9 @@ namespace Utils
       multipliers.resize( 2 * n );
       multipliers.setZero();
 
+#ifndef UTILS_NO_EXCEPTIONS
       try
+#endif
       {
         // Choose solver based on problem characteristics
         integer nnz               = H.nonZeros();
@@ -710,7 +716,9 @@ namespace Utils
 
           if ( solver.info() != Eigen::Success )
           {
+#ifndef UTILS_MINIMAL_BUILD
             if ( verbosity >= 3 ) fmt::print( "  QP: Sparse decomposition failed\n" );
+#endif
             return false;
           }
           p = -solver.solve( g );
@@ -724,7 +732,9 @@ namespace Utils
 
           if ( solver.info() != Eigen::Success )
           {
+#ifndef UTILS_MINIMAL_BUILD
             if ( verbosity >= 3 ) fmt::print( "  QP: Dense decomposition failed\n" );
+#endif
             return false;
           }
           p = -solver.solve( g );
@@ -733,7 +743,9 @@ namespace Utils
         // Check for numerical issues
         if ( !p.allFinite() )
         {
+#ifndef UTILS_MINIMAL_BUILD
           if ( verbosity >= 3 ) fmt::print( "  QP: Non-finite solution\n" );
+#endif
           return false;
         }
 
@@ -804,13 +816,19 @@ namespace Utils
             }
           }
         }
+#ifndef UTILS_MINIMAL_BUILD
         if ( verbosity >= 3 ) { fmt::print( "  QP: ‖p‖={:.2e}, λ={:.2e}\n", p.norm(), lambda ); }
+#endif
       }
+#ifndef UTILS_NO_EXCEPTIONS
       catch ( const std::exception & e )
       {
+#ifndef UTILS_MINIMAL_BUILD
         if ( verbosity >= 3 ) fmt::print( "  QP: Exception: {}\n", e.what() );
+#endif
         return false;
       }
+#endif
 
       return true;
     }
@@ -843,7 +861,9 @@ namespace Utils
       multipliers.resize( 2 * n );
       multipliers.setZero();
 
+#ifndef UTILS_NO_EXCEPTIONS
       try
+#endif
       {
         // Regularize Hessian
         Matrix A = H;
@@ -855,7 +875,9 @@ namespace Utils
 
         if ( solver.info() != Eigen::Success )
         {
+#ifndef UTILS_MINIMAL_BUILD
           if ( verbosity >= 3 ) fmt::print( "  QP: Dense decomposition failed\n" );
+#endif
           return false;
         }
 
@@ -863,7 +885,9 @@ namespace Utils
 
         if ( !p.allFinite() )
         {
+#ifndef UTILS_MINIMAL_BUILD
           if ( verbosity >= 3 ) fmt::print( "  QP: Non-finite solution\n" );
+#endif
           return false;
         }
 
@@ -897,13 +921,19 @@ namespace Utils
           }
         }
 
+#ifndef UTILS_MINIMAL_BUILD
         if ( verbosity >= 3 ) { fmt::print( "  QP: ‖p‖={:.2e}, λ={:.2e}\n", p.norm(), lambda ); }
+#endif
       }
+#ifndef UTILS_NO_EXCEPTIONS
       catch ( const std::exception & e )
       {
+#ifndef UTILS_MINIMAL_BUILD
         if ( verbosity >= 3 ) fmt::print( "  QP: Exception: {}\n", e.what() );
+#endif
         return false;
       }
+#endif
 
       return true;
     }
@@ -952,6 +982,7 @@ namespace Utils
     //  Debugging and Reporting
     // =========================================================================
 
+#ifndef UTILS_MINIMAL_BUILD
     /**
      * @brief Print constraint bounds
      *
@@ -1025,6 +1056,7 @@ namespace Utils
         max_width,
         avg_width );
     }
+#endif
   };
 
 }  // namespace Utils

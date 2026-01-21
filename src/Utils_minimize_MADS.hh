@@ -59,15 +59,19 @@
 #include <cmath>
 #include <functional>
 #include <limits>
+#ifndef UTILS_MINIMAL_BUILD
 #include <optional>
 #include <random>
+#endif
 #include <set>
 #include <utility>
 #include <vector>
 
 #include "Utils.hh"
 #include "Utils_eigen.hh"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 
 namespace Utils
 {
@@ -489,6 +493,7 @@ namespace Utils
       integer n                    = x0.size();
       integer no_improvement_count = 0;
 
+#ifndef UTILS_MINIMAL_BUILD
       if ( m_opts.verbose )
       {
         fmt::print(
@@ -498,6 +503,7 @@ namespace Utils
           m_current_f,
           m_mesh_size );
       }
+#endif
 
       for ( integer k{ 0 }; k < m_opts.max_iter; ++k )
       {
@@ -523,6 +529,7 @@ namespace Utils
         m_history.push_back( { k, m_current_f, m_mesh_size, improvement, m_eval_count } );
 
         // Verbose output
+#ifndef UTILS_MINIMAL_BUILD
         if ( m_opts.verbose && ( k % m_opts.print_every ) == 0 )
         {
           fmt::print(
@@ -533,11 +540,14 @@ namespace Utils
             improvement,
             m_eval_count );
         }
+#endif
 
         // Check convergence
         if ( check_convergence( no_improvement_count ) )
         {
+#ifndef UTILS_MINIMAL_BUILD
           if ( m_opts.verbose ) { fmt::print( "[MADS] Converged at iteration {}: {}\n", k, m_termination_message ); }
+#endif
           return;
         }
 
@@ -546,14 +556,18 @@ namespace Utils
         {
           m_converged           = true;
           m_termination_message = "Maximum function evaluations reached";
+#ifndef UTILS_MINIMAL_BUILD
           if ( m_opts.verbose ) { fmt::print( "[MADS] Stopped: {}\n", m_termination_message ); }
+#endif
           return;
         }
       }
 
       m_converged           = false;
       m_termination_message = "Maximum iterations reached";
+#ifndef UTILS_MINIMAL_BUILD
       if ( m_opts.verbose ) { fmt::print( "[MADS] Stopped: {}\n", m_termination_message ); }
+#endif
     }
 
     /**
@@ -580,12 +594,16 @@ namespace Utils
      */
     string get_state_info() const
     {
+#ifndef UTILS_MINIMAL_BUILD
       return fmt::format(
         "MADS State: f={}, mesh_size={}, evaluations={}, visited_points={}",
         m_current_f,
         m_mesh_size,
         m_eval_count,
         m_visited_points.size() );
+#else
+      return std::string();
+#endif
     }
 
     /**

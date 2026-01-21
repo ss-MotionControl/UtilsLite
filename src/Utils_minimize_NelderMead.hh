@@ -28,7 +28,9 @@
 
 #include "Utils.hh"
 #include "Utils_eigen.hh"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 
 namespace Utils
 {
@@ -85,6 +87,7 @@ namespace Utils
     }
 
     // Helper for vector formatting
+#ifndef UTILS_MINIMAL_BUILD
     template <typename Scalar> inline string format_vector( Vector<Scalar> const & v, integer max_size = 10 )
     {
       string  tmp{ "[" };
@@ -105,6 +108,7 @@ namespace Utils
       tmp += "]";
       return tmp;
     }
+#endif
 
   }  // namespace NelderMead
 
@@ -301,6 +305,7 @@ namespace Utils
       return flags;
     }
 
+#ifndef UTILS_MINIMAL_BUILD
     void print_inner_iteration_summary( integer iter_count, Scalar best_value, const SimplexStats & stats ) const
     {
       if ( m_options.verbosity_level < 2 ) return;
@@ -435,6 +440,7 @@ namespace Utils
         }
       }
     }
+#endif
 
     /**
      * @brief Safely evaluate objective function with bounds checking
@@ -454,10 +460,12 @@ namespace Utils
         bool out_of_bound = ( x.array() < m_lower.array() ).any() || ( x.array() > m_upper.array() ).any();
         if ( out_of_bound )
         {
+#ifndef UTILS_MINIMAL_BUILD
           if ( m_options.verbose )
           {
             fmt::print( "{}Warning: Point outside bounds, returning large value\n", m_indent );
           }
+#endif
           return std::numeric_limits<Scalar>::max();
         }
       }
@@ -467,10 +475,12 @@ namespace Utils
 
       if ( !std::isfinite( value ) )
       {
+#ifndef UTILS_MINIMAL_BUILD
         if ( m_options.verbose )
         {
           fmt::print( "{}Warning: Non-finite function value at x={}\n", m_indent, x.transpose() );
         }
+#endif
         return std::numeric_limits<Scalar>::max();
       }
       return value;
@@ -646,6 +656,7 @@ namespace Utils
       // Verify simplex is not degenerate
       if ( compute_volume() < std::numeric_limits<Scalar>::epsilon() )
       {
+#ifndef UTILS_MINIMAL_BUILD
         if ( m_options.verbose )
         {
           fmt::print(
@@ -653,6 +664,7 @@ namespace Utils
             "perturbation\n",
             m_indent );
         }
+#endif
         // EIGEN3: Use Vector::Random() for efficient random vector generation
         // This is optimized and may use vectorized random number generation
         for ( integer i{ 1 }; i <= m_dim; ++i )
@@ -829,6 +841,7 @@ namespace Utils
                        ( geometry_converged && stats.value_range < tolerance * convergence_relaxation ) ||
                        ( variance_converged && geometry_converged );
 
+#ifndef UTILS_MINIMAL_BUILD
       if ( m_options.verbose && ( converged || m_global_iterations % m_options.progress_frequency == 0 ) )
       {
         fmt::print(
@@ -842,6 +855,7 @@ namespace Utils
           stats.diameter,
           stats.std_dev );
       }
+#endif
       return converged;
     }
 
@@ -1149,6 +1163,7 @@ namespace Utils
       return false;
     }
 
+#ifndef UTILS_MINIMAL_BUILD
     void print_iteration_header( integer iter, Scalar best_value, Scalar diameter ) const
     {
       if ( !m_options.verbose ) return;
@@ -1184,6 +1199,7 @@ namespace Utils
         fval,
         tmp );
     }
+#endif
 
     /**
      * @brief Run single Nelder-Mead optimization (without restarts)
@@ -1213,6 +1229,7 @@ namespace Utils
       result.initial_function_value = m_values[indices[0]];
 
       // MODIFICA: Usare verbosity_level invece di verbose
+#ifndef UTILS_MINIMAL_BUILD
       if ( m_options.verbosity_level >= 1 )
       {
         fmt::print(
@@ -1221,6 +1238,7 @@ namespace Utils
           m_dim,
           result.initial_function_value );
       }
+#endif
 
       integer local_iter = 0;
 
@@ -1270,6 +1288,7 @@ namespace Utils
         }
 
         // MODIFICA: Mantenere stampa progresso per compatibilità
+#ifndef UTILS_MINIMAL_BUILD
         if ( m_options.verbose && ( m_global_iterations % m_options.progress_frequency ) == 0 )
         {
           indices = get_sorted_indices();
@@ -1280,6 +1299,7 @@ namespace Utils
             m_values[indices[0]],
             result.simplex_diameter );
         }
+#endif
       }
 
       if ( result.status == Status::FAILED ) { result.status = Status::MAX_ITERATIONS; }
@@ -1296,6 +1316,7 @@ namespace Utils
       return result;
     }
 
+#ifndef UTILS_MINIMAL_BUILD
     /**
      * @brief Print optimization header information
      * @param x0 Starting point
@@ -1381,6 +1402,7 @@ namespace Utils
         res.simplex_diameter,
         m_indent );
     }
+#endif
 
   public:
     /**
@@ -1466,6 +1488,7 @@ namespace Utils
         if ( m_global_evals >= m_options.max_function_evaluations ) break;
         if ( m_global_iterations >= m_options.max_iterations ) break;
 
+#ifndef UTILS_MINIMAL_BUILD
         if ( m_options.verbose )
         {
           fmt::print(
@@ -1476,6 +1499,7 @@ namespace Utils
             status_to_string( best_result.status ),
             best_result.final_function_value );
         }
+#endif
 
         Scalar perturbation_scale = m_options.restart_perturbation_ratio * ( 1.0 + m_restarts_performed * 0.1 );
 
@@ -1562,7 +1586,9 @@ namespace Utils
         }
 
         if ( improvement ) { best_result = current_result; }
+#ifndef UTILS_MINIMAL_BUILD
         else if ( m_options.verbose ) { fmt::print( "{}[Restart rejected: no improvement]\n", m_indent ); }
+#endif
       }
 
       // Store final results

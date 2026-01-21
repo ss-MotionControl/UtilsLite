@@ -28,7 +28,9 @@
 #define UTILS_AUTODIFF_dot_HH
 
 #include "Utils.hh"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 
 #ifdef _MSC_VER
 #pragma warning( disable : 4127 )
@@ -37,6 +39,7 @@
 #include "Utils/3rd/autodiff/forward/dual.hpp"
 #include "Utils/3rd/autodiff/forward/real.hpp"
 
+#ifndef UTILS_MINIMAL_BUILD
 namespace fmt
 {
   template <> struct formatter<autodiff::dual1st> : ostream_formatter
@@ -52,6 +55,7 @@ namespace fmt
   {
   };
 }  // namespace fmt
+#endif
 
 #include <type_traits>
 

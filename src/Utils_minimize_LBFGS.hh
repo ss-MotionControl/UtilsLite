@@ -334,6 +334,7 @@ namespace Utils
     // PRINTING METHODS
     // ===========================================================================
 
+#ifndef UTILS_MINIMAL_BUILD
     void print_optimization_header( integer n, Scalar f0 ) const
     {
       if ( m_options.verbosity_level < 1 ) return;
@@ -444,6 +445,7 @@ namespace Utils
         m_final_gradient_norm,
         m_LBFGS.size() );
     }
+#endif
 
   public:
     LBFGS_minimizer( Options opts = Options() )
@@ -477,7 +479,9 @@ namespace Utils
 
     void reset_memory()
     {
+#ifndef UTILS_MINIMAL_BUILD
       if ( m_options.verbosity_level >= 2 ) fmt::print( "[LBFGS] Periodic memory reset\n" );
+#endif
       m_LBFGS.clear();
       m_iter_since_reset = 0;
     }
@@ -540,8 +544,10 @@ namespace Utils
 
         if ( !step_opt.has_value() )
         {
+#ifndef UTILS_MINIMAL_BUILD
           if ( m_options.verbosity_level >= 1 )
             fmt::print( PrintColors::WARNING, "[LBFGS] Line search failed, trying fallback\n" );
+#endif
 
           m_LBFGS.clear();
 
@@ -562,10 +568,12 @@ namespace Utils
           bool   updated = false;
           // FIXED: Stricter curvature condition (was m_epsi)
           if ( sty > Scalar( 1e-8 ) * s.norm() * y.norm() ) { updated = m_LBFGS.add_correction( s, y ); }
+#ifndef UTILS_MINIMAL_BUILD
           else if ( m_options.verbosity_level >= 2 )
           {
             fmt::print( PrintColors::WARNING, "[LBFGS] Skipping update: sty={:.2e} too small\n", sty );
           }
+#endif
 
           print_lbfgs_update( sty, updated );
 
@@ -609,10 +617,12 @@ namespace Utils
 
         // FIXED: Stricter curvature condition (was m_epsi)
         if ( sty > Scalar( 1e-8 ) * s.norm() * y.norm() ) { updated = m_LBFGS.add_correction( s, y ); }
+#ifndef UTILS_MINIMAL_BUILD
         else if ( m_options.verbosity_level >= 2 )
         {
           fmt::print( PrintColors::WARNING, "[LBFGS] Skipping update: sty={:.2e} too small\n", sty );
         }
+#endif
 
         print_lbfgs_update( sty, updated );
 
@@ -647,7 +657,9 @@ namespace Utils
       m_final_gradient_norm  = gnorm;
       m_final_function_value = f;
 
+#ifndef UTILS_MINIMAL_BUILD
       print_optimization_statistics();
+#endif
     }
   };
 

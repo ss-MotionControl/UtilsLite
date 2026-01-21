@@ -30,7 +30,9 @@
 
 #include <set>
 
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 #include "Utils_Linesearch.hh"
 
 namespace Utils

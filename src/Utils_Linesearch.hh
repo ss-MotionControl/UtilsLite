@@ -30,7 +30,9 @@
 
 #include "Utils.hh"
 #include "Utils_eigen.hh"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 
 namespace Utils
 {

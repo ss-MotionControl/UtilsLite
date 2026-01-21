@@ -54,14 +54,20 @@
 #include <cmath>
 #include <functional>
 #include <limits>
+#ifndef UTILS_MINIMAL_BUILD
 #include <optional>
+#endif
 #include <utility>
 #include <vector>
+#ifndef UTILS_MINIMAL_BUILD
 #include <stdio.h>
+#endif
 #include <math.h>
 
 #include "Utils.hh"
+#ifndef UTILS_MINIMAL_BUILD
 #include "Utils_fmt.hh"
+#endif
 #include "Utils_eigen.hh"
 
 namespace Utils
@@ -191,12 +197,14 @@ namespace Utils
     {
       ++m_num_f_eval;
       Scalar f = m_fun( x );
+#ifndef UTILS_MINIMAL_BUILD
       if ( m_print_level == 3 )
         fmt::print(
           "    Function n.{} F(X) = {:15}   X: {}\n",
           m_num_f_eval,
           fmt::format( "{:.9}", f ),
           print_vec( x, 6 ) );
+#endif
       return f;
     }
 
@@ -278,6 +286,7 @@ namespace Utils
     void set_maxfun( integer m ) { m_max_f_eval = m; }
 
   private:
+#ifndef UTILS_MINIMAL_BUILD
     std::string print_vec( Vector const & x, integer max_elem ) const
     {
       integer x_size = x.size();
@@ -309,6 +318,7 @@ namespace Utils
     }
 
     void print_error( string const & reason ) { fmt::print( "\n    Return from BOBYQA because {}.\n", reason ); }
+#endif
 
     void compute_hessian_product( Vector const & s, Vector & hs ) const
     {
@@ -454,7 +464,9 @@ namespace Utils
     const integer np = m_nv + 1;
     if ( m_npt < m_nv + 2 || m_npt > ( m_nv + 2 ) * np / 2 )
     {
+#ifndef UTILS_MINIMAL_BUILD
       print_error( "NPT is not in the required interval" );
+#endif
       return Status::BOBYQA_BAD_NPT;
     }
 
@@ -504,7 +516,9 @@ namespace Utils
     // Check if any bound difference is less than 2*RHOBEG
     if ( ( bounds_diff.array() < Scalar( 2 ) * m_rhobeg ).any() )
     {
+#ifndef UTILS_MINIMAL_BUILD
       print_error( "one of the differences XU(I)-XL(I) is less than 2*RHOBEG" );
+#endif
       return Status::BOBYQA_TOO_CLOSE;
     }
 
@@ -568,7 +582,9 @@ namespace Utils
     // If prelim didn't have enough function evaluations then abort like Fortran
     if ( m_num_f_eval < m_npt )
     {
+#ifndef UTILS_MINIMAL_BUILD
       if ( m_print_level > 0 ) print_error( "CALFUN has been called MAXFUN times" );
+#endif
       return Status::BOBYQA_TOO_MANY_EVALUATIONS;
     }
 
@@ -1337,6 +1353,7 @@ namespace Utils
         m_delta = max( m_delta, m_rho );  // Mantieni delta almeno rho
 
         // Output diagnostico
+#ifndef UTILS_MINIMAL_BUILD
         if ( m_print_level >= 2 )
         {
           fmt::print(
@@ -1350,6 +1367,7 @@ namespace Utils
             m_f_val( m_kopt ),
             print_vec( m_x_base + m_x_opt, 6 ) );
         }
+#endif
 
         // Reset parametri per nuova fase
         ntrits        = 0;
@@ -1447,7 +1465,9 @@ namespace Utils
           // std::cout << "ERROR m_knew = " << m_knew << '\n';
           //  Gestisce gli errori dell'algoritmo, impostando il messaggio di errore
           //  e lo stato appropriato.
+#ifndef UTILS_MINIMAL_BUILD
           if ( m_print_level > 0 && reason ) print_error( reason );
+#endif
           keep_going = false;
           break;
 
@@ -1462,6 +1482,7 @@ namespace Utils
       f = m_f_val( m_kopt );
     }
 
+#ifndef UTILS_MINIMAL_BUILD
     if ( m_print_level >= 1 )
     {
       fmt::print(
@@ -1474,6 +1495,7 @@ namespace Utils
         f,
         print_vec( X, 6 ) );
     }
+#endif
 
     // non ha senso lo rimuovo
     // if ( status == Status::BOBYQA_SUCCESS ) m_xbase( 0 ) = f;
